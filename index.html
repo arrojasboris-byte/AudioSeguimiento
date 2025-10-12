@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AUDIOLOGÍA – Sistema de Gestión</title>
+  <!-- TailwindCSS (CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- React 18 + ReactDOM (UMD) -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <!-- Babel para transformar JSX en el navegador -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body class="bg-gradient-to-br from-gray-100 to-gray-200 min-h-screen">
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState } = React;
+
+    // Iconos SVG personalizados
+    const FileText = (props) => <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>;
+
+    const AudiologiaApp = () => {
+      const [activeCentro, setActiveCentro] = useState(1);
+      const [logoUrl, setLogoUrl] = useState('');
+      const [companyName, setCompanyName] = useState('AUDIOLOGÍA');
+
+      const centros = [
+        { id: 1, nombre: 'Centro Madrid Norte' },
+        { id: 2, nombre: 'Centro Barcelona Centro' }
+      ];
+
+      const data = {
+        title: 'CENTROS EXCLUSIVOS',
+        icon: FileText,
+        centrosData: {
+          1: { accionesResultado: [{id:1,fecha:'',accion:'',derivacion:0,cita:0,observaciones:''}] },
+          2: { accionesResultado: [{id:1,fecha:'',accion:'',derivacion:0,cita:0,observaciones:''}] }
+        }
+      };
+
+      const current = data.centrosData[activeCentro];
+
+      return (
+        <div className="max-w-3xl mx-auto py-10 px-5">
+          <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-red-600">
+            <div className="flex items-center gap-4">
+              {logoUrl ? (
+                <img src={logoUrl} alt="Logo" className="h-16 w-auto object-contain" />
+              ) : (
+                <div className="bg-red-600 rounded-xl p-4 text-white font-bold">Logo</div>
+              )}
+              <div>
+                <h1 className="text-3xl font-bold text-gray-800">{companyName}</h1>
+                <p className="text-red-600">Sistema de Gestión de Audiología</p>
+              </div>
+            </div>
+
+            <div className="mt-6">
+              <h2 className="text-xl font-semibold text-gray-800 mb-2">Sección: {data.title}</h2>
+              <label className="text-sm text-gray-600">Centro activo:</label>
+              <select
+                value={activeCentro}
+                onChange={(e)=>setActiveCentro(parseInt(e.target.value))}
+                className="ml-2 border rounded px-2 py-1"
+              >
+                {centros.map(c=>(<option key={c.id} value={c.id}>{c.nombre}</option>))}
+              </select>
+            </div>
+
+            <div className="mt-6 bg-gray-50 border rounded p-4">
+              <h3 className="font-semibold text-gray-800">Acciones - Resultado (demo)</h3>
+              {current.accionesResultado.map((a)=>(
+                <div key={a.id} className="text-sm text-gray-700 mt-2">• Fecha: {a.fecha || '-'} | Acción: {a.accion || '-'} | Derivación: {a.derivacion} | Cita: {a.cita}</div>
+              ))}
+            </div>
+
+            <div className="mt-6">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Cambiar logo:</label>
+              <input type="file" accept="image/*" onChange={(e)=>{const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=(ev)=>setLogoUrl(ev.target.result); r.readAsDataURL(f);}} />
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<AudiologiaApp />);
+  </script>
+</body>
+</html>
