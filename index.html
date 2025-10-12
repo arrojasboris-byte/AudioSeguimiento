@@ -9,49 +9,17 @@
   <!-- React 18 + ReactDOM (UMD) -->
   <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
-  <!-- Babel para JSX -->
+  <!-- Babel para poder usar JSX en el navegador -->
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <style>
-    /* Evita parpadeo del PIN gate */
-    #root { min-height: 100vh; }
-  </style>
 </head>
 <body class="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200">
+
   <div id="root"></div>
 
   <script type="text/babel">
-    const { useState, useEffect, useRef } = React;
+    const { useState, useEffect } = React;
 
-    /* ===== Utiles de almacenamiento ===== */
-    const LS_KEY = "audioseguimiento_state_v1";
-    const LS_PIN = "audioseguimiento_pin_v1";     // hash "simple"
-    const DEFAULT_PIN = "AR4321";
-
-    const simpleHash = (s) => {
-      // hash sencillo para no guardar pin plano (NO criptográfico)
-      let h = 0; for (let i=0;i<s.length;i++) { h = (h<<5)-h + s.charCodeAt(i); h |= 0; }
-      return String(h);
-    };
-
-    const saveToLocal = (state) => {
-      try {
-        localStorage.setItem(LS_KEY, JSON.stringify(state));
-        return true;
-      } catch(e) { console.error(e); return false; }
-    };
-
-    const loadFromLocal = () => {
-      try {
-        const raw = localStorage.getItem(LS_KEY);
-        return raw ? JSON.parse(raw) : null;
-      } catch(e) { console.error(e); return null; }
-    };
-
-    const savePin = (pin) => localStorage.setItem(LS_PIN, simpleHash(pin));
-    const getPinHash = () => localStorage.getItem(LS_PIN) || simpleHash(DEFAULT_PIN);
-    const checkPin = (pin) => simpleHash(pin) === getPinHash();
-
-    /* ===== ICONOS ===== */
+    /* === ICONOS MUY LIGEROS === */
     const Icon = ({d, className="w-5 h-5"}) => (
       <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={d}/>
@@ -60,7 +28,7 @@
     const ChevronRight = (p)=> <Icon {...p} d="M9 5l7 7-7 7" />;
     const ChevronDown  = (p)=> <Icon {...p} d="M19 9l-7 7-7-7" />;
     const Plus         = (p)=> <Icon {...p} d="M12 4v16m8-8H4" />;
-    const SaveI        = (p)=> <Icon {...p} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />;
+    const Save         = (p)=> <Icon {...p} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />;
     const X            = (p)=> <Icon {...p} d="M6 18L18 6M6 6l12 12" />;
     const Search       = (p)=> <Icon {...p} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />;
     const FileText     = (p)=> <Icon {...p} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414A1 1 0 0119 9v10a2 2 0 01-2 2z" />;
@@ -70,19 +38,12 @@
     const Msg          = (p)=> <Icon {...p} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />;
     const Heart        = (p)=> <Icon {...p} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />;
     const UploadI      = (p)=> <Icon {...p} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M12 12V4m0 8l-4-4m4 4l4-4" />;
-    const KeyI         = (p)=> <Icon {...p} d="M15 7a5 5 0 10-4 8m4-8l6 6m0 0v4m0-4h-4" />;
 
     function Badge({children}) {
       return <span className="inline-block px-3 py-1 rounded-lg text-sm font-semibold border-2 bg-gray-100 border-gray-300 text-gray-800">{children}</span>;
     }
 
-    /* ===== App ===== */
     function AudiologiaApp(){
-      // GATE por PIN
-      const [authorized, setAuthorized] = useState(false);
-      const [pinInput, setPinInput] = useState("");
-
-      // Estado principal
       const [activeSection, setActiveSection] = useState('centros_exclusivos');
       const [activeCentro, setActiveCentro]   = useState(1);
       const [searchTerm, setSearchTerm]       = useState('');
@@ -92,16 +53,16 @@
       const [showCentroModal, setShowCentroModal] = useState(false);
       const [showCentrosDropdown, setShowCentrosDropdown] = useState(true);
 
-      const [autosaveTick, setAutosaveTick] = useState(0);
-      const autosaveRef = useRef(null);
-      const fileInputRef = useRef(null);
-
       // Centros
       const coloresCentros = [
-        'bg-blue-100 border-blue-400 text-blue-800','bg-green-100 border-green-400 text-green-800',
-        'bg-purple-100 border-purple-400 text-purple-800','bg-orange-100 border-orange-400 text-orange-800',
-        'bg-pink-100 border-pink-400 text-pink-800','bg-indigo-100 border-indigo-400 text-indigo-800',
-        'bg-yellow-100 border-yellow-400 text-yellow-800','bg-red-100 border-red-400 text-red-800',
+        'bg-blue-100 border-blue-400 text-blue-800',
+        'bg-green-100 border-green-400 text-green-800',
+        'bg-purple-100 border-purple-400 text-purple-800',
+        'bg-orange-100 border-orange-400 text-orange-800',
+        'bg-pink-100 border-pink-400 text-pink-800',
+        'bg-indigo-100 border-indigo-400 text-indigo-800',
+        'bg-yellow-100 border-yellow-400 text-yellow-800',
+        'bg-red-100 border-red-400 text-red-800',
       ];
       const [centros,setCentros] = useState([
         { id:1, nombre:'Centro Madrid Norte', delegado:'Ana Martínez', audiologo:'Dr. García', franquiciaSucursal:'Franquicia', color:coloresCentros[0]},
@@ -131,135 +92,32 @@
 
       const sections = Object.entries(data).map(([id, v]) => ({id, ...v}));
       const activeData = data[activeSection];
-      const iconMap = {
-        file:(p)=><FileText {...p}/>, users:(p)=><Users {...p}/>, head:(p)=><Headphones {...p}/>,
-        pack:(p)=><PackageI {...p}/>, msg:(p)=><Msg {...p}/>, heart:(p)=><Heart {...p}/>
-      };
 
-      // Cargar desde localStorage cuando haya PIN correcto
-      useEffect(()=>{
-        if(!authorized) return;
-        const snap = loadFromLocal();
-        if(snap){
-          try{
-            setActiveSection(snap.activeSection || 'centros_exclusivos');
-            setActiveCentro(snap.activeCentro || 1);
-            setLogoUrl(snap.logoUrl || '');
-            setCompanyName(snap.companyName || 'AUDIOLOGÍA');
-            setCentros(snap.centros || centros);
-            setData(snap.data || data);
-          }catch(e){ console.warn("No se pudo restaurar snapshot:", e); }
-        }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      }, [authorized]);
-
-      // Autosave cada 2s si hubo cambios (contador autosaveTick)
-      useEffect(()=>{
-        if(!authorized) return;
-        if(autosaveRef.current) clearTimeout(autosaveRef.current);
-        autosaveRef.current = setTimeout(()=>{
-          const ok = saveToLocal({activeSection, activeCentro, logoUrl, companyName, centros, data});
-          // opcional: podrías mostrar un toast si quieres
-        }, 2000);
-        return ()=> clearTimeout(autosaveRef.current);
-      }, [authorized, autosaveTick, activeSection, activeCentro, logoUrl, companyName, centros, data]);
-
-      // helpers para disparar autosave cuando cambien cosas
-      const touch = ()=> setAutosaveTick(t => t+1);
-
-      // Bloque PIN
-      const handleEnterPin = (e) => { e.preventDefault();
-        if(checkPin(pinInput.trim())){
-          setAuthorized(true);
-          setPinInput('');
-        } else {
-          alert('PIN incorrecto');
-        }
-      };
-      const changePin = () => {
-        const newPin = prompt("Nuevo PIN (mín. 4 caracteres):", "");
-        if(!newPin || newPin.trim().length<4) return;
-        savePin(newPin.trim());
-        alert("PIN actualizado.");
-      };
-
-      // Logo
-      const handleLogoUpload = (e)=>{
-        const f = e.target.files?.[0];
-        if(!f) return;
-        const r = new FileReader();
-        r.onload = ev => { setLogoUrl(ev.target.result); touch(); };
-        r.readAsDataURL(f);
-      };
-
-      // Guardar ahora
-      const guardadoManual = ()=>{
-        const ok = saveToLocal({activeSection, activeCentro, logoUrl, companyName, centros, data});
-        alert(ok ? "Guardado local actualizado." : "Error guardando en este navegador.");
-      };
-
-      // Backup (export/import)
-      const exportBackup = ()=>{
-        const exportData = { activeSection, activeCentro, logoUrl, companyName, centros, data, when:new Date().toISOString() };
-        const blob = new Blob([JSON.stringify(exportData,null,2)], {type:'application/json'});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url; a.download = 'audiologia_backup.json'; a.click();
-        URL.revokeObjectURL(url);
-      };
-      const importBackup = (file)=>{
-        if(!file) return;
-        const r = new FileReader();
-        r.onload = ev => {
-          try {
-            const obj = JSON.parse(ev.target.result);
-            setActiveSection(obj.activeSection || 'centros_exclusivos');
-            setActiveCentro(obj.activeCentro || 1);
-            setLogoUrl(obj.logoUrl || '');
-            setCompanyName(obj.companyName || 'AUDIOLOGÍA');
-            setCentros(obj.centros || centros);
-            setData(obj.data || data);
-            saveToLocal({
-              activeSection: obj.activeSection || 'centros_exclusivos',
-              activeCentro: obj.activeCentro || 1,
-              logoUrl: obj.logoUrl || '',
-              companyName: obj.companyName || 'AUDIOLOGÍA',
-              centros: obj.centros || centros,
-              data: obj.data || data
-            });
-            alert('Backup restaurado correctamente.');
-          } catch(e) {
-            alert('Archivo inválido.');
-          }
-        };
-        r.readAsText(file);
-      };
-
-      // Acceso a datos del centro activo
       const getCentroData = () => {
         if(!activeData.requiresCentro) return null;
         const cd = activeData.centrosData[activeCentro];
-        if(!cd){
-          const init = baseCentroData();
+        if(!cd){ // inicializa en caliente si falta
           setData(prev => ({
             ...prev,
             [activeSection]:{
               ...prev[activeSection],
-              centrosData:{ ...prev[activeSection].centrosData, [activeCentro]: init }
+              centrosData:{ ...prev[activeSection].centrosData, [activeCentro]: baseCentroData() }
             }
           }));
-          return init;
+          return baseCentroData();
         }
         return cd;
       };
+
       const currentCentroData = getCentroData();
 
       // Acciones-Resultado
       const [acciones, setAcciones] = useState([]);
-      useEffect(()=>{ if(currentCentroData) setAcciones(currentCentroData.accionesResultado); }, [activeCentro, activeSection]);      
+      useEffect(()=>{ if(currentCentroData) setAcciones(currentCentroData.accionesResultado); }, [activeCentro, activeSection]);
+
       const addAccion = ()=> {
         const newId = Math.max(...acciones.map(a=>a.id),0)+1;
-        setAcciones([...acciones, {id:newId, fecha:'', accion:'', derivacion:0, cita:0, observaciones:''}]); touch();
+        setAcciones([...acciones, {id:newId, fecha:'', accion:'', derivacion:0, cita:0, observaciones:''}]);
       };
       const saveAcciones = ()=> {
         setData(prev => ({
@@ -271,7 +129,7 @@
               [activeCentro]:{ ...prev[activeSection].centrosData[activeCentro], accionesResultado: acciones }
             }
           }
-        })); touch();
+        }));
       };
 
       // Formaciones
@@ -287,15 +145,16 @@
               [activeCentro]:{ ...prev[activeSection].centrosData[activeCentro], formaciones }
             }
           }
-        })); touch();
+        }));
       };
 
       // Procesos
       const [procesos, setProcesos] = useState([]);
       useEffect(()=>{ if(currentCentroData) setProcesos(currentCentroData.procesos); }, [activeCentro, activeSection]);
+
       const addProceso = ()=>{
         const newId = Math.max(...procesos.map(p=>p.id),0)+1;
-        setProcesos([...procesos, {id:newId, nombrePaquete:'', descripcion:'', puntuacion:'', observaciones:'', fechaVisita:'', archivos:[], enlaces:[]}]); touch();
+        setProcesos([...procesos, {id:newId, nombrePaquete:'', descripcion:'', puntuacion:'', observaciones:'', fechaVisita:'', archivos:[], enlaces:[]}]);
       };
       const saveProcesos = ()=>{
         setData(prev => ({
@@ -307,56 +166,61 @@
               [activeCentro]:{ ...prev[activeSection].centrosData[activeCentro], procesos }
             }
           }
-        })); touch();
+        }));
       };
 
-      // Crear centro
+      // Logo
+      const handleLogoUpload = (e)=>{
+        const f = e.target.files?.[0];
+        if(!f) return;
+        const r = new FileReader();
+        r.onload = ev => setLogoUrl(ev.target.result);
+        r.readAsDataURL(f);
+      };
+
+      // Añadir centro
       const addNewCentro = ()=>{
         if(!newCentro.nombre.trim()) return alert('Pon un nombre para el centro');
         if(centros.length >= 12) return alert('Máximo 12 centros');
+
         const newId = Math.max(...centros.map(c=>c.id),0)+1;
         const color = coloresCentros[centros.length%coloresCentros.length];
         const c = { id:newId, ...newCentro, color };
         setCentros([...centros, c]);
+
         setData(prev=>({
           ...prev,
           centros_exclusivos:{
             ...prev.centros_exclusivos,
-            centrosData:{ ...prev.centros_exclusivos.centrosData, [newId]: baseCentroData() }
+            centrosData:{
+              ...prev.centros_exclusivos.centrosData,
+              [newId]: baseCentroData()
+            }
           }
         }));
         setActiveCentro(newId);
         setNewCentro({nombre:'',delegado:'',audiologo:'',franquiciaSucursal:''});
         setShowCentroModal(false);
-        touch();
       };
 
-      /* ---------- UI ---------- */
-      if(!authorized){
-        // Inicializa PIN si no existe
-        if(!localStorage.getItem(LS_PIN)) savePin(DEFAULT_PIN);
+      // Export: Backup JSON
+      const downloadBackup = ()=>{
+        const exportData = { data, logo:logoUrl, companyName };
+        const blob = new Blob([JSON.stringify(exportData,null,2)], {type:'application/json'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = 'audiologia_completo.json'; a.click();
+        URL.revokeObjectURL(url);
+      };
 
-        return (
-          <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
-            <form onSubmit={handleEnterPin} className="bg-white p-8 rounded-xl shadow-xl border-2 border-rose-600 w-[360px]">
-              <div className="flex items-center gap-2 mb-4">
-                <KeyI className="w-6 h-6 text-rose-600"/>
-                <h1 className="text-2xl font-bold text-gray-800">Acceso</h1>
-              </div>
-              <p className="text-sm text-gray-600 mb-4">Introduce el PIN para abrir la plataforma.</p>
-              <input
-                type="password"
-                placeholder="PIN"
-                value={pinInput}
-                onChange={(e)=>setPinInput(e.target.value)}
-                className="w-full border-2 rounded-lg px-3 py-2 focus:border-rose-600 outline-none mb-4"
-              />
-              <button type="submit" className="w-full bg-rose-600 hover:bg-rose-700 text-white py-2 rounded-lg font-semibold">Entrar</button>
-              <p className="text-xs text-gray-500 mt-3">PIN por defecto: <span className="font-mono">AR4321</span></p>
-            </form>
-          </div>
-        );
-      }
+      const iconMap = {
+        file: (p)=><FileText {...p}/>,
+        users:(p)=><Users {...p}/>,
+        head: (p)=><Headphones {...p}/>,
+        pack: (p)=><PackageI {...p}/>,
+        msg:  (p)=><Msg {...p}/>,
+        heart:(p)=><Heart {...p}/>
+      };
 
       return (
         <div className="min-h-screen">
@@ -378,32 +242,16 @@
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <div className="relative mr-2">
+                <div className="flex items-center gap-3">
+                  <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5"/>
                     <input className="pl-10 pr-4 py-2 bg-white border-2 border-gray-300 rounded-lg focus:border-rose-600 outline-none w-64"
-                      placeholder="Buscar..." value={searchTerm} onChange={e=>{setSearchTerm(e.target.value)}} />
+                      placeholder="Buscar..." value={searchTerm} onChange={e=>setSearchTerm(e.target.value)} />
                   </div>
 
-                  <button onClick={guardadoManual}
-                          className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg shadow-md text-sm">
-                    <SaveI className="w-4 h-4"/> Guardar ahora
-                  </button>
-
-                  <button onClick={exportBackup}
-                          className="flex items-center gap-2 bg-rose-600 hover:bg-rose-700 text-white px-3 py-2 rounded-lg shadow-md text-sm">
-                    💾 Exportar
-                  </button>
-
-                  <label className="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg shadow-md text-sm">
-                    Restaurar
-                    <input ref={fileInputRef} type="file" accept=".json" className="hidden"
-                           onChange={(e)=>{ importBackup(e.target.files?.[0]); e.target.value=''; }} />
-                  </label>
-
-                  <button onClick={changePin}
-                          className="ml-2 text-xs text-gray-600 hover:text-gray-800 underline">
-                    Cambiar PIN
+                  <button onClick={downloadBackup}
+                          className="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-lg shadow-md">
+                    💾 Backup
                   </button>
                 </div>
               </div>
@@ -425,7 +273,7 @@
                         <div key={s.id}>
                           <button
                             onClick={()=>{
-                              setActiveSection(s.id); touch();
+                              setActiveSection(s.id);
                               if(s.requiresCentro) setShowCentrosDropdown(true);
                             }}
                             className={`w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg transition-all ${
@@ -444,7 +292,7 @@
                               <div className="space-y-1">
                                 {centros.map(c=>(
                                   <button key={c.id}
-                                          onClick={()=>{ setActiveCentro(c.id); touch(); }}
+                                          onClick={()=>setActiveCentro(c.id)}
                                           className={`w-full text-left px-2 py-1.5 rounded-md text-xs border-2 ${
                                             activeCentro===c.id ? c.color : 'bg-white text-gray-700 border-gray-200 hover:border-gray-300'
                                           }`}>
@@ -484,6 +332,7 @@
                     </div>
                   </div>
 
+                  {/* Si no requiere centro puedes poner tu contenido aquí. Para este demo mostramos solo la parte de centros_exclusivos */}
                   {activeData.requiresCentro ? (
                     <>
                       {/* ACCIONES-RESULTADO */}
@@ -495,7 +344,7 @@
                               <Plus className="w-4 h-4"/> Añadir
                             </button>
                             <button onClick={saveAcciones} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2">
-                              <SaveI className="w-4 h-4"/> Guardar
+                              <Save className="w-4 h-4"/> Guardar
                             </button>
                           </div>
                         </div>
@@ -521,32 +370,32 @@
                                   <td className="border px-2 py-1 text-center">{idx+1}</td>
                                   <td className="border px-2 py-1">
                                     <input type="date" value={a.fecha} onChange={e=>{
-                                      const v=e.target.value; setAcciones(prev=>prev.map(x=>x.id===a.id?{...x,fecha:v}:x)); touch();
+                                      const v=e.target.value; setAcciones(prev=>prev.map(x=>x.id===a.id?{...x,fecha:v}:x));
                                     }} className="w-full outline-none"/>
                                   </td>
                                   <td className="border px-2 py-1">
                                     <input value={a.accion} onChange={e=>{
-                                      const v=e.target.value; setAcciones(prev=>prev.map(x=>x.id===a.id?{...x,accion:v}:x)); touch();
+                                      const v=e.target.value; setAcciones(prev=>prev.map(x=>x.id===a.id?{...x,accion:v}:x));
                                     }} className="w-full outline-none" placeholder="Descripción..."/>
                                   </td>
                                   <td className="border px-2 py-1 text-center">
                                     <input type="number" min="0" value={a.derivacion} onChange={e=>{
-                                      const v=parseInt(e.target.value)||0; setAcciones(prev=>prev.map(x=>x.id===a.id?{...x,derivacion:v}:x)); touch();
+                                      const v=parseInt(e.target.value)||0; setAcciones(prev=>prev.map(x=>x.id===a.id?{...x,derivacion:v}:x));
                                     }} className="w-full outline-none text-center"/>
                                   </td>
                                   <td className="border px-2 py-1 text-center">
                                     <input type="number" min="0" value={a.cita} onChange={e=>{
-                                      const v=parseInt(e.target.value)||0; setAcciones(prev=>prev.map(x=>x.id===a.id?{...x,cita:v}:x)); touch();
+                                      const v=parseInt(e.target.value)||0; setAcciones(prev=>prev.map(x=>x.id===a.id?{...x,cita:v}:x));
                                     }} className="w-full outline-none text-center"/>
                                   </td>
                                   <td className="border px-2 py-1">
                                     <input value={a.observaciones} onChange={e=>{
-                                      const v=e.target.value; setAcciones(prev=>prev.map(x=>x.id===a.id?{...x,observaciones:v}:x)); touch();
+                                      const v=e.target.value; setAcciones(prev=>prev.map(x=>x.id===a.id?{...x,observaciones:v}:x));
                                     }} className="w-full outline-none" placeholder="Observaciones..."/>
                                   </td>
                                   <td className="border px-2 py-1 text-center">
                                     <button onClick={()=>{
-                                      setAcciones(prev => prev.length>1 ? prev.filter(x=>x.id!==a.id) : prev); touch();
+                                      setAcciones(prev => prev.length>1 ? prev.filter(x=>x.id!==a.id) : prev);
                                     }} className="text-rose-600 hover:bg-rose-50 rounded p-1"><X className="w-4 h-4"/></button>
                                   </td>
                                 </tr>
@@ -561,7 +410,7 @@
                         <div className="flex items-center justify-between mb-4">
                           <h3 className="text-xl font-bold text-gray-800">Formación Continua</h3>
                           <button onClick={saveFormaciones} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2">
-                            <SaveI className="w-4 h-4"/> Guardar
+                            <Save className="w-4 h-4"/> Guardar
                           </button>
                         </div>
                         <div className="overflow-x-auto">
@@ -585,12 +434,12 @@
                                     <td className="border px-2 py-1 text-center">{idx+1}</td>
                                     <td className="border px-2 py-1">
                                       <input type="date" value={f.fecha} onChange={e=>{
-                                        const v=e.target.value; setFormaciones(prev=>prev.map(x=>x.id===f.id?{...x,fecha:v}:x)); touch();
+                                        const v=e.target.value; setFormaciones(prev=>prev.map(x=>x.id===f.id?{...x,fecha:v}:x));
                                       }} className="w-full outline-none"/>
                                     </td>
                                     <td className="border px-2 py-1">
                                       <select value={f.asistencia} onChange={e=>{
-                                        const v=e.target.value; setFormaciones(prev=>prev.map(x=>x.id===f.id?{...x,asistencia:v}:x)); touch();
+                                        const v=e.target.value; setFormaciones(prev=>prev.map(x=>x.id===f.id?{...x,asistencia:v}:x));
                                       }} className="w-full outline-none">
                                         <option value=""></option>
                                         <option value="SI">SI</option>
@@ -600,12 +449,12 @@
                                     </td>
                                     <td className="border px-2 py-1">
                                       <input value={f.titulo} onChange={e=>{
-                                        const v=e.target.value; setFormaciones(prev=>prev.map(x=>x.id===f.id?{...x,titulo:v}:x)); touch();
+                                        const v=e.target.value; setFormaciones(prev=>prev.map(x=>x.id===f.id?{...x,titulo:v}:x));
                                       }} className="w-full outline-none" placeholder="Nombre del curso..."/>
                                     </td>
                                     <td className="border px-2 py-1">
                                       <input value={f.aplicacion} onChange={e=>{
-                                        const v=e.target.value; setFormaciones(prev=>prev.map(x=>x.id===f.id?{...x,aplicacion:v}:x)); touch();
+                                        const v=e.target.value; setFormaciones(prev=>prev.map(x=>x.id===f.id?{...x,aplicacion:v}:x));
                                       }} className="w-full outline-none" placeholder="¿Cómo se aplicará? o SI/NO"/>
                                     </td>
                                   </tr>
@@ -629,7 +478,7 @@
                               <Plus className="w-4 h-4"/> Añadir
                             </button>
                             <button onClick={saveProcesos} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2">
-                              <SaveI className="w-4 h-4"/> Guardar
+                              <Save className="w-4 h-4"/> Guardar
                             </button>
                           </div>
                         </div>
@@ -653,32 +502,32 @@
                                   <td className="border px-2 py-1 text-center">{idx+1}</td>
                                   <td className="border px-2 py-1">
                                     <input value={p.nombrePaquete} onChange={e=>{
-                                      const v=e.target.value; setProcesos(prev=>prev.map(x=>x.id===p.id?{...x,nombrePaquete:v}:x)); touch();
+                                      const v=e.target.value; setProcesos(prev=>prev.map(x=>x.id===p.id?{...x,nombrePaquete:v}:x));
                                     }} className="w-full outline-none font-semibold" placeholder="Nombre..."/>
                                   </td>
                                   <td className="border px-2 py-1">
                                     <input value={p.descripcion} onChange={e=>{
-                                      const v=e.target.value; setProcesos(prev=>prev.map(x=>x.id===p.id?{...x,descripcion:v}:x)); touch();
+                                      const v=e.target.value; setProcesos(prev=>prev.map(x=>x.id===p.id?{...x,descripcion:v}:x));
                                     }} className="w-full outline-none" placeholder="Descripción..."/>
                                   </td>
                                   <td className="border px-2 py-1 text-center">
                                     <input value={p.puntuacion} onChange={e=>{
-                                      const v=e.target.value; setProcesos(prev=>prev.map(x=>x.id===p.id?{...x,puntuacion:v}:x)); touch();
+                                      const v=e.target.value; setProcesos(prev=>prev.map(x=>x.id===p.id?{...x,puntuacion:v}:x));
                                     }} className="w-full outline-none text-center" placeholder="Ej: 8/10"/>
                                   </td>
                                   <td className="border px-2 py-1">
                                     <input value={p.observaciones} onChange={e=>{
-                                      const v=e.target.value; setProcesos(prev=>prev.map(x=>x.id===p.id?{...x,observaciones:v}:x)); touch();
+                                      const v=e.target.value; setProcesos(prev=>prev.map(x=>x.id===p.id?{...x,observaciones:v}:x));
                                     }} className="w-full outline-none" placeholder="Observaciones..."/>
                                   </td>
                                   <td className="border px-2 py-1">
                                     <input type="date" value={p.fechaVisita} onChange={e=>{
-                                      const v=e.target.value; setProcesos(prev=>prev.map(x=>x.id===p.id?{...x,fechaVisita:v}:x)); touch();
+                                      const v=e.target.value; setProcesos(prev=>prev.map(x=>x.id===p.id?{...x,fechaVisita:v}:x));
                                     }} className="w-full outline-none"/>
                                   </td>
                                   <td className="border px-2 py-1 text-center">
                                     <button onClick={()=>{
-                                      setProcesos(prev => prev.length>1 ? prev.filter(x=>x.id!==p.id) : prev); touch();
+                                      setProcesos(prev => prev.length>1 ? prev.filter(x=>x.id!==p.id) : prev);
                                     }} className="text-rose-600 hover:bg-rose-50 rounded p-1"><X className="w-4 h-4"/></button>
                                   </td>
                                 </tr>
@@ -703,7 +552,7 @@
                 <h3 className="text-2xl font-bold text-gray-800 mb-4">Personalizar Marca</h3>
                 <div className="mb-4">
                   <label className="text-gray-700 font-semibold block mb-2">Nombre de la Empresa</label>
-                  <input value={companyName} onChange={e=>{ setCompanyName(e.target.value); touch(); }}
+                  <input value={companyName} onChange={e=>setCompanyName(e.target.value)}
                          className="w-full bg-white text-gray-800 border-2 border-gray-300 rounded-lg px-4 py-3 focus:border-rose-600 outline-none"/>
                 </div>
                 <div className="mb-4">
@@ -728,33 +577,35 @@
               <div className="bg-white rounded-xl p-6 border-2 border-rose-600 shadow-2xl max-w-md w-full mx-4">
                 <h3 className="text-2xl font-bold text-gray-800 mb-2">Añadir Nuevo Centro</h3>
                 <p className="text-sm text-gray-600 mb-4">Total: {centros.length}/12</p>
+
                 <div className="space-y-3 text-sm">
                   <div>
                     <label className="font-semibold block mb-1">Nombre *</label>
                     <input className="w-full border-2 rounded-lg px-3 py-2 focus:border-rose-600 outline-none"
-                           value={newCentro.nombre} onChange={e=>{ setNewCentro(v=>({...v, nombre:e.target.value})); }} />
+                           value={newCentro.nombre} onChange={e=>setNewCentro(v=>({...v, nombre:e.target.value}))}/>
                   </div>
                   <div>
                     <label className="font-semibold block mb-1">Delegado *</label>
                     <input className="w-full border-2 rounded-lg px-3 py-2 focus:border-rose-600 outline-none"
-                           value={newCentro.delegado} onChange={e=>{ setNewCentro(v=>({...v, delegado:e.target.value})); }} />
+                           value={newCentro.delegado} onChange={e=>setNewCentro(v=>({...v, delegado:e.target.value}))}/>
                   </div>
                   <div>
                     <label className="font-semibold block mb-1">Audiólogo *</label>
                     <input className="w-full border-2 rounded-lg px-3 py-2 focus:border-rose-600 outline-none"
-                           value={newCentro.audiologo} onChange={e=>{ setNewCentro(v=>({...v, audiologo:e.target.value})); }} />
+                           value={newCentro.audiologo} onChange={e=>setNewCentro(v=>({...v, audiologo:e.target.value}))}/>
                   </div>
                   <div>
                     <label className="font-semibold block mb-1">Tipo *</label>
                     <select className="w-full border-2 rounded-lg px-3 py-2 focus:border-rose-600 outline-none"
                             value={newCentro.franquiciaSucursal}
-                            onChange={e=>{ setNewCentro(v=>({...v, franquiciaSucursal:e.target.value})); }}>
+                            onChange={e=>setNewCentro(v=>({...v, franquiciaSucursal:e.target.value}))}>
                       <option value="">Seleccionar...</option>
                       <option value="Franquicia">Franquicia</option>
                       <option value="Sucursal">Sucursal</option>
                     </select>
                   </div>
                 </div>
+
                 <div className="flex gap-3 mt-6">
                   <button onClick={addNewCentro} className="flex-1 bg-rose-600 text-white px-4 py-3 rounded-lg hover:bg-rose-700">Añadir Centro</button>
                   <button onClick={()=>{ setShowCentroModal(false); setNewCentro({nombre:'',delegado:'',audiologo:'',franquiciaSucursal:''}); }}
