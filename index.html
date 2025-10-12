@@ -7,23 +7,25 @@
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    /* Scroll suave y contenedores colapsables agradables */
     html { scroll-behavior: smooth; }
-    .btn { @apply inline-flex items-center justify-center rounded-lg px-3 py-2 text-sm font-semibold shadow-sm; }
-    .btn-red { @apply bg-red-600 text-white hover:bg-red-700; }
-    .btn-blue { @apply bg-blue-600 text-white hover:bg-blue-700; }
-    .btn-green{ @apply bg-green-600 text-white hover:bg-green-700; }
-    .btn-gray { @apply bg-gray-600 text-white hover:bg-gray-700; }
-    .chip      { @apply inline-block rounded-lg border-2 px-2 py-0.5 text-xs font-bold; }
-    .card      { @apply bg-white rounded-xl shadow-lg border-l-4 border-red-600; }
-    .subcard   { @apply bg-gray-50 border-2 border-gray-200 rounded-lg; }
+    .btn { display:inline-flex; align-items:center; justify-content:center; border-radius:0.5rem; padding:0.5rem 0.75rem; font-size:0.875rem; font-weight:600; box-shadow:0 1px 2px rgba(0,0,0,.05); }
+    .btn-red { background:#dc2626; color:#fff; } .btn-red:hover{ background:#b91c1c; }
+    .btn-blue{ background:#2563eb; color:#fff; } .btn-blue:hover{ background:#1d4ed8; }
+    .btn-green{ background:#16a34a; color:#fff; } .btn-green:hover{ background:#15803d; }
+    .btn-gray{ background:#4b5563; color:#fff; } .btn-gray:hover{ background:#374151; }
+    .chip{ display:inline-block; border-radius:0.5rem; border-width:2px; padding:0.125rem 0.5rem; font-size:0.75rem; font-weight:700; }
+    .card{ background:#fff; border-left:4px solid #dc2626; border-radius:0.75rem; box-shadow:0 10px 20px rgba(0,0,0,.06); }
+    .subcard{ background:#f9fafb; border:2px solid #e5e7eb; border-radius:0.75rem; }
     details > summary::-webkit-details-marker {display:none}
-    summary { @apply select-none cursor-pointer flex items-center justify-between gap-3 px-4 py-3 font-bold text-gray-800 bg-white border border-gray-200 rounded-lg; }
-    .icon { width: 18px; height: 18px; }
-    .drag-handle { cursor: move; }
+    summary { user-select:none; cursor:pointer; display:flex; align-items:center; justify-content:space-between; gap:0.75rem; padding:0.75rem 1rem; font-weight:700; color:#1f2937; background:#fff; border:1px solid #e5e7eb; border-radius:0.5rem; }
+    .icon { width:18px; height:18px; }
+    .drag-handle { cursor:move; }
     .grabber { width:3px; height:3px; background:#9ca3af; border-radius:9999px; margin:2px auto; }
-    .kbd { @apply inline-block rounded border border-gray-300 bg-gray-50 px-1.5 py-0.5 text-[11px] font-mono text-gray-700; }
     .floating-cloud { position: fixed; right: 12px; bottom: 12px; display:flex; gap:8px; flex-direction:column; z-index: 9999; }
+    .hidden-important { display:none !important; }
+    input, select { outline: none; }
+    table input, table select { background:#fff; }
+    .muted { color:#6b7280; }
   </style>
 </head>
 <body class="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200">
@@ -47,7 +49,7 @@
           <svg class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
           </svg>
-          <input id="searchInput" type="text" placeholder="Buscar en secciones y componentes..."
+          <input id="searchInput" type="text" placeholder="Buscar en secciones, centros y tablas..."
                  class="pl-10 pr-4 py-2 bg-white border-2 border-gray-300 text-gray-800 placeholder-gray-400 rounded-lg focus:border-red-600 focus:outline-none w-72">
         </div>
         <button id="btnSaveLocal" class="btn btn-gray">💾 Guardar local</button>
@@ -60,29 +62,28 @@
   <main class="max-w-7xl mx-auto px-6 py-8">
     <div class="grid grid-cols-12 gap-6">
       <!-- SIDEBAR -->
-      <aside class="col-span-3">
+      <aside class="col-span-12 lg:col-span-3">
         <div class="card p-4">
           <div class="flex items-center justify-between mb-3">
             <h2 class="text-lg font-semibold text-gray-800">Secciones</h2>
             <button id="btnAddSection" class="btn btn-red px-2 py-1">+ Sección</button>
           </div>
-
           <nav id="sectionsNav" class="space-y-2"></nav>
 
-          <!-- Centros (solo cuando se selecciona Centos Exclusivos) -->
+          <!-- Centros -->
           <div id="centrosWrap" class="mt-4 hidden">
             <button id="toggleCentros" class="w-full btn btn-blue">Centros ▾</button>
             <div id="centrosList" class="mt-2 hidden bg-gray-100 rounded-lg p-2 border border-gray-200 space-y-2"></div>
             <div class="mt-2">
               <button id="btnAddCentro" class="btn btn-green w-full">+ Añadir Centro</button>
-              <p class="text-xs text-gray-500 mt-1 text-center">Máx. 12 centros</p>
+              <p class="text-xs muted mt-1 text-center">Máx. 12 centros</p>
             </div>
           </div>
         </div>
       </aside>
 
       <!-- CONTENT -->
-      <section class="col-span-9">
+      <section class="col-span-12 lg:col-span-9">
         <div class="card p-6">
           <div class="flex items-center justify-between mb-5">
             <div class="flex items-center gap-3">
@@ -123,7 +124,7 @@
                 </thead>
                 <tbody id="tbodyAcciones"></tbody>
               </table>
-              <div class="text-xs text-gray-500 mt-2">Consejo: reordena arrastrando el manejador (columna ↕).</div>
+              <div class="text-xs muted mt-2">Consejo: reordena arrastrando el manejador (columna ↕).</div>
             </div>
           </details>
 
@@ -195,7 +196,7 @@
     </div>
   </main>
 
-  <!-- Botones Nube (no interfieren con el diseño) -->
+  <!-- Botones Nube -->
   <div class="floating-cloud">
     <button id="btnCloudSave" class="btn btn-green">☁ Guardar nube</button>
     <button id="btnCloudLoad" class="btn btn-blue">☁ Cargar nube</button>
@@ -203,10 +204,7 @@
 
   <!-- ========== APP LOGIC ========== -->
   <script>
-    // -------- STATE & PERSISTENCIA LOCAL ----------
     const LS_KEY = "audioseguimiento_state_v2";
-
-    // Paleta de colores para chips de Centro
     const centroColors = [
       'bg-blue-100 border-blue-400 text-blue-800',
       'bg-green-100 border-green-400 text-green-800',
@@ -221,7 +219,6 @@
       'bg-lime-100 border-lime-400 text-lime-800',
       'bg-rose-100 border-rose-400 text-rose-800'
     ];
-
     const defaultState = () => ({
       activeSection: 'centros_exclusivos',
       showCentrosDropdown: true,
@@ -258,20 +255,17 @@
 
     let state = loadLocal() || defaultState();
 
-    function saveLocal() {
-      localStorage.setItem(LS_KEY, JSON.stringify(state));
-    }
-    function loadLocal() {
+    function saveLocal(){ localStorage.setItem(LS_KEY, JSON.stringify(state)); }
+    function loadLocal(){
       const raw = localStorage.getItem(LS_KEY);
-      try { return raw ? JSON.parse(raw) : null; } catch(e){ return null }
+      try { return raw ? JSON.parse(raw) : null; } catch(e){ return null; }
     }
-    function resetLocal() {
+    function resetLocal(){
       localStorage.removeItem(LS_KEY);
       state = defaultState();
       renderAll();
     }
 
-    // --------- UTILES ----------
     function byId(id){ return document.getElementById(id); }
     function nextId(list){ return (Math.max(0, ...list.map(x=>+x.id||0))+1) || 1; }
     function humanIndex(i){ return (i+1).toString(); }
@@ -286,7 +280,17 @@
       }
     }
 
-    // --------- RENDER NAV SECTIONS ----------
+    // Buscar (resaltado simple en tablas y títulos)
+    byId('searchInput').addEventListener('input', (e)=>{
+      const q = e.target.value.trim().toLowerCase();
+      document.querySelectorAll('[data-searchable]').forEach(el=>{
+        const hit = el.dataset.searchable.toLowerCase().includes(q);
+        el.classList.toggle('hidden-important', q && !hit);
+      });
+      // Tablas: no ocultamos filas (para no descuadrar), pero podrías añadir lógica extra aquí.
+    });
+
+    // NAV de secciones
     function renderSectionsNav(){
       const nav = byId('sectionsNav');
       nav.innerHTML = '';
@@ -295,10 +299,10 @@
         const btn = document.createElement('button');
         btn.className = `w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg transition-all ${isActive ? 'bg-red-600 text-white shadow-md' : 'text-gray-700 bg-gray-50 hover:bg-gray-100'}`;
         btn.innerHTML = `
-          <span class="font-medium text-sm">${sec.title}</span>
+          <span class="font-medium text-sm" data-searchable="${sec.title}">${sec.title}</span>
           ${sec.requiresCentro ? '<span class="text-xs bg-black/10 px-2 py-0.5 rounded-full">'+ state.centros.length +'/12</span>' : ''}
         `;
-        btn.onclick = () => {
+        btn.onclick = ()=>{
           state.activeSection = id;
           saveLocal();
           renderAll();
@@ -307,12 +311,11 @@
       });
     }
 
-    // --------- RENDER CENTROS ----------
+    // Centros
     function renderCentros(){
       const wrap = byId('centrosWrap');
       const isCentros = state.activeSection === 'centros_exclusivos';
       wrap.classList.toggle('hidden', !isCentros);
-
       if (!isCentros) return;
 
       const list = byId('centrosList');
@@ -323,6 +326,8 @@
         const row = document.createElement('div');
         row.className = 'relative group bg-white border-2 border-gray-200 rounded-lg p-2';
         const active = c.id === state.activeCentroId;
+        row.setAttribute('data-searchable', `${c.nombre} ${c.delegado} ${c.audiologo} ${c.tipo}`);
+
         row.innerHTML = `
           <div class="flex items-center gap-2">
             <button class="flex-1 text-left px-2 py-1.5 rounded-md text-xs transition-all border-2 ${active ? c.color : 'bg-white text-gray-700 border-gray-200 hover:border-gray-300'}" data-action="select">
@@ -356,12 +361,10 @@
         row.onclick = (e)=>{
           const act = e.target.closest('[data-action]')?.dataset.action;
           if (!act) return;
-
           if (act === 'select') {
             state.activeCentroId = c.id;
             ensureCentroData(c.id);
-            saveLocal();
-            renderAll();
+            saveLocal(); renderAll();
           }
           if (act === 'edit') {
             row.querySelector('[data-edit]').classList.toggle('hidden');
@@ -379,27 +382,21 @@
               audiologo: row.querySelector('[data-f="audiologo"]').value.trim(),
               tipo: row.querySelector('[data-f="tipo"]').value
             };
-            saveLocal();
-            renderAll();
+            saveLocal(); renderAll();
           }
           if (act === 'del') {
             if (!confirm('¿Eliminar este centro?')) return;
             const delId = c.id;
             state.centros = state.centros.filter(z => z.id !== delId);
-            if (state.activeCentroId === delId) {
-              state.activeCentroId = state.centros[0]?.id || null;
-            }
-            // Limpia datos del centro eliminado
+            if (state.activeCentroId === delId) state.activeCentroId = state.centros[0]?.id || null;
             delete state.sections.centros_exclusivos.centrosData[delId];
-            saveLocal();
-            renderAll();
+            saveLocal(); renderAll();
           }
         };
         list.appendChild(row);
       });
     }
 
-    // --------- RENDER HEADER DE CONTENIDO ----------
     function renderActiveHeader(){
       const sec = state.sections[state.activeSection];
       byId('activeTitle').textContent = sec.title;
@@ -415,12 +412,12 @@
           chipWrap.appendChild(chip);
         }
       }
+      // Mostrar/ocultar wrapper de Centros en sidebar
+      byId('centrosWrap').classList.toggle('hidden', !sec.requiresCentro);
     }
 
-    // --------- RENDER TABLAS DERECHA ----------
     function renderAcciones(){
-      const tb = byId('tbodyAcciones');
-      tb.innerHTML = '';
+      const tb = byId('tbodyAcciones'); tb.innerHTML = '';
       const sec = state.sections[state.activeSection];
       if (!sec.requiresCentro) { tb.innerHTML = '<tr><td colspan="8" class="text-center p-4 text-gray-500">Selecciona "CENTROS EXCLUSIVOS".</td></tr>'; return; }
       ensureCentroData(state.activeCentroId);
@@ -430,11 +427,10 @@
         const isGreen = (+a.derivacion>0 && +a.cita>0);
         const tr = document.createElement('tr');
         tr.className = `${isGreen ? 'bg-green-100' : 'bg-white'} hover:bg-opacity-80 transition`;
+        tr.setAttribute('data-searchable', `${a.fecha} ${a.accion} ${a.observaciones} ${a.derivacion} ${a.cita}`);
         tr.innerHTML = `
-          <td class="text-center align-top drag-handle">
-            <div class="grabber"></div><div class="grabber"></div><div class="grabber"></div>
-          </td>
-          <td class="text-center font-bold">${humanIndex(i)}</td>
+          <td class="text-center align-top drag-handle"><div class="grabber"></div><div class="grabber"></div><div class="grabber"></div></td>
+          <td class="text-center font-bold">${(i+1)}</td>
           <td><input type="date" value="${a.fecha||''}" class="w-full border rounded px-2 py-1" data-f="fecha"></td>
           <td><input type="text" value="${a.accion||''}" placeholder="Descripción..." class="w-full border rounded px-2 py-1" data-f="accion"></td>
           <td><input type="number" min="0" value="${a.derivacion||0}" class="w-full border rounded px-2 py-1 text-center font-bold" data-f="derivacion"></td>
@@ -443,27 +439,22 @@
           <td class="text-center"><button class="text-red-600" data-action="del">✕</button></td>
         `;
         tr.oninput = e=>{
-          const f = e.target.dataset.f;
-          if (!f) return;
+          const f = e.target.dataset.f; if (!f) return;
           arr[i][f] = (f==='derivacion'||f==='cita') ? (+e.target.value||0) : e.target.value;
         };
         tr.onclick = e=>{
           if (e.target.dataset.action === 'del') {
             if (arr.length===1) return;
-            arr.splice(i,1);
-            renderAcciones();
+            arr.splice(i,1); renderAcciones();
           }
         };
         tb.appendChild(tr);
       });
-
-      // drag & drop orden
       makeRowsDraggable(tb, arr, renderAcciones);
     }
 
     function renderFormacion(){
-      const tb = byId('tbodyFormacion');
-      tb.innerHTML = '';
+      const tb = byId('tbodyFormacion'); tb.innerHTML = '';
       const sec = state.sections[state.activeSection];
       if (!sec.requiresCentro) { tb.innerHTML = '<tr><td colspan="6" class="text-center p-4 text-gray-500">Selecciona "CENTROS EXCLUSIVOS".</td></tr>'; return; }
       ensureCentroData(state.activeCentroId);
@@ -478,9 +469,10 @@
 
         const tr = document.createElement('tr');
         tr.className = `${bg} hover:bg-opacity-80 transition`;
+        tr.setAttribute('data-searchable', `${f.fecha} ${f.asistencia} ${f.titulo} ${f.aplicacion}`);
         tr.innerHTML = `
           <td class="text-center align-top drag-handle"><div class="grabber"></div><div class="grabber"></div><div class="grabber"></div></td>
-          <td class="text-center font-bold">${humanIndex(i)}</td>
+          <td class="text-center font-bold">${(i+1)}</td>
           <td><input type="date" value="${f.fecha||''}" class="w-full border rounded px-2 py-1" data-f="fecha"></td>
           <td>
             <select class="w-full border rounded px-2 py-1 font-semibold" data-f="asistencia">
@@ -494,19 +486,16 @@
           <td><input type="text" value="${f.aplicacion||''}" placeholder="¿Cómo se aplicará? o SI/NO" class="w-full border rounded px-2 py-1" data-f="aplicacion"></td>
         `;
         tr.oninput = e=>{
-          const field = e.target.dataset.f;
-          if (!field) return;
+          const field = e.target.dataset.f; if (!field) return;
           arr[i][field] = e.target.value;
         };
         tb.appendChild(tr);
       });
-
       makeRowsDraggable(tb, arr, renderFormacion);
     }
 
     function renderProcesos(){
-      const tb = byId('tbodyProcesos');
-      tb.innerHTML = '';
+      const tb = byId('tbodyProcesos'); tb.innerHTML = '';
       const sec = state.sections[state.activeSection];
       if (!sec.requiresCentro) { tb.innerHTML = '<tr><td colspan="9" class="text-center p-4 text-gray-500">Selecciona "CENTROS EXCLUSIVOS".</td></tr>'; return; }
       ensureCentroData(state.activeCentroId);
@@ -515,9 +504,10 @@
       arr.forEach((p, i)=>{
         const tr = document.createElement('tr');
         tr.className = `bg-white hover:bg-gray-50 transition`;
+        tr.setAttribute('data-searchable', `${p.nombrePaquete} ${p.descripcion} ${p.puntuacion} ${p.observaciones}`);
         tr.innerHTML = `
           <td class="text-center align-top drag-handle"><div class="grabber"></div><div class="grabber"></div><div class="grabber"></div></td>
-          <td class="text-center font-bold">${humanIndex(i)}</td>
+          <td class="text-center font-bold">${(i+1)}</td>
           <td><input type="text" value="${p.nombrePaquete||''}" placeholder="Nombre del paquete..." class="w-full border rounded px-2 py-1 font-semibold" data-f="nombrePaquete"></td>
           <td><input type="text" value="${p.descripcion||''}" placeholder="Descripción personalizada..." class="w-full border rounded px-2 py-1" data-f="descripcion"></td>
           <td><input type="text" value="${p.puntuacion||''}" placeholder="Ej: 8/10" class="w-full border rounded px-2 py-1 text-center font-bold" data-f="puntuacion"></td>
@@ -529,42 +519,27 @@
           </td>
           <td class="text-center"><button class="text-red-600" data-action="del">✕</button></td>
         `;
-
         tr.oninput = e=>{
-          const f = e.target.dataset.f;
-          if (!f) return;
+          const f = e.target.dataset.f; if (!f) return;
           arr[i][f] = e.target.value;
         };
-
         tr.onclick = e=>{
           const act = e.target.closest('[data-action]')?.dataset.action;
           if (!act) return;
-          if (act==='del') {
-            if (arr.length===1) return;
-            arr.splice(i,1);
-            renderProcesos();
-          }
+          if (act==='del') { if (arr.length===1) return; arr.splice(i,1); renderProcesos(); }
           if (act==='add-file') {
-            // Solo mostramos nombre (no se sube archivo real en este HTML simple)
-            const name = prompt('Nombre del archivo (solo referencia visual):');
-            if (!name) return;
+            const name = prompt('Nombre del archivo (solo referencia visual):'); if (!name) return;
             const f = { id: Date.now()+Math.random(), name };
-            arr[i].archivos = arr[i].archivos || [];
-            arr[i].archivos.push(f);
-            renderProcesos();
+            arr[i].archivos = arr[i].archivos || []; arr[i].archivos.push(f); renderProcesos();
           }
           if (act==='add-link') {
-            const url = prompt('URL del enlace:');
-            if (!url) return;
+            const url = prompt('URL del enlace:'); if (!url) return;
             const title = prompt('Título (opcional):') || url;
             const l = { id: Date.now()+Math.random(), url, title };
-            arr[i].enlaces = arr[i].enlaces || [];
-            arr[i].enlaces.push(l);
-            renderProcesos();
+            arr[i].enlaces = arr[i].enlaces || []; arr[i].enlaces.push(l); renderProcesos();
           }
         };
 
-        // Fila secundaria para listar archivos/enlaces
         const sub = document.createElement('tr');
         sub.innerHTML = `
           <td colspan="9" class="bg-gray-50">
@@ -577,7 +552,7 @@
                       <span>📎 ${f.name}</span>
                       <button class="text-red-600" data-remove-file="${f.id}">✕</button>
                     </div>
-                  `).join('') || '<div class="text-gray-400">—</div>'}
+                  `).join('') || '<div class="muted">—</div>'}
                 </div>
               </div>
               <div>
@@ -588,43 +563,32 @@
                       <a href="${l.url}" target="_blank" class="text-blue-600 hover:text-blue-800 truncate">🔗 ${l.title}</a>
                       <button class="text-red-600" data-remove-link="${l.id}">✕</button>
                     </div>
-                  `).join('') || '<div class="text-gray-400">—</div>'}
+                  `).join('') || '<div class="muted">—</div>'}
                 </div>
               </div>
             </div>
           </td>
         `;
-
-        // Manejo de eliminar archivo/enlace
         sub.onclick = e=>{
           const rmFile = e.target.dataset.removeFile;
           const rmLink = e.target.dataset.removeLink;
-          if (rmFile) {
-            arr[i].archivos = (arr[i].archivos||[]).filter(x=> String(x.id)!==String(rmFile));
-            renderProcesos();
-          }
-          if (rmLink) {
-            arr[i].enlaces = (arr[i].enlaces||[]).filter(x=> String(x.id)!==String(rmLink));
-            renderProcesos();
-          }
+          if (rmFile) { arr[i].archivos = (arr[i].archivos||[]).filter(x=> String(x.id)!==String(rmFile)); renderProcesos(); }
+          if (rmLink) { arr[i].enlaces = (arr[i].enlaces||[]).filter(x=> String(x.id)!==String(rmLink)); renderProcesos(); }
         };
 
         tb.appendChild(tr);
         tb.appendChild(sub);
       });
-
       makeRowsDraggable(tb, arr, renderProcesos, {rowSpan:2});
     }
 
-    // --------- DRAG-REORDER (simple) ----------
     function makeRowsDraggable(tbody, arrayRef, rerender, opts={rowSpan:1}){
-      // Hacemos draggable solo las filas principales (no las secundarias)
       const rows = [...tbody.querySelectorAll('tr')].filter((_,idx)=> opts.rowSpan===2 ? idx%2===0 : true);
       rows.forEach((tr, idx)=>{
         tr.draggable = true;
-        tr.ondragstart = ()=> tr.classList.add('opacity-50');
-        tr.ondragend = ()=> tr.classList.remove('opacity-50');
-        tr.ondragover = (e)=> e.preventDefault();
+        tr.ondragstart = (e)=>{ tr.classList.add('opacity-50'); e.dataTransfer.setData('rowIndex', idx); };
+        tr.ondragend   = ()=> tr.classList.remove('opacity-50');
+        tr.ondragover  = (e)=> e.preventDefault();
         tr.ondrop = (e)=>{
           e.preventDefault();
           const from = +e.dataTransfer.getData('rowIndex');
@@ -634,48 +598,24 @@
           arrayRef.splice(to,0,item);
           rerender();
         };
-        tr.ondragstart = (e)=> {
-          e.dataTransfer.setData('rowIndex', idx);
-        };
       });
     }
 
-    // --------- BÚSQUEDA ----------
-    byId('searchInput').addEventListener('input', (e)=>{
-      const q = e.target.value.trim().toLowerCase();
-      // filtro por: titulo de sección, nombres de centros, filas (acción, formación, procesos)
-      const sec = state.sections[state.activeSection];
-      if (state.activeSection === 'centros_exclusivos' && state.activeCentroId) {
-        ensureCentroData(state.activeCentroId);
-        const cd = state.sections.centros_exclusivos.centrosData[state.activeCentroId];
-        // Simple highlight filtrando por valor (no ocultamos filas, pero podrías)
-        // Aquí solo guardamos la query para futuras mejoras.
-      }
-      // No hacemos cambios destructivos, la búsqueda es global como guía.
-      // Visualmente, la persona puede escribir y navegar secciones/centros.
-    });
-
-    // --------- BOTONES CABECERA ----------
     byId('btnSaveLocal').onclick = ()=>{ saveLocal(); alert('✅ Guardado local.'); };
     byId('btnReset').onclick = ()=>{ if (confirm('¿Restablecer a valores de ejemplo?')) resetLocal(); };
     byId('btnAddSection').onclick = ()=>{
       const id = 'section_'+Date.now();
       state.sections[id] = { title:'Nueva Sección', requiresCentro:false, items:[] };
       state.activeSection = id;
-      saveLocal();
-      renderAll();
+      saveLocal(); renderAll();
     };
-
-    // --------- CENTROS: toggle y añadir ----------
     byId('toggleCentros').onclick = ()=>{
       state.showCentrosDropdown = !state.showCentrosDropdown;
-      saveLocal();
-      renderCentros();
+      saveLocal(); renderCentros();
     };
     byId('btnAddCentro').onclick = ()=>{
       if (state.centros.length>=12) { alert('Máximo 12 centros'); return; }
-      const nombre = prompt('Nombre del Centro:');
-      if (!nombre) return;
+      const nombre = prompt('Nombre del Centro:'); if (!nombre) return;
       const delegado = prompt('Delegado:') || '';
       const audiologo = prompt('Audiólogo:') || '';
       const tipo = prompt('Tipo (Franquicia/Sucursal):') || '';
@@ -684,11 +624,9 @@
       state.centros.push({ id:newId, nombre:nombre.trim(), delegado, audiologo, tipo, color });
       ensureCentroData(newId);
       state.activeCentroId = newId;
-      saveLocal();
-      renderAll();
+      saveLocal(); renderAll();
     };
 
-    // --------- ACCIONES: añadir/guardar ----------
     byId('btnAddAccion').onclick = ()=>{
       ensureCentroData(state.activeCentroId);
       const arr = state.sections.centros_exclusivos.centrosData[state.activeCentroId].acciones;
@@ -697,10 +635,8 @@
     };
     byId('btnSaveAcciones').onclick = ()=>{ saveLocal(); alert('✅ Acciones guardadas.'); };
 
-    // --------- FORMACIÓN ----------
     byId('btnSaveFormacion').onclick = ()=>{ saveLocal(); alert('✅ Formación guardada.'); };
 
-    // --------- PROCESOS ----------
     byId('btnAddProceso').onclick = ()=>{
       ensureCentroData(state.activeCentroId);
       const arr = state.sections.centros_exclusivos.centrosData[state.activeCentroId].procesos;
@@ -709,7 +645,6 @@
     };
     byId('btnSaveProcesos').onclick = ()=>{ saveLocal(); alert('✅ Procesos guardados.'); };
 
-    // --------- RENDER PRINCIPAL ----------
     function renderAll(){
       renderSectionsNav();
       renderCentros();
@@ -717,6 +652,12 @@
       renderAcciones();
       renderFormacion();
       renderProcesos();
+      // Aplicar filtro de búsqueda activo (si hay)
+      const q = byId('searchInput').value.trim().toLowerCase();
+      document.querySelectorAll('[data-searchable]').forEach(el=>{
+        const hit = el.dataset.searchable?.toLowerCase().includes(q);
+        el.classList.toggle('hidden-important', q && !hit);
+      });
     }
     renderAll();
   </script>
@@ -724,13 +665,13 @@
   <!-- ========== CLOUD SYNC (SUPABASE) ========== -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    // 1) Pega tus credenciales de Supabase:
-    const SUPABASE_URL  = "https://TU-PROYECTO.supabase.co"; // <-- pega aquí tu Project URL
-    const SUPABASE_ANON = "TU-ANON-KEY";                      // <-- pega aquí tu anon public key
+    // 1) Pega tus credenciales:
+    const SUPABASE_URL  = "https://TU-PROYECTO.supabase.co"; // <-- pega tu Project URL
+    const SUPABASE_ANON = "TU-ANON-KEY";                      // <-- pega tu anon public key
 
     // 2) Config de sincronización
-    const WORKSPACE_ID = "AUDIOLOGIA"; // puedes cambiarlo si quieres separar espacios
-    const SECRET_PIN   = "AR4321";     // no se muestra al usuario (no pedir PIN en pantalla)
+    const WORKSPACE_ID = "AUDIOLOGIA"; // separa espacios si quieres
+    const SECRET_PIN   = "AR4321";     // no se pide ni se muestra
 
     const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
@@ -763,16 +704,19 @@
           .maybeSingle();
         if (error) throw error;
         if (!data) { alert("No hay backup en la nube para este espacio."); return; }
-        localStorage.setItem(LS_KEY, JSON.stringify(data.payload));
-        alert("✅ Cargado desde la nube. Recarga la página para ver cambios.");
+        // Cargar al estado y re-renderizar sin recargar la página
+        state = data.payload;
+        saveLocal();
+        renderAll();
+        alert("✅ Cargado desde la nube.");
       } catch (e) {
         console.error(e);
         alert("❌ Error cargando desde la nube.");
       }
     }
 
-    byId('btnCloudSave').onclick = cloudSave;
-    byId('btnCloudLoad').onclick = cloudLoad;
+    document.getElementById('btnCloudSave').onclick = cloudSave;
+    document.getElementById('btnCloudLoad').onclick = cloudLoad;
   </script>
   <!-- ========== / CLOUD SYNC ========== -->
 
