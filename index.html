@@ -1,369 +1,622 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>AUDIOLOGÍA – Sistema de Gestión</title>
-  <!-- TailwindCSS (CDN) -->
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>AudioSeguimiento</title>
+  <!-- Tailwind (CDN) -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- React 18 + ReactDOM (UMD) -->
-  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-  <!-- Babel para transformar JSX en el navegador -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <!-- Babel para poder usar JSX en el navegador -->
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </head>
-<body class="bg-gradient-to-br from-gray-100 to-gray-200 min-h-screen">
+<body class="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200">
+
   <div id="root"></div>
 
   <script type="text/babel">
     const { useState, useEffect } = React;
 
-    // Iconos SVG personalizados
-    const ChevronRight = (props) => <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>;
-    const ChevronDown = (props) => <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>;
-    const Plus = (props) => <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>;
-    const Edit2 = (props) => <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>;
-    const Save = (props) => <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" /></svg>;
-    const X = (props) => <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>;
-    const Search = (props) => <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>;
-    const Users = (props) => <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>;
-    const FileText = (props) => <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>;
-    const Headphones = (props) => <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" /></svg>;
-    const Package = (props) => <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>;
-    const MessageCircle = (props) => <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>;
-    const Heart = (props) => <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>;
-    const Download = (props) => <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>;
-    const Upload = (props) => <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>;
-    const Image = (props) => <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>;
-    const PlusCircle = (props) => <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>;
-    const LinkIcon = (props) => <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>;
-    const Paperclip = (props) => <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" /></svg>;
-    const Pencil = (props) => <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>;
+    /* === ICONOS MUY LIGEROS === */
+    const Icon = ({d, className="w-5 h-5"}) => (
+      <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={d}/>
+      </svg>
+    );
+    const ChevronRight = (p)=> <Icon {...p} d="M9 5l7 7-7 7" />;
+    const ChevronDown  = (p)=> <Icon {...p} d="M19 9l-7 7-7-7" />;
+    const Plus         = (p)=> <Icon {...p} d="M12 4v16m8-8H4" />;
+    const Save         = (p)=> <Icon {...p} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />;
+    const X            = (p)=> <Icon {...p} d="M6 18L18 6M6 6l12 12" />;
+    const Search       = (p)=> <Icon {...p} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />;
+    const FileText     = (p)=> <Icon {...p} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414A1 1 0 0119 9v10a2 2 0 01-2 2z" />;
+    const Users        = (p)=> <Icon {...p} d="M17 20h5v-1a6 6 0 00-9-5.197M9 20H4v-1a6 6 0 0111.472-1.33M15 7a4 4 0 11-8 0 4 4 0 018 0z" />;
+    const Headphones   = (p)=> <Icon {...p} d="M4 13a8 8 0 1116 0v5a3 3 0 01-3 3h-1v-7h4M4 18v-5a8 8 0 018-8" />;
+    const PackageI     = (p)=> <Icon {...p} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />;
+    const Msg          = (p)=> <Icon {...p} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />;
+    const Heart        = (p)=> <Icon {...p} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />;
+    const UploadI      = (p)=> <Icon {...p} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M12 12V4m0 8l-4-4m4 4l4-4" />;
 
-    const AudiologiaApp = () => {
+    function Badge({children}) {
+      return <span className="inline-block px-3 py-1 rounded-lg text-sm font-semibold border-2 bg-gray-100 border-gray-300 text-gray-800">{children}</span>;
+    }
+
+    function AudiologiaApp(){
       const [activeSection, setActiveSection] = useState('centros_exclusivos');
-      const [activeCentro, setActiveCentro] = useState(null);
-      const [searchTerm, setSearchTerm] = useState('');
-      const [logoUrl, setLogoUrl] = useState('');
-      const [companyName, setCompanyName] = useState('AUDIOLOGÍA');
+      const [activeCentro, setActiveCentro]   = useState(1);
+      const [searchTerm, setSearchTerm]       = useState('');
+      const [logoUrl, setLogoUrl]             = useState('');
+      const [companyName, setCompanyName]     = useState('AUDIOLOGÍA');
       const [showLogoModal, setShowLogoModal] = useState(false);
-      const [showSectionEditModal, setShowSectionEditModal] = useState(false);
-      const [editingSectionId, setEditingSectionId] = useState(null);
-      const [editingSectionName, setEditingSectionName] = useState('');
       const [showCentroModal, setShowCentroModal] = useState(false);
-      const [newCentroNombre, setNewCentroNombre] = useState('');
-      const [newCentroDelegado, setNewCentroDelegado] = useState('');
-      const [newCentroAudiologo, setNewCentroAudiologo] = useState('');
-      const [newCentroFranquiciaSucursal, setNewCentroFranquiciaSucursal] = useState('');
-      const [showCentrosDropdown, setShowCentrosDropdown] = useState(false);
-      const [editingCentroId, setEditingCentroId] = useState(null);
-      const [editingCentroNombre, setEditingCentroNombre] = useState('');
-      const [editingCentroDelegado, setEditingCentroDelegado] = useState('');
-      const [editingCentroAudiologo, setEditingCentroAudiologo] = useState('');
-      const [editingCentroFranquiciaSucursal, setEditingCentroFranquiciaSucursal] = useState('');
+      const [showCentrosDropdown, setShowCentrosDropdown] = useState(true);
 
-      const [centros, setCentros] = useState([
-        { id: 1, nombre: 'Centro Madrid Norte', delegado: 'Ana Martínez', audiologo: 'Dr. García', franquiciaSucursal: 'Franquicia', color: 'bg-blue-100 border-blue-400 text-blue-800' },
-        { id: 2, nombre: 'Centro Barcelona Centro', delegado: 'Carlos Ruiz', audiologo: 'Dra. López', franquiciaSucursal: 'Sucursal', color: 'bg-green-100 border-green-400 text-green-800' }
-      ]);
-
+      // Centros
       const coloresCentros = [
-        'bg-blue-100 border-blue-400 text-blue-800','bg-green-100 border-green-400 text-green-800','bg-purple-100 border-purple-400 text-purple-800',
-        'bg-orange-100 border-orange-400 text-orange-800','bg-pink-100 border-pink-400 text-pink-800','bg-indigo-100 border-indigo-400 text-indigo-800',
-        'bg-yellow-100 border-yellow-400 text-yellow-800','bg-red-100 border-red-400 text-red-800','bg-teal-100 border-teal-400 text-teal-800',
-        'bg-cyan-100 border-cyan-400 text-cyan-800','bg-lime-100 border-lime-400 text-lime-800','bg-rose-100 border-rose-400 text-rose-800'
+        'bg-blue-100 border-blue-400 text-blue-800',
+        'bg-green-100 border-green-400 text-green-800',
+        'bg-purple-100 border-purple-400 text-purple-800',
+        'bg-orange-100 border-orange-400 text-orange-800',
+        'bg-pink-100 border-pink-400 text-pink-800',
+        'bg-indigo-100 border-indigo-400 text-indigo-800',
+        'bg-yellow-100 border-yellow-400 text-yellow-800',
+        'bg-red-100 border-red-400 text-red-800',
       ];
+      const [centros,setCentros] = useState([
+        { id:1, nombre:'Centro Madrid Norte', delegado:'Ana Martínez', audiologo:'Dr. García', franquiciaSucursal:'Franquicia', color:coloresCentros[0]},
+        { id:2, nombre:'Centro Barcelona Centro', delegado:'Carlos Ruiz', audiologo:'Dra. López', franquiciaSucursal:'Sucursal', color:coloresCentros[1]},
+      ]);
+      const [newCentro, setNewCentro] = useState({nombre:'',delegado:'',audiologo:'',franquiciaSucursal:''});
 
-      const [data, setData] = useState({
-        centros_exclusivos: {
-          title: 'CENTROS EXCLUSIVOS',
-          icon: FileText,
-          color: 'from-red-600 to-red-700',
-          requiresCentro: true,
-          centrosData: {
-            1: { 
-              customFields: [], 
-              accionesResultado: [{ id: 1, fecha: '', accion: '', derivacion: 0, cita: 0, observaciones: '' }],
-              formaciones: Array.from({length:10},(_,i)=>({id:i+1,fecha:'',asistencia:'',titulo:'',aplicacion:''})),
-              procesosPersonalizados: [{ id: 1, nombrePaquete:'', descripcion:'', puntuacion:'', observaciones:'', fechaVisita:'', archivos:[], enlaces:[] }]
-            },
-            2: { 
-              customFields: [], 
-              accionesResultado: [{ id: 1, fecha: '', accion: '', derivacion: 0, cita: 0, observaciones: '' }],
-              formaciones: Array.from({length:10},(_,i)=>({id:i+1,fecha:'',asistencia:'',titulo:'',aplicacion:''})),
-              procesosPersonalizados: [{ id: 1, nombrePaquete:'', descripcion:'', puntuacion:'', observaciones:'', fechaVisita:'', archivos:[], enlaces:[] }]
-            }
-          }
-        },
-        centros_flop: { title: 'CENTROS FLOP', icon: Users, color: 'from-gray-600 to-gray-700', customFields: [], items: [] },
-        visitas_audio: { title: 'VISITAS AUDIO', icon: Headphones, color: 'from-red-500 to-red-600', customFields: [], items: [] },
-        mentoring_audio: { title: 'MENTORING AUDIO', icon: Edit2, color: 'from-gray-700 to-gray-800', customFields: [], items: [] },
-        producto_pedidos: { title: 'Producto / Pedidos / Devoluciones', icon: Package, color: 'from-red-700 to-red-800', customFields: [], items: [] },
-        comunicacion: { title: 'Comunicación', icon: MessageCircle, color: 'from-gray-500 to-gray-600', customFields: [], items: [] },
-        area_social: { title: 'Área Social y Colaboraciones', icon: Heart, color: 'from-red-600 to-red-700', customFields: [], items: [] }
+      // Datos por sección
+      const baseCentroData = () => ({
+        accionesResultado: [{ id:1, fecha:'', accion:'', derivacion:0, cita:0, observaciones:'' }],
+        formaciones: Array.from({length:10},(_,i)=>({ id:i+1, fecha:'', asistencia:'', titulo:'', aplicacion:'' })),
+        procesos: [{ id:1, nombrePaquete:'', descripcion:'', puntuacion:'', observaciones:'', fechaVisita:'', archivos:[], enlaces:[] }],
       });
 
-      const [accionesResultadoData, setAccionesResultadoData] = useState([]);
-      const [draggedAccionIndex, setDraggedAccionIndex] = useState(null);
-      const [formacionesData, setFormacionesData] = useState([]);
-      const [draggedFormacionIndex, setDraggedFormacionIndex] = useState(null);
-      const [procesosData, setProcesosData] = useState([]);
-      const [draggedProcesoIndex, setDraggedProcesoIndex] = useState(null);
-      const [editingProcesoId, setEditingProcesoId] = useState(null);
-      const [newProcesoLinkUrl, setNewProcesoLinkUrl] = useState('');
-      const [newProcesoLinkTitle, setNewProcesoLinkTitle] = useState('');
-      const [showFieldModal, setShowFieldModal] = useState(false);
-      const [newFieldName, setNewFieldName] = useState('');
+      const [data,setData] = useState({
+        centros_exclusivos: {
+          title:'CENTROS EXCLUSIVOS', icon:'file', requiresCentro:true,
+          centrosData: { 1: baseCentroData(), 2: baseCentroData() }
+        },
+        centros_flop: { title:'CENTROS FLOP', icon:'users', requiresCentro:false, items:[] },
+        visitas_audio:{ title:'VISITAS AUDIO', icon:'head', requiresCentro:false, items:[] },
+        mentoring_audio:{ title:'MENTORING AUDIO', icon:'file', requiresCentro:false, items:[] },
+        producto_pedidos:{ title:'Producto / Pedidos / Devoluciones', icon:'pack', requiresCentro:false, items:[] },
+        comunicacion:{ title:'Comunicación', icon:'msg', requiresCentro:false, items:[] },
+        area_social:{ title:'Área Social y Colaboraciones', icon:'heart', requiresCentro:false, items:[] },
+      });
 
-      // Inicializar el primer centro
-      useEffect(() => {
-        if (activeSection === 'centros_exclusivos' && centros.length > 0 && !activeCentro) {
-          setActiveCentro(centros[0].id);
-        }
-      }, []);
-
+      const sections = Object.entries(data).map(([id, v]) => ({id, ...v}));
       const activeData = data[activeSection];
 
-      const getCurrentData = () => {
-        if (activeData.requiresCentro && activeCentro) {
-          return activeData.centrosData[activeCentro] || { 
-            customFields: [], 
-            accionesResultado: [{ id: 1, fecha:'', accion:'', derivacion:0, cita:0, observaciones:'' }],
-            formaciones: Array.from({length:10},(_,i)=>({id:i+1,fecha:'',asistencia:'',titulo:'',aplicacion:''})),
-            procesosPersonalizados: [{ id:1, nombrePaquete:'', descripcion:'', puntuacion:'', observaciones:'', fechaVisita:'', archivos:[], enlaces:[] }]
-          };
-        }
-        return activeData;
-      };
-      const currentData = getCurrentData();
-
-      // Cargar datos al cambiar centro
-      useEffect(() => {
-        if (activeSection === 'centros_exclusivos' && activeCentro && currentData) {
-          setAccionesResultadoData(currentData.accionesResultado || [{ id:1, fecha:'', accion:'', derivacion:0, cita:0, observaciones:'' }]);
-          setFormacionesData(currentData.formaciones || []);
-          setProcesosData(currentData.procesosPersonalizados || [{ id:1, nombrePaquete:'', descripcion:'', puntuacion:'', observaciones:'', fechaVisita:'', archivos:[], enlaces:[] }]);
-        }
-      }, [activeCentro, activeSection]);
-
-      // ---- Acciones-Resultado
-      const addAccion = () => {
-        const newId = Math.max(...accionesResultadoData.map(a => a.id), 0) + 1;
-        setAccionesResultadoData([...accionesResultadoData, { id:newId, fecha:'', accion:'', derivacion:0, cita:0, observaciones:'' }]);
-      };
-      const deleteAccion = (id) => {
-        if (accionesResultadoData.length > 1) setAccionesResultadoData(accionesResultadoData.filter(a => a.id !== id));
-      };
-      const updateAccion = (id, field, value) => {
-        setAccionesResultadoData(accionesResultadoData.map(a => a.id === id ? { ...a, [field]: value } : a));
-      };
-      const handleDragStartAccion = (i) => setDraggedAccionIndex(i);
-      const handleDragOverAccion = (e, i) => {
-        e.preventDefault();
-        if (draggedAccionIndex === null || draggedAccionIndex === i) return;
-        const items = [...accionesResultadoData];
-        const dragged = items[draggedAccionIndex];
-        items.splice(draggedAccionIndex,1);
-        items.splice(i,0,dragged);
-        setAccionesResultadoData(items);
-        setDraggedAccionIndex(i);
-      };
-      const handleDragEndAccion = () => setDraggedAccionIndex(null);
-      const saveAccionesResultado = () => {
-        if (activeData.requiresCentro && activeCentro) {
+      const getCentroData = () => {
+        if(!activeData.requiresCentro) return null;
+        const cd = activeData.centrosData[activeCentro];
+        if(!cd){ // inicializa en caliente si falta
           setData(prev => ({
             ...prev,
-            [activeSection]: {
+            [activeSection]:{
               ...prev[activeSection],
-              centrosData: {
-                ...prev[activeSection].centrosData,
-                [activeCentro]: {
-                  ...prev[activeSection].centrosData[activeCentro],
-                  accionesResultado: accionesResultadoData
-                }
-              }
+              centrosData:{ ...prev[activeSection].centrosData, [activeCentro]: baseCentroData() }
             }
           }));
+          return baseCentroData();
         }
+        return cd;
       };
 
-      // ---- Formaciones
-      const updateFormacion = (id, field, value) => {
-        const updated = formacionesData.map(f => f.id === id ? { ...f, [field]: value } : f);
-        setFormacionesData(updated);
+      const currentCentroData = getCentroData();
+
+      // Acciones-Resultado
+      const [acciones, setAcciones] = useState([]);
+      useEffect(()=>{ if(currentCentroData) setAcciones(currentCentroData.accionesResultado); }, [activeCentro, activeSection]);
+
+      const addAccion = ()=> {
+        const newId = Math.max(...acciones.map(a=>a.id),0)+1;
+        setAcciones([...acciones, {id:newId, fecha:'', accion:'', derivacion:0, cita:0, observaciones:''}]);
       };
-      const handleDragStartFormacion = (i) => setDraggedFormacionIndex(i);
-      const handleDragOverFormacion = (e, i) => {
-        e.preventDefault();
-        if (draggedFormacionIndex === null || draggedFormacionIndex === i) return;
-        const items = [...formacionesData];
-        const dragged = items[draggedFormacionIndex];
-        items.splice(draggedFormacionIndex,1);
-        items.splice(i,0,dragged);
-        setFormacionesData(items);
-        setDraggedFormacionIndex(i);
-      };
-      const handleDragEndFormacion = () => setDraggedFormacionIndex(null);
-      const saveFormaciones = () => {
-        if (activeData.requiresCentro && activeCentro) {
-          setData(prev => ({
-            ...prev,
-            [activeSection]: {
-              ...prev[activeSection],
-              centrosData: {
-                ...prev[activeSection].centrosData,
-                [activeCentro]: {
-                  ...prev[activeSection].centrosData[activeCentro],
-                  formaciones: formacionesData
-                }
-              }
+      const saveAcciones = ()=> {
+        setData(prev => ({
+          ...prev,
+          [activeSection]:{
+            ...prev[activeSection],
+            centrosData:{
+              ...prev[activeSection].centrosData,
+              [activeCentro]:{ ...prev[activeSection].centrosData[activeCentro], accionesResultado: acciones }
             }
-          }));
-        }
+          }
+        }));
       };
 
-      // ---- Procesos
-      const addProceso = () => {
-        const newId = Math.max(...procesosData.map(p => p.id), 0) + 1;
-        setProcesosData([...procesosData, { id:newId, nombrePaquete:'', descripcion:'', puntuacion:'', observaciones:'', fechaVisita:'', archivos:[], enlaces:[] }]);
-      };
-      const deleteProceso = (id) => {
-        if (procesosData.length > 1) setProcesosData(procesosData.filter(p => p.id !== id));
-      };
-      const updateProceso = (id, field, value) => {
-        setProcesosData(procesosData.map(p => p.id === id ? { ...p, [field]: value } : p));
-      };
-      const handleProcesoFileUpload = (procesoId, event) => {
-        const files = Array.from(event.target.files).map(file => ({ name:file.name, size:file.size, type:file.type, id: Date.now()+Math.random() }));
-        setProcesosData(procesosData.map(p => p.id === procesoId ? { ...p, archivos:[...(p.archivos||[]), ...files] } : p));
-      };
-      const removeProcesoFile = (procesoId, fileId) => {
-        setProcesosData(procesosData.map(p => p.id === procesoId ? { ...p, archivos:(p.archivos||[]).filter(f=>f.id!==fileId) } : p));
-      };
-      const [newProcesoLinkUrl, setNewProcesoLinkUrl] = useState('');
-      const [newProcesoLinkTitle, setNewProcesoLinkTitle] = useState('');
-      const [editingProcesoId, setEditingProcesoId] = useState(null);
-      const addProcesoLink = (procesoId) => {
-        if (!newProcesoLinkUrl.trim()) return;
-        const newLink = { url:newProcesoLinkUrl, title:newProcesoLinkTitle || newProcesoLinkUrl, id: Date.now() };
-        setProcesosData(procesosData.map(p => p.id === procesoId ? { ...p, enlaces:[...(p.enlaces||[]), newLink] } : p));
-        setNewProcesoLinkUrl(''); setNewProcesoLinkTitle(''); setEditingProcesoId(null);
-      };
-      const removeProcesoLink = (procesoId, linkId) => {
-        setProcesosData(procesosData.map(p => p.id === procesoId ? { ...p, enlaces:(p.enlaces||[]).filter(l => l.id !== linkId) } : p));
-      };
-      const handleDragStartProceso = (i) => setDraggedProcesoIndex(i);
-      const handleDragOverProceso = (e,i) => {
-        e.preventDefault();
-        if (draggedProcesoIndex === null || draggedProcesoIndex === i) return;
-        const items = [...procesosData];
-        const dragged = items[draggedProcesoIndex];
-        items.splice(draggedProcesoIndex,1);
-        items.splice(i,0,dragged);
-        setProcesosData(items);
-        setDraggedProcesoIndex(i);
-      };
-      const handleDragEndProceso = () => setDraggedProcesoIndex(null);
-      const saveProcesos = () => {
-        if (activeData.requiresCentro && activeCentro) {
-          setData(prev => ({
-            ...prev,
-            [activeSection]: {
-              ...prev[activeSection],
-              centrosData: {
-                ...prev[activeSection].centrosData,
-                [activeCentro]: {
-                  ...prev[activeSection].centrosData[activeCentro],
-                  procesosPersonalizados: procesosData
-                }
-              }
+      // Formaciones
+      const [formaciones, setFormaciones] = useState([]);
+      useEffect(()=>{ if(currentCentroData) setFormaciones(currentCentroData.formaciones); }, [activeCentro, activeSection]);
+      const saveFormaciones = ()=> {
+        setData(prev => ({
+          ...prev,
+          [activeSection]:{
+            ...prev[activeSection],
+            centrosData:{
+              ...prev[activeSection].centrosData,
+              [activeCentro]:{ ...prev[activeSection].centrosData[activeCentro], formaciones }
             }
-          }));
-        }
+          }
+        }));
       };
 
-      const sections = Object.entries(data).map(([key, value]) => ({ id:key, ...value }));
+      // Procesos
+      const [procesos, setProcesos] = useState([]);
+      useEffect(()=>{ if(currentCentroData) setProcesos(currentCentroData.procesos); }, [activeCentro, activeSection]);
 
-      // UI
+      const addProceso = ()=>{
+        const newId = Math.max(...procesos.map(p=>p.id),0)+1;
+        setProcesos([...procesos, {id:newId, nombrePaquete:'', descripcion:'', puntuacion:'', observaciones:'', fechaVisita:'', archivos:[], enlaces:[]}]);
+      };
+      const saveProcesos = ()=>{
+        setData(prev => ({
+          ...prev,
+          [activeSection]:{
+            ...prev[activeSection],
+            centrosData:{
+              ...prev[activeSection].centrosData,
+              [activeCentro]:{ ...prev[activeSection].centrosData[activeCentro], procesos }
+            }
+          }
+        }));
+      };
+
+      // Logo
+      const handleLogoUpload = (e)=>{
+        const f = e.target.files?.[0];
+        if(!f) return;
+        const r = new FileReader();
+        r.onload = ev => setLogoUrl(ev.target.result);
+        r.readAsDataURL(f);
+      };
+
+      // Añadir centro
+      const addNewCentro = ()=>{
+        if(!newCentro.nombre.trim()) return alert('Pon un nombre para el centro');
+        if(centros.length >= 12) return alert('Máximo 12 centros');
+
+        const newId = Math.max(...centros.map(c=>c.id),0)+1;
+        const color = coloresCentros[centros.length%coloresCentros.length];
+        const c = { id:newId, ...newCentro, color };
+        setCentros([...centros, c]);
+
+        setData(prev=>({
+          ...prev,
+          centros_exclusivos:{
+            ...prev.centros_exclusivos,
+            centrosData:{
+              ...prev.centros_exclusivos.centrosData,
+              [newId]: baseCentroData()
+            }
+          }
+        }));
+        setActiveCentro(newId);
+        setNewCentro({nombre:'',delegado:'',audiologo:'',franquiciaSucursal:''});
+        setShowCentroModal(false);
+      };
+
+      // Export: Backup JSON
+      const downloadBackup = ()=>{
+        const exportData = { data, logo:logoUrl, companyName };
+        const blob = new Blob([JSON.stringify(exportData,null,2)], {type:'application/json'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = 'audiologia_completo.json'; a.click();
+        URL.revokeObjectURL(url);
+      };
+
+      const iconMap = {
+        file: (p)=><FileText {...p}/>,
+        users:(p)=><Users {...p}/>,
+        head: (p)=><Headphones {...p}/>,
+        pack: (p)=><PackageI {...p}/>,
+        msg:  (p)=><Msg {...p}/>,
+        heart:(p)=><Heart {...p}/>
+      };
+
       return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200">
-          <div className="bg-white border-b-4 border-red-600 shadow-xl">
+        <div className="min-h-screen">
+          {/* HEADER */}
+          <div className="bg-white border-b-4 border-rose-600 shadow-xl">
             <div className="max-w-7xl mx-auto px-6 py-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   {logoUrl ? (
-                    <img src={logoUrl} alt="Logo" className="h-16 w-auto object-contain cursor-pointer hover:opacity-80 transition" onClick={() => setShowLogoModal(true)} />
+                    <img src={logoUrl} className="h-16 w-auto object-contain cursor-pointer" onClick={()=>setShowLogoModal(true)} alt="logo"/>
                   ) : (
-                    <div className="bg-gradient-to-br from-red-600 to-red-700 p-4 rounded-xl shadow-lg cursor-pointer hover:shadow-xl transition" onClick={() => setShowLogoModal(true)}>
-                      <Image className="w-8 h-8 text-white" />
-                    </div>
+                    <button onClick={()=>setShowLogoModal(true)} className="bg-gradient-to-br from-rose-600 to-rose-700 p-4 rounded-xl shadow-lg text-white">
+                      <UploadI className="w-6 h-6"/>
+                    </button>
                   )}
                   <div>
-                    <h1 className="text-3xl font-bold text-gray-800 cursor-pointer hover:text-red-600 transition" onClick={() => setShowLogoModal(true)}>
-                      {companyName}
-                    </h1>
-                    <p className="text-red-600 mt-1">Sistema de Gestión de Audiología</p>
+                    <h1 onClick={()=>setShowLogoModal(true)} className="text-3xl font-bold text-gray-800 cursor-pointer">{companyName}</h1>
+                    <p className="text-rose-600 mt-1">Sistema de Gestión de Audiología</p>
                   </div>
                 </div>
+
                 <div className="flex items-center gap-3">
                   <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                    <input
-                      type="text"
-                      placeholder="Buscar procedimientos..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10 pr-4 py-2 bg-white border-2 border-gray-300 text-gray-800 placeholder-gray-400 rounded-lg focus:border-red-600 focus:outline-none w-64"
-                    />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5"/>
+                    <input className="pl-10 pr-4 py-2 bg-white border-2 border-gray-300 rounded-lg focus:border-rose-600 outline-none w-64"
+                      placeholder="Buscar..." value={searchTerm} onChange={e=>setSearchTerm(e.target.value)} />
                   </div>
-                  <button onClick={() => setShowLogoModal(true)} className="flex items-center gap-2 bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-all shadow-md hover:shadow-lg">
-                    <Image className="w-5 h-5" /> Logo
+
+                  <button onClick={downloadBackup}
+                          className="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-lg shadow-md">
+                    💾 Backup
                   </button>
-                  <label className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-all shadow-md hover:shadow-lg cursor-pointer">
-                    <Upload className="w-5 h-5" /> Importar
-                    <input type="file" accept=".xlsx,.xls" className="hidden" />
-                  </label>
                 </div>
               </div>
             </div>
           </div>
 
+          {/* CONTENIDO */}
           <div className="max-w-7xl mx-auto px-6 py-8">
             <div className="grid grid-cols-12 gap-6">
-              <!-- Sidebar y contenido principal idénticos a la versión anterior, omitidos por brevedad
-                   (el código completo está funcional en esta plantilla). -->
-              <div className="col-span-12 text-gray-600">
-                Selecciona una sección y empieza a trabajar con tus centros, acciones, formaciones y procesos ✨
-              </div>
+              {/* SIDEBAR */}
+              <aside className="col-span-3">
+                <div className="bg-white rounded-xl shadow-lg p-4 border-l-4 border-rose-600">
+                  <h2 className="text-lg font-semibold text-gray-800 mb-3">Secciones</h2>
+                  <nav className="space-y-2">
+                    {sections.map(s=>{
+                      const IconC = iconMap[s.icon] || FileText;
+                      const isActive = activeSection===s.id;
+                      return (
+                        <div key={s.id}>
+                          <button
+                            onClick={()=>{
+                              setActiveSection(s.id);
+                              if(s.requiresCentro) setShowCentrosDropdown(true);
+                            }}
+                            className={`w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg transition-all ${
+                              isActive ? 'bg-rose-600 text-white shadow-md' : 'text-gray-700 bg-gray-50 hover:bg-gray-100'
+                            }`}
+                          >
+                            <span className="flex items-center gap-3">
+                              <IconC className="w-5 h-5"/>
+                              <span className="font-medium text-sm">{s.title}</span>
+                            </span>
+                            {s.requiresCentro && (isActive ? <ChevronDown/> : <ChevronRight/>)}
+                          </button>
+
+                          {isActive && s.requiresCentro && showCentrosDropdown && (
+                            <div className="ml-2 mt-1 bg-gray-100 rounded-lg p-2 border border-gray-200">
+                              <div className="space-y-1">
+                                {centros.map(c=>(
+                                  <button key={c.id}
+                                          onClick={()=>setActiveCentro(c.id)}
+                                          className={`w-full text-left px-2 py-1.5 rounded-md text-xs border-2 ${
+                                            activeCentro===c.id ? c.color : 'bg-white text-gray-700 border-gray-200 hover:border-gray-300'
+                                          }`}>
+                                    <div className="font-bold truncate">{c.nombre}</div>
+                                    <div className="text-xs opacity-75 truncate">👤 {c.delegado} | 🎧 {c.audiologo}</div>
+                                    <div className="text-xs opacity-75">📍 {c.franquiciaSucursal || '-'}</div>
+                                  </button>
+                                ))}
+                                {centros.length<12 && (
+                                  <button onClick={()=>setShowCentroModal(true)}
+                                          className="w-full flex items-center justify-center gap-1 px-2 py-1.5 bg-green-600 text-white rounded-md hover:bg-green-700 text-xs">
+                                    <Plus className="w-3 h-3"/> Añadir centro ({centros.length}/12)
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </nav>
+                </div>
+              </aside>
+
+              {/* MAIN */}
+              <main className="col-span-9">
+                <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-rose-600">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="bg-rose-600 p-3 rounded-lg text-white shadow-md">
+                      {(iconMap[activeData.icon] || FileText)({className:"w-6 h-6"})}
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold text-gray-800">{activeData.title}</h2>
+                      {activeData.requiresCentro && activeCentro && (
+                        <div className="mt-1"><Badge>{centros.find(c=>c.id===activeCentro)?.nombre}</Badge></div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Si no requiere centro puedes poner tu contenido aquí. Para este demo mostramos solo la parte de centros_exclusivos */}
+                  {activeData.requiresCentro ? (
+                    <>
+                      {/* ACCIONES-RESULTADO */}
+                      <section className="bg-gray-50 border-2 border-gray-200 rounded-lg p-5 mb-6">
+                        <div className="flex items-center justify-between mb-4">
+                          <h3 className="text-xl font-bold text-gray-800">Acciones-Resultado</h3>
+                          <div className="flex gap-2">
+                            <button onClick={addAccion} className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm flex items-center gap-1">
+                              <Plus className="w-4 h-4"/> Añadir
+                            </button>
+                            <button onClick={saveAcciones} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2">
+                              <Save className="w-4 h-4"/> Guardar
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="overflow-x-auto">
+                          <table className="w-full border-collapse bg-white rounded-lg overflow-hidden shadow-sm text-sm">
+                            <thead>
+                              <tr className="bg-rose-600 text-white">
+                                <th className="border px-2 py-2">#</th>
+                                <th className="border px-2 py-2">Fecha</th>
+                                <th className="border px-2 py-2">Acción</th>
+                                <th className="border px-2 py-2">Derivación</th>
+                                <th className="border px-2 py-2">Cita</th>
+                                <th className="border px-2 py-2">Observaciones</th>
+                                <th className="border px-2 py-2">❌</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {acciones
+                                .filter(a => (a.accion||'').toLowerCase().includes(searchTerm.toLowerCase()))
+                                .map((a,idx)=>(
+                                <tr key={a.id} className={`${(a.derivacion>0 && a.cita>0)?'bg-green-50':''}`}>
+                                  <td className="border px-2 py-1 text-center">{idx+1}</td>
+                                  <td className="border px-2 py-1">
+                                    <input type="date" value={a.fecha} onChange={e=>{
+                                      const v=e.target.value; setAcciones(prev=>prev.map(x=>x.id===a.id?{...x,fecha:v}:x));
+                                    }} className="w-full outline-none"/>
+                                  </td>
+                                  <td className="border px-2 py-1">
+                                    <input value={a.accion} onChange={e=>{
+                                      const v=e.target.value; setAcciones(prev=>prev.map(x=>x.id===a.id?{...x,accion:v}:x));
+                                    }} className="w-full outline-none" placeholder="Descripción..."/>
+                                  </td>
+                                  <td className="border px-2 py-1 text-center">
+                                    <input type="number" min="0" value={a.derivacion} onChange={e=>{
+                                      const v=parseInt(e.target.value)||0; setAcciones(prev=>prev.map(x=>x.id===a.id?{...x,derivacion:v}:x));
+                                    }} className="w-full outline-none text-center"/>
+                                  </td>
+                                  <td className="border px-2 py-1 text-center">
+                                    <input type="number" min="0" value={a.cita} onChange={e=>{
+                                      const v=parseInt(e.target.value)||0; setAcciones(prev=>prev.map(x=>x.id===a.id?{...x,cita:v}:x));
+                                    }} className="w-full outline-none text-center"/>
+                                  </td>
+                                  <td className="border px-2 py-1">
+                                    <input value={a.observaciones} onChange={e=>{
+                                      const v=e.target.value; setAcciones(prev=>prev.map(x=>x.id===a.id?{...x,observaciones:v}:x));
+                                    }} className="w-full outline-none" placeholder="Observaciones..."/>
+                                  </td>
+                                  <td className="border px-2 py-1 text-center">
+                                    <button onClick={()=>{
+                                      setAcciones(prev => prev.length>1 ? prev.filter(x=>x.id!==a.id) : prev);
+                                    }} className="text-rose-600 hover:bg-rose-50 rounded p-1"><X className="w-4 h-4"/></button>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </section>
+
+                      {/* FORMACIONES */}
+                      <section className="bg-gray-50 border-2 border-gray-200 rounded-lg p-5 mb-6">
+                        <div className="flex items-center justify-between mb-4">
+                          <h3 className="text-xl font-bold text-gray-800">Formación Continua</h3>
+                          <button onClick={saveFormaciones} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2">
+                            <Save className="w-4 h-4"/> Guardar
+                          </button>
+                        </div>
+                        <div className="overflow-x-auto">
+                          <table className="w-full border-collapse bg-white rounded-lg overflow-hidden shadow-sm text-sm">
+                            <thead>
+                              <tr className="bg-rose-600 text-white">
+                                <th className="border px-2 py-2">#</th>
+                                <th className="border px-2 py-2">Fecha</th>
+                                <th className="border px-2 py-2">Asistencia</th>
+                                <th className="border px-2 py-2">Título</th>
+                                <th className="border px-2 py-2">Aplicación</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {formaciones.map((f,idx)=>{
+                                const asiste = (f.asistencia||'').toLowerCase().startsWith('s');
+                                const aplica = !!(f.aplicacion||'').trim();
+                                const bg = asiste && aplica ? 'bg-green-50' : asiste ? 'bg-orange-50' : '';
+                                return (
+                                  <tr key={f.id} className={bg}>
+                                    <td className="border px-2 py-1 text-center">{idx+1}</td>
+                                    <td className="border px-2 py-1">
+                                      <input type="date" value={f.fecha} onChange={e=>{
+                                        const v=e.target.value; setFormaciones(prev=>prev.map(x=>x.id===f.id?{...x,fecha:v}:x));
+                                      }} className="w-full outline-none"/>
+                                    </td>
+                                    <td className="border px-2 py-1">
+                                      <select value={f.asistencia} onChange={e=>{
+                                        const v=e.target.value; setFormaciones(prev=>prev.map(x=>x.id===f.id?{...x,asistencia:v}:x));
+                                      }} className="w-full outline-none">
+                                        <option value=""></option>
+                                        <option value="SI">SI</option>
+                                        <option value="NO">NO</option>
+                                        <option value="Pendiente">Pendiente</option>
+                                      </select>
+                                    </td>
+                                    <td className="border px-2 py-1">
+                                      <input value={f.titulo} onChange={e=>{
+                                        const v=e.target.value; setFormaciones(prev=>prev.map(x=>x.id===f.id?{...x,titulo:v}:x));
+                                      }} className="w-full outline-none" placeholder="Nombre del curso..."/>
+                                    </td>
+                                    <td className="border px-2 py-1">
+                                      <input value={f.aplicacion} onChange={e=>{
+                                        const v=e.target.value; setFormaciones(prev=>prev.map(x=>x.id===f.id?{...x,aplicacion:v}:x));
+                                      }} className="w-full outline-none" placeholder="¿Cómo se aplicará? o SI/NO"/>
+                                    </td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
+                        <div className="mt-2 text-xs text-gray-600 flex gap-4">
+                          <span className="inline-flex items-center gap-1"><span className="w-3 h-3 bg-orange-100 border border-orange-300 inline-block rounded"></span> Asistencia: SI</span>
+                          <span className="inline-flex items-center gap-1"><span className="w-3 h-3 bg-green-100 border border-green-300 inline-block rounded"></span> Asistencia: SI + Aplicación</span>
+                        </div>
+                      </section>
+
+                      {/* PROCESOS */}
+                      <section className="bg-gray-50 border-2 border-gray-200 rounded-lg p-5">
+                        <div className="flex items-center justify-between mb-4">
+                          <h3 className="text-xl font-bold text-gray-800">Procesos y Paquetes Personalizados</h3>
+                          <div className="flex gap-2">
+                            <button onClick={addProceso} className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm flex items-center gap-1">
+                              <Plus className="w-4 h-4"/> Añadir
+                            </button>
+                            <button onClick={saveProcesos} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2">
+                              <Save className="w-4 h-4"/> Guardar
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="overflow-x-auto">
+                          <table className="w-full border-collapse bg-white rounded-lg overflow-hidden shadow-sm text-sm">
+                            <thead>
+                              <tr className="bg-rose-600 text-white">
+                                <th className="border px-2 py-2">#</th>
+                                <th className="border px-2 py-2">Nombre Paquete</th>
+                                <th className="border px-2 py-2">Descripción</th>
+                                <th className="border px-2 py-2">Puntuación</th>
+                                <th className="border px-2 py-2">Observaciones</th>
+                                <th className="border px-2 py-2">Fecha Visita</th>
+                                <th className="border px-2 py-2">❌</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {procesos.map((p,idx)=>(
+                                <tr key={p.id}>
+                                  <td className="border px-2 py-1 text-center">{idx+1}</td>
+                                  <td className="border px-2 py-1">
+                                    <input value={p.nombrePaquete} onChange={e=>{
+                                      const v=e.target.value; setProcesos(prev=>prev.map(x=>x.id===p.id?{...x,nombrePaquete:v}:x));
+                                    }} className="w-full outline-none font-semibold" placeholder="Nombre..."/>
+                                  </td>
+                                  <td className="border px-2 py-1">
+                                    <input value={p.descripcion} onChange={e=>{
+                                      const v=e.target.value; setProcesos(prev=>prev.map(x=>x.id===p.id?{...x,descripcion:v}:x));
+                                    }} className="w-full outline-none" placeholder="Descripción..."/>
+                                  </td>
+                                  <td className="border px-2 py-1 text-center">
+                                    <input value={p.puntuacion} onChange={e=>{
+                                      const v=e.target.value; setProcesos(prev=>prev.map(x=>x.id===p.id?{...x,puntuacion:v}:x));
+                                    }} className="w-full outline-none text-center" placeholder="Ej: 8/10"/>
+                                  </td>
+                                  <td className="border px-2 py-1">
+                                    <input value={p.observaciones} onChange={e=>{
+                                      const v=e.target.value; setProcesos(prev=>prev.map(x=>x.id===p.id?{...x,observaciones:v}:x));
+                                    }} className="w-full outline-none" placeholder="Observaciones..."/>
+                                  </td>
+                                  <td className="border px-2 py-1">
+                                    <input type="date" value={p.fechaVisita} onChange={e=>{
+                                      const v=e.target.value; setProcesos(prev=>prev.map(x=>x.id===p.id?{...x,fechaVisita:v}:x));
+                                    }} className="w-full outline-none"/>
+                                  </td>
+                                  <td className="border px-2 py-1 text-center">
+                                    <button onClick={()=>{
+                                      setProcesos(prev => prev.length>1 ? prev.filter(x=>x.id!==p.id) : prev);
+                                    }} className="text-rose-600 hover:bg-rose-50 rounded p-1"><X className="w-4 h-4"/></button>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </section>
+                    </>
+                  ) : (
+                    <div className="text-gray-500">Sección informativa. (Este demo concentra la funcionalidad en “Centros Exclusivos”).</div>
+                  )}
+                </div>
+              </main>
             </div>
           </div>
 
+          {/* MODAL LOGO */}
           {showLogoModal && (
-            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-              <div className="bg-white rounded-xl p-6 border-2 border-red-600 shadow-2xl max-w-md w-full mx-4">
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-xl p-6 border-2 border-rose-600 shadow-2xl max-w-md w-full mx-4">
                 <h3 className="text-2xl font-bold text-gray-800 mb-4">Personalizar Marca</h3>
                 <div className="mb-4">
                   <label className="text-gray-700 font-semibold block mb-2">Nombre de la Empresa</label>
-                  <input type="text" value={companyName} onChange={(e)=>setCompanyName(e.target.value)} className="w-full bg-white text-gray-800 border-2 border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-red-600"/>
+                  <input value={companyName} onChange={e=>setCompanyName(e.target.value)}
+                         className="w-full bg-white text-gray-800 border-2 border-gray-300 rounded-lg px-4 py-3 focus:border-rose-600 outline-none"/>
                 </div>
                 <div className="mb-4">
                   <label className="text-gray-700 font-semibold block mb-2">Logo Corporativo</label>
-                  {logoUrl && (<div className="mb-3 flex justify-center"><img src={logoUrl} alt="Logo Preview" className="max-h-32 object-contain"/></div>)}
-                  <label className="flex items-center justify-center gap-2 bg-red-600 text-white px-4 py-3 rounded-lg hover:bg-red-700 transition-all cursor-pointer">
-                    <Upload className="w-5 h-5" /> {logoUrl ? 'Cambiar Logo' : 'Subir Logo'}
-                    <input type="file" accept="image/*" onChange={(e)=>{const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=(ev)=>setLogoUrl(ev.target.result); r.readAsDataURL(f);}} className="hidden"/>
+                  {logoUrl && <div className="mb-3 flex justify-center"><img src={logoUrl} className="max-h-32 object-contain" alt="preview"/></div>}
+                  <label className="flex items-center justify-center gap-2 bg-rose-600 text-white px-4 py-3 rounded-lg hover:bg-rose-700 cursor-pointer">
+                    <UploadI className="w-5 h-5"/> {logoUrl?'Cambiar Logo':'Subir Logo'}
+                    <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden"/>
                   </label>
                 </div>
                 <div className="flex gap-3">
-                  <button onClick={()=>setShowLogoModal(false)} className="flex-1 bg-red-600 text-white px-4 py-3 rounded-lg hover:bg-red-700 transition-all shadow-md font-semibold">Guardar</button>
-                  <button onClick={()=>setShowLogoModal(false)} className="flex-1 bg-gray-300 text-gray-700 px-4 py-3 rounded-lg hover:bg-gray-400 transition-all font-semibold">Cancelar</button>
+                  <button onClick={()=>setShowLogoModal(false)} className="flex-1 bg-rose-600 text-white px-4 py-3 rounded-lg hover:bg-rose-700">Guardar</button>
+                  <button onClick={()=>setShowLogoModal(false)} className="flex-1 bg-gray-300 text-gray-700 px-4 py-3 rounded-lg hover:bg-gray-400">Cancelar</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* MODAL NUEVO CENTRO */}
+          {showCentroModal && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-xl p-6 border-2 border-rose-600 shadow-2xl max-w-md w-full mx-4">
+                <h3 className="text-2xl font-bold text-gray-800 mb-2">Añadir Nuevo Centro</h3>
+                <p className="text-sm text-gray-600 mb-4">Total: {centros.length}/12</p>
+
+                <div className="space-y-3 text-sm">
+                  <div>
+                    <label className="font-semibold block mb-1">Nombre *</label>
+                    <input className="w-full border-2 rounded-lg px-3 py-2 focus:border-rose-600 outline-none"
+                           value={newCentro.nombre} onChange={e=>setNewCentro(v=>({...v, nombre:e.target.value}))}/>
+                  </div>
+                  <div>
+                    <label className="font-semibold block mb-1">Delegado *</label>
+                    <input className="w-full border-2 rounded-lg px-3 py-2 focus:border-rose-600 outline-none"
+                           value={newCentro.delegado} onChange={e=>setNewCentro(v=>({...v, delegado:e.target.value}))}/>
+                  </div>
+                  <div>
+                    <label className="font-semibold block mb-1">Audiólogo *</label>
+                    <input className="w-full border-2 rounded-lg px-3 py-2 focus:border-rose-600 outline-none"
+                           value={newCentro.audiologo} onChange={e=>setNewCentro(v=>({...v, audiologo:e.target.value}))}/>
+                  </div>
+                  <div>
+                    <label className="font-semibold block mb-1">Tipo *</label>
+                    <select className="w-full border-2 rounded-lg px-3 py-2 focus:border-rose-600 outline-none"
+                            value={newCentro.franquiciaSucursal}
+                            onChange={e=>setNewCentro(v=>({...v, franquiciaSucursal:e.target.value}))}>
+                      <option value="">Seleccionar...</option>
+                      <option value="Franquicia">Franquicia</option>
+                      <option value="Sucursal">Sucursal</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="flex gap-3 mt-6">
+                  <button onClick={addNewCentro} className="flex-1 bg-rose-600 text-white px-4 py-3 rounded-lg hover:bg-rose-700">Añadir Centro</button>
+                  <button onClick={()=>{ setShowCentroModal(false); setNewCentro({nombre:'',delegado:'',audiologo:'',franquiciaSucursal:''}); }}
+                          className="flex-1 bg-gray-300 text-gray-700 px-4 py-3 rounded-lg hover:bg-gray-400">Cancelar</button>
                 </div>
               </div>
             </div>
           )}
         </div>
       );
-    };
+    }
 
     const root = ReactDOM.createRoot(document.getElementById('root'));
     root.render(<AudiologiaApp />);
