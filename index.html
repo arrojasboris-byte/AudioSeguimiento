@@ -3,23 +3,36 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>AudioSeguimiento</title>
+  <title>AUDIOLOGIA-SEGUIMIENTO</title>
   <!-- Tailwind (CDN) -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- React 18 + ReactDOM (UMD) -->
   <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
-  <!-- Babel para poder usar JSX en el navegador -->
+  <!-- Babel para JSX -->
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    html,body,#root{min-height:100%}
+  </style>
 </head>
 <body class="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200">
-
   <div id="root"></div>
 
   <script type="text/babel">
-    const { useState, useEffect } = React;
+    const { useState, useEffect, useRef } = React;
 
-    /* === ICONOS MUY LIGEROS === */
+    /* ===== Utiles de almacenamiento (sin PIN) ===== */
+    const LS_KEY = "audioseguimiento_state_v2";
+    const saveToLocal = (state) => {
+      try { localStorage.setItem(LS_KEY, JSON.stringify(state)); return true; }
+      catch(e){ console.error(e); return false; }
+    };
+    const loadFromLocal = () => {
+      try { const raw = localStorage.getItem(LS_KEY); return raw ? JSON.parse(raw) : null; }
+      catch(e){ console.error(e); return null; }
+    };
+
+    /* ===== ICONOS (ligeros) ===== */
     const Icon = ({d, className="w-5 h-5"}) => (
       <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={d}/>
@@ -28,9 +41,9 @@
     const ChevronRight = (p)=> <Icon {...p} d="M9 5l7 7-7 7" />;
     const ChevronDown  = (p)=> <Icon {...p} d="M19 9l-7 7-7-7" />;
     const Plus         = (p)=> <Icon {...p} d="M12 4v16m8-8H4" />;
-    const Save         = (p)=> <Icon {...p} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />;
+    const SaveI        = (p)=> <Icon {...p} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />;
     const X            = (p)=> <Icon {...p} d="M6 18L18 6M6 6l12 12" />;
-    const Search       = (p)=> <Icon {...p} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />;
+    const SearchI      = (p)=> <Icon {...p} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />;
     const FileText     = (p)=> <Icon {...p} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414A1 1 0 0119 9v10a2 2 0 01-2 2z" />;
     const Users        = (p)=> <Icon {...p} d="M17 20h5v-1a6 6 0 00-9-5.197M9 20H4v-1a6 6 0 0111.472-1.33M15 7a4 4 0 11-8 0 4 4 0 018 0z" />;
     const Headphones   = (p)=> <Icon {...p} d="M4 13a8 8 0 1116 0v5a3 3 0 01-3 3h-1v-7h4M4 18v-5a8 8 0 018-8" />;
@@ -38,43 +51,59 @@
     const Msg          = (p)=> <Icon {...p} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />;
     const Heart        = (p)=> <Icon {...p} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />;
     const UploadI      = (p)=> <Icon {...p} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M12 12V4m0 8l-4-4m4 4l4-4" />;
+    const PencilI      = (p)=> <Icon {...p} d="M15.232 5.232l3.536 3.536M4 20h4l11-11a2.5 2.5 0 10-3.536-3.536L4 16v4z" />;
+    const TrashI       = (p)=> <Icon {...p} d="M19 7l-1 12a2 2 0 01-2 2H8a2 2 0 01-2-2L5 7m14 0H5m14 0h-3m-8 0H5m3 0l1-2h6l1 2M10 11v6m4-6v6" />;
 
-    function Badge({children}) {
-      return <span className="inline-block px-3 py-1 rounded-lg text-sm font-semibold border-2 bg-gray-100 border-gray-300 text-gray-800">{children}</span>;
+    const Badge = ({children}) =>
+      <span className="inline-block px-3 py-1 rounded-lg text-sm font-semibold border-2 bg-gray-100 border-gray-300 text-gray-800">{children}</span>;
+
+    /* ===== Acordeón simple ===== */
+    function Accordion({title, open, onToggle, children}) {
+      return (
+        <div className="bg-gray-50 border-2 border-gray-200 rounded-lg">
+          <button onClick={onToggle}
+                  className="w-full flex items-center justify-between px-4 py-3">
+            <span className="text-lg font-bold text-gray-800">{title}</span>
+            {open ? <ChevronDown/> : <ChevronRight/>}
+          </button>
+          {open && <div className="px-5 pb-5">{children}</div>}
+        </div>
+      );
     }
 
-    function AudiologiaApp(){
+    /* ===== App ===== */
+    function App(){
+      // Estado base
       const [activeSection, setActiveSection] = useState('centros_exclusivos');
       const [activeCentro, setActiveCentro]   = useState(1);
       const [searchTerm, setSearchTerm]       = useState('');
       const [logoUrl, setLogoUrl]             = useState('');
-      const [companyName, setCompanyName]     = useState('AUDIOLOGÍA');
+      const [companyName, setCompanyName]     = useState('AUDIOLOGIA-SEGUIMIENTO');
       const [showLogoModal, setShowLogoModal] = useState(false);
-      const [showCentroModal, setShowCentroModal] = useState(false);
       const [showCentrosDropdown, setShowCentrosDropdown] = useState(true);
+
+      const [showCentroModal, setShowCentroModal] = useState(false);
+      const [editCentroModal, setEditCentroModal] = useState({open:false, centro:null});
+      const [newCentro, setNewCentro] = useState({nombre:'',delegado:'',audiologo:'',franquiciaSucursal:''});
+      const autosaveRef = useRef(null);
 
       // Centros
       const coloresCentros = [
-        'bg-blue-100 border-blue-400 text-blue-800',
-        'bg-green-100 border-green-400 text-green-800',
-        'bg-purple-100 border-purple-400 text-purple-800',
-        'bg-orange-100 border-orange-400 text-orange-800',
-        'bg-pink-100 border-pink-400 text-pink-800',
-        'bg-indigo-100 border-indigo-400 text-indigo-800',
-        'bg-yellow-100 border-yellow-400 text-yellow-800',
-        'bg-red-100 border-red-400 text-red-800',
+        'bg-blue-100 border-blue-400 text-blue-800','bg-green-100 border-green-400 text-green-800',
+        'bg-purple-100 border-purple-400 text-purple-800','bg-orange-100 border-orange-400 text-orange-800',
+        'bg-pink-100 border-pink-400 text-pink-800','bg-indigo-100 border-indigo-400 text-indigo-800',
+        'bg-yellow-100 border-yellow-400 text-yellow-800','bg-red-100 border-red-400 text-red-800'
       ];
       const [centros,setCentros] = useState([
         { id:1, nombre:'Centro Madrid Norte', delegado:'Ana Martínez', audiologo:'Dr. García', franquiciaSucursal:'Franquicia', color:coloresCentros[0]},
         { id:2, nombre:'Centro Barcelona Centro', delegado:'Carlos Ruiz', audiologo:'Dra. López', franquiciaSucursal:'Sucursal', color:coloresCentros[1]},
       ]);
-      const [newCentro, setNewCentro] = useState({nombre:'',delegado:'',audiologo:'',franquiciaSucursal:''});
 
       // Datos por sección
       const baseCentroData = () => ({
         accionesResultado: [{ id:1, fecha:'', accion:'', derivacion:0, cita:0, observaciones:'' }],
         formaciones: Array.from({length:10},(_,i)=>({ id:i+1, fecha:'', asistencia:'', titulo:'', aplicacion:'' })),
-        procesos: [{ id:1, nombrePaquete:'', descripcion:'', puntuacion:'', observaciones:'', fechaVisita:'', archivos:[], enlaces:[] }],
+        procesos: [{ id:1, nombrePaquete:'', descripcion:'', puntuacion:'', observaciones:'', fechaVisita:'' }],
       });
 
       const [data,setData] = useState({
@@ -92,135 +121,220 @@
 
       const sections = Object.entries(data).map(([id, v]) => ({id, ...v}));
       const activeData = data[activeSection];
+      const iconMap = {
+        file:(p)=><FileText {...p}/>, users:(p)=><Users {...p}/>, head:(p)=><Headphones {...p}/>,
+        pack:(p)=><PackageI {...p}/>, msg:(p)=><Msg {...p}/>, heart:(p)=><Heart {...p}/>
+      };
 
-      const getCentroData = () => {
-        if(!activeData.requiresCentro) return null;
-        const cd = activeData.centrosData[activeCentro];
-        if(!cd){ // inicializa en caliente si falta
-          setData(prev => ({
-            ...prev,
-            [activeSection]:{
-              ...prev[activeSection],
-              centrosData:{ ...prev[activeSection].centrosData, [activeCentro]: baseCentroData() }
-            }
-          }));
-          return baseCentroData();
+      // Cargar snapshot
+      useEffect(()=>{
+        const snap = loadFromLocal();
+        if(snap){
+          try{
+            setActiveSection(snap.activeSection || 'centros_exclusivos');
+            setActiveCentro(snap.activeCentro || 1);
+            setLogoUrl(snap.logoUrl || '');
+            setCompanyName(snap.companyName || 'AUDIOLOGIA-SEGUIMIENTO');
+            setCentros(snap.centros || centros);
+            setData(snap.data || data);
+          }catch(e){ console.warn("No se pudo restaurar snapshot:", e); }
         }
-        return cd;
-      };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+      }, []);
 
-      const currentCentroData = getCentroData();
-
-      // Acciones-Resultado
-      const [acciones, setAcciones] = useState([]);
-      useEffect(()=>{ if(currentCentroData) setAcciones(currentCentroData.accionesResultado); }, [activeCentro, activeSection]);
-
-      const addAccion = ()=> {
-        const newId = Math.max(...acciones.map(a=>a.id),0)+1;
-        setAcciones([...acciones, {id:newId, fecha:'', accion:'', derivacion:0, cita:0, observaciones:''}]);
+      // Autosave cada 2s
+      const touch = ()=>{
+        if(autosaveRef.current) clearTimeout(autosaveRef.current);
+        autosaveRef.current = setTimeout(()=>{
+          saveToLocal({activeSection, activeCentro, logoUrl, companyName, centros, data});
+        }, 2000);
       };
-      const saveAcciones = ()=> {
-        setData(prev => ({
-          ...prev,
-          [activeSection]:{
-            ...prev[activeSection],
-            centrosData:{
-              ...prev[activeSection].centrosData,
-              [activeCentro]:{ ...prev[activeSection].centrosData[activeCentro], accionesResultado: acciones }
-            }
-          }
-        }));
-      };
-
-      // Formaciones
-      const [formaciones, setFormaciones] = useState([]);
-      useEffect(()=>{ if(currentCentroData) setFormaciones(currentCentroData.formaciones); }, [activeCentro, activeSection]);
-      const saveFormaciones = ()=> {
-        setData(prev => ({
-          ...prev,
-          [activeSection]:{
-            ...prev[activeSection],
-            centrosData:{
-              ...prev[activeSection].centrosData,
-              [activeCentro]:{ ...prev[activeSection].centrosData[activeCentro], formaciones }
-            }
-          }
-        }));
-      };
-
-      // Procesos
-      const [procesos, setProcesos] = useState([]);
-      useEffect(()=>{ if(currentCentroData) setProcesos(currentCentroData.procesos); }, [activeCentro, activeSection]);
-
-      const addProceso = ()=>{
-        const newId = Math.max(...procesos.map(p=>p.id),0)+1;
-        setProcesos([...procesos, {id:newId, nombrePaquete:'', descripcion:'', puntuacion:'', observaciones:'', fechaVisita:'', archivos:[], enlaces:[]}]);
-      };
-      const saveProcesos = ()=>{
-        setData(prev => ({
-          ...prev,
-          [activeSection]:{
-            ...prev[activeSection],
-            centrosData:{
-              ...prev[activeSection].centrosData,
-              [activeCentro]:{ ...prev[activeSection].centrosData[activeCentro], procesos }
-            }
-          }
-        }));
-      };
+      useEffect(()=>{ touch(); }, [activeSection, activeCentro, logoUrl, companyName, centros, data]);
 
       // Logo
       const handleLogoUpload = (e)=>{
         const f = e.target.files?.[0];
         if(!f) return;
         const r = new FileReader();
-        r.onload = ev => setLogoUrl(ev.target.result);
+        r.onload = ev => { setLogoUrl(ev.target.result); touch(); };
         r.readAsDataURL(f);
       };
 
-      // Añadir centro
+      // Guardar ahora / Exportar / Importar
+      const guardadoManual = ()=>{
+        const ok = saveToLocal({activeSection, activeCentro, logoUrl, companyName, centros, data});
+        alert(ok ? "Guardado local actualizado." : "Error guardando en este navegador.");
+      };
+      const exportBackup = ()=>{
+        const exportData = { activeSection, activeCentro, logoUrl, companyName, centros, data, when:new Date().toISOString() };
+        const blob = new Blob([JSON.stringify(exportData,null,2)], {type:'application/json'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = 'audiologia_backup.json'; a.click();
+        URL.revokeObjectURL(url);
+      };
+      const importBackup = (file)=>{
+        if(!file) return;
+        const r = new FileReader();
+        r.onload = ev => {
+          try {
+            const obj = JSON.parse(ev.target.result);
+            setActiveSection(obj.activeSection || 'centros_exclusivos');
+            setActiveCentro(obj.activeCentro || 1);
+            setLogoUrl(obj.logoUrl || '');
+            setCompanyName(obj.companyName || 'AUDIOLOGIA-SEGUIMIENTO');
+            setCentros(obj.centros || centros);
+            setData(obj.data || data);
+            saveToLocal({...obj});
+            alert('Backup restaurado correctamente.');
+          } catch(e) { alert('Archivo inválido.'); }
+        };
+        r.readAsText(file);
+      };
+
+      // Datos centro activo
+      const getCentroData = () => {
+        if(!activeData.requiresCentro) return null;
+        const cd = activeData.centrosData[activeCentro];
+        if(!cd){
+          const init = baseCentroData();
+          setData(prev => ({
+            ...prev,
+            [activeSection]:{
+              ...prev[activeSection],
+              centrosData:{ ...prev[activeSection].centrosData, [activeCentro]: init }
+            }
+          }));
+          return init;
+        }
+        return cd;
+      };
+      const currentCentroData = getCentroData() || {};
+
+      // Acordeones
+      const [openAcc, setOpenAcc] = useState(false);
+      const [openForm, setOpenForm] = useState(false);
+      const [openProc, setOpenProc] = useState(false);
+
+      // CRUD Acciones
+      const acciones = currentCentroData.accionesResultado || [];
+      const setAcciones = (arr)=>{
+        setData(prev => ({
+          ...prev,
+          [activeSection]:{
+            ...prev[activeSection],
+            centrosData:{ 
+              ...prev[activeSection].centrosData,
+              [activeCentro]: { ...prev[activeSection].centrosData[activeCentro], accionesResultado: arr }
+            }
+          }
+        }));
+        touch();
+      };
+      const addAccion = ()=>{
+        const newId = Math.max(...acciones.map(a=>a.id),0)+1;
+        setAcciones([...acciones, {id:newId, fecha:'', accion:'', derivacion:0, cita:0, observaciones:''}]);
+      };
+
+      // CRUD Formaciones
+      const formaciones = currentCentroData.formaciones || [];
+      const setFormaciones = (arr)=>{
+        setData(prev => ({
+          ...prev,
+          [activeSection]:{
+            ...prev[activeSection],
+            centrosData:{ 
+              ...prev[activeSection].centrosData,
+              [activeCentro]: { ...prev[activeSection].centrosData[activeCentro], formaciones: arr }
+            }
+          }
+        }));
+        touch();
+      };
+
+      // CRUD Procesos
+      const procesos = currentCentroData.procesos || [];
+      const setProcesos = (arr)=>{
+        setData(prev => ({
+          ...prev,
+          [activeSection]:{
+            ...prev[activeSection],
+            centrosData:{ 
+              ...prev[activeSection].centrosData,
+              [activeCentro]: { ...prev[activeSection].centrosData[activeCentro], procesos: arr }
+            }
+          }
+        }));
+        touch();
+      };
+      const addProceso = ()=>{
+        const newId = Math.max(...procesos.map(p=>p.id),0)+1;
+        setProcesos([...procesos, {id:newId, nombrePaquete:'', descripcion:'', puntuacion:'', observaciones:'', fechaVisita:''}]);
+      };
+
+      // Centros: añadir / editar / eliminar
       const addNewCentro = ()=>{
         if(!newCentro.nombre.trim()) return alert('Pon un nombre para el centro');
         if(centros.length >= 12) return alert('Máximo 12 centros');
-
         const newId = Math.max(...centros.map(c=>c.id),0)+1;
         const color = coloresCentros[centros.length%coloresCentros.length];
         const c = { id:newId, ...newCentro, color };
         setCentros([...centros, c]);
-
+        // inicializar data para el nuevo centro
         setData(prev=>({
           ...prev,
           centros_exclusivos:{
             ...prev.centros_exclusivos,
-            centrosData:{
-              ...prev.centros_exclusivos.centrosData,
-              [newId]: baseCentroData()
-            }
+            centrosData:{ ...prev.centros_exclusivos.centrosData, [newId]: baseCentroData() }
           }
         }));
         setActiveCentro(newId);
         setNewCentro({nombre:'',delegado:'',audiologo:'',franquiciaSucursal:''});
         setShowCentroModal(false);
+        touch();
       };
 
-      // Export: Backup JSON
-      const downloadBackup = ()=>{
-        const exportData = { data, logo:logoUrl, companyName };
-        const blob = new Blob([JSON.stringify(exportData,null,2)], {type:'application/json'});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url; a.download = 'audiologia_completo.json'; a.click();
-        URL.revokeObjectURL(url);
+      const startEditCentro = (centro)=>{
+        setEditCentroModal({open:true, centro:{...centro}});
+      };
+      const saveEditCentro = ()=>{
+        const c = editCentroModal.centro;
+        setCentros(prev => prev.map(x => x.id===c.id ? c : x));
+        setEditCentroModal({open:false, centro:null});
+        touch();
+      };
+      const deleteCentro = (id)=>{
+        if(!confirm('¿Eliminar este centro?')) return;
+        setCentros(prev => prev.filter(c=>c.id!==id));
+        // también borrar sus datos
+        setData(prev=>{
+          const copy = {...prev.centros_exclusivos.centrosData};
+          delete copy[id];
+          return {
+            ...prev,
+            centros_exclusivos: { ...prev.centros_exclusivos, centrosData: copy }
+          };
+        });
+        if(activeCentro===id){
+          const rest = centros.filter(c=>c.id!==id);
+          setActiveCentro(rest[0]?.id || null);
+        }
+        touch();
       };
 
-      const iconMap = {
-        file: (p)=><FileText {...p}/>,
-        users:(p)=><Users {...p}/>,
-        head: (p)=><Headphones {...p}/>,
-        pack: (p)=><PackageI {...p}/>,
-        msg:  (p)=><Msg {...p}/>,
-        heart:(p)=><Heart {...p}/>
-      };
+      // Buscar: filtra en la sección activa y sus componentes
+      const q = (searchTerm||'').trim().toLowerCase();
+      const filterText = (txt)=> (txt||'').toLowerCase().includes(q);
+      const accionesFiltradas = q ? acciones.filter(a =>
+        filterText(a.accion) || filterText(a.observaciones) || filterText(a.fecha) ||
+        String(a.derivacion).includes(q) || String(a.cita).includes(q)
+      ) : acciones;
+      const formacionesFiltradas = q ? formaciones.filter(f =>
+        filterText(f.titulo) || filterText(f.aplicacion) || filterText(f.asistencia) || filterText(f.fecha)
+      ) : formaciones;
+      const procesosFiltrados = q ? procesos.filter(p =>
+        filterText(p.nombrePaquete) || filterText(p.descripcion) || filterText(p.puntuacion) || filterText(p.observaciones) || filterText(p.fechaVisita)
+      ) : procesos;
 
       return (
         <div className="min-h-screen">
@@ -237,22 +351,34 @@
                     </button>
                   )}
                   <div>
-                    <h1 onClick={()=>setShowLogoModal(true)} className="text-3xl font-bold text-gray-800 cursor-pointer">{companyName}</h1>
+                    <h1 onClick={()=>setShowLogoModal(true)} className="text-3xl font-bold text-gray-800 cursor-pointer">AUDIOLOGIA-SEGUIMIENTO</h1>
                     <p className="text-rose-600 mt-1">Sistema de Gestión de Audiología</p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5"/>
-                    <input className="pl-10 pr-4 py-2 bg-white border-2 border-gray-300 rounded-lg focus:border-rose-600 outline-none w-64"
-                      placeholder="Buscar..." value={searchTerm} onChange={e=>setSearchTerm(e.target.value)} />
+                <div className="flex items-center gap-2">
+                  <div className="relative mr-2">
+                    <SearchI className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5"/>
+                    <input className="pl-10 pr-4 py-2 bg-white border-2 border-gray-300 rounded-lg focus:border-rose-600 outline-none w-72"
+                      placeholder="Buscar en la sección (centros, acciones, formación, procesos)..."
+                      value={searchTerm} onChange={e=>setSearchTerm(e.target.value)} />
                   </div>
 
-                  <button onClick={downloadBackup}
-                          className="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-lg shadow-md">
-                    💾 Backup
+                  <button onClick={guardadoManual}
+                          className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg shadow-md text-sm">
+                    <SaveI className="w-4 h-4"/> Guardar ahora
                   </button>
+
+                  <button onClick={exportBackup}
+                          className="flex items-center gap-2 bg-rose-600 hover:bg-rose-700 text-white px-3 py-2 rounded-lg shadow-md text-sm">
+                    💾 Exportar
+                  </button>
+
+                  <label className="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg shadow-md text-sm">
+                    Restaurar
+                    <input type="file" accept=".json" className="hidden"
+                           onChange={(e)=>{ importBackup(e.target.files?.[0]); e.target.value=''; }} />
+                  </label>
                 </div>
               </div>
             </div>
@@ -287,27 +413,51 @@
                             {s.requiresCentro && (isActive ? <ChevronDown/> : <ChevronRight/>)}
                           </button>
 
-                          {isActive && s.requiresCentro && showCentrosDropdown && (
-                            <div className="ml-2 mt-1 bg-gray-100 rounded-lg p-2 border border-gray-200">
-                              <div className="space-y-1">
-                                {centros.map(c=>(
-                                  <button key={c.id}
-                                          onClick={()=>setActiveCentro(c.id)}
-                                          className={`w-full text-left px-2 py-1.5 rounded-md text-xs border-2 ${
-                                            activeCentro===c.id ? c.color : 'bg-white text-gray-700 border-gray-200 hover:border-gray-300'
-                                          }`}>
-                                    <div className="font-bold truncate">{c.nombre}</div>
-                                    <div className="text-xs opacity-75 truncate">👤 {c.delegado} | 🎧 {c.audiologo}</div>
-                                    <div className="text-xs opacity-75">📍 {c.franquiciaSucursal || '-'}</div>
-                                  </button>
-                                ))}
-                                {centros.length<12 && (
-                                  <button onClick={()=>setShowCentroModal(true)}
-                                          className="w-full flex items-center justify-center gap-1 px-2 py-1.5 bg-green-600 text-white rounded-md hover:bg-green-700 text-xs">
-                                    <Plus className="w-3 h-3"/> Añadir centro ({centros.length}/12)
-                                  </button>
-                                )}
-                              </div>
+                          {/* Centros desplegables + editar/eliminar */}
+                          {isActive && s.requiresCentro && (
+                            <div className="mt-2 ml-2">
+                              <button
+                                onClick={()=>setShowCentrosDropdown(v=>!v)}
+                                className="text-xs text-gray-600 hover:text-gray-800 underline mb-2"
+                              >
+                                {showCentrosDropdown ? 'Ocultar centros' : 'Mostrar centros'}
+                              </button>
+
+                              {showCentrosDropdown && (
+                                <div className="bg-gray-100 rounded-lg p-2 border border-gray-200 space-y-1">
+                                  {centros
+                                    .filter(c => {
+                                      // que el buscador también encuentre centros por nombre/delegado/audiólogo
+                                      if(!q) return true;
+                                      return (c.nombre+c.delegado+c.audiologo+(c.franquiciaSucursal||'')).toLowerCase().includes(q);
+                                    })
+                                    .map(c=>(
+                                    <div key={c.id} className="flex items-center gap-1">
+                                      <button
+                                        onClick={()=> setActiveCentro(c.id)}
+                                        className={`flex-1 text-left px-2 py-1.5 rounded-md text-xs border-2 ${
+                                          activeCentro===c.id ? c.color : 'bg-white text-gray-700 border-gray-200 hover:border-gray-300'
+                                        }`}>
+                                        <div className="font-bold truncate">{c.nombre}</div>
+                                        <div className="text-xs opacity-75 truncate">👤 {c.delegado} | 🎧 {c.audiologo}</div>
+                                        <div className="text-xs opacity-75">📍 {c.franquiciaSucursal || '-'}</div>
+                                      </button>
+                                      <button onClick={()=>startEditCentro(c)} className="p-1 bg-blue-500 hover:bg-blue-600 text-white rounded" title="Editar">
+                                        <PencilI className="w-3 h-3"/>
+                                      </button>
+                                      <button onClick={()=>deleteCentro(c.id)} className="p-1 bg-red-500 hover:bg-red-600 text-white rounded" title="Eliminar">
+                                        <TrashI className="w-3 h-3"/>
+                                      </button>
+                                    </div>
+                                  ))}
+                                  {centros.length<12 && (
+                                    <button onClick={()=>setShowCentroModal(true)}
+                                            className="w-full flex items-center justify-center gap-1 px-2 py-1.5 bg-green-600 text-white rounded-md hover:bg-green-700 text-xs">
+                                      <Plus className="w-3 h-3"/> Añadir centro ({centros.length}/12)
+                                    </button>
+                                  )}
+                                </div>
+                              )}
                             </div>
                           )}
                         </div>
@@ -332,23 +482,21 @@
                     </div>
                   </div>
 
-                  {/* Si no requiere centro puedes poner tu contenido aquí. Para este demo mostramos solo la parte de centros_exclusivos */}
                   {activeData.requiresCentro ? (
-                    <>
-                      {/* ACCIONES-RESULTADO */}
-                      <section className="bg-gray-50 border-2 border-gray-200 rounded-lg p-5 mb-6">
-                        <div className="flex items-center justify-between mb-4">
-                          <h3 className="text-xl font-bold text-gray-800">Acciones-Resultado</h3>
+                    <div className="space-y-4">
+                      {/* ACCIONES-RESULTADO (acordeón) */}
+                      <Accordion title={`Acciones-Resultado (${accionesFiltradas.length})`} open={openAcc} onToggle={()=>setOpenAcc(v=>!v)}>
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="text-sm text-gray-500">Muestra resultados filtrados por el buscador.</div>
                           <div className="flex gap-2">
                             <button onClick={addAccion} className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm flex items-center gap-1">
                               <Plus className="w-4 h-4"/> Añadir
                             </button>
-                            <button onClick={saveAcciones} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2">
-                              <Save className="w-4 h-4"/> Guardar
+                            <button onClick={()=>guardadoManual()} className="px-3 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 text-sm flex items-center gap-1">
+                              <SaveI className="w-4 h-4"/> Guardar ahora
                             </button>
                           </div>
                         </div>
-
                         <div className="overflow-x-auto">
                           <table className="w-full border-collapse bg-white rounded-lg overflow-hidden shadow-sm text-sm">
                             <thead>
@@ -363,39 +511,42 @@
                               </tr>
                             </thead>
                             <tbody>
-                              {acciones
-                                .filter(a => (a.accion||'').toLowerCase().includes(searchTerm.toLowerCase()))
-                                .map((a,idx)=>(
+                              {accionesFiltradas.map((a,idx)=>(
                                 <tr key={a.id} className={`${(a.derivacion>0 && a.cita>0)?'bg-green-50':''}`}>
                                   <td className="border px-2 py-1 text-center">{idx+1}</td>
                                   <td className="border px-2 py-1">
                                     <input type="date" value={a.fecha} onChange={e=>{
-                                      const v=e.target.value; setAcciones(prev=>prev.map(x=>x.id===a.id?{...x,fecha:v}:x));
+                                      const v=e.target.value;
+                                      setAcciones(acciones.map(x=>x.id===a.id?{...x,fecha:v}:x));
                                     }} className="w-full outline-none"/>
                                   </td>
                                   <td className="border px-2 py-1">
                                     <input value={a.accion} onChange={e=>{
-                                      const v=e.target.value; setAcciones(prev=>prev.map(x=>x.id===a.id?{...x,accion:v}:x));
+                                      const v=e.target.value;
+                                      setAcciones(acciones.map(x=>x.id===a.id?{...x,accion:v}:x));
                                     }} className="w-full outline-none" placeholder="Descripción..."/>
                                   </td>
                                   <td className="border px-2 py-1 text-center">
                                     <input type="number" min="0" value={a.derivacion} onChange={e=>{
-                                      const v=parseInt(e.target.value)||0; setAcciones(prev=>prev.map(x=>x.id===a.id?{...x,derivacion:v}:x));
+                                      const v=parseInt(e.target.value)||0;
+                                      setAcciones(acciones.map(x=>x.id===a.id?{...x,derivacion:v}:x));
                                     }} className="w-full outline-none text-center"/>
                                   </td>
                                   <td className="border px-2 py-1 text-center">
                                     <input type="number" min="0" value={a.cita} onChange={e=>{
-                                      const v=parseInt(e.target.value)||0; setAcciones(prev=>prev.map(x=>x.id===a.id?{...x,cita:v}:x));
+                                      const v=parseInt(e.target.value)||0;
+                                      setAcciones(acciones.map(x=>x.id===a.id?{...x,cita:v}:x));
                                     }} className="w-full outline-none text-center"/>
                                   </td>
                                   <td className="border px-2 py-1">
                                     <input value={a.observaciones} onChange={e=>{
-                                      const v=e.target.value; setAcciones(prev=>prev.map(x=>x.id===a.id?{...x,observaciones:v}:x));
+                                      const v=e.target.value;
+                                      setAcciones(acciones.map(x=>x.id===a.id?{...x,observaciones:v}:x));
                                     }} className="w-full outline-none" placeholder="Observaciones..."/>
                                   </td>
                                   <td className="border px-2 py-1 text-center">
                                     <button onClick={()=>{
-                                      setAcciones(prev => prev.length>1 ? prev.filter(x=>x.id!==a.id) : prev);
+                                      setAcciones(acciones.length>1 ? acciones.filter(x=>x.id!==a.id) : acciones);
                                     }} className="text-rose-600 hover:bg-rose-50 rounded p-1"><X className="w-4 h-4"/></button>
                                   </td>
                                 </tr>
@@ -403,16 +554,10 @@
                             </tbody>
                           </table>
                         </div>
-                      </section>
+                      </Accordion>
 
-                      {/* FORMACIONES */}
-                      <section className="bg-gray-50 border-2 border-gray-200 rounded-lg p-5 mb-6">
-                        <div className="flex items-center justify-between mb-4">
-                          <h3 className="text-xl font-bold text-gray-800">Formación Continua</h3>
-                          <button onClick={saveFormaciones} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2">
-                            <Save className="w-4 h-4"/> Guardar
-                          </button>
-                        </div>
+                      {/* FORMACION (acordeón) */}
+                      <Accordion title={`Formación Continua (${formacionesFiltradas.length})`} open={openForm} onToggle={()=>setOpenForm(v=>!v)}>
                         <div className="overflow-x-auto">
                           <table className="w-full border-collapse bg-white rounded-lg overflow-hidden shadow-sm text-sm">
                             <thead>
@@ -422,10 +567,11 @@
                                 <th className="border px-2 py-2">Asistencia</th>
                                 <th className="border px-2 py-2">Título</th>
                                 <th className="border px-2 py-2">Aplicación</th>
+                                <th className="border px-2 py-2">❌</th>
                               </tr>
                             </thead>
                             <tbody>
-                              {formaciones.map((f,idx)=>{
+                              {formacionesFiltradas.map((f,idx)=>{
                                 const asiste = (f.asistencia||'').toLowerCase().startsWith('s');
                                 const aplica = !!(f.aplicacion||'').trim();
                                 const bg = asiste && aplica ? 'bg-green-50' : asiste ? 'bg-orange-50' : '';
@@ -434,12 +580,12 @@
                                     <td className="border px-2 py-1 text-center">{idx+1}</td>
                                     <td className="border px-2 py-1">
                                       <input type="date" value={f.fecha} onChange={e=>{
-                                        const v=e.target.value; setFormaciones(prev=>prev.map(x=>x.id===f.id?{...x,fecha:v}:x));
+                                        const v=e.target.value; setFormaciones(formaciones.map(x=>x.id===f.id?{...x,fecha:v}:x));
                                       }} className="w-full outline-none"/>
                                     </td>
                                     <td className="border px-2 py-1">
                                       <select value={f.asistencia} onChange={e=>{
-                                        const v=e.target.value; setFormaciones(prev=>prev.map(x=>x.id===f.id?{...x,asistencia:v}:x));
+                                        const v=e.target.value; setFormaciones(formaciones.map(x=>x.id===f.id?{...x,asistencia:v}:x));
                                       }} className="w-full outline-none">
                                         <option value=""></option>
                                         <option value="SI">SI</option>
@@ -449,13 +595,18 @@
                                     </td>
                                     <td className="border px-2 py-1">
                                       <input value={f.titulo} onChange={e=>{
-                                        const v=e.target.value; setFormaciones(prev=>prev.map(x=>x.id===f.id?{...x,titulo:v}:x));
+                                        const v=e.target.value; setFormaciones(formaciones.map(x=>x.id===f.id?{...x,titulo:v}:x));
                                       }} className="w-full outline-none" placeholder="Nombre del curso..."/>
                                     </td>
                                     <td className="border px-2 py-1">
                                       <input value={f.aplicacion} onChange={e=>{
-                                        const v=e.target.value; setFormaciones(prev=>prev.map(x=>x.id===f.id?{...x,aplicacion:v}:x));
+                                        const v=e.target.value; setFormaciones(formaciones.map(x=>x.id===f.id?{...x,aplicacion:v}:x));
                                       }} className="w-full outline-none" placeholder="¿Cómo se aplicará? o SI/NO"/>
+                                    </td>
+                                    <td className="border px-2 py-1 text-center">
+                                      <button onClick={()=>{
+                                        setFormaciones(formaciones.length>1 ? formaciones.filter(x=>x.id!==f.id) : formaciones);
+                                      }} className="text-rose-600 hover:bg-rose-50 rounded p-1"><X className="w-4 h-4"/></button>
                                     </td>
                                   </tr>
                                 );
@@ -467,18 +618,18 @@
                           <span className="inline-flex items-center gap-1"><span className="w-3 h-3 bg-orange-100 border border-orange-300 inline-block rounded"></span> Asistencia: SI</span>
                           <span className="inline-flex items-center gap-1"><span className="w-3 h-3 bg-green-100 border border-green-300 inline-block rounded"></span> Asistencia: SI + Aplicación</span>
                         </div>
-                      </section>
+                      </Accordion>
 
-                      {/* PROCESOS */}
-                      <section className="bg-gray-50 border-2 border-gray-200 rounded-lg p-5">
-                        <div className="flex items-center justify-between mb-4">
-                          <h3 className="text-xl font-bold text-gray-800">Procesos y Paquetes Personalizados</h3>
+                      {/* PROCESOS (acordeón) */}
+                      <Accordion title={`Procesos y Paquetes Personalizados (${procesosFiltrados.length})`} open={openProc} onToggle={()=>setOpenProc(v=>!v)}>
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="text-sm text-gray-500">Muestra resultados filtrados por el buscador.</div>
                           <div className="flex gap-2">
                             <button onClick={addProceso} className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm flex items-center gap-1">
                               <Plus className="w-4 h-4"/> Añadir
                             </button>
-                            <button onClick={saveProcesos} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2">
-                              <Save className="w-4 h-4"/> Guardar
+                            <button onClick={()=>guardadoManual()} className="px-3 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 text-sm flex items-center gap-1">
+                              <SaveI className="w-4 h-4"/> Guardar ahora
                             </button>
                           </div>
                         </div>
@@ -497,37 +648,37 @@
                               </tr>
                             </thead>
                             <tbody>
-                              {procesos.map((p,idx)=>(
+                              {procesosFiltrados.map((p,idx)=>(
                                 <tr key={p.id}>
                                   <td className="border px-2 py-1 text-center">{idx+1}</td>
                                   <td className="border px-2 py-1">
                                     <input value={p.nombrePaquete} onChange={e=>{
-                                      const v=e.target.value; setProcesos(prev=>prev.map(x=>x.id===p.id?{...x,nombrePaquete:v}:x));
+                                      const v=e.target.value; setProcesos(procesos.map(x=>x.id===p.id?{...x,nombrePaquete:v}:x));
                                     }} className="w-full outline-none font-semibold" placeholder="Nombre..."/>
                                   </td>
                                   <td className="border px-2 py-1">
                                     <input value={p.descripcion} onChange={e=>{
-                                      const v=e.target.value; setProcesos(prev=>prev.map(x=>x.id===p.id?{...x,descripcion:v}:x));
+                                      const v=e.target.value; setProcesos(procesos.map(x=>x.id===p.id?{...x,descripcion:v}:x));
                                     }} className="w-full outline-none" placeholder="Descripción..."/>
                                   </td>
                                   <td className="border px-2 py-1 text-center">
                                     <input value={p.puntuacion} onChange={e=>{
-                                      const v=e.target.value; setProcesos(prev=>prev.map(x=>x.id===p.id?{...x,puntuacion:v}:x));
+                                      const v=e.target.value; setProcesos(procesos.map(x=>x.id===p.id?{...x,puntuacion:v}:x));
                                     }} className="w-full outline-none text-center" placeholder="Ej: 8/10"/>
                                   </td>
                                   <td className="border px-2 py-1">
                                     <input value={p.observaciones} onChange={e=>{
-                                      const v=e.target.value; setProcesos(prev=>prev.map(x=>x.id===p.id?{...x,observaciones:v}:x));
+                                      const v=e.target.value; setProcesos(procesos.map(x=>x.id===p.id?{...x,observaciones:v}:x));
                                     }} className="w-full outline-none" placeholder="Observaciones..."/>
                                   </td>
                                   <td className="border px-2 py-1">
                                     <input type="date" value={p.fechaVisita} onChange={e=>{
-                                      const v=e.target.value; setProcesos(prev=>prev.map(x=>x.id===p.id?{...x,fechaVisita:v}:x));
+                                      const v=e.target.value; setProcesos(procesos.map(x=>x.id===p.id?{...x,fechaVisita:v}:x));
                                     }} className="w-full outline-none"/>
                                   </td>
                                   <td className="border px-2 py-1 text-center">
                                     <button onClick={()=>{
-                                      setProcesos(prev => prev.length>1 ? prev.filter(x=>x.id!==p.id) : prev);
+                                      setProcesos(procesos.length>1 ? procesos.filter(x=>x.id!==p.id) : procesos);
                                     }} className="text-rose-600 hover:bg-rose-50 rounded p-1"><X className="w-4 h-4"/></button>
                                   </td>
                                 </tr>
@@ -535,8 +686,8 @@
                             </tbody>
                           </table>
                         </div>
-                      </section>
-                    </>
+                      </Accordion>
+                    </div>
                   ) : (
                     <div className="text-gray-500">Sección informativa. (Este demo concentra la funcionalidad en “Centros Exclusivos”).</div>
                   )}
@@ -552,7 +703,7 @@
                 <h3 className="text-2xl font-bold text-gray-800 mb-4">Personalizar Marca</h3>
                 <div className="mb-4">
                   <label className="text-gray-700 font-semibold block mb-2">Nombre de la Empresa</label>
-                  <input value={companyName} onChange={e=>setCompanyName(e.target.value)}
+                  <input value={companyName} onChange={e=>{ setCompanyName(e.target.value); touch(); }}
                          className="w-full bg-white text-gray-800 border-2 border-gray-300 rounded-lg px-4 py-3 focus:border-rose-600 outline-none"/>
                 </div>
                 <div className="mb-4">
@@ -577,38 +728,80 @@
               <div className="bg-white rounded-xl p-6 border-2 border-rose-600 shadow-2xl max-w-md w-full mx-4">
                 <h3 className="text-2xl font-bold text-gray-800 mb-2">Añadir Nuevo Centro</h3>
                 <p className="text-sm text-gray-600 mb-4">Total: {centros.length}/12</p>
-
                 <div className="space-y-3 text-sm">
                   <div>
                     <label className="font-semibold block mb-1">Nombre *</label>
                     <input className="w-full border-2 rounded-lg px-3 py-2 focus:border-rose-600 outline-none"
-                           value={newCentro.nombre} onChange={e=>setNewCentro(v=>({...v, nombre:e.target.value}))}/>
+                           value={newCentro.nombre} onChange={e=>{ setNewCentro(v=>({...v, nombre:e.target.value})); }} />
                   </div>
                   <div>
                     <label className="font-semibold block mb-1">Delegado *</label>
                     <input className="w-full border-2 rounded-lg px-3 py-2 focus:border-rose-600 outline-none"
-                           value={newCentro.delegado} onChange={e=>setNewCentro(v=>({...v, delegado:e.target.value}))}/>
+                           value={newCentro.delegado} onChange={e=>{ setNewCentro(v=>({...v, delegado:e.target.value})); }} />
                   </div>
                   <div>
                     <label className="font-semibold block mb-1">Audiólogo *</label>
                     <input className="w-full border-2 rounded-lg px-3 py-2 focus:border-rose-600 outline-none"
-                           value={newCentro.audiologo} onChange={e=>setNewCentro(v=>({...v, audiologo:e.target.value}))}/>
+                           value={newCentro.audiologo} onChange={e=>{ setNewCentro(v=>({...v, audiologo:e.target.value})); }} />
                   </div>
                   <div>
                     <label className="font-semibold block mb-1">Tipo *</label>
                     <select className="w-full border-2 rounded-lg px-3 py-2 focus:border-rose-600 outline-none"
                             value={newCentro.franquiciaSucursal}
-                            onChange={e=>setNewCentro(v=>({...v, franquiciaSucursal:e.target.value}))}>
+                            onChange={e=>{ setNewCentro(v=>({...v, franquiciaSucursal:e.target.value})); }}>
                       <option value="">Seleccionar...</option>
                       <option value="Franquicia">Franquicia</option>
                       <option value="Sucursal">Sucursal</option>
                     </select>
                   </div>
                 </div>
-
                 <div className="flex gap-3 mt-6">
                   <button onClick={addNewCentro} className="flex-1 bg-rose-600 text-white px-4 py-3 rounded-lg hover:bg-rose-700">Añadir Centro</button>
                   <button onClick={()=>{ setShowCentroModal(false); setNewCentro({nombre:'',delegado:'',audiologo:'',franquiciaSucursal:''}); }}
+                          className="flex-1 bg-gray-300 text-gray-700 px-4 py-3 rounded-lg hover:bg-gray-400">Cancelar</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* MODAL EDITAR CENTRO */}
+          {editCentroModal.open && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-xl p-6 border-2 border-blue-600 shadow-2xl max-w-md w-full mx-4">
+                <h3 className="text-2xl font-bold text-gray-800 mb-2">Editar Centro</h3>
+                <div className="space-y-3 text-sm">
+                  <div>
+                    <label className="font-semibold block mb-1">Nombre *</label>
+                    <input className="w-full border-2 rounded-lg px-3 py-2 focus:border-blue-600 outline-none"
+                           value={editCentroModal.centro?.nombre||''}
+                           onChange={e=> setEditCentroModal(m=>({open:true, centro:{...m.centro, nombre:e.target.value}})) } />
+                  </div>
+                  <div>
+                    <label className="font-semibold block mb-1">Delegado *</label>
+                    <input className="w-full border-2 rounded-lg px-3 py-2 focus:border-blue-600 outline-none"
+                           value={editCentroModal.centro?.delegado||''}
+                           onChange={e=> setEditCentroModal(m=>({open:true, centro:{...m.centro, delegado:e.target.value}})) } />
+                  </div>
+                  <div>
+                    <label className="font-semibold block mb-1">Audiólogo *</label>
+                    <input className="w-full border-2 rounded-lg px-3 py-2 focus:border-blue-600 outline-none"
+                           value={editCentroModal.centro?.audiologo||''}
+                           onChange={e=> setEditCentroModal(m=>({open:true, centro:{...m.centro, audiologo:e.target.value}})) } />
+                  </div>
+                  <div>
+                    <label className="font-semibold block mb-1">Tipo *</label>
+                    <select className="w-full border-2 rounded-lg px-3 py-2 focus:border-blue-600 outline-none"
+                            value={editCentroModal.centro?.franquiciaSucursal||''}
+                            onChange={e=> setEditCentroModal(m=>({open:true, centro:{...m.centro, franquiciaSucursal:e.target.value}})) }>
+                      <option value="">Seleccionar...</option>
+                      <option value="Franquicia">Franquicia</option>
+                      <option value="Sucursal">Sucursal</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="flex gap-3 mt-6">
+                  <button onClick={saveEditCentro} className="flex-1 bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700">Guardar</button>
+                  <button onClick={()=> setEditCentroModal({open:false, centro:null})}
                           className="flex-1 bg-gray-300 text-gray-700 px-4 py-3 rounded-lg hover:bg-gray-400">Cancelar</button>
                 </div>
               </div>
@@ -619,7 +812,7 @@
     }
 
     const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(<AudiologiaApp />);
+    root.render(<App />);
   </script>
 </body>
 </html>
