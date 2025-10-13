@@ -1,604 +1,481 @@
 <!doctype html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>AUDIOLOGIA-SEGUIMIENTO</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <style>body{visibility:hidden}</style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>AUDIOLOGIA-SEGUIMIENTO</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='%23e11' d='M8 10h48v8H8z'/%3E%3Crect x='8' y='18' width='48' height='36' rx='6' fill='%23fff' stroke='%23e11' stroke-width='3'/%3E%3C/svg%3E">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet">
+<style>
+:root{
+  --red:#e11d2a; --red-600:#d61e1e; --bg:#edf0f3; --card:#ffffff;
+  --ink:#1f2937; --muted:#6b7280; --line:#e5e7eb; --chip:#f3f4f6;
+  --radius:14px; --shadow:0 12px 24px rgba(0,0,0,.06);
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif;background:linear-gradient(180deg,#f7f7f8,#eef1f4);}
+.container{max-width:1200px;margin:18px auto;padding:0 16px;}
+/* header */
+.header{background:var(--card); border:1px solid var(--line); border-left:6px solid var(--red); box-shadow:var(--shadow); border-radius:var(--radius);
+  padding:14px 16px; display:flex; align-items:center; gap:14px}
+.brand{display:flex; align-items:center; gap:16px; flex:1}
+.logo{height:54px; width:auto; object-fit:contain}
+.titlebox{display:flex; flex-direction:column}
+.kicker{font-size:14px; color:var(--muted)}
+.h1{font-size:34px; font-weight:900; color:var(--ink); letter-spacing:.5px}
+.iconbar{display:flex; gap:10px}
+.iconbtn{border:none; background:#222b; color:#fff; width:46px; height:46px; border-radius:12px; display:grid; place-items:center; cursor:pointer}
+.iconbtn.red{background:var(--red)}
+.iconbtn.blue{background:#1f63ff}
+.iconbtn:hover{transform:translateY(-1px)}
+/* search */
+.searchWrap{margin:16px 0}
+.search{width:100%; padding:16px 18px; border:1px solid var(--line); border-radius:12px; background:#fff; box-shadow:var(--shadow); font-size:16px}
+/* layout */
+.grid{display:grid; grid-template-columns:360px 1fr; gap:18px}
+@media(max-width:1000px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card); border:1px solid var(--line); border-left:6px solid var(--red); border-radius:16px; box-shadow:var(--shadow)}
+.cardHeader{display:flex; align-items:center; justify-content:space-between; padding:18px}
+.cardTitle{font-size:22px; font-weight:800; color:var(--ink)}
+.linkBtn{color:var(--red-600); font-weight:700; cursor:pointer; user-select:none}
+.hr{height:1px; background:var(--line)}
+.pad{padding:14px 18px}
+/* section list */
+.sectionItem{border:1px solid var(--line); background:var(--chip); border-radius:12px; margin:10px 0; overflow:hidden}
+.sectionHead{display:flex; align-items:center; justify-content:space-between; padding:12px 14px; cursor:pointer}
+.sectionHead h4{margin:0; font-size:16px; font-weight:800; color:var(--ink)}
+.badge{font-size:12px; padding:4px 8px; background:#fff; border:1px solid var(--line); border-radius:999px; color:var(--muted)}
+.sectionBody{display:none; padding:10px 12px; background:#fff}
+.sectionBody.show{display:block}
+.row{display:flex; align-items:center; justify-content:space-between; gap:8px; padding:8px 10px; border:1px dashed var(--line); border-radius:10px; margin:6px 0; background:#fafafa}
+.row strong{font-weight:800}
+.row .muted{color:var(--muted); font-size:12px}
+.rowBtns{display:flex; gap:6px}
+.smallbtn{border:none; background:#f1f5f9; color:#111; border-radius:8px; padding:6px 8px; cursor:pointer}
+.smallbtn.red{background:#fee2e2; color:#b91c1c}
+.smallbtn.green{background:#dcfce7; color:#166534}
+.addLine{display:flex; gap:8px; margin-top:8px}
+.addLine input, .addLine select{flex:1; padding:8px 10px; border:1px solid var(--line); border-radius:8px; background:#fff}
+.plus{border:none; background:#111; color:#fff; border-radius:8px; padding:8px 10px; cursor:pointer}
+/* procedures */
+.procHeader{display:flex; align-items:center; justify-content:space-between; gap:12px}
+.procTitle{font-size:22px; font-weight:900}
+.procAdd{display:flex; gap:8px}
+.chip{background:#f6f6f8; border:1px solid var(--line); color:#333; padding:6px 10px; border-radius:999px; font-size:12px}
+.procList{padding:10px 16px 18px}
+.procItem{border:1px solid var(--line); border-radius:12px; background:#fff; margin:10px 0; overflow:hidden}
+.procHead{display:flex; align-items:center; justify-content:space-between; padding:12px 14px; cursor:pointer; background:#f9fafb}
+.procHead h5{margin:0; font-size:16px; font-weight:800}
+.procBody{display:none; padding:12px 14px; border-top:1px solid var(--line)}
+.procBody.show{display:block}
+.flexcol{display:flex; gap:10px; flex-wrap:wrap}
+.flexcol input, .flexcol textarea{width:100%; padding:8px 10px; border:1px solid var(--line); border-radius:8px; font-size:14px}
+.flexcol .half{flex:1 1 220px}
+.actions{display:flex; gap:6px; margin-top:8px}
+.hide{display:none !important}
+</style>
 </head>
-<body class="bg-gradient-to-br from-gray-100 to-gray-200 min-h-screen">
-  <div id="root"></div>
+<body>
+<div class="container">
 
-  <script type="text/babel">
-    const PIN_REQUIRED = "AR4321";
-    const LS_KEY_SETTINGS = "audiologia_cloud_settings_v1";
-    const LS_KEY_TOKEN_ENC = "audiologia_token_enc_v1";
-    const LS_KEY_APPDATA  = "audiologia_data_backup_v1";
-
-    function xorEncryptToB64(text, key){
-      const t=[...text], k=[...key];
-      const out=t.map((ch,i)=>String.fromCharCode(ch.charCodeAt(0)^k[i%k.length].charCodeAt(0))).join("");
-      return btoa(unescape(encodeURIComponent(out)));
-    }
-    function xorDecryptFromB64(b64,key){
-      try{
-        const bin=decodeURIComponent(escape(atob(b64)));
-        const b=[...bin], k=[...key];
-        return b.map((ch,i)=>String.fromCharCode(ch.charCodeAt(0)^k[i%k.length].charCodeAt(0))).join("");
-      }catch(e){return "";}
-    }
-
-    const App=()=>{
-      React.useEffect(()=>{document.body.style.visibility='visible';},[]);
-
-      const [companyName,setCompanyName]=React.useState("AUDIOLOGÍA");
-      const [logoUrl,setLogoUrl]=React.useState("");
-      const [search,setSearch]=React.useState("");
-
-      // IZQUIERDA: secciones (solo Centros exclusivos)
-      const [centrosOpen,setCentrosOpen]=React.useState(true);
-      const [centros,setCentros]=React.useState([
-        {id:1,nombre:"Centro Madrid Norte",delegado:"Ana Martínez",audiologo:"Dr. García",tipo:"Franquicia"},
-        {id:2,nombre:"Centro Barcelona Centro",delegado:"Carlos Ruiz",audiologo:"Dra. López",tipo:"Sucursal"},
-      ]);
-      const [activeCentroId,setActiveCentroId]=React.useState(1);
-      const [editingCentroId,setEditingCentroId]=React.useState(null);
-      const [nuevoCentro,setNuevoCentro]=React.useState({nombre:"",delegado:"",audiologo:"",tipo:""});
-
-      // DERECHA: plegables
-      const [panelAccOpen,setPanelAccOpen]=React.useState(true);
-      const [panelFormOpen,setPanelFormOpen]=React.useState(true);
-      const [panelProcOpen,setPanelProcOpen]=React.useState(true);
-
-      // Datos por centro
-      const [acciones,setAcciones]=React.useState({
-        1:[{id:1,fecha:"",accion:"",derivacion:0,cita:0,observ:""}],
-        2:[{id:1,fecha:"",accion:"",derivacion:0,cita:0,observ:""}],
-      });
-      const [formaciones,setFormaciones]=React.useState({
-        1:Array.from({length:10},(_,i)=>({id:i+1,fecha:"",asistencia:"",titulo:"",aplicacion:""})),
-        2:Array.from({length:10},(_,i)=>({id:i+1,fecha:"",asistencia:"",titulo:"",aplicacion:""})),
-      });
-      const [procesos,setProcesos]=React.useState({
-        1:[{id:1,nombre:"",descripcion:"",puntuacion:"",observaciones:"",fechaVisita:"",archivos:[],enlaces:[]}],
-        2:[{id:1,nombre:"",descripcion:"",puntuacion:"",observaciones:"",fechaVisita:"",archivos:[],enlaces:[]}],
-      });
-
-      // CLOUD modal
-      const [cloudOpen,setCloudOpen]=React.useState(false);
-      const [cloudPIN,setCloudPIN]=React.useState("");
-      const [ghOwner,setGhOwner]=React.useState("");
-      const [ghRepo,setGhRepo]=React.useState("");
-      const [ghPath,setGhPath]=React.useState("data/audiologia.json");
-      const [ghTokenPlain,setGhTokenPlain]=React.useState("");
-
-      React.useEffect(()=>{
-        const s=localStorage.getItem(LS_KEY_SETTINGS);
-        if(s){
-          try{ const cfg=JSON.parse(s);
-            setGhOwner(cfg.owner||"");
-            setGhRepo(cfg.repo||"");
-            setGhPath(cfg.path||"data/audiologia.json");
-          }catch{}
-        }
-        const backup=localStorage.getItem(LS_KEY_APPDATA);
-        if(backup){
-          try{
-            const d=JSON.parse(backup);
-            if(d.companyName) setCompanyName(d.companyName);
-            if(d.logoUrl) setLogoUrl(d.logoUrl);
-            if(d.centros) setCentros(d.centros);
-            if(d.acciones) setAcciones(d.acciones);
-            if(d.formaciones) setFormaciones(d.formaciones);
-            if(d.procesos) setProcesos(d.procesos);
-            if(d.activeCentroId) setActiveCentroId(d.activeCentroId);
-          }catch{}
-        }
-      },[]);
-
-      const currentCentro = centros.find(c=>c.id===activeCentroId) || null;
-      const currentAcc = acciones[activeCentroId] || [];
-      const currentFor = formaciones[activeCentroId] || [];
-      const currentPro = procesos[activeCentroId] || [];
-
-      // Buscador global
-      const q=search.trim().toLowerCase();
-      const filteredCentros = !q ? centros :
-        centros.filter(c=>`${c.nombre} ${c.delegado} ${c.audiologo} ${c.tipo}`.toLowerCase().includes(q));
-
-      function handleLogoUpload(e){
-        const f=e.target.files?.[0]; if(!f) return;
-        const rd=new FileReader();
-        rd.onload=ev=>setLogoUrl(ev.target.result);
-        rd.readAsDataURL(f);
-      }
-
-      // Centros
-      function addCentro(){
-        const nombre=nuevoCentro.nombre.trim(); if(!nombre) return;
-        const id=Math.max(0,...centros.map(c=>c.id))+1;
-        const c={id,...nuevoCentro};
-        setCentros(p=>[...p,c]);
-        setAcciones(p=>({...p,[id]:[{id:1,fecha:"",accion:"",derivacion:0,cita:0,observ:""}]}));
-        setFormaciones(p=>({...p,[id]:Array.from({length:10},(_,i)=>({id:i+1,fecha:"",asistencia:"",titulo:"",aplicacion:""}))}));
-        setProcesos(p=>({...p,[id]:[{id:1,nombre:"",descripcion:"",puntuacion:"",observaciones:"",fechaVisita:"",archivos:[],enlaces:[]}]}));
-        setNuevoCentro({nombre:"",delegado:"",audiologo:"",tipo:""});
-        setActiveCentroId(id);
-      }
-      function removeCentro(id){
-        if(!confirm("¿Eliminar este centro?")) return;
-        setCentros(p=>p.filter(c=>c.id!==id));
-        setAcciones(p=>{const x={...p}; delete x[id]; return x;});
-        setFormaciones(p=>{const x={...p}; delete x[id]; return x;});
-        setProcesos(p=>{const x={...p}; delete x[id]; return x;});
-        if(activeCentroId===id){
-          const rest=centros.filter(c=>c.id!==id);
-          setActiveCentroId(rest[0]?.id ?? null);
-        }
-      }
-      function saveCentroEdit(id,edits){
-        setCentros(p=>p.map(c=>c.id===id?{...c,...edits}:c));
-        setEditingCentroId(null);
-      }
-
-      // Acciones
-      function addAccion(){
-        const list=acciones[activeCentroId]||[];
-        const id=Math.max(0,...list.map(a=>a.id))+1;
-        setAcciones(p=>({...p,[activeCentroId]:[...list,{id,fecha:"",accion:"",derivacion:0,cita:0,observ:""}]}));
-      }
-      function updAccion(id,field,value){
-        const list=acciones[activeCentroId]||[];
-        setAcciones(p=>({...p,[activeCentroId]:list.map(a=>a.id===id?{...a,[field]:value}:a)}));
-      }
-      function delAccion(id){
-        const list=acciones[activeCentroId]||[];
-        if(list.length<=1) return;
-        setAcciones(p=>({...p,[activeCentroId]:list.filter(a=>a.id!==id)}));
-      }
-
-      // Formaciones
-      function updForm(id,field,value){
-        const list=formaciones[activeCentroId]||[];
-        setFormaciones(p=>({...p,[activeCentroId]:list.map(f=>f.id===id?{...f,[field]:value}:f)}));
-      }
-
-      // Procesos
-      function addProceso(){
-        const list=procesos[activeCentroId]||[];
-        const id=Math.max(0,...list.map(p=>p.id))+1;
-        setProcesos(p=>({...p,[activeCentroId]:[...list,{id,nombre:"",descripcion:"",puntuacion:"",observaciones:"",fechaVisita:"",archivos:[],enlaces:[]}]}));
-      }
-      function updProceso(id,field,value){
-        const list=procesos[activeCentroId]||[];
-        setProcesos(p=>({...p,[activeCentroId]:list.map(o=>o.id===id?{...o,[field]:value}:o)}));
-      }
-      function delProceso(id){
-        const list=procesos[activeCentroId]||[];
-        if(list.length<=1) return;
-        setProcesos(p=>({...p,[activeCentroId]:list.filter(o=>o.id!==id)}));
-      }
-
-      // Backup local
-      function buildPayload(){
-        return {version:1,companyName,logoUrl,centros,acciones,formaciones,procesos,activeCentroId};
-      }
-      function applyPayload(p){
-        if(p.companyName!==undefined) setCompanyName(p.companyName);
-        if(p.logoUrl!==undefined) setLogoUrl(p.logoUrl);
-        if(p.centros) setCentros(p.centros);
-        if(p.acciones) setAcciones(p.acciones);
-        if(p.formaciones) setFormaciones(p.formaciones);
-        if(p.procesos) setProcesos(p.procesos);
-        if(p.activeCentroId!==undefined) setActiveCentroId(p.activeCentroId);
-      }
-      function exportJSON(){
-        const payload=buildPayload();
-        const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
-        const url=URL.createObjectURL(blob);
-        const a=document.createElement("a");
-        a.href=url; a.download="audiologia_backup.json"; a.click();
-        URL.revokeObjectURL(url);
-        localStorage.setItem(LS_KEY_APPDATA,JSON.stringify(payload));
-        alert("✅ Backup descargado y guardado localmente");
-      }
-      function importJSONFile(e){
-        const f=e.target.files?.[0]; if(!f) return;
-        const rd=new FileReader();
-        rd.onload=ev=>{
-          try{
-            const p=JSON.parse(ev.target.result);
-            applyPayload(p);
-            localStorage.setItem(LS_KEY_APPDATA,JSON.stringify(p));
-            alert("✅ Datos importados");
-          }catch{alert("❌ Archivo inválido");}
-        };
-        rd.readAsText(f);
-        e.target.value="";
-      }
-
-      // CLOUD (GitHub)
-      function openCloud(){ setCloudOpen(true); }
-      function closeCloud(){ setCloudOpen(false); setCloudPIN(""); }
-      function saveCloudSettings(){
-        localStorage.setItem(LS_KEY_SETTINGS,JSON.stringify({owner:ghOwner,repo:ghRepo,path:ghPath}));
-        if(ghTokenPlain){
-          if(cloudPIN!==PIN_REQUIRED){ alert("PIN incorrecto"); return; }
-          const enc=xorEncryptToB64(ghTokenPlain,cloudPIN);
-          localStorage.setItem(LS_KEY_TOKEN_ENC,enc);
-          setGhTokenPlain("");
-          alert("✅ Ajustes guardados (token protegido con PIN)");
-        }else{
-          alert("✅ Ajustes guardados");
-        }
-      }
-      function getTokenWithPIN(pin){
-        const enc=localStorage.getItem(LS_KEY_TOKEN_ENC);
-        if(!enc) return "";
-        return xorDecryptFromB64(enc,pin);
-      }
-      async function pushToGitHub(){
-        if(cloudPIN!==PIN_REQUIRED){ alert("PIN incorrecto"); return; }
-        if(!ghOwner||!ghRepo||!ghPath){ alert("Configura Owner/Repo/Path"); return; }
-        const token=getTokenWithPIN(cloudPIN);
-        if(!token){ alert("No hay token guardado. Escribe uno y pulsa Guardar ajustes."); return; }
-        const payload=buildPayload();
-        try{
-          let sha=null;
-          const getRes=await fetch(`https://api.github.com/repos/${ghOwner}/${ghRepo}/contents/${encodeURIComponent(ghPath)}`,{
-            headers:{Authorization:`Bearer ${token}`,"Accept":"application/vnd.github+json"}
-          });
-          if(getRes.ok){ const info=await getRes.json(); sha=info.sha||null; }
-          const contentB64=btoa(unescape(encodeURIComponent(JSON.stringify(payload,null,2))));
-          const putRes=await fetch(`https://api.github.com/repos/${ghOwner}/${ghRepo}/contents/${encodeURIComponent(ghPath)}`,{
-            method:"PUT",
-            headers:{Authorization:`Bearer ${token}`,"Accept":"application/vnd.github+json"},
-            body:JSON.stringify({message:"Update audiologia data",content:contentB64,branch:"main",sha})
-          });
-          if(!putRes.ok){ throw new Error(await putRes.text()); }
-          localStorage.setItem(LS_KEY_APPDATA,JSON.stringify(payload));
-          alert("✅ Guardado en la nube (GitHub) completado");
-          closeCloud();
-        }catch(err){ console.error(err); alert("❌ Error guardando en la nube. Revisa Owner/Repo/Path/Token/Permisos."); }
-      }
-      async function loadFromGitHub(){
-        if(cloudPIN!==PIN_REQUIRED){ alert("PIN incorrecto"); return; }
-        if(!ghOwner||!ghRepo||!ghPath){ alert("Configura Owner/Repo/Path"); return; }
-        const token=getTokenWithPIN(cloudPIN);
-        if(!token){ alert("No hay token guardado. Escribe uno y pulsa Guardar ajustes."); return; }
-        try{
-          const res=await fetch(`https://api.github.com/repos/${ghOwner}/${ghRepo}/contents/${encodeURIComponent(ghPath)}`,{
-            headers:{Authorization:`Bearer ${token}`,"Accept":"application/vnd.github+json"}
-          });
-          if(!res.ok) throw new Error(await res.text());
-          const data=await res.json();
-          const json=JSON.parse(decodeURIComponent(escape(atob(data.content))));
-          applyPayload(json);
-          localStorage.setItem(LS_KEY_APPDATA,JSON.stringify(json));
-          alert("✅ Datos cargados desde la nube");
-          closeCloud();
-        }catch(err){ console.error(err); alert("❌ Error cargando desde la nube."); }
-      }
-
-      // ----- UI -----
-      return (
-        <div className="max-w-7xl mx-auto px-4 md:px-6 py-5">
-          {/* CABECERA: SOLO ICONOS */}
-          <div className="bg-white border-b-4 border-red-600 rounded-xl shadow px-4 md:px-6 py-3 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              {logoUrl ? (
-                <img src={logoUrl} alt="Logo" className="h-12 w-auto object-contain rounded" />
-              ) : (
-                <div className="h-12 w-12 bg-red-600/90 rounded flex items-center justify-center text-white font-bold">L</div>
-              )}
-              <div>
-                <div className="text-xs text-gray-500">Plataforma</div>
-                <h1 className="text-2xl md:text-3xl font-extrabold text-gray-800">AUDIOLOGIA-SEGUIMIENTO</h1>
-                <div className="text-red-600 text-sm -mt-1">{companyName}</div>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              {/* 🖼️ logo */}
-              <label title="Logo" className="bg-gray-700 text-white px-2.5 py-2 rounded-lg hover:bg-gray-800 cursor-pointer text-lg">🖼️
-                <input type="file" className="hidden" accept="image/*" onChange={handleLogoUpload} />
-              </label>
-
-              {/* 🔒 PIN / Nube (abre modal) */}
-              <button title="PIN / Nube" onClick={()=>setCloudOpen(true)} className="bg-gray-700 text-white px-3 py-2 rounded-lg hover:bg-gray-800 text-lg">🔒</button>
-
-              {/* ☁️ Accesos nube rápidos (requiere PIN dentro del modal) */}
-              <button title="Guardar/Cargar en nube" onClick={openCloud} className="bg-red-600 text-white px-3 py-2 rounded-lg hover:bg-red-700 text-lg">☁️</button>
-
-              {/* 💾 Backup */}
-              <div className="relative group">
-                <button title="Backup" className="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 text-lg">💾</button>
-                <div className="absolute right-0 mt-2 w-56 bg-white border rounded-lg shadow-md hidden group-hover:block">
-                  <button onClick={exportJSON} className="w-full text-left px-3 py-2 hover:bg-blue-50">Descargar JSON</button>
-                  <label className="w-full block px-3 py-2 hover:bg-blue-50 cursor-pointer">
-                    Cargar desde archivo
-                    <input type="file" className="hidden" accept="application/json" onChange={importJSONFile}/>
-                  </label>
-                </div>
-              </div>
-
-              {/* ⚙️ Empresa */}
-              <button title="Editar nombre empresa" onClick={()=>{
-                const v=prompt("Nuevo nombre de empresa:",companyName);
-                if(v!==null) setCompanyName(v);
-              }} className="bg-gray-300 text-gray-800 px-3 py-2 rounded-lg hover:bg-gray-400 text-lg">⚙️</button>
-            </div>
-          </div>
-
-          {/* BUSCADOR */}
-          <div className="mt-4 bg-white rounded-xl shadow p-3">
-            <input className="w-full border-2 border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-red-600"
-                   placeholder="Buscar en secciones, centros y datos…" value={search} onChange={e=>setSearch(e.target.value)} />
-          </div>
-
-          <div className="mt-6 grid grid-cols-12 gap-5">
-            {/* IZQUIERDA: SOLO SECCIÓN CENTROS */}
-            <div className="col-span-12 md:col-span-4">
-              <div className="bg-white rounded-xl shadow p-4 border-l-4 border-red-600">
-                <div className="flex items-center justify-between">
-                  <h2 className="font-bold text-gray-800">Centros exclusivos</h2>
-                  <button onClick={()=>setCentrosOpen(o=>!o)} className="text-sm text-red-600">{centrosOpen?"Ocultar":"Mostrar"}</button>
-                </div>
-
-                {centrosOpen && (
-                  <div className="mt-3 space-y-2">
-                    {filteredCentros.map(c=>(
-                      <div key={c.id} className={`p-2 rounded-lg border ${activeCentroId===c.id?"border-red-600 bg-red-50":"border-gray-200 bg-gray-50"}`}>
-                        {editingCentroId===c.id ? (
-                          <CentroEditor centro={c} onCancel={()=>setEditingCentroId(null)} onSave={(edits)=>saveCentroEdit(c.id,edits)} />
-                        ) : (
-                          <div className="flex items-start gap-2">
-                            <button onClick={()=>setActiveCentroId(c.id)} className="flex-1 text-left">
-                              <div className="font-semibold">{c.nombre}</div>
-                              <div className="text-xs text-gray-600">👤 {c.delegado} — 🎧 {c.audiologo} — 📍 {c.tipo||"-"}</div>
-                            </button>
-                            <div className="flex flex-col gap-1">
-                              <button onClick={()=>setEditingCentroId(c.id)} className="px-2 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700">Editar</button>
-                              <button onClick={()=>removeCentro(c.id)} className="px-2 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700">Eliminar</button>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-
-                    {/* Añadir centro */}
-                    <div className="mt-3 border-t pt-3">
-                      <div className="text-sm font-semibold mb-2">Añadir centro</div>
-                      <div className="grid grid-cols-2 gap-2">
-                        <input className="border rounded px-2 py-1 text-sm" placeholder="Nombre" value={nuevoCentro.nombre} onChange={e=>setNuevoCentro({...nuevoCentro,nombre:e.target.value})}/>
-                        <input className="border rounded px-2 py-1 text-sm" placeholder="Delegado" value={nuevoCentro.delegado} onChange={e=>setNuevoCentro({...nuevoCentro,delegado:e.target.value})}/>
-                        <input className="border rounded px-2 py-1 text-sm" placeholder="Audiólogo" value={nuevoCentro.audiologo} onChange={e=>setNuevoCentro({...nuevoCentro,audiologo:e.target.value})}/>
-                        <select className="border rounded px-2 py-1 text-sm" value={nuevoCentro.tipo} onChange={e=>setNuevoCentro({...nuevoCentro,tipo:e.target.value})}>
-                          <option value="">Tipo…</option>
-                          <option value="Franquicia">Franquicia</option>
-                          <option value="Sucursal">Sucursal</option>
-                        </select>
-                      </div>
-                      <button onClick={addCentro} className="mt-2 px-3 py-1.5 text-sm bg-green-600 text-white rounded hover:bg-green-700">Añadir</button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* DERECHA: PROCEDIMIENTOS DEL CENTRO */}
-            <div className="col-span-12 md:col-span-8 space-y-5">
-              <div className="bg-white rounded-xl shadow p-4 border-l-4 border-red-600">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-xl font-bold text-gray-800">
-                    Procedimientos — {currentCentro? currentCentro.nombre : "Sin centro"}
-                  </h3>
-                </div>
-              </div>
-
-              {/* Acciones */}
-              <Panel title="Acciones - Resultado" open={panelAccOpen} onToggle={()=>setPanelAccOpen(o=>!o)}>
-                <div className="flex justify-end mb-2">
-                  <button onClick={addAccion} className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded hover:bg-blue-700">Añadir</button>
-                </div>
-                <div className="overflow-x-auto">
-                  <table className="min-w-full bg-white border rounded">
-                    <thead className="bg-red-600 text-white">
-                      <tr>
-                        <th className="px-2 py-2 text-left">#</th>
-                        <th className="px-2 py-2 text-left">Fecha</th>
-                        <th className="px-2 py-2 text-left">Acción</th>
-                        <th className="px-2 py-2 text-center">Derivación</th>
-                        <th className="px-2 py-2 text-center">Cita</th>
-                        <th className="px-2 py-2 text-left">Observaciones</th>
-                        <th className="px-2 py-2"></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {currentAcc.filter(a=>{
-                        if(!q) return true;
-                        const txt=`${a.accion||""} ${a.observ||""}`.toLowerCase();
-                        return txt.includes(q);
-                      }).map((a,i)=>{
-                        const green=(a.derivacion||0)>0 && (a.cita||0)>0;
-                        return (
-                          <tr key={a.id} className={green?"bg-green-50":""}>
-                            <td className="border px-2 py-1">{i+1}</td>
-                            <td className="border px-2 py-1"><input type="date" className="w-full border rounded px-2 py-1 text-sm" value={a.fecha} onChange={e=>updAccion(a.id,"fecha",e.target.value)}/></td>
-                            <td className="border px-2 py-1"><input className="w-full border rounded px-2 py-1 text-sm" placeholder="Descripción…" value={a.accion} onChange={e=>updAccion(a.id,"accion",e.target.value)}/></td>
-                            <td className="border px-2 py-1 text-center"><input type="number" min="0" className="w-20 border rounded px-2 py-1 text-sm text-center" value={a.derivacion} onChange={e=>updAccion(a.id,"derivacion",parseInt(e.target.value||"0"))}/></td>
-                            <td className="border px-2 py-1 text-center"><input type="number" min="0" className="w-20 border rounded px-2 py-1 text-sm text-center" value={a.cita} onChange={e=>updAccion(a.id,"cita",parseInt(e.target.value||"0"))}/></td>
-                            <td className="border px-2 py-1"><input className="w-full border rounded px-2 py-1 text-sm" placeholder="Observaciones…" value={a.observ} onChange={e=>updAccion(a.id,"observ",e.target.value)}/></td>
-                            <td className="border px-2 py-1 text-right">
-                              <button onClick={()=>delAccion(a.id)} disabled={currentAcc.length<=1} className={`px-2 py-1 text-sm rounded ${currentAcc.length<=1?"bg-gray-200 text-gray-400":"bg-red-600 text-white hover:bg-red-700"}`}>Eliminar</button>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              </Panel>
-
-              {/* Formación */}
-              <Panel title="Formación continua" open={panelFormOpen} onToggle={()=>setPanelFormOpen(o=>!o)}>
-                <div className="overflow-x-auto">
-                  <table className="min-w-full bg-white border rounded">
-                    <thead className="bg-red-600 text-white">
-                      <tr>
-                        <th className="px-2 py-2 text-left">#</th>
-                        <th className="px-2 py-2 text-left">Fecha</th>
-                        <th className="px-2 py-2 text-left">Asistencia</th>
-                        <th className="px-2 py-2 text-left">Título</th>
-                        <th className="px-2 py-2 text-left">Aplicación</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {currentFor.filter(f=>{
-                        if(!q) return true;
-                        const txt=`${f.titulo||""} ${f.aplicacion||""} ${f.asistencia||""}`.toLowerCase();
-                        return txt.includes(q);
-                      }).map((f,i)=>{
-                        const asiste=["si","sí"].includes((f.asistencia||"").toLowerCase());
-                        const aplica=asiste && ((f.aplicacion||"").trim().length>0);
-                        const bg=aplica?"bg-green-50":asiste?"bg-orange-50":"";
-                        return (
-                          <tr key={f.id} className={bg}>
-                            <td className="border px-2 py-1">{i+1}</td>
-                            <td className="border px-2 py-1"><input type="date" className="w-full border rounded px-2 py-1 text-sm" value={f.fecha} onChange={e=>updForm(f.id,"fecha",e.target.value)}/></td>
-                            <td className="border px-2 py-1">
-                              <select className="w-full border rounded px-2 py-1 text-sm" value={f.asistencia} onChange={e=>updForm(f.id,"asistencia",e.target.value)}>
-                                <option value=""></option>
-                                <option value="SI">SI</option>
-                                <option value="NO">NO</option>
-                                <option value="Pendiente">Pendiente</option>
-                              </select>
-                            </td>
-                            <td className="border px-2 py-1"><input className="w-full border rounded px-2 py-1 text-sm" value={f.titulo} placeholder="Nombre del curso…" onChange={e=>updForm(f.id,"titulo",e.target.value)}/></td>
-                            <td className="border px-2 py-1"><input className="w-full border rounded px-2 py-1 text-sm" value={f.aplicacion} placeholder="¿Cómo se aplicará? o SI/NO" onChange={e=>updForm(f.id,"aplicacion",e.target.value)}/></td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              </Panel>
-
-              {/* Procesos */}
-              <Panel title="Procesos y paquetes personalizados" open={panelProcOpen} onToggle={()=>setPanelProcOpen(o=>!o)}>
-                <div className="flex justify-end mb-2">
-                  <button onClick={addProceso} className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded hover:bg-blue-700">Añadir</button>
-                </div>
-                <div className="overflow-x-auto">
-                  <table className="min-w-full bg-white border rounded">
-                    <thead className="bg-red-600 text-white">
-                      <tr>
-                        <th className="px-2 py-2 text-left">#</th>
-                        <th className="px-2 py-2 text-left">Nombre</th>
-                        <th className="px-2 py-2 text-left">Descripción</th>
-                        <th className="px-2 py-2 text-center">Puntuación</th>
-                        <th className="px-2 py-2 text-left">Observaciones</th>
-                        <th className="px-2 py-2 text-left">Fecha visita</th>
-                        <th className="px-2 py-2"></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {currentPro.filter(p=>{
-                        if(!q) return true;
-                        const txt=`${p.nombre||""} ${p.descripcion||""} ${p.observaciones||""}`.toLowerCase();
-                        return txt.includes(q);
-                      }).map((p,i)=>(
-                        <tr key={p.id}>
-                          <td className="border px-2 py-1">{i+1}</td>
-                          <td className="border px-2 py-1"><input className="w-full border rounded px-2 py-1 text-sm" value={p.nombre} placeholder="Paquete…" onChange={e=>updProceso(p.id,"nombre",e.target.value)}/></td>
-                          <td className="border px-2 py-1"><input className="w-full border rounded px-2 py-1 text-sm" value={p.descripcion} placeholder="Descripción…" onChange={e=>updProceso(p.id,"descripcion",e.target.value)}/></td>
-                          <td className="border px-2 py-1 text-center"><input className="w-24 border rounded px-2 py-1 text-sm text-center" value={p.puntuacion} placeholder="8/10" onChange={e=>updProceso(p.id,"puntuacion",e.target.value)}/></td>
-                          <td className="border px-2 py-1"><input className="w-full border rounded px-2 py-1 text-sm" value={p.observaciones} placeholder="Observaciones…" onChange={e=>updProceso(p.id,"observaciones",e.target.value)}/></td>
-                          <td className="border px-2 py-1"><input type="date" className="w-full border rounded px-2 py-1 text-sm" value={p.fechaVisita} onChange={e=>updProceso(p.id,"fechaVisita",e.target.value)}/></td>
-                          <td className="border px-2 py-1 text-right">
-                            <button onClick={()=>delProceso(p.id)} disabled={currentPro.length<=1} className={`px-2 py-1 text-sm rounded ${currentPro.length<=1?"bg-gray-200 text-gray-400":"bg-red-600 text-white hover:bg-red-700"}`}>Eliminar</button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </Panel>
-            </div>
-          </div>
-
-          {/* MODAL NUBE */}
-          {cloudOpen && (
-            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-              <div className="bg-white rounded-xl shadow-xl border-2 border-red-600 max-w-lg w-full mx-4">
-                <div className="p-5">
-                  <h3 className="text-2xl font-bold text-gray-800 mb-1">Nube (GitHub) — PIN: AR4321</h3>
-                  <p className="text-gray-600 text-sm mb-4">
-                    Se guardará un JSON en tu repositorio con el API de GitHub.
-                  </p>
-                  <div className="grid grid-cols-2 gap-3">
-                    <input className="border-2 rounded px-3 py-2" placeholder="Owner" value={ghOwner} onChange={e=>setGhOwner(e.target.value)}/>
-                    <input className="border-2 rounded px-3 py-2" placeholder="Repo" value={ghRepo} onChange={e=>setGhRepo(e.target.value)}/>
-                    <input className="col-span-2 border-2 rounded px-3 py-2" placeholder="Ruta (p.ej. data/audiologia.json)" value={ghPath} onChange={e=>setGhPath(e.target.value)}/>
-                    <input className="col-span-2 border-2 rounded px-3 py-2" placeholder="Token (se guardará protegido)" value={ghTokenPlain} onChange={e=>setGhTokenPlain(e.target.value)}/>
-                    <input className="border-2 rounded px-3 py-2" placeholder="PIN" value={cloudPIN} onChange={e=>setCloudPIN(e.target.value)}/>
-                  </div>
-                  <div className="flex items-center gap-2 mt-3">
-                    <button onClick={saveCloudSettings} className="px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-900">Guardar ajustes</button>
-                    <div className="flex-1"></div>
-                    <button onClick={loadFromGitHub} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Cargar</button>
-                    <button onClick={pushToGitHub} className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">Guardar</button>
-                  </div>
-                </div>
-                <div className="bg-gray-100 px-5 py-3 flex items-center justify-between rounded-b-xl">
-                  <div className="text-xs text-gray-600">El token se guarda ofuscado localmente y se desbloquea con el PIN.</div>
-                  <button onClick={()=>setCloudOpen(false)} className="px-3 py-1.5 bg-gray-400 text-white rounded hover:bg-gray-500">Cerrar</button>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      );
-    };
-
-    const Panel=({title,open,onToggle,children})=>(
-      <div className="bg-white rounded-xl shadow p-4 border-l-4 border-red-600">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-xl font-bold text-gray-800">{title}</h3>
-          <button onClick={onToggle} className="text-sm text-red-600">{open?"Ocultar":"Mostrar"}</button>
-        </div>
-        {open && <div>{children}</div>}
+  <!-- header -->
+  <div class="header">
+    <div class="brand">
+      <img id="logoImg" class="logo" src="https://raw.githubusercontent.com/arrojasboris-byte/plataforma-Afflelou/main/logo-afflelou.png" alt="Logo">
+      <div class="titlebox">
+        <span class="kicker">Plataforma</span>
+        <div class="h1">AUDIOLOGIA-SEGUIMIENTO</div>
       </div>
-    );
+    </div>
+    <div class="iconbar">
+      <button class="iconbtn" id="btnLogo" title="Logo"><i class="ri-image-2-line"></i></button>
+      <button class="iconbtn" id="btnLock" title="Editar con PIN"><i class="ri-lock-2-line"></i></button>
+      <button class="iconbtn red" id="btnCloud" title="Guardar en nube"><i class="ri-cloud-line"></i></button>
+      <button class="iconbtn blue" id="btnBackup" title="Backup / Restaurar"><i class="ri-save-3-line"></i></button>
+      <button class="iconbtn" id="btnSettings" title="Ajustes"><i class="ri-settings-3-line"></i></button>
+    </div>
+    <input id="logoFile" type="file" accept="image/*" class="hide">
+    <input id="backupFile" type="file" accept="application/json" class="hide">
+  </div>
 
-    const CentroEditor=({centro,onCancel,onSave})=>{
-      const [form,setForm]=React.useState({...centro});
-      return (
-        <div className="space-y-2">
-          <input className="w-full border rounded px-2 py-1 text-sm" value={form.nombre} onChange={e=>setForm({...form,nombre:e.target.value})}/>
-          <div className="grid grid-cols-2 gap-2">
-            <input className="border rounded px-2 py-1 text-sm" value={form.delegado} onChange={e=>setForm({...form,delegado:e.target.value})}/>
-            <input className="border rounded px-2 py-1 text-sm" value={form.audiologo} onChange={e=>setForm({...form,audiologo:e.target.value})}/>
-            <select className="border rounded px-2 py-1 text-sm" value={form.tipo} onChange={e=>setForm({...form,tipo:e.target.value})}>
-              <option value="">Tipo…</option>
-              <option value="Franquicia">Franquicia</option>
-              <option value="Sucursal">Sucursal</option>
-            </select>
+  <!-- search -->
+  <div class="searchWrap">
+    <input id="search" class="search" placeholder="Buscar en secciones, centros y datos..." />
+  </div>
+
+  <!-- layout -->
+  <div class="grid">
+    <!-- left: sections -->
+    <div class="card">
+      <div class="cardHeader">
+        <div class="cardTitle">Secciones</div>
+        <div class="actions">
+          <button id="addSection" class="smallbtn"><i class="ri-add-line"></i> Añadir</button>
+        </div>
+      </div>
+      <div class="hr"></div>
+      <div class="pad" id="sections">
+
+        <!-- Centros exclusivos -->
+        <div class="sectionItem" data-sec="exclusivos">
+          <div class="sectionHead">
+            <h4>Centros exclusivos</h4>
+            <div>
+              <span class="badge" id="countExclusivos">0</span>
+              <span class="linkBtn" data-toggle="#bodyExclusivos">Mostrar</span>
+            </div>
           </div>
-          <div className="flex gap-2">
-            <button onClick={()=>onSave(form)} className="px-3 py-1.5 text-sm bg-green-600 text-white rounded hover:bg-green-700">Guardar</button>
-            <button onClick={onCancel} className="px-3 py-1.5 text-sm bg-gray-400 text-white rounded hover:bg-gray-500">Cancelar</button>
+          <div class="sectionBody" id="bodyExclusivos">
+            <div id="listExclusivos"></div>
+            <div class="addLine editOnly">
+              <input id="newExNombre" placeholder="Nombre centro">
+              <input id="newExDelegado" placeholder="Delegado">
+              <input id="newExAudio" placeholder="Audiólogo">
+              <select id="newExTipo">
+                <option value="">Tipo…</option>
+                <option value="Franquicia">Franquicia</option>
+                <option value="Sucursal">Sucursal</option>
+              </select>
+              <button id="btnAddEx" class="plus"><i class="ri-add-line"></i></button>
+            </div>
           </div>
         </div>
-      );
-    };
 
-    const root=ReactDOM.createRoot(document.getElementById("root"));
-    root.render(<App/>);
-  </script>
+        <!-- Centros flop -->
+        <div class="sectionItem" data-sec="flop">
+          <div class="sectionHead">
+            <h4>Centros flop</h4>
+            <div>
+              <span class="badge" id="countFlop">0</span>
+              <span class="linkBtn" data-toggle="#bodyFlop">Mostrar</span>
+            </div>
+          </div>
+          <div class="sectionBody" id="bodyFlop">
+            <div id="listFlop"></div>
+            <div class="addLine editOnly">
+              <input id="newFlNombre" placeholder="Nombre centro">
+              <input id="newFlDelegado" placeholder="Delegado">
+              <input id="newFlAudio" placeholder="Audiólogo">
+              <select id="newFlTipo">
+                <option value="">Tipo…</option>
+                <option value="Franquicia">Franquicia</option>
+                <option value="Sucursal">Sucursal</option>
+              </select>
+              <button id="btnAddFl" class="plus"><i class="ri-add-line"></i></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Formaciones - Mentoring -->
+        <div class="sectionItem" data-sec="formMent">
+          <div class="sectionHead">
+            <h4>Formaciones – Mentoring</h4>
+            <div><span class="linkBtn" data-toggle="#bodyFormMent">Mostrar</span></div>
+          </div>
+          <div class="sectionBody" id="bodyFormMent">
+            <div class="row">
+              <strong>Cíclicos</strong>
+              <span class="muted">Programas recurrentes</span>
+              <div class="rowBtns editOnly">
+                <button class="smallbtn">Editar</button>
+                <button class="smallbtn red">Eliminar</button>
+              </div>
+            </div>
+            <div class="row">
+              <strong>Grupo delegado</strong>
+              <span class="muted">Plan por delegado</span>
+              <div class="rowBtns editOnly">
+                <button class="smallbtn">Editar</button>
+                <button class="smallbtn red">Eliminar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Visitas a centros -->
+        <div class="sectionItem" data-sec="visitas">
+          <div class="sectionHead">
+            <h4>Visitas a centros</h4>
+            <div><span class="linkBtn" data-toggle="#bodyVisitas">Mostrar</span></div>
+          </div>
+          <div class="sectionBody" id="bodyVisitas">
+            <div class="row">
+              <strong>Registro de visitas</strong>
+              <span class="muted">Próximamente</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- right: procedures -->
+    <div class="card">
+      <div class="cardHeader">
+        <div class="procHeader">
+          <div class="procTitle">Procedimientos — <span id="procCentro">Seleccione un centro</span></div>
+          <span class="chip" id="procCount">0 ítems</span>
+        </div>
+        <div class="procAdd editOnly">
+          <button id="btnAddProc" class="smallbtn green"><i class="ri-add-line"></i> Añadir</button>
+        </div>
+      </div>
+      <div class="hr"></div>
+      <div class="procList" id="procList"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---------- Estado ---------- */
+const state = JSON.parse(localStorage.getItem('audiologia_state_v2')||'null') || {
+  logo: '',
+  edit: false,
+  exclusivos: [
+    {id:1, nombre:'Reina Mercedes', delegado:'Ana Martínez', audio:'Dr. García', tipo:'Franquicia'},
+    {id:2, nombre:'Barcelona Centro', delegado:'Carlos Ruiz', audio:'Dra. López', tipo:'Sucursal'}
+  ],
+  flop: [],
+  selectedCentroId: 1,
+  procedimientos: {
+    // por centro exclusivo
+    "1":[
+      {id: 1, titulo:'Chequeo inicial', fecha:'', accion:'', derivacion:0, cita:0, obs:''},
+    ],
+    "2":[]
+  }
+};
+function save(){ localStorage.setItem('audiologia_state_v2', JSON.stringify(state)); render(); }
+
+/* ---------- Util ---------- */
+const $ = s=>document.querySelector(s);
+const $$ = s=>document.querySelectorAll(s);
+function uid(){ return Math.floor(Math.random()*1e9); }
+function toggleEdit(on){
+  state.edit = on ?? !state.edit;
+  document.querySelectorAll('.editOnly').forEach(el=> el.classList.toggle('hide', !state.edit));
+  $('#btnLock').innerHTML = state.edit ? '<i class="ri-lock-unlock-line"></i>' : '<i class="ri-lock-2-line"></i>';
+}
+
+/* ---------- Render secciones ---------- */
+function renderCentros(list, mountId, countId, tipo){
+  const mount = $(mountId); mount.innerHTML = '';
+  list.forEach(c=>{
+    const row = document.createElement('div');
+    row.className='row';
+    row.innerHTML = `
+      <div>
+        <strong>${c.nombre}</strong>
+        <div class="muted">👤 ${c.delegado || '-'} · 🎧 ${c.audio || '-'} · 📍 ${c.tipo || '-'}</div>
+      </div>
+      <div class="rowBtns">
+        ${tipo==='ex' ? `<button class="smallbtn" data-sel="${c.id}"><i class="ri-check-line"></i> Seleccionar</button>`:''}
+        <button class="smallbtn editOnly"><i class="ri-pencil-line"></i></button>
+        <button class="smallbtn red editOnly"><i class="ri-delete-bin-line"></i></button>
+      </div>`;
+    // eventos
+    if(tipo==='ex') row.querySelector('[data-sel]')?.addEventListener('click',()=>{
+      state.selectedCentroId = c.id; save();
+    });
+    // editar
+    row.querySelector('.editOnly:nth-of-type(1)')?.addEventListener('click',()=>{
+      const nombre = prompt('Nombre', c.nombre)||c.nombre;
+      const del = prompt('Delegado', c.delegado||'')||c.delegado;
+      const au = prompt('Audiólogo', c.audio||'')||c.audio;
+      const tp = prompt('Tipo (Franquicia/Sucursal)', c.tipo||'')||c.tipo;
+      Object.assign(c,{nombre,delegado:del,audio:au,tipo:tp}); save();
+    });
+    // eliminar
+    row.querySelector('.editOnly.red')?.addEventListener('click',()=>{
+      if(!confirm('¿Eliminar centro?')) return;
+      const arr = (tipo==='ex')? state.exclusivos : state.flop;
+      const idx = arr.findIndex(x=>x.id===c.id);
+      if(idx>=0) arr.splice(idx,1);
+      if(tipo==='ex' && state.selectedCentroId===c.id) state.selectedCentroId = state.exclusivos[0]?.id || null;
+      save();
+    });
+    mount.appendChild(row);
+  });
+  $(countId).textContent = list.length;
+}
+function renderProcedimientos(){
+  const centro = state.exclusivos.find(c=>c.id===state.selectedCentroId);
+  $('#procCentro').textContent = centro? centro.nombre : 'Seleccione un centro';
+  const list = centro ? (state.procedimientos[centro.id] || (state.procedimientos[centro.id]=[])) : [];
+  $('#procCount').textContent = `${list.length} ítems`;
+  const mount = $('#procList'); mount.innerHTML = '';
+  list.forEach(p=>{
+    const item = document.createElement('div');
+    item.className='procItem';
+    item.innerHTML = `
+      <div class="procHead" data-toggle>
+        <h5>${p.titulo || 'Sin título'}</h5>
+        <div class="rowBtns">
+          <button class="smallbtn editOnly" data-edit><i class="ri-pencil-line"></i></button>
+          <button class="smallbtn red editOnly" data-del><i class="ri-delete-bin-line"></i></button>
+        </div>
+      </div>
+      <div class="procBody">
+        <div class="flexcol">
+          <input class="half" data-k="fecha" placeholder="Fecha" value="${p.fecha||''}">
+          <input class="half" data-k="accion" placeholder="Acción" value="${p.accion||''}">
+          <div class="half"><input data-k="derivacion" placeholder="Derivación" value="${p.derivacion||0}" type="number"></div>
+          <div class="half"><input data-k="cita" placeholder="Cita" value="${p.cita||0}" type="number"></div>
+          <textarea rows="3" data-k="obs" placeholder="Observaciones">${p.obs||''}</textarea>
+        </div>
+      </div>`;
+    // plegable
+    item.querySelector('[data-toggle]').addEventListener('click',e=>{
+      if(e.target.closest('.rowBtns')) return;
+      item.querySelector('.procBody').classList.toggle('show');
+    });
+    // editar (renombrar)
+    item.querySelector('[data-edit]').addEventListener('click',()=>{
+      const t = prompt('Título', p.titulo||'')||p.titulo; p.titulo=t; save();
+    });
+    // eliminar
+    item.querySelector('[data-del]').addEventListener('click',()=>{
+      if(!confirm('¿Eliminar procedimiento?')) return;
+      const arr = state.procedimientos[centro.id];
+      const idx = arr.findIndex(x=>x.id===p.id); if(idx>=0) arr.splice(idx,1); save();
+    });
+    // cambios de campos
+    item.querySelectorAll('[data-k]').forEach(inp=>{
+      inp.addEventListener('input',()=>{
+        const k = inp.dataset.k;
+        p[k] = (k==='cita'||k==='derivacion') ? Number(inp.value||0) : inp.value;
+        save();
+      });
+    });
+    mount.appendChild(item);
+  });
+}
+function render(){
+  // logo
+  if(state.logo) $('#logoImg').src = state.logo;
+  // centros
+  renderCentros(state.exclusivos,'#listExclusivos','#countExclusivos','ex');
+  renderCentros(state.flop,'#listFlop','#countFlop','fl');
+  // procedimientos
+  renderProcedimientos();
+  // modo edición
+  toggleEdit(state.edit);
+}
+render();
+
+/* ---------- Eventos UI ---------- */
+// toggle secciones
+$$('.linkBtn').forEach(btn=>{
+  const target = btn.getAttribute('data-toggle');
+  if(!target) return;
+  btn.addEventListener('click',()=>{
+    const el = document.querySelector(target);
+    el.classList.toggle('show');
+    btn.textContent = el.classList.contains('show')? 'Ocultar' : 'Mostrar';
+  });
+});
+
+// add centro exclusivos
+$('#btnAddEx').addEventListener('click',()=>{
+  const n = $('#newExNombre').value.trim(); if(!n) return;
+  state.exclusivos.push({
+    id: uid(),
+    nombre:n,
+    delegado: $('#newExDelegado').value.trim(),
+    audio: $('#newExAudio').value.trim(),
+    tipo: $('#newExTipo').value
+  });
+  $('#newExNombre').value = $('#newExDelegado').value = $('#newExAudio').value = '';
+  $('#newExTipo').value = '';
+  save();
+});
+// add centro flop
+$('#btnAddFl').addEventListener('click',()=>{
+  const n = $('#newFlNombre').value.trim(); if(!n) return;
+  state.flop.push({
+    id: uid(),
+    nombre:n,
+    delegado: $('#newFlDelegado').value.trim(),
+    audio: $('#newFlAudio').value.trim(),
+    tipo: $('#newFlTipo').value
+  });
+  $('#newFlNombre').value = $('#newFlDelegado').value = $('#newFlAudio').value = '';
+  $('#newFlTipo').value = '';
+  save();
+});
+
+// add procedimiento
+$('#btnAddProc').addEventListener('click',()=>{
+  const cId = state.selectedCentroId;
+  if(!cId){ alert('Selecciona primero un centro exclusivo.'); return; }
+  const arr = state.procedimientos[cId] || (state.procedimientos[cId]=[]);
+  arr.push({id:uid(), titulo:'Nuevo procedimiento', fecha:'', accion:'', derivacion:0, cita:0, obs:''});
+  save();
+});
+
+/* logo */
+$('#btnLogo').addEventListener('click',()=> $('#logoFile').click());
+$('#logoFile').addEventListener('change',(e)=>{
+  const f = e.target.files[0]; if(!f) return;
+  const r = new FileReader(); r.onload = ev=>{ state.logo = ev.target.result; save(); };
+  r.readAsDataURL(f);
+});
+
+/* edición con PIN */
+$('#btnLock').addEventListener('click',()=>{
+  if(state.edit){ toggleEdit(false); return; }
+  const p = prompt('PIN de edición'); if(p==='AR4321'){ toggleEdit(true); } else if(p!==null){ alert('PIN incorrecto'); }
+});
+
+/* Backup local */
+$('#btnBackup').addEventListener('click',()=>{
+  // menú rápido: descargar o cargar archivo
+  const op = confirm('Aceptar = Descargar backup\nCancelar = Cargar backup desde archivo');
+  if(op){
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(state,null,2)],{type:'application/json'}));
+    a.download = 'audiologia_backup.json'; a.click();
+  }else{
+    $('#backupFile').click();
+  }
+});
+$('#backupFile').addEventListener('change',(e)=>{
+  const f = e.target.files[0]; if(!f) return;
+  const r = new FileReader();
+  r.onload = ev=>{
+    try{
+      const obj = JSON.parse(ev.target.result);
+      Object.assign(state, obj);
+      save();
+    }catch(err){ alert('Archivo inválido'); }
+  };
+  r.readAsText(f);
+});
+
+/* Guardar en nube (placeholder) */
+$('#btnCloud').addEventListener('click',()=>{
+  alert('“Guardar en nube” preparado. Podemos conectarlo a GitHub Gist o Google Drive cuando me pases el método preferido.');
+});
+
+/* Ajustes simples */
+$('#btnSettings').addEventListener('click',()=>{
+  alert('Ajustes mínimos. Próximamente: integración nube, usuarios, etc.');
+});
+
+/* Búsqueda */
+$('#search').addEventListener('input',(e)=>{
+  const q = e.target.value.toLowerCase().trim();
+  // filtra filas de centros
+  ['#listExclusivos','#listFlop'].forEach(sel=>{
+    $$(sel+' .row').forEach(r=>{
+      r.style.display = r.textContent.toLowerCase().includes(q)? '' : 'none';
+    });
+  });
+  // filtra procedimientos (titulo y cuerpo)
+  $$('#procList .procItem').forEach(it=>{
+    it.style.display = it.textContent.toLowerCase().includes(q)? '' : 'none';
+  });
+});
+</script>
 </body>
 </html>
