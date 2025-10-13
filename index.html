@@ -1,233 +1,297 @@
-<!-- === Pegar justo antes de </body> en https://arrojasboris-byte.github.io/AudioSeguimiento/ === -->
+<!-- === AudioSeguimiento – Cloud Sync (Firestore) | PEGAR ANTES DE </body> === -->
 <script type="module">
   /********************************************************************
-   * AudioSeguimiento – Sincronización en la nube (Firestore)
-   * - Guarda/recupera el estado desde la nube
-   * - PIN fijo: AR4321 (se guarda en localStorage)
-   * - Muestra "Última actualización" y estado de sincronización
-   *
-   * INSTRUCCIONES (una sola vez):
-   * 1) Crea un proyecto en https://console.firebase.google.com
-   * 2) Activa Firestore (modo production)
-   * 3) Copia tu CONFIG de Firebase aquí abajo (apiKey, authDomain, projectId...)
-   * 4) En Firestore Reglas, para prototipo, puedes usar (restringe más tarde):
-   *    rules_version = '2';
-   *    service cloud.firestore {
-   *      match /databases/{database}/documents {
-   *        match /platformStates/{docId} {
-   *          allow read, write: if true;
-   *        }
-   *      }
-   *    }
+   * AudioSeguimiento – Guardar en la Nube (Firestore)
+   * - Mantiene tu edición original intacta (no interfiere con tu JS).
+   * - Sincroniza SOLO elementos [data-cloud] (o #notas como fallback).
+   * - PIN fijo: AR4321 → docId = SHA-256(PIN).
+   * - Barra flotante: Guardar nube / Actualizar + Última actualización.
+   * - Falla con gracia si falta config Firebase (sin romper la página).
    ********************************************************************/
 
-  // 1) CONFIG de tu proyecto Firebase (Rellena con tus valores)
+  // ============ 1) CONFIGURA AQUÍ TU FIREBASE (RELLENA LOS CAMPOS) ============
   const firebaseConfig = {
-    apiKey: "TU_API_KEY",
-    authDomain: "TU_AUTH_DOMAIN",
-    projectId: "TU_PROJECT_ID",
-    // Opcionales, pero recomendables si los tienes:
+    apiKey: "TU_API_KEY",                 // <- RELLENA
+    authDomain: "TU_AUTH_DOMAIN",         // <- RELLENA (p.ej. tuapp.firebaseapp.com)
+    projectId: "TU_PROJECT_ID",           // <- RELLENA (p.ej. tuapp)
+    // Opcionales si los tienes:
     // storageBucket: "TU_STORAGE_BUCKET",
     // messagingSenderId: "TU_SENDER_ID",
     // appId: "TU_APP_ID",
   };
 
-  // 2) Import del SDK v9 modular (desde CDN oficial)
+  // ============ 2) IMPORTS SDK FIREBASE (CDN OFICIAL) ============
   import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js';
   import {
     getFirestore, doc, getDoc, setDoc, onSnapshot, serverTimestamp
   } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js';
 
-  // 3) Utilidad: hash SHA-256 (hex)
+  // ============ 3) UTILIDADES ============
+  const PIN = "AR4321";
+
   async function sha256Hex(text) {
     const enc = new TextEncoder().encode(text);
     const buf = await crypto.subtle.digest('SHA-256', enc);
     return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
   }
 
-  // 4) PIN fijo (AR4321) → se guarda en localStorage para no preguntar
-  const FIXED_PIN = "AR4321";
-  localStorage.setItem('audioseguimiento_pin', FIXED_PIN);
-
-  // 5) Hooks necesarios (AJUSTA ESTO A TU APLICACIÓN REAL)
-  // Deben existir 2 funciones globales para serializar/aplicar el estado.
-  // Si ya las tienes, elimina estos "fallbacks" y usa las tuyas.
-  if (typeof window.getPlatformState !== 'function') {
-    // EJEMPLO: recoge campos típicos de la UI. ADÁPTALO a tu DOM.
-    window.getPlatformState = () => {
-      const notas = document.querySelector('#notas')?.value || '';
-      // Si tienes listados, tablas o sliders, léelos aquí.
-      return {
-        notas,
-        // pacientes: leerPacientesDeTuUI(),
-        // ajustes: leerAjustesDeTuUI(),
-        version: 'demo',
-        savedAt: Date.now()
-      };
-    };
-  }
-  if (typeof window.applyPlatformState !== 'function') {
-    // EJEMPLO: aplica el estado en la UI. ADÁPTALO a tu DOM.
-    window.applyPlatformState = (state) => {
-      if (!state) return;
-      try {
-        if (typeof state.notas === 'string' && document.querySelector('#notas')) {
-          document.querySelector('#notas').value = state.notas;
-        }
-        // if (state.pacientes) pintarPacientesEnTuUI(state.pacientes);
-        // if (state.ajustes) aplicarAjustesEnTuUI(state.ajustes);
-      } catch (e) {
-        console.warn('No se pudo aplicar parte del estado:', e);
-      }
-      // Vista previa rápida (opcional)
-      const area = document.querySelector('#estado-previsualizacion');
-      if (area) area.textContent = JSON.stringify(state, null, 2);
-    };
+  function isFirebaseConfigured(cfg) {
+    const req = ["apiKey","authDomain","projectId"];
+    return req.every(k => typeof cfg[k] === "string" && cfg[k] && !cfg[k].startsWith("TU_"));
   }
 
-  // 6) UI mínima: barra flotante + previsualización de estado (puedes quitarlo)
-  const toolbar = document.createElement('div');
-  toolbar.style.position = 'fixed';
-  toolbar.style.right = '1rem';
-  toolbar.style.bottom = '1rem';
-  toolbar.style.zIndex = '2147483647';
-  toolbar.style.background = 'rgba(0,0,0,0.75)';
-  toolbar.style.color = '#fff';
-  toolbar.style.padding = '10px 12px';
-  toolbar.style.borderRadius = '12px';
-  toolbar.style.fontFamily = 'system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, sans-serif';
-  toolbar.style.boxShadow = '0 6px 18px rgba(0,0,0,0.25)';
-  toolbar.innerHTML = `
-    <div style="display:flex; align-items:center; gap:.5rem; flex-wrap:wrap;">
-      <strong>Cloud Sync</strong>
-      <button id="btn-actualizar" style="padding:.4rem .7rem; border:0; border-radius:8px; cursor:pointer;">Actualizar</button>
-      <button id="btn-guardar" style="padding:.4rem .7rem; border:0; border-radius:8px; cursor:pointer;">Guardar</button>
-      <span id="sync-status" style="opacity:.9">⏳ Inicializando…</span>
-      <span id="last-update" style="opacity:.9">—</span>
-    </div>`;
-  document.body.appendChild(toolbar);
+  // ============ 4) UI DISCRETA (NO ROMPE TU DISEÑO) ============
+  const bar = document.createElement('div');
+  Object.assign(bar.style, {
+    position: 'fixed',
+    right: '12px',
+    bottom: '12px',
+    zIndex: 2147483647,
+    background: 'rgba(0,0,0,0.78)',
+    color: '#fff',
+    padding: '8px 10px',
+    borderRadius: '12px',
+    fontFamily: 'system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,sans-serif',
+    boxShadow: '0 6px 18px rgba(0,0,0,0.25)',
+    display: 'flex',
+    gap: '8px',
+    alignItems: 'center',
+    flexWrap: 'wrap'
+  });
+  bar.innerHTML = `
+    <strong style="font-weight:600">Cloud Sync</strong>
+    <button id="cloud-save" style="padding:.4rem .6rem;border:0;border-radius:8px;cursor:pointer;">Guardar nube</button>
+    <button id="cloud-load" style="padding:.4rem .6rem;border:0;border-radius:8px;cursor:pointer;">Actualizar</button>
+    <span id="cloud-status" style="opacity:.95">⏳</span>
+    <span id="cloud-last" style="opacity:.9">—</span>
+  `;
+  document.body.appendChild(bar);
 
+  const btnSave = bar.querySelector('#cloud-save');
+  const btnLoad = bar.querySelector('#cloud-load');
+  const elStatus = bar.querySelector('#cloud-status');
+  const elLast   = bar.querySelector('#cloud-last');
+
+  // Vista previa opcional (útil al probar). Quita si no la quieres.
   const pre = document.createElement('pre');
+  Object.assign(pre.style, {
+    position: 'fixed',
+    left: '12px',
+    bottom: '12px',
+    maxWidth: '40vw',
+    maxHeight: '32vh',
+    overflow: 'auto',
+    background: 'rgba(255,255,255,0.96)',
+    padding: '8px 10px',
+    borderRadius: '12px',
+    fontSize: '12px',
+    boxShadow: '0 6px 18px rgba(0,0,0,0.15)',
+    color: '#111',
+    whiteSpace: 'pre-wrap',
+    zIndex: 2147483646
+  });
   pre.id = 'estado-previsualizacion';
-  pre.style.position = 'fixed';
-  pre.style.left = '1rem';
-  pre.style.bottom = '1rem';
-  pre.style.maxWidth = '40vw';
-  pre.style.maxHeight = '30vh';
-  pre.style.overflow = 'auto';
-  pre.style.background = 'rgba(255,255,255,0.95)';
-  pre.style.padding = '8px 10px';
-  pre.style.borderRadius = '12px';
-  pre.style.fontSize = '12px';
-  pre.style.boxShadow = '0 6px 18px rgba(0,0,0,0.15)';
-  pre.style.color = '#111';
-  pre.style.whiteSpace = 'pre-wrap';
   document.body.appendChild(pre);
 
-  const statusEl = document.getElementById('sync-status');
-  const lastEl = document.getElementById('last-update');
-  const setStatus = (t) => statusEl.textContent = t;
-  const setLast = (date) => {
-    if (!date) { lastEl.textContent = '—'; return; }
+  function setStatus(msg){ elStatus.textContent = msg; }
+  function setLast(ts){
+    if (!ts) { elLast.textContent = '—'; return; }
     try {
-      const d = date.toDate ? date.toDate() : new Date(date);
-      lastEl.textContent = `Última actualización: ${d.toLocaleString('es-ES')}`;
-    } catch {
-      lastEl.textContent = '—';
+      const d = ts?.toDate ? ts.toDate() : new Date(ts);
+      elLast.textContent = `Última actualización: ${d.toLocaleString('es-ES')}`;
+    } catch { elLast.textContent = '—'; }
+  }
+
+  function disableButtons(reason){
+    btnSave.disabled = true; btnLoad.disabled = true;
+    btnSave.style.opacity = .6; btnLoad.style.opacity = .6;
+    setStatus(reason);
+  }
+
+  // ============ 5) SELECCIÓN DE CAMPOS A SINCRONIZAR ============
+  function getCloudElements() {
+    const marked = Array.from(document.querySelectorAll('[data-cloud]'));
+    if (marked.length > 0) return marked;
+    const fallback = document.querySelector('#notas');
+    return fallback ? [fallback] : [];
+  }
+
+  function readElementValue(el) {
+    const tag = el.tagName;
+    if (tag === 'INPUT') {
+      const t = (el.getAttribute('type') || 'text').toLowerCase();
+      if (t === 'checkbox') return !!el.checked;
+      if (t === 'radio') return el.checked ? el.value : null;
+      return el.value;
     }
-  };
+    if (tag === 'TEXTAREA' || tag === 'SELECT') return el.value;
+    return el.textContent;
+  }
 
-  // 7) Firebase / Firestore
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-
-  // 8) Derivar docId a partir del PIN hasheado (evita doc predecible)
-  const currentPIN = localStorage.getItem('audioseguimiento_pin') || FIXED_PIN;
-  const docId = await sha256Hex(currentPIN.trim());
-  const docRef = doc(db, 'platformStates', docId);
-
-  // 9) Suscripción en tiempo real
-  setStatus('🔄 Conectando…');
-  let initialApplied = false;
-  onSnapshot(docRef, (snap) => {
-    if (snap.exists()) {
-      const data = snap.data();
-      setLast(data.lastUpdated);
-      if (data && data.state) {
-        // Evita que la primera aplicación pise cambios locales no guardados:
-        if (!initialApplied) {
-          window.applyPlatformState(data.state);
-          initialApplied = true;
-        }
-        setStatus('✅ Sincronizado');
-      } else {
-        setStatus('ℹ️ Documento vacío');
+  function writeElementValue(el, val) {
+    try {
+      const tag = el.tagName;
+      if (tag === 'INPUT') {
+        const t = (el.getAttribute('type') || 'text').toLowerCase();
+        if (t === 'checkbox') { el.checked = !!val; return; }
+        if (t === 'radio') { el.checked = (val === el.value); return; }
+        el.value = (val ?? '');
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+        el.dispatchEvent(new Event('change', { bubbles: true }));
+        return;
       }
-    } else {
-      setStatus('➕ Aún no hay estado en la nube');
-      setLast(null);
+      if (tag === 'TEXTAREA' || tag === 'SELECT') {
+        el.value = (val ?? '');
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+        el.dispatchEvent(new Event('change', { bubbles: true }));
+        return;
+      }
+      if (typeof val === 'string') el.textContent = val;
+    } catch (e) {
+      console.warn('No se pudo aplicar valor a', el, e);
     }
-  }, (err) => {
-    console.error(err);
-    setStatus('⚠️ Error escuchando cambios');
-  });
+  }
 
-  // 10) Guardar a nube
+  function collectState() {
+    const els = getCloudElements();
+    const state = {};
+    els.forEach((el, idx) => {
+      const key = el.id || el.name || `el_${idx}`;
+      const val = readElementValue(el);
+      if (val !== null && key) state[key] = val;
+    });
+    // Previsualización opcional
+    const area = document.getElementById('estado-previsualizacion');
+    if (area) area.textContent = JSON.stringify(state, null, 2);
+    return state;
+  }
+
+  function applyState(state) {
+    if (!state || typeof state !== 'object') return;
+    Object.keys(state).forEach(k => {
+      let el = document.getElementById(k) || document.querySelector(`[name="${CSS.escape(k)}"]`);
+      if (el) writeElementValue(el, state[k]);
+    });
+    const area = document.getElementById('estado-previsualizacion');
+    if (area) area.textContent = JSON.stringify(state, null, 2);
+  }
+
+  // ============ 6) FLUJO PRINCIPAL ============
+  let app, db, docRef;
+
+  async function init() {
+    try {
+      // Comprobación de configuración
+      if (!isFirebaseConfigured(firebaseConfig)) {
+        disableButtons('⚠️ Configura Firebase (apiKey/authDomain/projectId)');
+        console.warn('Rellena firebaseConfig con los valores reales de tu proyecto.');
+        return;
+      }
+
+      // Inicializa Firebase + Firestore
+      app = initializeApp(firebaseConfig);
+      db  = getFirestore(app);
+
+      // Deriva docId desde PIN y prepara docRef
+      const docId = await sha256Hex(PIN);
+      docRef = doc(db, 'platformStates', docId);
+
+      setStatus('🔄 Conectando…');
+
+      // Suscripción en tiempo real
+      onSnapshot(docRef, (snap) => {
+        if (snap.exists()) {
+          const data = snap.data();
+          setLast(data.lastUpdated);
+          if (data?.state) {
+            applyState(data.state);
+            setStatus('✅ Sincronizado');
+          } else {
+            setStatus('ℹ️ Documento vacío');
+          }
+        } else {
+          setLast(null);
+          setStatus('➕ Sin datos en la nube');
+        }
+      }, (err) => {
+        console.error(err);
+        setStatus('⚠️ Error de escucha');
+      });
+
+    } catch (e) {
+      console.error('Fallo en init:', e);
+      disableButtons('❌ Error inicializando');
+      alert('Error inicializando sincronización. Revisa consola.');
+    }
+  }
+
   async function saveToCloud() {
     try {
+      if (!docRef) throw new Error('Firestore no inicializado');
       setStatus('💾 Guardando…');
-      const state = await Promise.resolve(window.getPlatformState());
+      const state = collectState();
       await setDoc(docRef, {
         state,
         lastUpdated: serverTimestamp(),
         updatedBy: 'web'
       }, { merge: true });
       setStatus('✅ Guardado');
+      localStorage.setItem('audioseguimiento_backup', JSON.stringify({ when: Date.now(), state }));
     } catch (e) {
       console.error(e);
       setStatus('❌ Error al guardar');
-      alert('Error guardando en la nube. Revisa la consola.');
+      alert('Error guardando en la nube. Ver consola / reglas Firestore.');
     }
   }
 
-  // 11) Forzar actualización desde nube
-  async function refreshFromCloud() {
+  async function loadFromCloud() {
     try {
+      if (!docRef) throw new Error('Firestore no inicializado');
       setStatus('⬇️ Actualizando…');
       const snap = await getDoc(docRef);
       if (snap.exists()) {
         const data = snap.data();
         setLast(data.lastUpdated);
-        if (data && data.state) {
-          window.applyPlatformState(data.state);
+        if (data?.state) {
+          applyState(data.state);
           setStatus('✅ Actualizado');
         } else {
           setStatus('ℹ️ Documento vacío');
         }
       } else {
-        setStatus('➕ No existe estado aún');
         setLast(null);
+        setStatus('➕ No existe estado aún');
       }
     } catch (e) {
       console.error(e);
       setStatus('❌ Error al actualizar');
-      alert('Error actualizando desde la nube.');
+      alert('Error actualizando desde la nube. Ver consola / reglas Firestore.');
     }
   }
 
-  // 12) Auto-guardado opcional (descomenta si quieres autosave por cambios)
-  // let saveTimer;
-  // function autoSave() {
-  //   clearTimeout(saveTimer);
-  //   saveTimer = setTimeout(saveToCloud, 800);
-  // }
-  // Ejemplos:
-  // document.querySelector('#notas')?.addEventListener('input', autoSave);
+  // ============ 7) ENLACE DE EVENTOS ============
+  btnSave.addEventListener('click', saveToCloud);
+  btnLoad.addEventListener('click', loadFromCloud);
 
-  // 13) Eventos de la barra
-  document.getElementById('btn-guardar').addEventListener('click', saveToCloud);
-  document.getElementById('btn-actualizar').addEventListener('click', refreshFromCloud);
+  // ============ 8) INICIO ============
+  init();
 
-  // 14) (Opcional) Guardar al cerrar/recargar
-  // window.addEventListener('beforeunload', () => { navigator.sendBeacon ? navigator.sendBeacon(...) : saveToCloud(); });
+  /********************************************************************
+   * CONSEJO RÁPIDO:
+   * - Marca con data-cloud lo que quieras sincronizar:
+   *   <input id="nombre" data-cloud>
+   *   <textarea id="notas" data-cloud></textarea>
+   *   <select id="tipo" data-cloud></select>
+   *
+   * REGLAS FIRESTORE (prototipo, abre lectura/escritura):
+   * rules_version = '2';
+   * service cloud.firestore {
+   *   match /databases/{database}/documents {
+   *     match /platformStates/{docId} {
+   *       allow read, write: if true;
+   *     }
+   *   }
+   * }
+   * Para producción: usa Firebase Auth + reglas estrictas.
+   ********************************************************************/
 </script>
