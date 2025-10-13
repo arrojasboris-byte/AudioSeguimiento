@@ -2,62 +2,19 @@
 <html lang="es">
 <head>
   <meta charset="utf-8" />
-  <meta
-    name="viewport"
-    content="width=device-width,initial-scale=1,maximum-scale=1"
-  />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
   <title>AudioSeguimiento – Cloud Sync</title>
   <style>
     :root { color-scheme: light dark; }
-    body {
-      margin: 0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, sans-serif;
-      line-height: 1.35;
-    }
-    header {
-      padding: 16px 18px;
-      background: linear-gradient(90deg, #5a7bf7, #7a9dff);
-      color: #fff;
-    }
-    header h1 {
-      margin: 0;
-      font-size: 1.2rem;
-      letter-spacing: .3px;
-    }
-    main {
-      padding: 18px;
-      display: grid;
-      gap: 16px;
-      max-width: 900px;
-      margin: 0 auto;
-    }
-    .card {
-      background: rgba(255,255,255,.75);
-      backdrop-filter: blur(6px);
-      border-radius: 14px;
-      box-shadow: 0 8px 28px rgba(0,0,0,.08);
-      padding: 14px;
-    }
+    body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, sans-serif; line-height: 1.35; }
+    header { padding: 16px 18px; background: linear-gradient(90deg, #5a7bf7, #7a9dff); color: #fff; }
+    header h1 { margin: 0; font-size: 1.2rem; letter-spacing: .3px; }
+    main { padding: 18px; display: grid; gap: 16px; max-width: 900px; margin: 0 auto; }
+    .card { background: rgba(255,255,255,.75); backdrop-filter: blur(6px); border-radius: 14px; box-shadow: 0 8px 28px rgba(0,0,0,.08); padding: 14px; }
     .label { font-size: .9rem; opacity: .85; margin-bottom: 6px; display: block; }
-    textarea, input, select {
-      width: 100%;
-      padding: 10px 12px;
-      border-radius: 10px;
-      border: 1px solid rgba(0,0,0,.15);
-      outline: none;
-      font: inherit;
-      background: rgba(255,255,255,.9);
-    }
+    textarea, input, select { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(0,0,0,.15); outline: none; font: inherit; background: rgba(255,255,255,.9); }
     small.helper { opacity: .75; display: block; margin-top: 8px; }
-    pre.preview {
-      max-height: 280px;
-      overflow: auto;
-      font-size: 12px;
-      padding: 10px;
-      background: rgba(0,0,0,.05);
-      border-radius: 10px;
-      margin: 0;
-    }
+    pre.preview { max-height: 280px; overflow: auto; font-size: 12px; padding: 10px; background: rgba(0,0,0,.05); border-radius: 10px; margin: 0; }
     @media (prefers-color-scheme: dark) {
       .card { background: rgba(25,25,28,.6); }
       textarea, input, select { background: rgba(30,30,35,.9); color: #eee; border-color: rgba(255,255,255,.15); }
@@ -71,86 +28,75 @@
   </header>
 
   <main>
-    <!-- EJEMPLO mínimo sincronizable (marca tus campos reales con data-cloud) -->
+    <!-- Marca tus campos reales con data-cloud; #notas se usa como respaldo -->
     <div class="card">
       <label for="notas" class="label">Notas (ejemplo, sincroniza con la nube)</label>
       <textarea id="notas" data-cloud rows="7" placeholder="Escribe aquí..."></textarea>
-      <small class="helper">Marca tus campos reales con <code>data-cloud</code> para incluirlos en la sincronización. Si no marcas nada, este <code>#notas</code> se usa como respaldo.</small>
+      <small class="helper">Pon <code>data-cloud</code> en cada campo de tu plataforma que quieras sincronizar.</small>
     </div>
 
     <div class="card">
       <strong>Vista previa del estado guardado</strong>
       <pre id="estado-previsualizacion" class="preview">—</pre>
-      <small class="helper">Se muestra el JSON que se sube/recupera.</small>
     </div>
   </main>
 
-  <!-- === Cloud Sync SIN TOKENS (TODO EN UNO) === -->
+  <!-- === Cloud Sync SIN TOKENS – INTEGRADO === -->
   <script type="module">
-    /********************************************************************
-     * Cloud Sync sin tokens (cliente) – TODO EN UNO
-     * - Usa un endpoint público (Google Apps Script Web App con acceso "Anyone").
-     * - Sin claves ni tokens en el navegador.
-     * - Soporta ?endpoint=URL para abrir y funcionar directo desde un enlace.
-     * - Botón ⚙️: guarda la URL del endpoint en localStorage (una vez).
-     * - Sincroniza elementos [data-cloud] (o #notas si no hay marcados).
-     * - PIN compartido: AR4321 (agrupa el estado por este PIN).
-     ********************************************************************/
-
+    /***** CONFIG *****/
     const PIN = "AR4321";
-    const CFG_KEY = "audioseguimiento_endpoint_url"; // guarda la URL del backend
-    const BK_KEY  = "audioseguimiento_backup";       // copia local de seguridad
+    // Endpoint integrado (tu Apps Script Web App):
+    const ENDPOINT_EMBED = "https://script.google.com/macros/s/AKfycby5vh1Ja0XllWFB98ypWmDcUfUItwEciVimUd5L6Esi1wfPJbcc2dap6G0lciRf51VR/exec";
+    const CFG_KEY = "audioseguimiento_endpoint_url";
+    const BK_KEY  = "audioseguimiento_backup";
 
-    /* =================== Utilidades =================== */
-    function qs(name){
-      const url = new URL(window.location.href);
-      return url.searchParams.get(name);
+    /***** Utilidades *****/
+    function qs(name){ const u = new URL(location.href); return u.searchParams.get(name); }
+    function getEndpoint(){
+      // Prioridad: ?endpoint=... > guardado en localStorage > embebido
+      const ep = qs("endpoint");
+      if (ep) return ep;
+      try { return JSON.parse(localStorage.getItem(CFG_KEY)||"null") || ENDPOINT_EMBED; } catch { return ENDPOINT_EMBED; }
     }
-    function getEndpoint(){ try { return JSON.parse(localStorage.getItem(CFG_KEY) || "null"); } catch { return null; } }
     function setEndpoint(url){ localStorage.setItem(CFG_KEY, JSON.stringify(url)); }
+
+    // Si llegó via ?endpoint=..., guardarlo para futuras visitas
     (function captureEndpointFromLink(){
       const ep = qs("endpoint");
-      if (ep) {
-        try { const u = new URL(ep); setEndpoint(u.toString()); }
-        catch {}
-      }
+      if (ep) { try { const url = new URL(ep); setEndpoint(url.toString()); } catch {} }
     })();
 
-    /* =================== UI flotante =================== */
+    /***** UI flotante *****/
     const bar = document.createElement("div");
     Object.assign(bar.style,{
-      position:"fixed",right:"12px",bottom:"12px",zIndex:2147483647,
-      background:"rgba(0,0,0,.82)",color:"#fff",padding:"8px 10px",
-      borderRadius:"12px",fontFamily:"system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,sans-serif",
-      boxShadow:"0 6px 18px rgba(0,0,0,.25)",display:"flex",gap:"8px",alignItems:"center",flexWrap:"wrap"
+      position:"fixed", right:"12px", bottom:"12px", zIndex:2147483647,
+      background:"rgba(0,0,0,.82)", color:"#fff", padding:"8px 10px",
+      borderRadius:"12px", fontFamily:"system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,sans-serif",
+      boxShadow:"0 6px 18px rgba(0,0,0,.25)", display:"flex", gap:"8px", alignItems:"center", flexWrap:"wrap"
     });
     bar.innerHTML = `
       <strong>Cloud Sync</strong>
       <button id="cloud-save" style="padding:.4rem .6rem;border:0;border-radius:8px;cursor:pointer;">Guardar</button>
       <button id="cloud-load" style="padding:.4rem .6rem;border:0;border-radius:8px;cursor:pointer;">Actualizar</button>
-      <label style="display:flex;align-items:center;gap:.4rem;font-size:.9em;opacity:.95;">
+      <label style="display:flex;align-items:center;gap:.35rem;font-size:.9em;opacity:.95;">
         <input id="cloud-autosave" type="checkbox" style="transform:translateY(1px)" />
         Auto
       </label>
       <span id="cloud-status" style="opacity:.95">⏳</span>
       <span id="cloud-last" style="opacity:.9">—</span>
-      <button id="cloud-config" title="Configurar endpoint" style="padding:.2rem .5rem;border:0;border-radius:8px;background:#444;color:#fff;cursor:pointer;">⚙️</button>
     `;
     document.body.appendChild(bar);
-
     const btnSave = bar.querySelector("#cloud-save");
     const btnLoad = bar.querySelector("#cloud-load");
-    const btnCfg  = bar.querySelector("#cloud-config");
     const chkAuto = bar.querySelector("#cloud-autosave");
     const elStatus= bar.querySelector("#cloud-status");
     const elLast  = bar.querySelector("#cloud-last");
-    const setStatus = (t)=> elStatus.textContent=t;
-    const setLast   = (s)=> elLast.textContent = s ? `Última actualización: ${s}` : "—";
-    function disableButtons(msg){ btnSave.disabled=btnLoad.disabled=true; btnSave.style.opacity=btnLoad.style.opacity=.6; setStatus(msg||"⚠️ Inactivo"); }
-    function enableButtons(){ btnSave.disabled=btnLoad.disabled=false; btnSave.style.opacity=btnLoad.style.opacity=1; }
 
-    /* =================== Qué sincronizar =================== */
     const preview = document.getElementById("estado-previsualizacion");
+    const setStatus = (t)=> elStatus.textContent = t;
+    const setLast   = (s)=> elLast.textContent = s ? `Última actualización: ${s}` : "—";
+
+    /***** Qué sincronizar *****/
     function getCloudElements(){
       const marked = [...document.querySelectorAll("[data-cloud]")];
       if (marked.length) return marked;
@@ -164,7 +110,7 @@
         if (t==="radio")    return el.checked ? el.value : null;
         return el.value;
       }
-      if (el.tagName==="TEXTAREA" || el.tagName==="SELECT") return el.value;
+      if (el.tagName==="TEXTAREA"||el.tagName==="SELECT") return el.value;
       return el.textContent;
     }
     function writeEl(el,val){
@@ -178,7 +124,7 @@
           el.dispatchEvent(new Event("change",{bubbles:true}));
           return;
         }
-        if (el.tagName==="TEXTAREA" || el.tagName==="SELECT"){
+        if (el.tagName==="TEXTAREA"||el.tagName==="SELECT"){
           el.value=(val??"");
           el.dispatchEvent(new Event("input",{bubbles:true}));
           el.dispatchEvent(new Event("change",{bubbles:true}));
@@ -202,85 +148,73 @@
       if (preview) preview.textContent = JSON.stringify(state, null, 2);
     }
 
-    /* =================== Configuración del endpoint =================== */
-    function promptEndpoint(){
-      const example="https://script.google.com/macros/s/AKfycbx.../exec";
-      const msg=`Pega la URL de tu endpoint público (Google Apps Script Web App con acceso "Anyone").\n\nEjemplo:\n${example}\n\nSe guardará en este navegador.`;
-      const u = prompt(msg, getEndpoint()||""); if (!u) return;
-      try{ const test=new URL(u.trim()); setEndpoint(test.toString()); alert("¡Endpoint guardado! Pulsa Actualizar."); enableButtons(); }
-      catch{ alert("URL no válida."); }
-    }
-    btnCfg.addEventListener("click", promptEndpoint);
-
-    /* =================== Backup local (offline) =================== */
+    /***** Backup local (offline) *****/
     function saveBackup(state){ try{ localStorage.setItem(BK_KEY, JSON.stringify({when:Date.now(), state})); }catch{} }
     function loadBackup(){ try{ return JSON.parse(localStorage.getItem(BK_KEY)||"null"); }catch{ return null; } }
 
-    /* =================== Nube (sin tokens) =================== */
+    /***** Nube (sin tokens) *****/
     async function saveToCloud(){
-      const ENDPOINT=getEndpoint(); if(!ENDPOINT){ disableButtons("⚙️ Configura endpoint"); alert("Abre con ?endpoint=... o configúralo con ⚙️."); return; }
+      const ENDPOINT = getEndpoint();
       try{
         setStatus("💾 Guardando…");
-        const state=collectState();
-        const res=await fetch(ENDPOINT,{
+        const state = collectState();
+        const res = await fetch(ENDPOINT,{
           method:"POST",
           headers:{"Content-Type":"application/json"},
           body:JSON.stringify({action:"save", pin:PIN, state})
         });
-        const json=await res.json().catch(()=>null);
-        if(!res.ok||!json?.ok) throw new Error(json?.error||("HTTP "+res.status));
+        const json = await res.json().catch(()=>null);
+        if(!res.ok || !json?.ok) throw new Error(json?.error || ("HTTP "+res.status));
         setStatus("✅ Guardado"); setLast(json.updatedAt);
         saveBackup(state);
       }catch(e){
         console.error(e);
         setStatus("❌ Error al guardar");
-        alert("No se pudo guardar. Revisa la URL del endpoint o el backend.");
+        alert("No se pudo guardar. Revisa el endpoint o el backend.");
       }
     }
     async function loadFromCloud(){
-      const ENDPOINT=getEndpoint(); if(!ENDPOINT){ disableButtons("⚙️ Configura endpoint"); return; }
+      const ENDPOINT = getEndpoint();
       try{
         setStatus("⬇️ Cargando…");
-        const u=new URL(ENDPOINT); u.searchParams.set("action","load"); u.searchParams.set("pin",PIN);
-        const res=await fetch(u.toString(),{method:"GET"});
-        const json=await res.json().catch(()=>null);
-        if(!res.ok||!json?.ok) throw new Error(json?.error||("HTTP "+res.status));
-        applyState(json.state||{}); setStatus("✅ Actualizado"); setLast(json.updatedAt);
+        const u = new URL(ENDPOINT);
+        u.searchParams.set("action","load");
+        u.searchParams.set("pin", PIN);
+        const res = await fetch(u.toString(),{method:"GET"});
+        const json = await res.json().catch(()=>null);
+        if(!res.ok || !json?.ok) throw new Error(json?.error || ("HTTP "+res.status));
+        applyState(json.state || {}); setStatus("✅ Actualizado"); setLast(json.updatedAt);
       }catch(e){
         console.error(e);
         setStatus("❌ Error al cargar");
-        alert("No se pudo cargar. Revisa la URL del endpoint o el backend.");
-        const bk=loadBackup(); if(bk?.state){ applyState(bk.state); setStatus("ℹ️ Restaurado desde copia local"); }
+        alert("No se pudo cargar. Revisa el endpoint o el backend.");
+        const bk = loadBackup(); if (bk?.state){ applyState(bk.state); setStatus("ℹ️ Restaurado desde copia local"); }
       }
     }
 
-    /* =================== Auto-guardado opcional =================== */
+    /***** Auto-guardado opcional *****
+     * Activa la casilla “Auto” y cada cambio en campos data-cloud
+     * disparará un guardado (con pequeño debounce).
+     */
     let autosaveTimer=null;
     function autoSaveTick(){
-      if(!document.getElementById("cloud-autosave").checked) return;
+      if (!chkAuto.checked) return;
       clearTimeout(autosaveTimer);
-      autosaveTimer=setTimeout(saveToCloud, 800);
+      autosaveTimer = setTimeout(saveToCloud, 800);
     }
     function hookAutosave(){
       const els=getCloudElements();
       els.forEach(el=>["input","change","keyup","blur"].forEach(evt=>el.addEventListener(evt, autoSaveTick)));
     }
 
-    /* =================== Eventos / arranque =================== */
-    document.addEventListener("DOMContentLoaded", () => {
-      document.getElementById("cloud-save").addEventListener("click", saveToCloud);
-      document.getElementById("cloud-load").addEventListener("click", loadFromCloud);
-      document.getElementById("cloud-autosave").addEventListener("change", ()=>{ if(document.getElementById("cloud-autosave").checked) autoSaveTick(); });
+    /***** Eventos / arranque *****/
+    const chkAuto = document.getElementById("cloud-autosave");
+    document.getElementById("cloud-save").addEventListener("click", saveToCloud);
+    document.getElementById("cloud-load").addEventListener("click", loadFromCloud);
+    document.getElementById("cloud-autosave").addEventListener("change", ()=>{ if(chkAuto.checked) autoSaveTick(); });
 
-      if (getEndpoint()){
-        enableButtons();
-        hookAutosave();
-        loadFromCloud();
-      } else {
-        disableButtons("⚙️ Configura endpoint (o usa ?endpoint=URL en el enlace)");
-        hookAutosave(); // permite backup local aunque no haya endpoint aún
-      }
-    });
+    hookAutosave();
+    loadFromCloud(); // carga inicial automática usando el endpoint embebido (o el de la URL)
   </script>
 </body>
 </html>
