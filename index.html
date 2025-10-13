@@ -1,297 +1,690 @@
-<!-- === AudioSeguimiento – Cloud Sync (Firestore) | PEGAR ANTES DE </body> === -->
-<script type="module">
-  /********************************************************************
-   * AudioSeguimiento – Guardar en la Nube (Firestore)
-   * - Mantiene tu edición original intacta (no interfiere con tu JS).
-   * - Sincroniza SOLO elementos [data-cloud] (o #notas como fallback).
-   * - PIN fijo: AR4321 → docId = SHA-256(PIN).
-   * - Barra flotante: Guardar nube / Actualizar + Última actualización.
-   * - Falla con gracia si falta config Firebase (sin romper la página).
-   ********************************************************************/
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>AUDIOLOGIA-SEGUIMIENTO</title>
+<style>
+  :root{
+    --brand:#c9161d; --brand2:#e63a40; --bg:#f3f4f6; --panel:#ffffff; --ink:#111827;
+    --muted:#6b7280; --ok:#16a34a; --warn:#f59e0b; --danger:#dc2626;
+    --chip1:#e0f2fe; --chip2:#ecfccb; --chip3:#ede9fe; --chip4:#fee2e2; --chip5:#fef9c3;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.3 system-ui,Segoe UI,Roboto,Helvetica,Arial}
+  .wrap{max-width:1200px;margin:0 auto;padding:14px}
+  /* header */
+  .bar{display:flex;align-items:center;gap:12px;background:var(--panel);border-radius:14px;padding:10px 12px;border:3px solid var(--brand);border-bottom-width:6px}
+  .logoBox{width:160px;height:56px;border-radius:10px;background:#fafafa;border:1px dashed #d1d5db;display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .logoBox img{max-height:54px;width:auto}
+  h1{margin:0;font-size:26px;font-weight:800;letter-spacing:.3px}
+  .grow{flex:1}
+  .toolbar{display:flex;gap:8px}
+  .btn{border:0;background:#111827;color:#fff;padding:10px;border-radius:10px;display:inline-flex;align-items:center;gap:8px;cursor:pointer}
+  .btn.gray{background:#374151}
+  .btn.red{background:var(--brand)}
+  .btn.blue{background:#2563eb}
+  .btn:hover{opacity:.95}
+  .btn .i{font-style:normal}
+  input[type="file"]{display:none}
+  /* search */
+  .search{margin:12px 0;background:var(--panel);border-radius:12px;padding:10px;border:1px solid #e5e7eb}
+  .search input{width:100%;border:0;font-size:15px;padding:10px}
+  /* layout */
+  .grid{display:grid;grid-template-columns:360px 1fr;gap:16px}
+  .panel{background:var(--panel);border-radius:14px;border:1px solid #e5e7eb}
+  .pad{padding:12px}
+  .title{font-weight:800;font-size:18px;margin:0 0 8px}
+  .sub{color:var(--muted);font-size:13px}
+  .row{display:flex;align-items:center;gap:10px}
+  .right{display:flex;gap:6px;margin-left:auto}
+  .pill{border-radius:999px;background:#eef2ff;color:#1f2937;font-size:12px;padding:2px 8px}
+  .sep{height:1px;background:#e5e7eb;margin:8px 0}
+  /* sections left */
+  .secBox{border:1px solid #e5e7eb;border-radius:12px;margin:10px 0;overflow:hidden}
+  .secHead{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:#f9fafb}
+  .secItems{padding:10px}
+  .mini{display:flex;gap:8px;align-items:center;border:1px solid #e5e7eb;border-radius:10px;padding:8px;margin:8px 0;background:#fff}
+  .mini .name{font-weight:700}
+  .mini .meta{font-size:12px;color:var(--muted)}
+  .chip{font-size:12px;border-radius:999px;padding:2px 8px;border:1px solid #e5e7eb}
+  .mini .right .x{background:#fef2f2;color:#991b1b}
+  .mini .right .ed{background:#eef2ff;color:#1e3a8a}
+  .addSm{border:1px dashed #d1d5db;border-radius:10px;padding:6px 10px;background:#fafafa;cursor:pointer}
+  /* procedures right */
+  details{background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;margin:10px 0;overflow:hidden}
+  summary{list-style:none;cursor:pointer;padding:10px 12px;font-weight:800}
+  summary::-webkit-details-marker{display:none}
+  .box{padding:10px}
+  table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden}
+  th,td{border-bottom:1px solid #e5e7eb;padding:8px;text-align:left;font-size:14px}
+  th{background:var(--brand);color:#fff}
+  tr:last-child td{border-bottom:0}
+  input[type="text"],input[type="date"],input[type="number"],select,textarea{
+    width:100%;border:1px solid #e5e7eb;border-radius:8px;padding:7px 8px;font-size:14px;background:#fff
+  }
+  textarea{min-height:70px;resize:vertical}
+  .tRight{text-align:right}
+  .sm{font-size:12px}
+  .muted{color:var(--muted)}
+  /* modals */
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;padding:16px;z-index:50}
+  .card{background:#fff;border-radius:14px;max-width:520px;width:100%;padding:16px;border:2px solid var(--brand)}
+  .card h3{margin:0 0 10px}
+  .card .row{margin:6px 0}
+  .flex{display:flex;gap:8px}
+  .w50{width:50%}
+  .notice{font-size:13px;color:var(--muted)}
+  .foot{display:flex;gap:8px;justify-content:flex-end;margin-top:10px}
+  .hidden{display:none}
+  .tag{display:inline-block;padding:2px 8px;border-radius:999px;background:#eff6ff;color:#1e3a8a;font-size:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
 
-  // ============ 1) CONFIGURA AQUÍ TU FIREBASE (RELLENA LOS CAMPOS) ============
-  const firebaseConfig = {
-    apiKey: "TU_API_KEY",                 // <- RELLENA
-    authDomain: "TU_AUTH_DOMAIN",         // <- RELLENA (p.ej. tuapp.firebaseapp.com)
-    projectId: "TU_PROJECT_ID",           // <- RELLENA (p.ej. tuapp)
-    // Opcionales si los tienes:
-    // storageBucket: "TU_STORAGE_BUCKET",
-    // messagingSenderId: "TU_SENDER_ID",
-    // appId: "TU_APP_ID",
+  <!-- HEADER -->
+  <div class="bar">
+    <label class="logoBox" title="Logo (clic para cambiar)">
+      <img id="logoImg" alt="Logo" />
+      <input id="logoInput" type="file" accept="image/*">
+    </label>
+    <div>
+      <div class="sm muted">Plataforma</div>
+      <h1 id="brandTitle">AUDIOLOGIA-SEGUIMIENTO</h1>
+    </div>
+    <div class="grow"></div>
+
+    <div class="toolbar">
+      <button class="btn gray" id="btnLock" title="Desbloquear con PIN"><span class="i">🔒</span></button>
+      <button class="btn gray" id="btnLogo" title="Cambiar logo"><span class="i">🖼️</span></button>
+      <button class="btn blue" id="btnLoadCloud" title="Actualizar desde nube"><span class="i">☁️↻</span></button>
+      <button class="btn red" id="btnSaveCloud" title="Guardar en nube (Gist)"><span class="i">☁️</span>Guardar</button>
+      <button class="btn gray" id="btnBackup" title="Backup local"><span class="i">💾</span></button>
+      <button class="btn gray" id="btnRestore" title="Cargar archivo backup"><span class="i">📤</span></button>
+      <button class="btn gray" id="btnCloudSetup" title="Ajustes de nube"><span class="i">⚙️</span></button>
+      <input id="restoreInput" type="file" accept="application/json">
+    </div>
+  </div>
+
+  <!-- SEARCH -->
+  <div class="search">
+    <input id="searchInput" placeholder="Buscar en secciones, centros y datos…">
+  </div>
+
+  <div class="grid">
+    <!-- LEFT: SECTIONS -->
+    <div class="panel pad" id="left">
+      <div class="row">
+        <div class="title">Secciones</div>
+        <div class="right"><span class="pill" id="lastCloud">Última carga nube: –</span></div>
+      </div>
+
+      <div id="sections"></div>
+    </div>
+
+    <!-- RIGHT: PROCEDURES -->
+    <div class="panel pad" id="right">
+      <div class="row">
+        <div class="title">Procedimientos — <span id="activeCentroName">–</span></div>
+        <div class="right"><span class="pill" id="itemsCount">0 ítems</span></div>
+      </div>
+
+      <!-- Acciones-Resultado -->
+      <details open id="blkAcciones">
+        <summary>Acciones – Resultado</summary>
+        <div class="box">
+          <div class="row"><div class="right"><button class="btn blue sm" id="addAccion">+ Añadir</button></div></div>
+          <div class="sep"></div>
+          <table id="tblAcciones">
+            <thead><tr><th>#</th><th>Fecha</th><th>Acción</th><th>Derivación</th><th>Cita</th><th>Observaciones</th><th></th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </details>
+
+      <!-- Formación continua -->
+      <details id="blkFormacion">
+        <summary>Formación continua</summary>
+        <div class="box">
+          <div class="row"><div class="right"><button class="btn blue sm" id="addFormacion">+ Añadir</button></div></div>
+          <div class="sep"></div>
+          <table id="tblFormacion">
+            <thead><tr><th>#</th><th>Fecha</th><th>Asistencia</th><th>Título</th><th>Aplicación</th><th></th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </details>
+
+      <!-- Procesos -->
+      <details id="blkProcesos">
+        <summary>Procesos / Paquetes</summary>
+        <div class="box">
+          <div class="row"><div class="right"><button class="btn blue sm" id="addProceso">+ Añadir</button></div></div>
+          <div class="sep"></div>
+          <table id="tblProcesos">
+            <thead><tr><th>#</th><th>Nombre</th><th>Descripción</th><th>Puntuación</th><th>Observaciones</th><th>Fecha visita</th><th></th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </details>
+
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: CLOUD SETUP -->
+<div class="modal" id="cloudModal">
+  <div class="card">
+    <h3>Ajustes de nube (Gist)</h3>
+    <div class="notice">Pega un token de GitHub con permiso <b>gist</b>. Se guardará cifrado en tu navegador.</div>
+    <div class="row"><input id="inpToken" placeholder="ghp_… (scope: gist)"></div>
+    <div class="row flex">
+      <input class="w50" id="inpGistId" placeholder="Gist ID (vacío para crear uno nuevo)">
+      <label class="w50" style="display:flex;align-items:center;gap:8px">
+        <input type="checkbox" id="chkNewGist"> Crear Gist nuevo (secreto)
+      </label>
+    </div>
+    <div class="row"><span class="notice">Tu Gist almacenará <code>audiologia.json</code>. Con el mismo Gist ID cualquier PC/móvil podrá cargar tu última versión (☁️↻).</span></div>
+    <div class="foot">
+      <button class="btn gray" id="btnCloudCancel">Cancelar</button>
+      <button class="btn red" id="btnCloudSave">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: EDITAR/CREAR CENTRO -->
+<div class="modal" id="centroModal">
+  <div class="card">
+    <h3 id="centroTitle">Centro</h3>
+    <div class="row"><input id="cNombre" placeholder="Nombre del centro"></div>
+    <div class="row flex">
+      <input class="w50" id="cDelegado" placeholder="Delegado">
+      <input class="w50" id="cAudiologo" placeholder="Audiólogo">
+    </div>
+    <div class="row">
+      <select id="cTipo">
+        <option value="Franquicia">Franquicia</option>
+        <option value="Sucursal">Sucursal</option>
+      </select>
+    </div>
+    <div class="foot">
+      <button class="btn gray" id="btnCentroCancel">Cancelar</button>
+      <button class="btn red" id="btnCentroOk">OK</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ================== Estado / Modelo ================== */
+const PIN = "AR4321";
+const CHIPS = ["var(--chip1)","var(--chip2)","var(--chip3)","var(--chip4)","var(--chip5)"];
+
+const emptyData = () => ({
+  meta:{
+    title:"AUDIOLOGIA-SEGUIMIENTO",
+    logoDataUrl:"",
+    lastCloud:"",
+    gistId:"",
+  },
+  cloud:{ encToken:"" }, // token cifrado (simple)
+  centros:[
+    {id:1,nombre:"Centro Madrid Norte",delegado:"Ana Martínez",audiologo:"Dr. García",tipo:"Franquicia",kind:"exclusivo",color:0},
+    {id:2,nombre:"Centro Barcelona Centro",delegado:"Carlos Ruiz",audiologo:"Dra. López",tipo:"Sucursal",kind:"exclusivo",color:1},
+  ],
+  flop:[],
+  mentoring:[],
+  visitas:[],
+  proc:{ // procedimientos por centroId
+    1: {acciones:[{id:1,fecha:"",accion:"",derivacion:0,cita:0,obs:""}],
+        formacion:[{id:1,fecha:"",asis:"",titulo:"",apli:""}],
+        procesos:[{id:1,nombre:"",desc:"",punt:"",obs:"",fecha:""}]},
+    2: {acciones:[{id:1,fecha:"",accion:"",derivacion:0,cita:0,obs:""}],
+        formacion:[{id:1,fecha:"",asis:"",titulo:"",apli:""}],
+        procesos:[{id:1,nombre:"",desc:"",punt:"",obs:"",fecha:""}]},
+  },
+  ui:{activeCentro:1}
+});
+
+let DB = JSON.parse(localStorage.getItem("audio_db_v1")||"null") || emptyData();
+saveLocal(); // normaliza
+
+function saveLocal(){
+  localStorage.setItem("audio_db_v1", JSON.stringify(DB));
+  document.getElementById("brandTitle").textContent = DB.meta.title || "AUDIOLOGIA-SEGUIMIENTO";
+  document.getElementById("logoImg").src = DB.meta.logoDataUrl || "";
+  document.getElementById("lastCloud").textContent = "Última carga nube: " + (DB.meta.lastCloud||"–");
+}
+
+function setActiveCentro(id){
+  DB.ui.activeCentro = id;
+  saveLocal();
+  renderAll();
+}
+
+/* ================== Utiles ================== */
+function uid(list){ return (Math.max(0,...list.map(x=>x.id||0))+1)||1; }
+function fmtNow(){ const d=new Date(); return d.toLocaleString("es-ES"); }
+function alertMsg(txt){ window.alert(txt); }
+
+/* cifrado muy simple para token (solo ofuscación) */
+function enc(s){ try{ return btoa(unescape(encodeURIComponent(s))); }catch(e){ return s; } }
+function dec(s){ try{ return decodeURIComponent(escape(atob(s))); }catch(e){ return s; } }
+
+/* ================== Render secciones ================== */
+function renderSections(){
+  const wrap = document.getElementById("sections");
+  wrap.innerHTML = "";
+
+  // bloque generico
+  function block(title, key, kindLabel){
+    const box = document.createElement("div");
+    box.className="secBox";
+    box.innerHTML = `
+      <div class="secHead">
+        <div class="row">
+          <div class="title">${title}</div>
+          <span class="pill">${(DB[key]||[]).length}</span>
+        </div>
+        <div class="right">
+          <button class="btn gray sm" data-add="${key}">＋ Sub</button>
+        </div>
+      </div>
+      <div class="secItems" id="lst_${key}"></div>
+    `;
+    wrap.appendChild(box);
+
+    const lst = box.querySelector("#lst_"+key);
+    const items = DB[key]||[];
+    items.forEach((c,i)=>{
+      const chipColor = CHIPS[c.color % CHIPS.length];
+      const mini = document.createElement("div");
+      mini.className="mini";
+      mini.style.background = "#fff";
+      mini.innerHTML = `
+        <div class="chip" style="background:${chipColor};border-color:#d1d5db">${kindLabel||""}</div>
+        <div>
+          <div class="name">${c.nombre}</div>
+          <div class="meta">👤 ${c.delegado} · 🎧 ${c.audiologo} · 📍 ${c.tipo||"-"}</div>
+        </div>
+        <div class="right" style="margin-left:auto">
+          <button class="btn gray sm ed" data-ed="${key}:${c.id}">✎</button>
+          <button class="btn gray sm x" data-del="${key}:${c.id}">🗑</button>
+          <button class="btn blue sm" data-sel="${key}:${c.id}">Seleccionar</button>
+        </div>
+      `;
+      lst.appendChild(mini);
+    });
+
+    box.querySelector('[data-add]').onclick = ()=> openCentroModal({key});
+  }
+
+  // Exclusivos (centros)
+  (function(){
+    const box = document.createElement("div");
+    box.className="secBox";
+    box.innerHTML = `
+      <div class="secHead">
+        <div class="title">Centros Exclusivos</div>
+        <div class="right">
+          <button class="btn gray sm" id="addCent">＋ Sub</button>
+        </div>
+      </div>
+      <div class="secItems" id="lst_cent"></div>
+    `;
+    wrap.appendChild(box);
+    const lst = box.querySelector("#lst_cent");
+    DB.centros.forEach(c=>{
+      const chipColor = CHIPS[c.color % CHIPS.length];
+      const mini = document.createElement("div");
+      mini.className="mini";
+      mini.innerHTML = `
+        <div class="chip" style="background:${chipColor};border-color:#d1d5db">Exclusivo</div>
+        <div>
+          <div class="name">${c.nombre}</div>
+          <div class="meta">👤 ${c.delegado} · 🎧 ${c.audiologo} · 📍 ${c.tipo||"-"}</div>
+        </div>
+        <div class="right" style="margin-left:auto">
+          <button class="btn gray sm ed" data-ed="centros:${c.id}">✎</button>
+          <button class="btn gray sm x" data-del="centros:${c.id}">🗑</button>
+          <button class="btn blue sm" data-sel="centros:${c.id}">Seleccionar</button>
+        </div>
+      `;
+      lst.appendChild(mini);
+    });
+    box.querySelector("#addCent").onclick = ()=> openCentroModal({key:"centros"});
+    lst.addEventListener("click",(e)=>{
+      const t=e.target.closest("button"); if(!t) return;
+      if(t.dataset.sel){ const [key,id]=t.dataset.sel.split(":"); setActiveCentro(+id); }
+      if(t.dataset.ed){ const [key,id]=t.dataset.ed.split(":"); openCentroModal({key,id:+id}); }
+      if(t.dataset.del){ const [key,id]=t.dataset.del.split(":"); delCentro(key,+id); }
+    });
+  })();
+
+  block("Centros FLOP","flop","FLOP");
+  block("Formaciones – Mentoring","mentoring","Mentoring");
+  block("Visitas a centros","visitas","Visitas");
+
+  wrap.querySelectorAll("[data-add]").forEach(b=>{
+    b.onclick = ()=>{
+      const key=b.dataset.add;
+      openCentroModal({key});
+    };
+  });
+  wrap.addEventListener("click",(e)=>{
+    const t=e.target.closest("button"); if(!t) return;
+    if(t.dataset.sel){ const [key,id]=t.dataset.sel.split(":"); /* para otras secciones no hay proc */ }
+    if(t.dataset.ed){ const [key,id]=t.dataset.ed.split(":"); openCentroModal({key,id:+id}); }
+    if(t.dataset.del){ const [key,id]=t.dataset.del.split(":"); delCentro(key,+id); }
+  });
+}
+
+function delCentro(key,id){
+  if(!confirm("¿Eliminar este elemento?")) return;
+  DB[key]=DB[key].filter(x=>x.id!==id);
+  if(key==="centros"){
+    delete DB.proc[id];
+    if(DB.ui.activeCentro===id){
+      const nxt = DB.centros[0]?.id || null;
+      DB.ui.activeCentro = nxt;
+    }
+  }
+  saveLocal(); renderAll();
+}
+
+function openCentroModal({key,id}){
+  const mdl = document.getElementById("centroModal");
+  const title = document.getElementById("centroTitle");
+  const cN = document.getElementById("cNombre");
+  const cD = document.getElementById("cDelegado");
+  const cA = document.getElementById("cAudiologo");
+  const cT = document.getElementById("cTipo");
+  cN.value=cD.value=cA.value=""; cT.value="Franquicia";
+  if(id){
+    const arr=DB[key]; const it=arr.find(x=>x.id===id);
+    cN.value=it.nombre; cD.value=it.delegado||""; cA.value=it.audiologo||""; cT.value=it.tipo||"Franquicia";
+    title.textContent = "Editar";
+  }else{
+    title.textContent = "Añadir";
+  }
+  mdl.style.display="flex";
+  document.getElementById("btnCentroCancel").onclick = ()=> mdl.style.display="none";
+  document.getElementById("btnCentroOk").onclick = ()=>{
+    const obj={nombre:cN.value.trim(),delegado:cD.value.trim(),audiologo:cA.value.trim(),tipo:cT.value, color: Math.floor(Math.random()*CHIPS.length)};
+    if(!obj.nombre){ alertMsg("Nombre requerido"); return;}
+    if(id){
+      const idx=DB[key].findIndex(x=>x.id===id);
+      DB[key][idx] = {...DB[key][idx],...obj};
+    }else{
+      const nid = uid(DB[key]||[]);
+      (DB[key]=DB[key]||[]).push({id:nid, ...obj});
+      if(key==="centros"){ DB.proc[nid] = {acciones:[{id:1,fecha:"",accion:"",derivacion:0,cita:0,obs:""}],formacion:[{id:1,fecha:"",asis:"",titulo:"",apli:""}],procesos:[{id:1,nombre:"",desc:"",punt:"",obs:"",fecha:""}]}; }
+    }
+    saveLocal(); mdl.style.display="none"; renderAll();
+  };
+}
+
+/* ================== Render procedimientos ================== */
+function getProc(id){ if(!DB.proc[id]) DB.proc[id]={acciones:[],formacion:[],procesos:[]}; return DB.proc[id]; }
+
+function renderProcedures(){
+  const id = DB.ui.activeCentro;
+  const centro = DB.centros.find(x=>x.id===id);
+  document.getElementById("activeCentroName").textContent = centro? centro.nombre : "–";
+
+  const P = getProc(id);
+  // Acciones
+  const tbA = document.querySelector("#tblAcciones tbody");
+  tbA.innerHTML="";
+  P.acciones.forEach((r,i)=>{
+    const tr=document.createElement("tr");
+    tr.innerHTML=`
+      <td>${i+1}</td>
+      <td><input type="date" value="${r.fecha||""}"></td>
+      <td><input type="text" value="${r.accion||""}" placeholder="Descripción…"></td>
+      <td><input type="number" value="${r.derivacion||0}"></td>
+      <td><input type="number" value="${r.cita||0}"></td>
+      <td><input type="text" value="${r.obs||""}" placeholder="Observaciones…"></td>
+      <td class="tRight"><button class="btn gray sm" data-del="acc:${r.id}">✖</button></td>
+    `;
+    tbA.appendChild(tr);
+    const [f,a,d,c,o]=tr.querySelectorAll("input");
+    f.oninput=()=>{r.fecha=f.value;saveLocal();};
+    a.oninput=()=>{r.accion=a.value;saveLocal();};
+    d.oninput=()=>{r.derivacion=+d.value||0;saveLocal();};
+    c.oninput=()=>{r.cita=+c.value||0;saveLocal();};
+    o.oninput=()=>{r.obs=o.value;saveLocal();};
+    tr.querySelector("[data-del]").onclick=()=>{ if(P.acciones.length>1){ P.acciones = P.acciones.filter(x=>x.id!==r.id); saveLocal(); renderProcedures(); }};
+  });
+  document.getElementById("addAccion").onclick=()=>{
+    P.acciones.push({id:uid(P.acciones),fecha:"",accion:"",derivacion:0,cita:0,obs:""});
+    saveLocal(); renderProcedures();
   };
 
-  // ============ 2) IMPORTS SDK FIREBASE (CDN OFICIAL) ============
-  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js';
-  import {
-    getFirestore, doc, getDoc, setDoc, onSnapshot, serverTimestamp
-  } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js';
-
-  // ============ 3) UTILIDADES ============
-  const PIN = "AR4321";
-
-  async function sha256Hex(text) {
-    const enc = new TextEncoder().encode(text);
-    const buf = await crypto.subtle.digest('SHA-256', enc);
-    return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
-  }
-
-  function isFirebaseConfigured(cfg) {
-    const req = ["apiKey","authDomain","projectId"];
-    return req.every(k => typeof cfg[k] === "string" && cfg[k] && !cfg[k].startsWith("TU_"));
-  }
-
-  // ============ 4) UI DISCRETA (NO ROMPE TU DISEÑO) ============
-  const bar = document.createElement('div');
-  Object.assign(bar.style, {
-    position: 'fixed',
-    right: '12px',
-    bottom: '12px',
-    zIndex: 2147483647,
-    background: 'rgba(0,0,0,0.78)',
-    color: '#fff',
-    padding: '8px 10px',
-    borderRadius: '12px',
-    fontFamily: 'system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,sans-serif',
-    boxShadow: '0 6px 18px rgba(0,0,0,0.25)',
-    display: 'flex',
-    gap: '8px',
-    alignItems: 'center',
-    flexWrap: 'wrap'
+  // Formacion
+  const tbF = document.querySelector("#tblFormacion tbody");
+  tbF.innerHTML="";
+  P.formacion.forEach((r,i)=>{
+    const tr=document.createElement("tr");
+    tr.innerHTML=`
+      <td>${i+1}</td>
+      <td><input type="date" value="${r.fecha||""}"></td>
+      <td>
+        <select>
+          <option value=""></option>
+          <option ${r.asis==="SI"?"selected":""}>SI</option>
+          <option ${r.asis==="NO"?"selected":""}>NO</option>
+          <option ${r.asis==="Pendiente"?"selected":""}>Pendiente</option>
+        </select>
+      </td>
+      <td><input type="text" value="${r.titulo||""}" placeholder="Título…"></td>
+      <td><input type="text" value="${r.apli||""}" placeholder="Aplicación o SI/NO…"></td>
+      <td class="tRight"><button class="btn gray sm" data-del="for:${r.id}">✖</button></td>
+    `;
+    tbF.appendChild(tr);
+    const f=tr.querySelector('input[type="date"]');
+    const s=tr.querySelector('select');
+    const t=tr.querySelectorAll('input[type="text"]')[0];
+    const a=tr.querySelectorAll('input[type="text"]')[1];
+    f.oninput=()=>{r.fecha=f.value;saveLocal();};
+    s.oninput=()=>{r.asis=s.value;saveLocal();};
+    t.oninput=()=>{r.titulo=t.value;saveLocal();};
+    a.oninput=()=>{r.apli=a.value;saveLocal();};
+    tr.querySelector("[data-del]").onclick=()=>{ if(P.formacion.length>1){ P.formacion=P.formacion.filter(x=>x.id!==r.id); saveLocal(); renderProcedures(); }};
   });
-  bar.innerHTML = `
-    <strong style="font-weight:600">Cloud Sync</strong>
-    <button id="cloud-save" style="padding:.4rem .6rem;border:0;border-radius:8px;cursor:pointer;">Guardar nube</button>
-    <button id="cloud-load" style="padding:.4rem .6rem;border:0;border-radius:8px;cursor:pointer;">Actualizar</button>
-    <span id="cloud-status" style="opacity:.95">⏳</span>
-    <span id="cloud-last" style="opacity:.9">—</span>
-  `;
-  document.body.appendChild(bar);
+  document.getElementById("addFormacion").onclick=()=>{
+    P.formacion.push({id:uid(P.formacion),fecha:"",asis:"",titulo:"",apli:""});
+    saveLocal(); renderProcedures();
+  };
 
-  const btnSave = bar.querySelector('#cloud-save');
-  const btnLoad = bar.querySelector('#cloud-load');
-  const elStatus = bar.querySelector('#cloud-status');
-  const elLast   = bar.querySelector('#cloud-last');
-
-  // Vista previa opcional (útil al probar). Quita si no la quieres.
-  const pre = document.createElement('pre');
-  Object.assign(pre.style, {
-    position: 'fixed',
-    left: '12px',
-    bottom: '12px',
-    maxWidth: '40vw',
-    maxHeight: '32vh',
-    overflow: 'auto',
-    background: 'rgba(255,255,255,0.96)',
-    padding: '8px 10px',
-    borderRadius: '12px',
-    fontSize: '12px',
-    boxShadow: '0 6px 18px rgba(0,0,0,0.15)',
-    color: '#111',
-    whiteSpace: 'pre-wrap',
-    zIndex: 2147483646
+  // Procesos
+  const tbP = document.querySelector("#tblProcesos tbody");
+  tbP.innerHTML="";
+  P.procesos.forEach((r,i)=>{
+    const tr=document.createElement("tr");
+    tr.innerHTML=`
+      <td>${i+1}</td>
+      <td><input type="text" value="${r.nombre||""}" placeholder="Nombre…"></td>
+      <td><input type="text" value="${r.desc||""}" placeholder="Descripción…"></td>
+      <td><input type="text" value="${r.punt||""}" placeholder="Ej: 8/10"></td>
+      <td><input type="text" value="${r.obs||""}" placeholder="Observaciones…"></td>
+      <td><input type="date" value="${r.fecha||""}"></td>
+      <td class="tRight"><button class="btn gray sm" data-del="pro:${r.id}">✖</button></td>
+    `;
+    tbP.appendChild(tr);
+    const [n,d,p,o,f]=tr.querySelectorAll("input");
+    n.oninput=()=>{r.nombre=n.value;saveLocal();};
+    d.oninput=()=>{r.desc=d.value;saveLocal();};
+    p.oninput=()=>{r.punt=p.value;saveLocal();};
+    o.oninput=()=>{r.obs=o.value;saveLocal();};
+    f.oninput=()=>{r.fecha=f.value;saveLocal();};
+    tr.querySelector("[data-del]").onclick=()=>{ if(P.procesos.length>1){ P.procesos=P.procesos.filter(x=>x.id!==r.id); saveLocal(); renderProcedures(); }};
   });
-  pre.id = 'estado-previsualizacion';
-  document.body.appendChild(pre);
+  document.getElementById("addProceso").onclick=()=>{
+    P.procesos.push({id:uid(P.procesos),nombre:"",desc:"",punt:"",obs:"",fecha:""});
+    saveLocal(); renderProcedures();
+  };
 
-  function setStatus(msg){ elStatus.textContent = msg; }
-  function setLast(ts){
-    if (!ts) { elLast.textContent = '—'; return; }
-    try {
-      const d = ts?.toDate ? ts.toDate() : new Date(ts);
-      elLast.textContent = `Última actualización: ${d.toLocaleString('es-ES')}`;
-    } catch { elLast.textContent = '—'; }
+  document.getElementById("itemsCount").textContent =
+    (P.acciones.length + P.formacion.length + P.procesos.length) + " ítems";
+}
+
+/* ================== Render global ================== */
+function renderAll(){
+  renderSections();
+  renderProcedures();
+}
+
+/* ================== Búsqueda simple ================== */
+document.getElementById("searchInput").oninput = (e)=>{
+  const q=e.target.value.trim().toLowerCase();
+  document.querySelectorAll(".mini").forEach(el=>{
+    const t=el.textContent.toLowerCase();
+    el.style.display = t.includes(q) ? "" : "none";
+  });
+};
+
+/* ================== Logo + título ================== */
+document.getElementById("btnLogo").onclick = ()=> document.getElementById("logoInput").click();
+document.getElementById("logoInput").onchange = (e)=>{
+  const f=e.target.files[0]; if(!f) return;
+  // Redimensiona a alto máximo 56px para no romper cabecera
+  const img=new Image(); const reader=new FileReader();
+  reader.onload = ev=>{
+    img.onload = ()=>{
+      const h=56, ratio=img.width/img.height, w=h*ratio;
+      const cv=document.createElement("canvas"); cv.width=w; cv.height=h;
+      const ctx=cv.getContext("2d"); ctx.drawImage(img,0,0,w,h);
+      DB.meta.logoDataUrl = cv.toDataURL("image/png");
+      saveLocal(); renderAll();
+    };
+    img.src=ev.target.result;
+  };
+  reader.readAsDataURL(f);
+};
+
+/* ================== PIN lock ================== */
+let unlocked=false;
+function requireUnlock(){
+  if(!unlocked){
+    const p=prompt("PIN:");
+    if(p!==PIN){ alertMsg("PIN incorrecto"); return false; }
+    unlocked=true;
+    document.getElementById("btnLock").textContent="🔓";
   }
+  return true;
+}
+document.getElementById("btnLock").onclick=()=>{ if(requireUnlock()) alertMsg("Edición desbloqueada"); };
 
-  function disableButtons(reason){
-    btnSave.disabled = true; btnLoad.disabled = true;
-    btnSave.style.opacity = .6; btnLoad.style.opacity = .6;
-    setStatus(reason);
-  }
+/* ================== Modal Cloud ================== */
+const Mcloud = document.getElementById("cloudModal");
+document.getElementById("btnCloudSetup").onclick=()=>{
+  if(!requireUnlock()) return;
+  document.getElementById("inpToken").value = DB.cloud.encToken? "••••••" : "";
+  document.getElementById("inpGistId").value = DB.meta.gistId||"";
+  document.getElementById("chkNewGist").checked = !DB.meta.gistId;
+  Mcloud.style.display="flex";
+};
+document.getElementById("btnCloudCancel").onclick=()=> Mcloud.style.display="none";
+document.getElementById("btnCloudSave").onclick=()=>{
+  const t = document.getElementById("inpToken").value.trim();
+  if(t && !t.startsWith("ghp_")){ alertMsg("Token inválido"); return; }
+  if(t) DB.cloud.encToken = enc(t);
+  DB.meta.gistId = document.getElementById("inpGistId").value.trim();
+  if(document.getElementById("chkNewGist").checked) DB.meta.gistId="";
+  saveLocal();
+  Mcloud.style.display="none";
+  alertMsg("Ajustes guardados.");
+};
 
-  // ============ 5) SELECCIÓN DE CAMPOS A SINCRONIZAR ============
-  function getCloudElements() {
-    const marked = Array.from(document.querySelectorAll('[data-cloud]'));
-    if (marked.length > 0) return marked;
-    const fallback = document.querySelector('#notas');
-    return fallback ? [fallback] : [];
-  }
+/* ================== GitHub Gist API ================== */
+async function gistFetch(method, url, body){
+  const token = dec(DB.cloud.encToken||"");
+  if(!token){ throw new Error("No hay token de GitHub (gist)"); }
+  const res = await fetch(url,{
+    method,
+    headers:{
+      "Accept":"application/vnd.github+json",
+      "Authorization":"token "+token,
+    },
+    body: body? JSON.stringify(body): undefined
+  });
+  if(!res.ok){ const txt=await res.text(); throw new Error("GitHub "+res.status+": "+txt); }
+  return res.json();
+}
 
-  function readElementValue(el) {
-    const tag = el.tagName;
-    if (tag === 'INPUT') {
-      const t = (el.getAttribute('type') || 'text').toLowerCase();
-      if (t === 'checkbox') return !!el.checked;
-      if (t === 'radio') return el.checked ? el.value : null;
-      return el.value;
-    }
-    if (tag === 'TEXTAREA' || tag === 'SELECT') return el.value;
-    return el.textContent;
-  }
-
-  function writeElementValue(el, val) {
-    try {
-      const tag = el.tagName;
-      if (tag === 'INPUT') {
-        const t = (el.getAttribute('type') || 'text').toLowerCase();
-        if (t === 'checkbox') { el.checked = !!val; return; }
-        if (t === 'radio') { el.checked = (val === el.value); return; }
-        el.value = (val ?? '');
-        el.dispatchEvent(new Event('input', { bubbles: true }));
-        el.dispatchEvent(new Event('change', { bubbles: true }));
-        return;
-      }
-      if (tag === 'TEXTAREA' || tag === 'SELECT') {
-        el.value = (val ?? '');
-        el.dispatchEvent(new Event('input', { bubbles: true }));
-        el.dispatchEvent(new Event('change', { bubbles: true }));
-        return;
-      }
-      if (typeof val === 'string') el.textContent = val;
-    } catch (e) {
-      console.warn('No se pudo aplicar valor a', el, e);
-    }
-  }
-
-  function collectState() {
-    const els = getCloudElements();
-    const state = {};
-    els.forEach((el, idx) => {
-      const key = el.id || el.name || `el_${idx}`;
-      const val = readElementValue(el);
-      if (val !== null && key) state[key] = val;
-    });
-    // Previsualización opcional
-    const area = document.getElementById('estado-previsualizacion');
-    if (area) area.textContent = JSON.stringify(state, null, 2);
-    return state;
-  }
-
-  function applyState(state) {
-    if (!state || typeof state !== 'object') return;
-    Object.keys(state).forEach(k => {
-      let el = document.getElementById(k) || document.querySelector(`[name="${CSS.escape(k)}"]`);
-      if (el) writeElementValue(el, state[k]);
-    });
-    const area = document.getElementById('estado-previsualizacion');
-    if (area) area.textContent = JSON.stringify(state, null, 2);
-  }
-
-  // ============ 6) FLUJO PRINCIPAL ============
-  let app, db, docRef;
-
-  async function init() {
-    try {
-      // Comprobación de configuración
-      if (!isFirebaseConfigured(firebaseConfig)) {
-        disableButtons('⚠️ Configura Firebase (apiKey/authDomain/projectId)');
-        console.warn('Rellena firebaseConfig con los valores reales de tu proyecto.');
-        return;
-      }
-
-      // Inicializa Firebase + Firestore
-      app = initializeApp(firebaseConfig);
-      db  = getFirestore(app);
-
-      // Deriva docId desde PIN y prepara docRef
-      const docId = await sha256Hex(PIN);
-      docRef = doc(db, 'platformStates', docId);
-
-      setStatus('🔄 Conectando…');
-
-      // Suscripción en tiempo real
-      onSnapshot(docRef, (snap) => {
-        if (snap.exists()) {
-          const data = snap.data();
-          setLast(data.lastUpdated);
-          if (data?.state) {
-            applyState(data.state);
-            setStatus('✅ Sincronizado');
-          } else {
-            setStatus('ℹ️ Documento vacío');
-          }
-        } else {
-          setLast(null);
-          setStatus('➕ Sin datos en la nube');
-        }
-      }, (err) => {
-        console.error(err);
-        setStatus('⚠️ Error de escucha');
+async function cloudSave(){
+  try{
+    const token = dec(DB.cloud.encToken||"");
+    if(!token){ alertMsg("Configura la nube primero (⚙️)"); return; }
+    const payload = JSON.stringify(DB);
+    let data;
+    if(DB.meta.gistId){
+      data = await gistFetch("PATCH","https://api.github.com/gists/"+DB.meta.gistId,{
+        files:{ "audiologia.json":{ content: payload } }
       });
-
-    } catch (e) {
-      console.error('Fallo en init:', e);
-      disableButtons('❌ Error inicializando');
-      alert('Error inicializando sincronización. Revisa consola.');
+    }else{
+      data = await gistFetch("POST","https://api.github.com/gists",{
+        description:"AudioSeguimiento data",
+        public:false,
+        files:{ "audiologia.json":{ content: payload } }
+      });
+      DB.meta.gistId = data.id;
+      saveLocal();
     }
+    DB.meta.lastCloud = fmtNow();
+    saveLocal();
+    alertMsg("Guardado en nube OK.\nGist ID:\n"+DB.meta.gistId);
+  }catch(err){
+    alertMsg("Error al guardar en nube:\n"+err.message);
   }
-
-  async function saveToCloud() {
-    try {
-      if (!docRef) throw new Error('Firestore no inicializado');
-      setStatus('💾 Guardando…');
-      const state = collectState();
-      await setDoc(docRef, {
-        state,
-        lastUpdated: serverTimestamp(),
-        updatedBy: 'web'
-      }, { merge: true });
-      setStatus('✅ Guardado');
-      localStorage.setItem('audioseguimiento_backup', JSON.stringify({ when: Date.now(), state }));
-    } catch (e) {
-      console.error(e);
-      setStatus('❌ Error al guardar');
-      alert('Error guardando en la nube. Ver consola / reglas Firestore.');
-    }
+}
+async function cloudLoad(){
+  try{
+    const token = dec(DB.cloud.encToken||"");
+    if(!token){ alertMsg("Configura la nube primero (⚙️)"); return; }
+    if(!DB.meta.gistId){ alertMsg("No hay Gist ID. Abre ⚙️ y crea uno o pega tu ID."); return; }
+    const data = await gistFetch("GET","https://api.github.com/gists/"+DB.meta.gistId);
+    const file = data.files["audiologia.json"];
+    if(!file) throw new Error("No existe audiologia.json en tu Gist.");
+    const txt = file.content;
+    const json = JSON.parse(txt);
+    DB = json; // reemplaza
+    saveLocal();
+    renderAll();
+    alertMsg("Cargado desde nube OK.");
+  }catch(err){
+    alertMsg("No se pudo leer de la nube: "+err.message);
   }
+}
 
-  async function loadFromCloud() {
-    try {
-      if (!docRef) throw new Error('Firestore no inicializado');
-      setStatus('⬇️ Actualizando…');
-      const snap = await getDoc(docRef);
-      if (snap.exists()) {
-        const data = snap.data();
-        setLast(data.lastUpdated);
-        if (data?.state) {
-          applyState(data.state);
-          setStatus('✅ Actualizado');
-        } else {
-          setStatus('ℹ️ Documento vacío');
-        }
-      } else {
-        setLast(null);
-        setStatus('➕ No existe estado aún');
-      }
-    } catch (e) {
-      console.error(e);
-      setStatus('❌ Error al actualizar');
-      alert('Error actualizando desde la nube. Ver consola / reglas Firestore.');
-    }
-  }
+/* ================== Backup local ================== */
+document.getElementById("btnBackup").onclick=()=>{
+  const blob = new Blob([JSON.stringify(DB,null,2)],{type:"application/json"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="data.json"; a.click();
+  URL.revokeObjectURL(a.href);
+};
+document.getElementById("btnRestore").onclick=()=> document.getElementById("restoreInput").click();
+document.getElementById("restoreInput").onchange=(e)=>{
+  const f=e.target.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    try{
+      DB = JSON.parse(ev.target.result);
+      saveLocal(); renderAll();
+      alertMsg("Backup cargado.");
+    }catch(err){ alertMsg("Archivo inválido"); }
+  };
+  r.readAsText(f);
+};
 
-  // ============ 7) ENLACE DE EVENTOS ============
-  btnSave.addEventListener('click', saveToCloud);
-  btnLoad.addEventListener('click', loadFromCloud);
+/* ================== Botones nube ================== */
+document.getElementById("btnSaveCloud").onclick=()=> cloudSave();
+document.getElementById("btnLoadCloud").onclick=()=> cloudLoad();
 
-  // ============ 8) INICIO ============
-  init();
-
-  /********************************************************************
-   * CONSEJO RÁPIDO:
-   * - Marca con data-cloud lo que quieras sincronizar:
-   *   <input id="nombre" data-cloud>
-   *   <textarea id="notas" data-cloud></textarea>
-   *   <select id="tipo" data-cloud></select>
-   *
-   * REGLAS FIRESTORE (prototipo, abre lectura/escritura):
-   * rules_version = '2';
-   * service cloud.firestore {
-   *   match /databases/{database}/documents {
-   *     match /platformStates/{docId} {
-   *       allow read, write: if true;
-   *     }
-   *   }
-   * }
-   * Para producción: usa Firebase Auth + reglas estrictas.
-   ********************************************************************/
+/* ================== iniciar ================== */
+renderAll();
 </script>
+</body>
+</html>
