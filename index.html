@@ -2,153 +2,223 @@
 <html lang="es">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
-  <title>AudioSeguimiento – Cloud Sync</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>AudioSeguimiento – Plataforma (Cloud Sync)</title>
   <style>
     :root { color-scheme: light dark; }
     * { box-sizing: border-box; }
-    body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, sans-serif; line-height: 1.35; }
-    header { padding: 12px 16px; background: linear-gradient(90deg, #5a7bf7, #7a9dff); color: #fff; }
-    header h1 { margin: 0 0 8px; font-size: 1.15rem; }
-    .toolbar-top { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-    .btn {
-      border: 0; border-radius: 10px; padding: 8px 12px; cursor: pointer;
-      background: #fff; color: #2a45b8; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,.15);
+    body { margin:0; font-family: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,sans-serif; background: #f6f7fb; }
+    header { position: sticky; top:0; z-index: 20; background: linear-gradient(90deg,#5a7bf7,#7a9dff); color:#fff; padding: 14px 16px; box-shadow: 0 6px 18px rgba(0,0,0,.15); }
+    .toolbar { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    .btn { border:0; border-radius:12px; padding:10px 14px; font-weight:700; cursor:pointer; box-shadow: 0 6px 16px rgba(0,0,0,.15); }
+    .btn.primary { background:#fff; color:#2a45b8; }
+    .btn.secondary { background:rgba(255,255,255,.95); color:#1a1c22; }
+    .chip { padding:6px 10px; border-radius:999px; background: rgba(255,255,255,.2); font-weight:600; }
+    .status { margin-left:6px; opacity:.95 }
+    .last { opacity:.9 }
+    main { max-width: 1060px; margin: 18px auto; padding: 0 16px; display:grid; gap:16px; }
+    .grid { display:grid; grid-template-columns: repeat(12,1fr); gap:16px; }
+    .card {
+      grid-column: span 12;
+      background: #fff; border-radius: 16px; padding: 16px;
+      box-shadow: 0 10px 30px rgba(34,48,92,.08);
     }
-    .btn.secondary { background: rgba(255,255,255,.9); color: #1d1f24; }
-    .status { font-size: .95rem; opacity: .95; margin-left: 6px; }
-    .last   { font-size: .9rem; opacity: .9; margin-left: 6px; }
-    main { padding: 18px; display: grid; gap: 16px; max-width: 900px; margin: 0 auto; }
-    .card { background: rgba(255,255,255,.75); backdrop-filter: blur(6px); border-radius: 14px; box-shadow: 0 8px 28px rgba(0,0,0,.08); padding: 14px; }
-    .label { font-size: .9rem; opacity: .85; margin-bottom: 6px; display: block; }
-    textarea, input, select {
-      width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(0,0,0,.15);
-      outline: none; font: inherit; background: rgba(255,255,255,.92);
+    .card h2 { margin:0 0 10px; font-size:1.05rem; }
+    label { display:block; font-size:.92rem; opacity:.85; margin-bottom:6px; }
+    input[type="text"], select, textarea, input[type="number"], input[type="range"]{
+      width:100%; border:1px solid rgba(0,0,0,.12); border-radius:12px; padding:10px 12px; font:inherit; background:#fff;
     }
-    pre.preview { max-height: 280px; overflow: auto; font-size: 12px; padding: 10px; background: rgba(0,0,0,.05); border-radius: 10px; margin: 0; }
-    @media (prefers-color-scheme: dark) {
-      .card { background: rgba(25,25,28,.6); }
-      textarea, input, select { background: rgba(30,30,35,.92); color: #eee; border-color: rgba(255,255,255,.15); }
-      pre.preview { background: rgba(255,255,255,.06); color: #ddd; }
-      .btn { background: #e9edff; color: #18329b; }
-      .btn.secondary { background: #f2f2f2; color: #222; }
+    textarea{ min-height:140px; resize:vertical; }
+    .row{ display:grid; grid-template-columns: repeat(12,1fr); gap:12px; }
+    .col-6{ grid-column: span 6; }
+    .col-4{ grid-column: span 4; }
+    .col-3{ grid-column: span 3; }
+    .muted{ opacity:.7; font-size:.9rem; }
+    pre#preview { background:#f1f3f7; border-radius:12px; padding:10px; margin:0; max-height:280px; overflow:auto; font-size:12px; }
+    .toast{ position:fixed; left:50%; transform:translateX(-50%); bottom:20px; background:#111; color:#fff; padding:10px 14px; border-radius:12px; box-shadow:0 14px 30px rgba(0,0,0,.25); z-index:9999; opacity:.97 }
+    @media (prefers-color-scheme: dark){
+      body{ background:#0e1116; }
+      .card{ background:#171a21; }
+      input,select,textarea{ background:#0f1217; color:#eee; border-color: rgba(255,255,255,.12); }
+      pre#preview{ background:#0f1217; color:#d7dbea; }
+      .btn.primary{ background:#e9edff; color:#1a2f9a; }
+      .btn.secondary{ background:#f1f1f1; color:#1e1e1e; }
     }
   </style>
 </head>
 <body>
   <header>
-    <h1>AudioSeguimiento – Edición con guardado en la nube</h1>
-    <!-- BOTONES VISIBLES ARRIBA -->
-    <div class="toolbar-top">
-      <button id="top-save" class="btn">Guardar</button>
-      <button id="top-load" class="btn secondary">Actualizar</button>
-      <label style="display:flex;align-items:center;gap:.4rem;">
-        <input id="top-auto" type="checkbox" />
-        Auto
-      </label>
-      <span id="top-status" class="status">⏳</span>
-      <span id="top-last" class="last">—</span>
+    <div class="toolbar">
+      <button id="btnSave" class="btn primary">Guardar</button>
+      <button id="btnLoad" class="btn secondary">Actualizar</button>
+      <label class="chip"><input id="chkAuto" type="checkbox" style="transform: translateY(1px)" /> Auto</label>
+      <span id="status" class="status chip">⏳</span>
+      <span id="last" class="last chip">—</span>
+      <span class="chip">PIN: <strong>&nbsp;AR4321&nbsp;</strong></span>
     </div>
   </header>
 
-  <main>
-    <!-- Marca tus campos con data-cloud; #notas se usa como respaldo -->
-    <div class="card">
-      <label for="notas" class="label">Notas (ejemplo, sincroniza con la nube)</label>
-      <textarea id="notas" data-cloud rows="7" placeholder="Escribe aquí..."></textarea>
-      <small style="opacity:.75;display:block;margin-top:8px;">
-        Pon <code>data-cloud</code> en cada campo de tu plataforma que quieras sincronizar.
-      </small>
-    </div>
+  <main class="grid">
+    <!-- Proyecto -->
+    <section class="card">
+      <h2>Proyecto</h2>
+      <div class="row">
+        <div class="col-6">
+          <label>Título</label>
+          <input data-cloud id="titulo" type="text" placeholder="Nombre del proyecto..." />
+        </div>
+        <div class="col-3">
+          <label>Estado</label>
+          <select data-cloud id="estado">
+            <option value="">—</option>
+            <option value="nuevo">Nuevo</option>
+            <option value="en_progreso">En progreso</option>
+            <option value="bloqueado">Bloqueado</option>
+            <option value="finalizado">Finalizado</option>
+          </select>
+        </div>
+        <div class="col-3">
+          <label>Progreso: <span id="lblProgreso" class="muted">0%</span></label>
+          <input data-cloud id="progreso" type="range" min="0" max="100" step="1" value="0" />
+        </div>
+      </div>
+    </section>
 
-    <div class="card">
-      <strong>Vista previa del estado guardado</strong>
-      <pre id="estado-previsualizacion" class="preview">—</pre>
-    </div>
+    <!-- Prioridad / Opciones -->
+    <section class="card">
+      <h2>Prioridad y opciones</h2>
+      <div class="row">
+        <div class="col-4">
+          <label>Prioridad</label>
+          <div>
+            <label><input data-cloud name="prioridad" type="radio" value="alta" /> Alta</label>&nbsp;&nbsp;
+            <label><input data-cloud name="prioridad" type="radio" value="media" /> Media</label>&nbsp;&nbsp;
+            <label><input data-cloud name="prioridad" type="radio" value="baja" /> Baja</label>
+          </div>
+        </div>
+        <div class="col-4">
+          <label><input data-cloud id="aviso" type="checkbox" /> Avisarme cuando cambie</label>
+        </div>
+        <div class="col-4">
+          <label>Responsable</label>
+          <input data-cloud id="responsable" type="text" placeholder="Nombre..." />
+        </div>
+      </div>
+    </section>
+
+    <!-- Checklist -->
+    <section class="card">
+      <h2>Checklist</h2>
+      <div class="row">
+        <div class="col-6">
+          <label><input data-cloud id="tarea1" type="checkbox" /> Brief recibido</label>
+        </div>
+        <div class="col-6">
+          <label><input data-cloud id="tarea2" type="checkbox" /> Material validado</label>
+        </div>
+        <div class="col-6">
+          <label><input data-cloud id="tarea3" type="checkbox" /> QA interno</label>
+        </div>
+        <div class="col-6">
+          <label><input data-cloud id="tarea4" type="checkbox" /> Entregado a cliente</label>
+        </div>
+      </div>
+    </section>
+
+    <!-- Notas -->
+    <section class="card">
+      <h2>Notas</h2>
+      <textarea data-cloud id="notas" placeholder="Escribe aquí…"></textarea>
+      <p class="muted">Todo lo marcado con <code>data-cloud</code> se sincroniza en la nube.</p>
+    </section>
+
+    <!-- Vista previa -->
+    <section class="card">
+      <h2>Vista previa del estado guardado</h2>
+      <pre id="preview">—</pre>
+    </section>
   </main>
 
-  <!-- === Cloud Sync SIN TOKENS – INTEGRADO === -->
+  <!-- === Cloud Sync (sin tokens) – Cliente === -->
   <script type="module">
-    /***** CONFIG *****/
+    /********** Config **********/
     const PIN = "AR4321";
     const ENDPOINT_EMBED = "https://script.google.com/macros/s/AKfycby5vh1Ja0XllWFB98ypWmDcUfUItwEciVimUd5L6Esi1wfPJbcc2dap6G0lciRf51VR/exec";
     const CFG_KEY = "audioseguimiento_endpoint_url";
     const BK_KEY  = "audioseguimiento_backup";
 
-    /***** Utils *****/
+    /********** Helpers **********/
     const qs = n => new URL(location.href).searchParams.get(n);
-    const getEndpoint = () => {
+    function getEndpoint() {
       const viaQS = qs("endpoint");
       if (viaQS) return viaQS;
-      try { return JSON.parse(localStorage.getItem(CFG_KEY) || "null") || ENDPOINT_EMBED; } catch { return ENDPOINT_EMBED; }
-    };
-    const setEndpoint = url => localStorage.setItem(CFG_KEY, JSON.stringify(url));
-    (function captureQS(){ const ep = qs("endpoint"); if (ep) { try { setEndpoint(new URL(ep).toString()); } catch {} } })();
+      try { return JSON.parse(localStorage.getItem(CFG_KEY) || "null") || ENDPOINT_EMBED; }
+      catch { return ENDPOINT_EMBED; }
+    }
+    (function persistQS(){ const ep = qs("endpoint"); if (ep) { try{ new URL(ep); localStorage.setItem(CFG_KEY, JSON.stringify(ep)); }catch{} } })();
 
-    const statusTop = document.getElementById("top-status");
-    const lastTop   = document.getElementById("top-last");
-    const setStatus = t => statusTop.textContent = t;
-    const setLast   = s => lastTop.textContent = s ? `Última actualización: ${s}` : "—";
-    const preview   = document.getElementById("estado-previsualizacion");
-    const chkAuto   = document.getElementById("top-auto");
+    const $ = sel => document.querySelector(sel);
+    const status = $("#status"), last = $("#last"), preview = $("#preview");
+    const btnSave = $("#btnSave"), btnLoad = $("#btnLoad"), chkAuto = $("#chkAuto");
+    const lblProg = $("#lblProgreso"), rngProg = $("#progreso");
+    rngProg.addEventListener("input", ()=> lblProg.textContent = `${rngProg.value}%`);
+    function toast(msg){ const t=document.createElement("div"); t.className="toast"; t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(), 2000); }
+    function setStatus(s){ status.textContent = s; }
+    function setLastText(ts){ last.textContent = ts ? `Actualizado: ${ts}` : "—"; }
 
-    /* Qué sincronizar */
+    /********** Estado **********/
     function getCloudElements(){
-      const marked = [...document.querySelectorAll("[data-cloud]")];
-      if (marked.length) return marked;
-      const fb = document.querySelector("#notas");
-      return fb ? [fb] : [];
+      return [...document.querySelectorAll("[data-cloud]")];
     }
     function readEl(el){
-      if (el.tagName === "INPUT"){
-        const t = (el.type || "text").toLowerCase();
-        if (t === "checkbox") return !!el.checked;
-        if (t === "radio")    return el.checked ? el.value : null;
+      if (el.tagName==="INPUT"){
+        const t=(el.type||"text").toLowerCase();
+        if (t==="checkbox") return !!el.checked;
+        if (t==="radio") return el.checked ? el.value : null;
         return el.value;
       }
-      if (el.tagName === "TEXTAREA" || el.tagName === "SELECT") return el.value;
+      if (el.tagName==="TEXTAREA" || el.tagName==="SELECT") return el.value;
       return el.textContent;
     }
     function writeEl(el,val){
-      try{
-        if (el.tagName === "INPUT"){
-          const t = (el.type || "text").toLowerCase();
-          if (t === "checkbox"){ el.checked = !!val; return; }
-          if (t === "radio"){ el.checked = (val === el.value); return; }
-          el.value = (val ?? "");
-          el.dispatchEvent(new Event("input",{bubbles:true}));
-          el.dispatchEvent(new Event("change",{bubbles:true}));
-          return;
-        }
-        if (el.tagName === "TEXTAREA" || el.tagName === "SELECT"){
-          el.value = (val ?? "");
-          el.dispatchEvent(new Event("input",{bubbles:true}));
-          el.dispatchEvent(new Event("change",{bubbles:true}));
-          return;
-        }
-        if (typeof val === "string") el.textContent = val;
-      }catch(e){ console.warn("No se pudo aplicar valor", e); }
+      if (el.tagName==="INPUT"){
+        const t=(el.type||"text").toLowerCase();
+        if (t==="checkbox"){ el.checked = !!val; return; }
+        if (t==="radio"){ el.checked = (val === el.value); return; }
+        el.value = (val ?? "");
+        el.dispatchEvent(new Event("input",{bubbles:true}));
+        el.dispatchEvent(new Event("change",{bubbles:true}));
+        return;
+      }
+      if (el.tagName==="TEXTAREA" || el.tagName==="SELECT"){
+        el.value = (val ?? "");
+        el.dispatchEvent(new Event("input",{bubbles:true}));
+        el.dispatchEvent(new Event("change",{bubbles:true}));
+        return;
+      }
+      if (typeof val === "string") el.textContent = val;
     }
     function collectState(){
-      const els = getCloudElements(); const state = {};
-      els.forEach((el,i)=>{ const k = el.id || el.name || `el_${i}`; const v = readEl(el); if (v !== null && k) state[k] = v; });
+      const els=getCloudElements(); const state={};
+      els.forEach((el,i)=>{ const k=el.id||el.name||`el_${i}`; const v=readEl(el); if (v!==null && k) state[k]=v; });
       preview.textContent = JSON.stringify(state, null, 2);
       return state;
     }
     function applyState(state){
-      if (!state || typeof state !== "object") return;
+      if (!state || typeof state!=="object") return;
       Object.keys(state).forEach(k=>{
         const el = document.getElementById(k) || document.querySelector(`[name="${CSS.escape(k)}"]`);
         if (el) writeEl(el, state[k]);
       });
+      if (state?.progreso !== undefined) lblProg.textContent = `${state.progreso}%`;
       preview.textContent = JSON.stringify(state, null, 2);
     }
 
-    /* Backup local */
-    const saveBackup = s => { try { localStorage.setItem(BK_KEY, JSON.stringify({when:Date.now(), state:s})); } catch {} };
-    const loadBackup = () => { try { return JSON.parse(localStorage.getItem(BK_KEY) || "null"); } catch { return null; } };
+    /********** Copia local **********/
+    function saveBackup(s){ try{ localStorage.setItem(BK_KEY, JSON.stringify({when:Date.now(), state:s})); }catch{} }
+    function loadBackup(){ try{ return JSON.parse(localStorage.getItem(BK_KEY)||"null"); }catch{ return null; } }
 
-    /* Nube */
+    /********** Nube **********/
     async function saveToCloud(){
       try{
         setStatus("💾 Guardando…");
@@ -161,12 +231,14 @@
         });
         const json = await res.json().catch(()=>null);
         if (!res.ok || !json?.ok) throw new Error(json?.error || ("HTTP "+res.status));
-        setStatus("✅ Guardado"); setLast(json.updatedAt);
+        setStatus("✅ Guardado");
+        setLastText(json.updatedAt);
+        toast("Guardado en la nube");
         saveBackup(state);
       }catch(e){
         console.error(e);
         setStatus("❌ Error al guardar");
-        alert("No se pudo guardar. Revisa el endpoint o el backend.");
+        toast("Error al guardar");
       }
     }
     async function loadFromCloud(){
@@ -174,19 +246,21 @@
         setStatus("⬇️ Cargando…");
         const u = new URL(getEndpoint());
         u.searchParams.set("action","load"); u.searchParams.set("pin", PIN);
-        const res = await fetch(u.toString(), { method: "GET" });
+        const res = await fetch(u.toString(), { method:"GET" });
         const json = await res.json().catch(()=>null);
         if (!res.ok || !json?.ok) throw new Error(json?.error || ("HTTP "+res.status));
-        applyState(json.state || {}); setStatus("✅ Actualizado"); setLast(json.updatedAt);
+        applyState(json.state || {});
+        setStatus("✅ Actualizado");
+        setLastText(json.updatedAt);
+        toast("Datos cargados de la nube");
       }catch(e){
         console.error(e);
         setStatus("❌ Error al cargar");
-        alert("No se pudo cargar. Revisa el endpoint o el backend.");
-        const bk = loadBackup(); if (bk?.state){ applyState(bk.state); setStatus("ℹ️ Restaurado desde copia local"); }
+        const bk = loadBackup(); if (bk?.state){ applyState(bk.state); toast("Restaurado desde copia local"); }
       }
     }
 
-    /* Auto-guardado + atajos */
+    /********** Auto-guardado y atajos **********/
     let autosaveTimer=null;
     function autoSaveTick(){
       if (!chkAuto.checked) return;
@@ -198,19 +272,16 @@
         ["input","change","keyup","blur"].forEach(evt=>el.addEventListener(evt, autoSaveTick));
       });
     }
-    // Ctrl/Cmd + S → Guardar
-    document.addEventListener("keydown", e => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
+    document.addEventListener("keydown", e=>{
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase()==="s"){
         e.preventDefault(); saveToCloud();
       }
     });
 
-    /* Eventos */
-    document.getElementById("top-save").addEventListener("click", saveToCloud);
-    document.getElementById("top-load").addEventListener("click", loadFromCloud);
-    document.getElementById("top-auto").addEventListener("change", ()=>{ if (chkAuto.checked) autoSaveTick(); });
-
-    /* Arranque */
+    /********** Eventos & arranque **********/
+    btnSave.addEventListener("click", saveToCloud);
+    btnLoad.addEventListener("click", loadFromCloud);
+    chkAuto.addEventListener("change", ()=>{ if (chkAuto.checked) autoSaveTick(); });
     hookAutosave();
     loadFromCloud();
   </script>
