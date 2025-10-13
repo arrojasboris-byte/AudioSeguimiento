@@ -1,481 +1,454 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>AUDIOLOGIA-SEGUIMIENTO</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='%23e11' d='M8 10h48v8H8z'/%3E%3Crect x='8' y='18' width='48' height='36' rx='6' fill='%23fff' stroke='%23e11' stroke-width='3'/%3E%3C/svg%3E">
-<link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{
-  --red:#e11d2a; --red-600:#d61e1e; --bg:#edf0f3; --card:#ffffff;
-  --ink:#1f2937; --muted:#6b7280; --line:#e5e7eb; --chip:#f3f4f6;
-  --radius:14px; --shadow:0 12px 24px rgba(0,0,0,.06);
-}
-*{box-sizing:border-box}
-html,body{margin:0;height:100%;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif;background:linear-gradient(180deg,#f7f7f8,#eef1f4);}
-.container{max-width:1200px;margin:18px auto;padding:0 16px;}
-/* header */
-.header{background:var(--card); border:1px solid var(--line); border-left:6px solid var(--red); box-shadow:var(--shadow); border-radius:var(--radius);
-  padding:14px 16px; display:flex; align-items:center; gap:14px}
-.brand{display:flex; align-items:center; gap:16px; flex:1}
-.logo{height:54px; width:auto; object-fit:contain}
-.titlebox{display:flex; flex-direction:column}
-.kicker{font-size:14px; color:var(--muted)}
-.h1{font-size:34px; font-weight:900; color:var(--ink); letter-spacing:.5px}
-.iconbar{display:flex; gap:10px}
-.iconbtn{border:none; background:#222b; color:#fff; width:46px; height:46px; border-radius:12px; display:grid; place-items:center; cursor:pointer}
-.iconbtn.red{background:var(--red)}
-.iconbtn.blue{background:#1f63ff}
-.iconbtn:hover{transform:translateY(-1px)}
-/* search */
-.searchWrap{margin:16px 0}
-.search{width:100%; padding:16px 18px; border:1px solid var(--line); border-radius:12px; background:#fff; box-shadow:var(--shadow); font-size:16px}
-/* layout */
-.grid{display:grid; grid-template-columns:360px 1fr; gap:18px}
-@media(max-width:1000px){.grid{grid-template-columns:1fr}}
-.card{background:var(--card); border:1px solid var(--line); border-left:6px solid var(--red); border-radius:16px; box-shadow:var(--shadow)}
-.cardHeader{display:flex; align-items:center; justify-content:space-between; padding:18px}
-.cardTitle{font-size:22px; font-weight:800; color:var(--ink)}
-.linkBtn{color:var(--red-600); font-weight:700; cursor:pointer; user-select:none}
-.hr{height:1px; background:var(--line)}
-.pad{padding:14px 18px}
-/* section list */
-.sectionItem{border:1px solid var(--line); background:var(--chip); border-radius:12px; margin:10px 0; overflow:hidden}
-.sectionHead{display:flex; align-items:center; justify-content:space-between; padding:12px 14px; cursor:pointer}
-.sectionHead h4{margin:0; font-size:16px; font-weight:800; color:var(--ink)}
-.badge{font-size:12px; padding:4px 8px; background:#fff; border:1px solid var(--line); border-radius:999px; color:var(--muted)}
-.sectionBody{display:none; padding:10px 12px; background:#fff}
-.sectionBody.show{display:block}
-.row{display:flex; align-items:center; justify-content:space-between; gap:8px; padding:8px 10px; border:1px dashed var(--line); border-radius:10px; margin:6px 0; background:#fafafa}
-.row strong{font-weight:800}
-.row .muted{color:var(--muted); font-size:12px}
-.rowBtns{display:flex; gap:6px}
-.smallbtn{border:none; background:#f1f5f9; color:#111; border-radius:8px; padding:6px 8px; cursor:pointer}
-.smallbtn.red{background:#fee2e2; color:#b91c1c}
-.smallbtn.green{background:#dcfce7; color:#166534}
-.addLine{display:flex; gap:8px; margin-top:8px}
-.addLine input, .addLine select{flex:1; padding:8px 10px; border:1px solid var(--line); border-radius:8px; background:#fff}
-.plus{border:none; background:#111; color:#fff; border-radius:8px; padding:8px 10px; cursor:pointer}
-/* procedures */
-.procHeader{display:flex; align-items:center; justify-content:space-between; gap:12px}
-.procTitle{font-size:22px; font-weight:900}
-.procAdd{display:flex; gap:8px}
-.chip{background:#f6f6f8; border:1px solid var(--line); color:#333; padding:6px 10px; border-radius:999px; font-size:12px}
-.procList{padding:10px 16px 18px}
-.procItem{border:1px solid var(--line); border-radius:12px; background:#fff; margin:10px 0; overflow:hidden}
-.procHead{display:flex; align-items:center; justify-content:space-between; padding:12px 14px; cursor:pointer; background:#f9fafb}
-.procHead h5{margin:0; font-size:16px; font-weight:800}
-.procBody{display:none; padding:12px 14px; border-top:1px solid var(--line)}
-.procBody.show{display:block}
-.flexcol{display:flex; gap:10px; flex-wrap:wrap}
-.flexcol input, .flexcol textarea{width:100%; padding:8px 10px; border:1px solid var(--line); border-radius:8px; font-size:14px}
-.flexcol .half{flex:1 1 220px}
-.actions{display:flex; gap:6px; margin-top:8px}
-.hide{display:none !important}
+  :root{
+    --bg:#eef1f5; --card:#ffffff; --ink:#1f2937; --muted:#6b7280;
+    --accent:#dc2626; --accent-2:#0ea5e9; --ok:#16a34a; --line:#e5e7eb;
+    --chip:#f8fafc; --shadow:0 12px 22px rgba(0,0,0,.06); --radius:18px;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;background:linear-gradient(150deg,#f4f6f9 0%,#edf1f7 100%);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--ink)}
+  .wrap{max-width:1200px;margin:0 auto;padding:18px}
+  .bar{background:var(--card);border-left:5px solid var(--accent);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-radius:14px;box-shadow:var(--shadow)}
+  .brand{display:flex;align-items:center;gap:14px}
+  .logo{width:190px;height:56px;background:#fff url('https://upload.wikimedia.org/wikipedia/commons/1/1c/Alain_Afflelou_logo.png') center/contain no-repeat;border-radius:10px;border:1px solid var(--line)}
+  h1{margin:0;font-weight:800;letter-spacing:.4px}
+  .sub{font-size:12px;color:var(--muted)}
+  .actions{display:flex;gap:10px}
+  .icon{width:46px;height:46px;border-radius:12px;border:1px solid var(--line);background:#101827;display:grid;place-items:center;color:#fff;cursor:pointer;box-shadow:var(--shadow)}
+  .icon.blue{background:#2563eb}.icon.red{background:#dc2626}
+  .icon img{width:22px;height:22px;opacity:.95}
+  .search{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:10px;margin:16px 0;box-shadow:var(--shadow)}
+  .search input{border:0;outline:0;width:100%;background:transparent;font-size:16px;color:var(--ink)}
+  .grid{display:grid;grid-template-columns:380px 1fr;gap:16px}
+  .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:12px}
+  /* columnas izquierda */
+  .sec{border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:12px}
+  .sec header{display:flex;align-items:center;gap:10px;justify-content:space-between}
+  .sec-title{display:flex;align-items:center;gap:10px}
+  .badge{background:#f3f4f6;border:1px solid var(--line);border-radius:999px;padding:2px 8px;font-size:12px}
+  .chip{color:#dc2626;font-weight:700;cursor:pointer}
+  .sec-tools{display:flex;gap:6px}
+  .btn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:7px 10px;font-weight:600;cursor:pointer}
+  .btn.add{background:#0ea5e9;border-color:#0ea5e9;color:#fff}
+  .btn.del{background:#ef4444;border-color:#ef4444;color:#fff}
+  .list{margin-top:10px;display:none}
+  .list.show{display:block}
+  .item{display:flex;align-items:center;justify-content:space-between;border:1px dashed var(--line);border-radius:12px;padding:8px 10px;margin-bottom:8px}
+  .tiny{font-size:12px;color:var(--muted)}
+  .item-tools{display:flex;gap:6px;align-items:center}
+  .tag{font-size:12px;background:#fff;border:1px solid var(--line);padding:4px 8px;border-radius:999px;color:#334155}
+  .tag.sel{background:#dcfce7;border-color:#22c55e}
+  /* derecha */
+  .panel .head{display:flex;align-items:center;justify-content:space-between}
+  .title{font-weight:800;font-size:24px}
+  .fold{border:1px solid var(--line);border-radius:12px;margin-top:12px}
+  .fold summary{list-style:none;cursor:pointer;padding:14px 16px;font-weight:700;border-radius:12px}
+  .fold[open] summary{background:#f9fafb}
+  .fold .inner{padding:12px 16px;border-top:1px solid var(--line)}
+  .row{display:grid;grid-template-columns:110px 1fr 90px 90px 1fr 36px;gap:8px;align-items:center;margin-bottom:6px}
+  .row input,.row select{width:100%;border:1px solid var(--line);border-radius:9px;padding:7px 8px}
+  .row .x{color:#ef4444;font-weight:700;cursor:pointer;text-align:center}
+  .note{font-size:12px;color:var(--muted);margin-top:6px}
+  @media (max-width:1000px){.grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-<div class="container">
-
-  <!-- header -->
-  <div class="header">
+<div class="wrap">
+  <div class="bar">
     <div class="brand">
-      <img id="logoImg" class="logo" src="https://raw.githubusercontent.com/arrojasboris-byte/plataforma-Afflelou/main/logo-afflelou.png" alt="Logo">
-      <div class="titlebox">
-        <span class="kicker">Plataforma</span>
-        <div class="h1">AUDIOLOGIA-SEGUIMIENTO</div>
+      <div id="logo" class="logo" title="Click para cambiar logo"></div>
+      <div>
+        <div class="sub">Plataforma</div>
+        <h1>AUDIOLOGIA-SEGUIMIENTO</h1>
       </div>
     </div>
-    <div class="iconbar">
-      <button class="iconbtn" id="btnLogo" title="Logo"><i class="ri-image-2-line"></i></button>
-      <button class="iconbtn" id="btnLock" title="Editar con PIN"><i class="ri-lock-2-line"></i></button>
-      <button class="iconbtn red" id="btnCloud" title="Guardar en nube"><i class="ri-cloud-line"></i></button>
-      <button class="iconbtn blue" id="btnBackup" title="Backup / Restaurar"><i class="ri-save-3-line"></i></button>
-      <button class="iconbtn" id="btnSettings" title="Ajustes"><i class="ri-settings-3-line"></i></button>
+    <div class="actions">
+      <div class="icon" id="btnLogo" title="Cambiar logo"><img src="https://cdn.jsdelivr.net/gh/tabler/tabler-icons/icons/photo.svg" alt=""></div>
+      <div class="icon" id="btnLock" title="Modo edición (PIN)"><img src="https://cdn.jsdelivr.net/gh/tabler/tabler-icons/icons/lock.svg" alt=""></div>
+      <div class="icon red" id="btnCloud" title="Guardar en la nube"><img src="https://cdn.jsdelivr.net/gh/tabler/tabler-icons/icons/cloud-upload.svg" alt=""></div>
+      <div class="icon blue" id="btnBackup" title="Backup (descargar/subir json)"><img src="https://cdn.jsdelivr.net/gh/tabler/tabler-icons/icons/device-floppy.svg" alt=""></div>
+      <div class="icon" id="btnCloudLoad" title="Cargar desde nube"><img src="https://cdn.jsdelivr.net/gh/tabler/tabler-icons/icons/cloud-download.svg" alt=""></div>
+      <div class="icon" id="btnSettings" title="Configurar nube (token/gist)"><img src="https://cdn.jsdelivr.net/gh/tabler/tabler-icons/icons/settings.svg" alt=""></div>
     </div>
-    <input id="logoFile" type="file" accept="image/*" class="hide">
-    <input id="backupFile" type="file" accept="application/json" class="hide">
   </div>
 
-  <!-- search -->
-  <div class="searchWrap">
-    <input id="search" class="search" placeholder="Buscar en secciones, centros y datos..." />
+  <div class="search">
+    <img src="https://cdn.jsdelivr.net/gh/tabler/tabler-icons/icons/search.svg" width="18" height="18" alt="">
+    <input id="q" placeholder="Buscar en secciones, centros y datos…">
   </div>
 
-  <!-- layout -->
   <div class="grid">
-    <!-- left: sections -->
-    <div class="card">
-      <div class="cardHeader">
-        <div class="cardTitle">Secciones</div>
-        <div class="actions">
-          <button id="addSection" class="smallbtn"><i class="ri-add-line"></i> Añadir</button>
-        </div>
+    <!-- IZQUIERDA -->
+    <div class="card" id="left"></div>
+
+    <!-- DERECHA -->
+    <div class="card panel">
+      <div class="head">
+        <div class="title">Procedimientos — <span id="currentItem">-</span></div>
       </div>
-      <div class="hr"></div>
-      <div class="pad" id="sections">
 
-        <!-- Centros exclusivos -->
-        <div class="sectionItem" data-sec="exclusivos">
-          <div class="sectionHead">
-            <h4>Centros exclusivos</h4>
-            <div>
-              <span class="badge" id="countExclusivos">0</span>
-              <span class="linkBtn" data-toggle="#bodyExclusivos">Mostrar</span>
-            </div>
-          </div>
-          <div class="sectionBody" id="bodyExclusivos">
-            <div id="listExclusivos"></div>
-            <div class="addLine editOnly">
-              <input id="newExNombre" placeholder="Nombre centro">
-              <input id="newExDelegado" placeholder="Delegado">
-              <input id="newExAudio" placeholder="Audiólogo">
-              <select id="newExTipo">
-                <option value="">Tipo…</option>
-                <option value="Franquicia">Franquicia</option>
-                <option value="Sucursal">Sucursal</option>
-              </select>
-              <button id="btnAddEx" class="plus"><i class="ri-add-line"></i></button>
-            </div>
-          </div>
+      <details class="fold" open>
+        <summary>Acciones - Resultado</summary>
+        <div class="inner" id="accionesBox"></div>
+        <div style="padding:12px 16px">
+          <button class="btn" id="addAccion">+ Acción</button>
         </div>
+      </details>
 
-        <!-- Centros flop -->
-        <div class="sectionItem" data-sec="flop">
-          <div class="sectionHead">
-            <h4>Centros flop</h4>
-            <div>
-              <span class="badge" id="countFlop">0</span>
-              <span class="linkBtn" data-toggle="#bodyFlop">Mostrar</span>
-            </div>
-          </div>
-          <div class="sectionBody" id="bodyFlop">
-            <div id="listFlop"></div>
-            <div class="addLine editOnly">
-              <input id="newFlNombre" placeholder="Nombre centro">
-              <input id="newFlDelegado" placeholder="Delegado">
-              <input id="newFlAudio" placeholder="Audiólogo">
-              <select id="newFlTipo">
-                <option value="">Tipo…</option>
-                <option value="Franquicia">Franquicia</option>
-                <option value="Sucursal">Sucursal</option>
-              </select>
-              <button id="btnAddFl" class="plus"><i class="ri-add-line"></i></button>
-            </div>
-          </div>
+      <details class="fold">
+        <summary>Formación continua</summary>
+        <div class="inner" id="formacionBox"></div>
+        <div style="padding:12px 16px">
+          <button class="btn" id="addFormacion">+ Registro</button>
         </div>
+      </details>
 
-        <!-- Formaciones - Mentoring -->
-        <div class="sectionItem" data-sec="formMent">
-          <div class="sectionHead">
-            <h4>Formaciones – Mentoring</h4>
-            <div><span class="linkBtn" data-toggle="#bodyFormMent">Mostrar</span></div>
-          </div>
-          <div class="sectionBody" id="bodyFormMent">
-            <div class="row">
-              <strong>Cíclicos</strong>
-              <span class="muted">Programas recurrentes</span>
-              <div class="rowBtns editOnly">
-                <button class="smallbtn">Editar</button>
-                <button class="smallbtn red">Eliminar</button>
-              </div>
-            </div>
-            <div class="row">
-              <strong>Grupo delegado</strong>
-              <span class="muted">Plan por delegado</span>
-              <div class="rowBtns editOnly">
-                <button class="smallbtn">Editar</button>
-                <button class="smallbtn red">Eliminar</button>
-              </div>
-            </div>
-          </div>
+      <details class="fold">
+        <summary>Procesos y paquetes personalizados</summary>
+        <div class="inner" id="procesosBox"></div>
+        <div style="padding:12px 16px">
+          <button class="btn" id="addProceso">+ Proceso</button>
         </div>
+      </details>
 
-        <!-- Visitas a centros -->
-        <div class="sectionItem" data-sec="visitas">
-          <div class="sectionHead">
-            <h4>Visitas a centros</h4>
-            <div><span class="linkBtn" data-toggle="#bodyVisitas">Mostrar</span></div>
-          </div>
-          <div class="sectionBody" id="bodyVisitas">
-            <div class="row">
-              <strong>Registro de visitas</strong>
-              <span class="muted">Próximamente</span>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- right: procedures -->
-    <div class="card">
-      <div class="cardHeader">
-        <div class="procHeader">
-          <div class="procTitle">Procedimientos — <span id="procCentro">Seleccione un centro</span></div>
-          <span class="chip" id="procCount">0 ítems</span>
-        </div>
-        <div class="procAdd editOnly">
-          <button id="btnAddProc" class="smallbtn green"><i class="ri-add-line"></i> Añadir</button>
-        </div>
-      </div>
-      <div class="hr"></div>
-      <div class="procList" id="procList"></div>
+      <div class="note">Modo edición con PIN <code>AR4321</code> (🔒). “Guardar en la nube” usa <b>GitHub Gist privado</b>.</div>
     </div>
   </div>
 </div>
 
 <script>
-/* ---------- Estado ---------- */
-const state = JSON.parse(localStorage.getItem('audiologia_state_v2')||'null') || {
-  logo: '',
-  edit: false,
-  exclusivos: [
-    {id:1, nombre:'Reina Mercedes', delegado:'Ana Martínez', audio:'Dr. García', tipo:'Franquicia'},
-    {id:2, nombre:'Barcelona Centro', delegado:'Carlos Ruiz', audio:'Dra. López', tipo:'Sucursal'}
+/* Utilidades */
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const uid = () => Date.now()+Math.random().toString(16).slice(2);
+
+/* Estado */
+let editMode = false;
+let state = {
+  logo:"",
+  selected:{ sectionId:null, itemId:null },
+  sections:[
+    { id:'centros_exclusivos', title:'Centros exclusivos', type:'centros', open:true, items:[
+      { id:1, nombre:'Reina Mercedes', delegado:'Ana Martínez', audiologo:'Dr. García', tipo:'Franquicia' },
+      { id:2, nombre:'Barcelona Centro', delegado:'Carlos Ruiz', audiologo:'Dra. López', tipo:'Sucursal' }
+    ]},
+    { id:'centros_flop', title:'Centros flop', type:'centros', open:false, items:[] },
+    { id:'formacion_mentoring', title:'Formaciones – Mentoring', type:'formaciones', open:false, items:[] },
+    { id:'visitas', title:'Visitas a centros', type:'visitas', open:false, items:[] }
   ],
-  flop: [],
-  selectedCentroId: 1,
-  procedimientos: {
-    // por centro exclusivo
-    "1":[
-      {id: 1, titulo:'Chequeo inicial', fecha:'', accion:'', derivacion:0, cita:0, obs:''},
-    ],
-    "2":[]
-  }
+  // Procedimientos por clave "sectionId:itemId"
+  dataByKey:{}
 };
-function save(){ localStorage.setItem('audiologia_state_v2', JSON.stringify(state)); render(); }
 
-/* ---------- Util ---------- */
-const $ = s=>document.querySelector(s);
-const $$ = s=>document.querySelectorAll(s);
-function uid(){ return Math.floor(Math.random()*1e9); }
-function toggleEdit(on){
-  state.edit = on ?? !state.edit;
-  document.querySelectorAll('.editOnly').forEach(el=> el.classList.toggle('hide', !state.edit));
-  $('#btnLock').innerHTML = state.edit ? '<i class="ri-lock-unlock-line"></i>' : '<i class="ri-lock-2-line"></i>';
+/* Persistencia local */
+function localSave(){ localStorage.setItem('audiologia_state_v2', JSON.stringify(state)); }
+function localLoad(){ const r=localStorage.getItem('audiologia_state_v2'); if(r){try{state=JSON.parse(r);}catch{}} }
+
+/* Helpers de datos */
+const keyFor = (sectionId,itemId)=> `${sectionId}:${itemId}`;
+function ensureData(sectionId,itemId){
+  const k = keyFor(sectionId,itemId);
+  if(!state.dataByKey[k]){
+    state.dataByKey[k] = {
+      acciones:[{id:1,fecha:'',accion:'',derivacion:0,cita:0,obs:''}],
+      formaciones:[{id:1,fecha:'',asistencia:'',titulo:'',aplicacion:''}],
+      procesos:[{id:1,nombre:'',descripcion:'',puntuacion:'',observaciones:'',fecha:''}]
+    };
+  }
+}
+function displayName(section, item){
+  if(section.type==='centros') return item.nombre;
+  if(section.type==='formaciones') return item.titulo||'(formación)';
+  if(section.type==='visitas') return item.objetivo||'(visita)';
+  return item.nombre||item.titulo||'(item)';
 }
 
-/* ---------- Render secciones ---------- */
-function renderCentros(list, mountId, countId, tipo){
-  const mount = $(mountId); mount.innerHTML = '';
-  list.forEach(c=>{
-    const row = document.createElement('div');
-    row.className='row';
-    row.innerHTML = `
-      <div>
-        <strong>${c.nombre}</strong>
-        <div class="muted">👤 ${c.delegado || '-'} · 🎧 ${c.audio || '-'} · 📍 ${c.tipo || '-'}</div>
-      </div>
-      <div class="rowBtns">
-        ${tipo==='ex' ? `<button class="smallbtn" data-sel="${c.id}"><i class="ri-check-line"></i> Seleccionar</button>`:''}
-        <button class="smallbtn editOnly"><i class="ri-pencil-line"></i></button>
-        <button class="smallbtn red editOnly"><i class="ri-delete-bin-line"></i></button>
-      </div>`;
-    // eventos
-    if(tipo==='ex') row.querySelector('[data-sel]')?.addEventListener('click',()=>{
-      state.selectedCentroId = c.id; save();
-    });
-    // editar
-    row.querySelector('.editOnly:nth-of-type(1)')?.addEventListener('click',()=>{
-      const nombre = prompt('Nombre', c.nombre)||c.nombre;
-      const del = prompt('Delegado', c.delegado||'')||c.delegado;
-      const au = prompt('Audiólogo', c.audio||'')||c.audio;
-      const tp = prompt('Tipo (Franquicia/Sucursal)', c.tipo||'')||c.tipo;
-      Object.assign(c,{nombre,delegado:del,audio:au,tipo:tp}); save();
-    });
-    // eliminar
-    row.querySelector('.editOnly.red')?.addEventListener('click',()=>{
-      if(!confirm('¿Eliminar centro?')) return;
-      const arr = (tipo==='ex')? state.exclusivos : state.flop;
-      const idx = arr.findIndex(x=>x.id===c.id);
-      if(idx>=0) arr.splice(idx,1);
-      if(tipo==='ex' && state.selectedCentroId===c.id) state.selectedCentroId = state.exclusivos[0]?.id || null;
-      save();
-    });
-    mount.appendChild(row);
-  });
-  $(countId).textContent = list.length;
-}
-function renderProcedimientos(){
-  const centro = state.exclusivos.find(c=>c.id===state.selectedCentroId);
-  $('#procCentro').textContent = centro? centro.nombre : 'Seleccione un centro';
-  const list = centro ? (state.procedimientos[centro.id] || (state.procedimientos[centro.id]=[])) : [];
-  $('#procCount').textContent = `${list.length} ítems`;
-  const mount = $('#procList'); mount.innerHTML = '';
-  list.forEach(p=>{
-    const item = document.createElement('div');
-    item.className='procItem';
-    item.innerHTML = `
-      <div class="procHead" data-toggle>
-        <h5>${p.titulo || 'Sin título'}</h5>
-        <div class="rowBtns">
-          <button class="smallbtn editOnly" data-edit><i class="ri-pencil-line"></i></button>
-          <button class="smallbtn red editOnly" data-del><i class="ri-delete-bin-line"></i></button>
+/* Render izquierda */
+function renderLeft(){
+  const left = $('#left'); left.innerHTML='';
+  state.sections.forEach(sec=>{
+    const box = document.createElement('div'); box.className='sec';
+    const header = document.createElement('header');
+
+    const t = document.createElement('div'); t.className='sec-title';
+    const h = document.createElement('h3'); h.style.margin='0'; h.textContent = sec.title;
+    const badge = document.createElement('span'); badge.className='badge'; badge.textContent = sec.items.length;
+    t.append(h,badge);
+
+    const actions = document.createElement('div'); actions.className='sec-tools';
+    const toggle = document.createElement('span'); toggle.className='chip'; toggle.textContent = sec.open?'Ocultar':'Mostrar';
+    toggle.addEventListener('click',()=>{sec.open=!sec.open;localSave();renderLeft();});
+    const add = document.createElement('button'); add.className='btn add'; add.textContent=' + Añadir';
+    add.addEventListener('click',()=>addItemToSection(sec));
+    actions.append(toggle, add);
+
+    header.append(t,actions);
+    box.appendChild(header);
+
+    const list = document.createElement('div'); list.className='list'+(sec.open?' show':'');
+    sec.items.forEach(it=>{
+      const row = document.createElement('div'); row.className='item';
+      row.innerHTML = `
+        <div>
+          <div><b>${displayName(sec,it)}</b></div>
+          <div class="tiny">
+            ${sec.type==='centros'
+              ? `👤 ${it.delegado||'-'} · 🎧 ${it.audiologo||'-'} · ${it.tipo||'-'}`
+              : (sec.type==='formaciones'
+                  ? `${it.ciclo||'-'} · ${it.grupo||'-'}`
+                  : (sec.fecha?`📅 ${it.fecha}`:'')
+                )
+            }
+          </div>
         </div>
-      </div>
-      <div class="procBody">
-        <div class="flexcol">
-          <input class="half" data-k="fecha" placeholder="Fecha" value="${p.fecha||''}">
-          <input class="half" data-k="accion" placeholder="Acción" value="${p.accion||''}">
-          <div class="half"><input data-k="derivacion" placeholder="Derivación" value="${p.derivacion||0}" type="number"></div>
-          <div class="half"><input data-k="cita" placeholder="Cita" value="${p.cita||0}" type="number"></div>
-          <textarea rows="3" data-k="obs" placeholder="Observaciones">${p.obs||''}</textarea>
+        <div class="item-tools">
+          <span class="tag ${state.selected.sectionId===sec.id && state.selected.itemId===it.id?'sel':''}">Seleccionar</span>
+          ${editMode?'<button class="btn">Editar</button><button class="btn del">Eliminar</button>':''}
         </div>
-      </div>`;
-    // plegable
-    item.querySelector('[data-toggle]').addEventListener('click',e=>{
-      if(e.target.closest('.rowBtns')) return;
-      item.querySelector('.procBody').classList.toggle('show');
-    });
-    // editar (renombrar)
-    item.querySelector('[data-edit]').addEventListener('click',()=>{
-      const t = prompt('Título', p.titulo||'')||p.titulo; p.titulo=t; save();
-    });
-    // eliminar
-    item.querySelector('[data-del]').addEventListener('click',()=>{
-      if(!confirm('¿Eliminar procedimiento?')) return;
-      const arr = state.procedimientos[centro.id];
-      const idx = arr.findIndex(x=>x.id===p.id); if(idx>=0) arr.splice(idx,1); save();
-    });
-    // cambios de campos
-    item.querySelectorAll('[data-k]').forEach(inp=>{
-      inp.addEventListener('input',()=>{
-        const k = inp.dataset.k;
-        p[k] = (k==='cita'||k==='derivacion') ? Number(inp.value||0) : inp.value;
-        save();
+      `;
+      // seleccionar
+      row.querySelector('.tag').addEventListener('click',()=>{
+        state.selected={sectionId:sec.id,itemId:it.id};
+        ensureData(sec.id,it.id); localSave(); renderRight(); renderLeft();
       });
+      if(editMode){
+        const [editBtn, delBtn] = row.querySelectorAll('button');
+        editBtn.addEventListener('click',()=>{
+          if(sec.type==='centros'){
+            const nombre = prompt('Nombre', it.nombre||'') ?? it.nombre;
+            const delegado = prompt('Delegado', it.delegado||'') ?? it.delegado;
+            const aud = prompt('Audiólogo', it.audiologo||'') ?? it.audiologo;
+            const tipo = prompt('Tipo (Franquicia/Sucursal)', it.tipo||'') ?? it.tipo;
+            Object.assign(it,{nombre,delegado,audiologo:aud,tipo});
+          }else if(sec.type==='formaciones'){
+            const titulo = prompt('Título del grupo', it.titulo||'') ?? it.titulo;
+            const ciclo = prompt('Ciclo (mensual/trimestral/…)', it.ciclo||'') ?? it.ciclo;
+            const grupo = prompt('Grupo/Delegado', it.grupo||'') ?? it.grupo;
+            Object.assign(it,{titulo,ciclo,grupo});
+          }else if(sec.type==='visitas'){
+            const fecha = prompt('Fecha', it.fecha||new Date().toISOString().slice(0,10)) ?? it.fecha;
+            const objetivo = prompt('Objetivo', it.objetivo||'') ?? it.objetivo;
+            Object.assign(it,{fecha,objetivo});
+          }
+          localSave(); renderLeft();
+        });
+        delBtn.addEventListener('click',()=>{
+          if(confirm('¿Eliminar elemento?')){
+            sec.items=sec.items.filter(x=>x.id!==it.id);
+            if(state.selected.sectionId===sec.id && state.selected.itemId===it.id){
+              state.selected={sectionId:null,itemId:null};
+            }
+            localSave(); renderLeft(); renderRight();
+          }
+        });
+      }
+      list.appendChild(row);
     });
-    mount.appendChild(item);
+    box.appendChild(list);
+    left.appendChild(box);
   });
 }
-function render(){
-  // logo
-  if(state.logo) $('#logoImg').src = state.logo;
-  // centros
-  renderCentros(state.exclusivos,'#listExclusivos','#countExclusivos','ex');
-  renderCentros(state.flop,'#listFlop','#countFlop','fl');
-  // procedimientos
-  renderProcedimientos();
-  // modo edición
-  toggleEdit(state.edit);
+function addItemToSection(sec){
+  if(sec.type==='centros'){
+    const nombre = prompt('Nombre del centro'); if(!nombre) return;
+    const it={id:uid(),nombre,delegado:'',audiologo:'',tipo:''};
+    sec.items.push(it); state.selected={sectionId:sec.id,itemId:it.id}; ensureData(sec.id,it.id);
+  }else if(sec.type==='formaciones'){
+    const titulo = prompt('Título del grupo/mentoring'); if(!titulo) return;
+    const it={id:uid(),titulo,ciclo:'',grupo:''};
+    sec.items.push(it); state.selected={sectionId:sec.id,itemId:it.id}; ensureData(sec.id,it.id);
+  }else if(sec.type==='visitas'){
+    const objetivo = prompt('Objetivo de la visita'); if(!objetivo) return;
+    const it={id:uid(),fecha:new Date().toISOString().slice(0,10),objetivo};
+    sec.items.push(it); state.selected={sectionId:sec.id,itemId:it.id}; ensureData(sec.id,it.id);
+  }
+  localSave(); renderLeft(); renderRight();
 }
-render();
 
-/* ---------- Eventos UI ---------- */
-// toggle secciones
-$$('.linkBtn').forEach(btn=>{
-  const target = btn.getAttribute('data-toggle');
-  if(!target) return;
-  btn.addEventListener('click',()=>{
-    const el = document.querySelector(target);
-    el.classList.toggle('show');
-    btn.textContent = el.classList.contains('show')? 'Ocultar' : 'Mostrar';
+/* Render derecha (procedimientos por sección+item) */
+function renderRight(){
+  const titleEl = $('#currentItem');
+  const [sec,item] = getSelected();
+  if(!sec||!item){ titleEl.textContent='-'; $('#accionesBox').innerHTML=$('#formacionBox').innerHTML=$('#procesosBox').innerHTML=''; return; }
+  titleEl.textContent = displayName(sec,item);
+  ensureData(sec.id,item.id);
+  const k = keyFor(sec.id,item.id), d = state.dataByKey[k];
+
+  // Acciones
+  const A=$('#accionesBox'); A.innerHTML='';
+  d.acciones.forEach(a=>{
+    const row=document.createElement('div'); row.className='row';
+    row.innerHTML=`
+      <input type="date" value="${a.fecha||''}">
+      <input placeholder="Acción…" value="${a.accion||''}">
+      <input type="number" min="0" value="${a.derivacion||0}">
+      <input type="number" min="0" value="${a.cita||0}">
+      <input placeholder="Observaciones" value="${a.obs||''}">
+      <div class="x">✕</div>`;
+    const [f,ac,de,ci,ob]=row.querySelectorAll('input');
+    [f,ac,de,ci,ob].forEach(el=>el.addEventListener('input',()=>{
+      Object.assign(a,{fecha:f.value,accion:ac.value,derivacion:+de.value||0,cita:+ci.value||0,obs:ob.value}); localSave();
+    }));
+    row.querySelector('.x').addEventListener('click',()=>{ if(!editMode) return; d.acciones=d.acciones.filter(x=>x!==a); localSave(); renderRight();});
+    A.appendChild(row);
   });
-});
 
-// add centro exclusivos
-$('#btnAddEx').addEventListener('click',()=>{
-  const n = $('#newExNombre').value.trim(); if(!n) return;
-  state.exclusivos.push({
-    id: uid(),
-    nombre:n,
-    delegado: $('#newExDelegado').value.trim(),
-    audio: $('#newExAudio').value.trim(),
-    tipo: $('#newExTipo').value
+  // Formación
+  const F=$('#formacionBox'); F.innerHTML='';
+  d.formaciones.forEach(f=>{
+    const row=document.createElement('div'); row.className='row';
+    row.innerHTML=`
+      <input type="date" value="${f.fecha||''}">
+      <input placeholder="Título" value="${f.titulo||''}">
+      <select>
+        <option value="">Asistencia</option>
+        <option ${f.asistencia==='SI'?'selected':''}>SI</option>
+        <option ${f.asistencia==='NO'?'selected':''}>NO</option>
+        <option ${f.asistencia==='Pendiente'?'selected':''}>Pendiente</option>
+      </select>
+      <input placeholder="Aplicación / Nota" value="${f.aplicacion||''}">
+      <div></div>
+      <div class="x">✕</div>`;
+    const [fe,ti,se,ap]=[row.children[0],row.children[1],row.children[2],row.children[3]];
+    [fe,ti,se,ap].forEach(el=>el.addEventListener('input',()=>{
+      Object.assign(f,{fecha:fe.value,titulo:ti.value,asistencia:se.value,aplicacion:ap.value}); localSave();
+    }));
+    row.querySelector('.x').addEventListener('click',()=>{ if(!editMode) return; d.formaciones=d.formaciones.filter(x=>x!==f); localSave(); renderRight();});
+    F.appendChild(row);
   });
-  $('#newExNombre').value = $('#newExDelegado').value = $('#newExAudio').value = '';
-  $('#newExTipo').value = '';
-  save();
-});
-// add centro flop
-$('#btnAddFl').addEventListener('click',()=>{
-  const n = $('#newFlNombre').value.trim(); if(!n) return;
-  state.flop.push({
-    id: uid(),
-    nombre:n,
-    delegado: $('#newFlDelegado').value.trim(),
-    audio: $('#newFlAudio').value.trim(),
-    tipo: $('#newFlTipo').value
+
+  // Procesos
+  const P=$('#procesosBox'); P.innerHTML='';
+  d.procesos.forEach(p=>{
+    const row=document.createElement('div'); row.className='row';
+    row.innerHTML=`
+      <input placeholder="Nombre paquete" value="${p.nombre||''}">
+      <input placeholder="Descripción" value="${p.descripcion||''}">
+      <input placeholder="Puntuación" value="${p.puntuacion||''}">
+      <input placeholder="Observaciones" value="${p.observaciones||''}">
+      <input type="date" value="${p.fecha||''}">
+      <div class="x">✕</div>`;
+    const [no,de,pu,ob,fe]=[row.children[0],row.children[1],row.children[2],row.children[3],row.children[4]];
+    ;[no,de,pu,ob,fe].forEach(el=>el.addEventListener('input',()=>{
+      Object.assign(p,{nombre:no.value,descripcion:de.value,puntuacion:pu.value,observaciones:ob.value,fecha:fe.value}); localSave();
+    }));
+    row.querySelector('.x').addEventListener('click',()=>{ if(!editMode) return; d.procesos=d.procesos.filter(x=>x!==p); localSave(); renderRight();});
+    P.appendChild(row);
   });
-  $('#newFlNombre').value = $('#newFlDelegado').value = $('#newFlAudio').value = '';
-  $('#newFlTipo').value = '';
-  save();
+}
+
+/* Añadir filas */
+$('#addAccion').addEventListener('click', ()=>{const s=getSelectedKey(); if(!s) return; state.dataByKey[s].acciones.push({id:uid(),fecha:'',accion:'',derivacion:0,cita:0,obs:''}); localSave(); renderRight();});
+$('#addFormacion').addEventListener('click', ()=>{const s=getSelectedKey(); if(!s) return; state.dataByKey[s].formaciones.push({id:uid(),fecha:'',asistencia:'',titulo:'',aplicacion:''}); localSave(); renderRight();});
+$('#addProceso').addEventListener('click', ()=>{const s=getSelectedKey(); if(!s) return; state.dataByKey[s].procesos.push({id:uid(),nombre:'',descripcion:'',puntuacion:'',observaciones:'',fecha:''}); localSave(); renderRight();});
+function getSelected(){const sec=state.sections.find(s=>s.id===state.selected.sectionId); const item=sec?.items?.find(i=>i.id===state.selected.itemId); return [sec,item];}
+function getSelectedKey(){const [sec,item]=getSelected(); if(!sec||!item){alert('Selecciona un elemento de alguna sección.');return null;} ensureData(sec.id,item.id); return keyFor(sec.id,item.id);}
+
+/* Buscador */
+$('#q').addEventListener('input', e=>{
+  const k=e.target.value.toLowerCase();
+  $$('#left .item').forEach(n=>{ n.style.display = n.textContent.toLowerCase().includes(k)?'flex':'none'; });
 });
 
-// add procedimiento
-$('#btnAddProc').addEventListener('click',()=>{
-  const cId = state.selectedCentroId;
-  if(!cId){ alert('Selecciona primero un centro exclusivo.'); return; }
-  const arr = state.procedimientos[cId] || (state.procedimientos[cId]=[]);
-  arr.push({id:uid(), titulo:'Nuevo procedimiento', fecha:'', accion:'', derivacion:0, cita:0, obs:''});
-  save();
+/* Logo + PIN */
+$('#btnLogo').addEventListener('click', ()=>{
+  if(!editMode) return alert('Activa el modo edición (candado).');
+  const input=document.createElement('input'); input.type='file'; input.accept='image/*';
+  input.onchange=e=>{
+    const f=e.target.files?.[0]; if(!f) return;
+    const r=new FileReader(); r.onload=ev=>{state.logo=ev.target.result; $('#logo').style.background=`#fff url('${state.logo}') center/contain no-repeat`; localSave();};
+    r.readAsDataURL(f);
+  }; input.click();
+});
+$('#btnLock').addEventListener('click', ()=>{
+  if(editMode){ editMode=false; alert('Modo edición DESACTIVADO'); renderLeft(); return; }
+  const pin=prompt('PIN de edición'); if(pin==='AR4321'){ editMode=true; alert('Modo edición ACTIVADO'); renderLeft(); } else alert('PIN incorrecto');
 });
 
-/* logo */
-$('#btnLogo').addEventListener('click',()=> $('#logoFile').click());
-$('#logoFile').addEventListener('change',(e)=>{
-  const f = e.target.files[0]; if(!f) return;
-  const r = new FileReader(); r.onload = ev=>{ state.logo = ev.target.result; save(); };
-  r.readAsDataURL(f);
-});
-
-/* edición con PIN */
-$('#btnLock').addEventListener('click',()=>{
-  if(state.edit){ toggleEdit(false); return; }
-  const p = prompt('PIN de edición'); if(p==='AR4321'){ toggleEdit(true); } else if(p!==null){ alert('PIN incorrecto'); }
-});
-
-/* Backup local */
-$('#btnBackup').addEventListener('click',()=>{
-  // menú rápido: descargar o cargar archivo
-  const op = confirm('Aceptar = Descargar backup\nCancelar = Cargar backup desde archivo');
-  if(op){
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([JSON.stringify(state,null,2)],{type:'application/json'}));
-    a.download = 'audiologia_backup.json'; a.click();
+/* Backup local (descargar/subir) */
+$('#btnBackup').addEventListener('click', ()=>{
+  const isDownload = confirm('OK = Descargar JSON\nCancelar = Cargar desde archivo');
+  if(isDownload){
+    const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='audiologia_backup.json'; a.click();
   }else{
-    $('#backupFile').click();
+    const input=document.createElement('input'); input.type='file'; input.accept='application/json';
+    input.onchange=async e=>{const f=e.target.files?.[0]; if(!f) return; const txt=await f.text(); try{state=JSON.parse(txt);}catch{return alert('Archivo inválido');} localSave(); hydrate(); alert('Backup cargado.');};
+    input.click();
   }
 });
-$('#backupFile').addEventListener('change',(e)=>{
-  const f = e.target.files[0]; if(!f) return;
-  const r = new FileReader();
-  r.onload = ev=>{
-    try{
-      const obj = JSON.parse(ev.target.result);
-      Object.assign(state, obj);
-      save();
-    }catch(err){ alert('Archivo inválido'); }
-  };
-  r.readAsText(f);
-});
 
-/* Guardar en nube (placeholder) */
-$('#btnCloud').addEventListener('click',()=>{
-  alert('“Guardar en nube” preparado. Podemos conectarlo a GitHub Gist o Google Drive cuando me pases el método preferido.');
+/* Nube (GitHub Gist) */
+const gh={
+  get token(){return localStorage.getItem('gist_token')||'';},
+  set token(v){localStorage.setItem('gist_token',v||'');},
+  get id(){return localStorage.getItem('gist_id')||'';},
+  set id(v){localStorage.setItem('gist_id',v||'');}
+};
+$('#btnSettings').addEventListener('click', ()=>{
+  const tok=prompt('Pega tu GitHub Token (scope: gist). Deja vacío para borrar.', gh.token);
+  if(tok===null) return; gh.token=tok.trim();
+  if(!gh.id){ const id=prompt('Opcional: si ya tienes un Gist, pega su ID',''); if(id!==null&&id.trim()) gh.id=id.trim(); }
+  alert('Configuración guardada.');
 });
+$('#btnCloud').addEventListener('click', cloudSave);
+$('#btnCloudLoad').addEventListener('click', cloudLoad);
 
-/* Ajustes simples */
-$('#btnSettings').addEventListener('click',()=>{
-  alert('Ajustes mínimos. Próximamente: integración nube, usuarios, etc.');
-});
+async function cloudSave(){
+  try{
+    let token=gh.token; if(!token){ token=prompt('Token (scope: gist)'); if(!token) return; gh.token=token; }
+    const headers={'Authorization':'Bearer '+token,'Accept':'application/vnd.github+json','Content-Type':'application/json'};
+    const body={description:'AUDIOLOGIA-SEGUIMIENTO backup', public:false, files:{'audiologia_backup.json':{content:JSON.stringify(state,null,2)}}};
+    let res,data;
+    if(!gh.id){
+      res=await fetch('https://api.github.com/gists',{method:'POST',headers,body:JSON.stringify(body)});
+      data=await res.json(); if(!res.ok) throw new Error(data.message||'Error creando Gist'); gh.id=data.id; alert('✅ Copia creada (Gist ID: '+gh.id+')');
+    }else{
+      res=await fetch('https://api.github.com/gists/'+gh.id,{method:'PATCH',headers,body:JSON.stringify(body)});
+      data=await res.json(); if(!res.ok) throw new Error(data.message||'Error actualizando Gist'); alert('✅ Copia actualizada en la nube.');
+    }
+  }catch(e){alert('❌ '+e.message);}
+}
+async function cloudLoad(){
+  try{
+    let token=gh.token; if(!token){ token=prompt('Token (scope: gist)'); if(!token) return; gh.token=token; }
+    if(!gh.id){ const id=prompt('Pega el Gist ID'); if(!id) return; gh.id=id.trim(); }
+    const headers={'Authorization':'Bearer '+gh.token,'Accept':'application/vnd.github+json'};
+    const res=await fetch('https://api.github.com/gists/'+gh.id,{headers}); const data=await res.json();
+    if(!res.ok) throw new Error(data.message||'No se pudo leer el Gist');
+    const file=data.files['audiologia_backup.json']; if(!file) throw new Error('No existe audiologia_backup.json');
+    state=JSON.parse(file.content); localSave(); hydrate(); alert('✅ Datos cargados.');
+  }catch(e){alert('❌ '+e.message);}
+}
 
-/* Búsqueda */
-$('#search').addEventListener('input',(e)=>{
-  const q = e.target.value.toLowerCase().trim();
-  // filtra filas de centros
-  ['#listExclusivos','#listFlop'].forEach(sel=>{
-    $$(sel+' .row').forEach(r=>{
-      r.style.display = r.textContent.toLowerCase().includes(q)? '' : 'none';
-    });
-  });
-  // filtra procedimientos (titulo y cuerpo)
-  $$('#procList .procItem').forEach(it=>{
-    it.style.display = it.textContent.toLowerCase().includes(q)? '' : 'none';
-  });
-});
+/* Hidratación inicial */
+function hydrate(){
+  if(state.logo) $('#logo').style.background=`#fff url('${state.logo}') center/contain no-repeat`;
+  // Selección por defecto
+  if(!state.selected.sectionId || !state.selected.itemId){
+    // priorizar centros exclusivos si hay
+    const pref=state.sections.find(s=>s.items.length>0);
+    if(pref) state.selected={sectionId:pref.id,itemId:pref.items[0].id};
+  }
+  renderLeft(); renderRight();
+}
+localLoad(); hydrate();
+// Autoload nube si ya hay token+id
+(async()=>{ if(!gh.token||!gh.id) return; try{
+  const headers={'Authorization':'Bearer '+gh.token,'Accept':'application/vnd.github+json'};
+  const r=await fetch('https://api.github.com/gists/'+gh.id,{headers}); if(!r.ok) return;
+  const d=await r.json(); const f=d.files['audiologia_backup.json'];
+  if(f){ state=JSON.parse(f.content); localSave(); hydrate(); console.log('Auto-cargado desde nube'); }
+}catch(_){}})();
 </script>
 </body>
 </html>
