@@ -17,6 +17,7 @@
   .status{font-weight:800}.last{opacity:.92}
   .search{min-width:260px;border:0;outline:none;border-radius:999px;padding:9px 12px;background:#fff;color:#1f2937}
   .logo{height:36px;width:auto;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.25)} .hidden{display:none}
+
   .layout{display:grid;grid-template-columns:340px 1fr;gap:18px;max-width:1300px;margin:18px auto;padding:0 16px}
   aside{background:var(--card);border-radius:16px;box-shadow:0 14px 34px rgba(30,41,59,.08);padding:12px}
   main{display:grid;gap:16px}
@@ -24,6 +25,7 @@
   .card h2{margin:0 0 6px;font-size:1.05rem}
   .subtle{font-size:.85rem;opacity:.75;margin:0 0 12px}
   .muted{opacity:.7;font-size:.9rem}
+
   .sec{border:1px solid #0001;border-radius:12px;margin:10px 0;overflow:hidden}
   .sec header{all:unset;display:flex;align-items:center;justify-content:space-between;background:#f3f4f6;color:#111;padding:10px 12px;font-weight:800}
   .sec header button{border:0;background:#fff;color:#1f2937;border-radius:8px;padding:6px 10px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.12)}
@@ -31,20 +33,24 @@
   .item{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:8px;border-radius:10px;cursor:pointer}
   .item:hover{background:#f5f6fb} .item.active{background:#e9ecff}
   .actions{display:flex;gap:6px} .iconbtn{border:0;background:#fff;border-radius:8px;padding:5px 8px;cursor:pointer;box-shadow:0 3px 9px rgba(0,0,0,.12)}
+
   label{display:block;font-size:.92rem;margin-bottom:6px}
   input[type="text"],select,textarea,input[type="number"],input[type="date"]{width:100%;border:1px solid #0001;border-radius:12px;padding:10px 12px;font:inherit;background:#fff;outline:none}
   input:focus,select:focus,textarea:focus{border-color:var(--primary);box-shadow:0 0 0 4px var(--ring)}
   textarea{min-height:110px;resize:vertical}
   .row{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
   .col-6{grid-column:span 6}.col-4{grid-column:span 4}.col-3{grid-column:span 3}
+
   .table{width:100%;border-collapse:collapse;border-radius:12px;overflow:hidden}
   .table th,.table td{border:1px solid #e5e7eb;padding:8px 10px;text-align:left;background:#fff}
   .table th{background:#f3f4f6}
   .table input{width:100%;border:0;outline:none;background:transparent;padding:6px}
   .tbar{display:flex;justify-content:space-between;align-items:center;margin:6px 0 10px}
   .tbar .addrow{border:0;background:#fff;border-radius:10px;padding:6px 10px;cursor:pointer;box-shadow:0 3px 9px rgba(0,0,0,.12)}
+
   .saveStrip{display:flex;gap:10px;align-items:center;justify-content:flex-end;margin-top:12px}
   .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:20px;background:#111;color:#fff;padding:10px 14px;border-radius:12px;box-shadow:0 14px 30px rgba(0,0,0,.25);z-index:9999;opacity:.98}
+
   @media (prefers-color-scheme:dark){:root{--bg:#0e1116;--card:#171a21;--text:#e5e7eb}
     aside,.card{box-shadow:0 14px 34px rgba(0,0,0,.25)} .sec header{background:#111827;color:#e5e7eb}
     .item:hover{background:#1f2430}.item.active{background:#1b2b57}
@@ -72,6 +78,7 @@
   </header>
 
   <div class="layout">
+    <!-- IZQUIERDA -->
     <aside id="aside">
       <section class="sec" data-sec="exclusivos">
         <header><div>🏥 <strong>CENTROS EXCLUSIVOS</strong> <span class="muted">(máx. 10)</span></div>
@@ -95,6 +102,7 @@
       </section>
     </aside>
 
+    <!-- DERECHA -->
     <main>
       <section class="card">
         <h2 id="detail-title">Detalle</h2>
@@ -105,10 +113,6 @@
           <button class="btn" id="btnSaveDetail">💾 Guardar cambios</button>
         </div>
       </section>
-      <section class="card">
-        <h2>Vista previa del estado</h2>
-        <pre id="preview">—</pre>
-      </section>
     </main>
   </div>
 
@@ -118,20 +122,20 @@ const PIN="AR4321";
 const ENDPOINT=new URLSearchParams(location.search).get("endpoint")||"https://script.google.com/macros/s/AKfycby5vh1Ja0XllWFB98ypWmDcUfUItwEciVimUd5L6Esi1wfPJbcc2dap6G0lciRf51VR/exec";
 
 /* ===== state ===== */
-let canEdit=false;
+let canEdit=false; // sigue existiendo, pero LAS TABLAS son SIEMPRE editables
 let state={logoDataUrl:"",exclusivos:[],flop:[],visitas:[],formaciones:[]};
 let selected={section:null,id:null};
 let dirty=false;
 
 /* ===== helpers ===== */
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
-const statusEl=$("#status"), lastEl=$("#last"), editLbl=$("#editState"), prevEl=$("#preview");
+const statusEl=$("#status"), lastEl=$("#last"), editLbl=$("#editState");
 const detailTitle=$("#detail-title"), detailForm=$("#detail-form"), panelSub=$("#panelSub"), dirtyHint=$("#dirtyHint");
 const setStatus=t=>statusEl.textContent=t, setLast=t=>lastEl.textContent=t?`Actualizado: ${t}`:"—";
 const toast=m=>{const x=document.createElement("div");x.className="toast";x.textContent=m;document.body.appendChild(x);setTimeout(()=>x.remove(),1800);};
 const uid=()=>Math.random().toString(36).slice(2,10);
-const updatePreview=()=>{prevEl.textContent=JSON.stringify(state,null,2)};
 const setDirty=v=>{dirty=v; dirtyHint.textContent=v?"• Tienes cambios sin guardar":"—";};
+
 const lists={exclusivos:$("#list-exclusivos"), flop:$("#list-flop"), visitas:$("#list-visitas"), formaciones:$("#list-formaciones")};
 const sectionsDom={"exclusivos":document.querySelector('[data-sec="exclusivos"]'),"flop":document.querySelector('[data-sec="flop"]'),"visitas":document.querySelector('[data-sec="visitas"]'),"formaciones":document.querySelector('[data-sec="formaciones"]')};
 
@@ -158,13 +162,12 @@ function renderLists(filter=""){
         }
       });
       div.querySelector(".edit").onclick=()=>{selected={section:sec,id:it.id}; renderDetail();};
-      div.querySelector(".del").onclick=()=>{ if(!canEdit)return toast("Bloqueado. Pulsa Editar (PIN).");
-        if(confirm("¿Eliminar este elemento?")){ state[sec]=state[sec].filter(x=>x.id!==it.id); selected={section:null,id:null}; renderLists($("#search").value); renderDetail(); setDirty(true); updatePreview(); }
+      div.querySelector(".del").onclick=()=>{ if(!confirm("¿Eliminar este elemento?"))return;
+        state[sec]=state[sec].filter(x=>x.id!==it.id); selected={section:null,id:null}; renderLists($("#search").value); renderDetail(); setDirty(true);
       };
       ul.appendChild(div);
     });
   });
-  updatePreview();
 }
 $("#search").addEventListener("input",e=>renderLists(e.target.value));
 
@@ -176,7 +179,7 @@ function setPanelSub(){
   panelSub.textContent=`Centro: ${name}`;
 }
 
-/* ===== detail (actions + trainings) ===== */
+/* ===== detail with 3 tables (Acciones, Formaciones, Evaluaciones) ===== */
 function renderDetail(){
   setPanelSub();
   const {section,id}=selected;
@@ -189,15 +192,16 @@ function renderDetail(){
 
   if(section==="exclusivos"||section==="flop"){
     if(!it.historial) it.historial=[];
-    if(!it.formaciones) it.formaciones=[]; // hasta 12
+    if(!it.formaciones) it.formaciones=[];
+    if(!it.evaluaciones) it.evaluaciones=[];
 
     detailForm.innerHTML=`
       <div class="row">
-        <div class="col-6"><label>Nombre</label><input id="f_nombre" type="text" placeholder="Nombre del centro" value="${it.nombre||""}" ${!canEdit?"":"autofocus"} ${!canEdit?"disabled":""}></div>
-        <div class="col-6"><label>Delegado</label><input id="f_delegado" type="text" placeholder="Persona delegada" value="${it.delegado||""}" ${!canEdit?"disabled":""}></div>
-        <div class="col-6"><label>Audiólogo</label><input id="f_audiologo" type="text" placeholder="Audiólogo/a" value="${it.audiologo||""}" ${!canEdit?"disabled":""}></div>
+        <div class="col-6"><label>Nombre</label><input id="f_nombre" type="text" placeholder="Nombre del centro" value="${it.nombre||""}"></div>
+        <div class="col-6"><label>Delegado</label><input id="f_delegado" type="text" placeholder="Persona delegada" value="${it.delegado||""}"></div>
+        <div class="col-6"><label>Audiólogo</label><input id="f_audiologo" type="text" placeholder="Audiólogo/a" value="${it.audiologo||""}"></div>
         <div class="col-6"><label>Tipo</label>
-          <select id="f_tipo" ${!canEdit?"disabled":""}>
+          <select id="f_tipo">
             <option value="">—</option>
             <option value="sucursal" ${it.tipo==="sucursal"?"selected":""}>Sucursal</option>
             <option value="franquicia" ${it.tipo==="franquicia"?"selected":""}>Franquicia</option>
@@ -240,97 +244,139 @@ function renderDetail(){
           </tr></thead><tbody></tbody>
         </table>
       </div>
+
+      <!-- EVALUACIONES -->
+      <div class="tbar" style="margin-top:18px">
+        <h3 style="margin:12px 0 6px">Evaluaciones de procesos y visitas</h3>
+        <button class="addrow" id="addRowEval">＋ Añadir fila</button>
+      </div>
+      <div style="overflow:auto">
+        <table class="table" id="tblEval">
+          <thead><tr>
+            <th style="min-width:140px">Fecha de visita</th>
+            <th style="min-width:120px">Puntuación</th>
+            <th style="min-width:260px">Áreas de mejora</th>
+            <th style="min-width:240px">Adjuntar Excel</th>
+            <th></th>
+          </tr></thead><tbody></tbody>
+        </table>
+      </div>
     `;
 
-    /* ---- enlazar campos cabecera ---- */
-    if(canEdit){
-      $("#f_nombre").oninput =()=>{it.nombre=$("#f_nombre").value; renderLists($("#search").value); setDirty(true); updatePreview();};
-      $("#f_delegado").oninput=()=>{it.delegado=$("#f_delegado").value; renderLists($("#search").value); setDirty(true); updatePreview();};
-      $("#f_audiologo").oninput=()=>{it.audiologo=$("#f_audiologo").value; setDirty(true); updatePreview();};
-      $("#f_tipo").onchange  =()=>{it.tipo=$("#f_tipo").value; setDirty(true); updatePreview();};
-    }
+    // Campos cabecera (no bloqueados)
+    $("#f_nombre").oninput =()=>{it.nombre=$("#f_nombre").value; renderLists($("#search").value); setDirty(true);};
+    $("#f_delegado").oninput=()=>{it.delegado=$("#f_delegado").value; renderLists($("#search").value); setDirty(true);};
+    $("#f_audiologo").oninput=()=>{it.audiologo=$("#f_audiologo").value; setDirty(true);};
+    $("#f_tipo").onchange  =()=>{it.tipo=$("#f_tipo").value; setDirty(true);};
 
-    /* ---- ACCIONES (editable) ---- */
+    /* ---- ACCIONES (SIEMPRE editable) ---- */
     const tbA=detailForm.querySelector("#tblAcc tbody");
     function rowAccHTML(r,i){
       const conv=(Number(r.citas)||0)?(((Number(r.ventas)||0)/(Number(r.citas)||1))*100).toFixed(1):"0.0";
       return `<tr data-i="${i}">
-        <td><input type="date" value="${r.fecha||""}" ${!canEdit?"disabled":""}></td>
-        <td><input type="text" placeholder="Llamada / Taller / Visita…" value="${r.accion||""}" ${!canEdit?"disabled":""}></td>
-        <td><input type="text" placeholder="Hospital / Proveedor…" value="${r.derivacion||""}" ${!canEdit?"disabled":""}></td>
-        <td><input type="number" min="0" value="${r.citas??""}" ${!canEdit?"disabled":""}></td>
-        <td><input type="number" min="0" value="${r.ventas??""}" ${!canEdit?"disabled":""}></td>
+        <td><input type="date" value="${r.fecha||""}"></td>
+        <td><input type="text" placeholder="Llamada / Taller / Visita…" value="${r.accion||""}"></td>
+        <td><input type="text" placeholder="Hospital / Proveedor…" value="${r.derivacion||""}"></td>
+        <td><input type="number" min="0" value="${r.citas??""}"></td>
+        <td><input type="number" min="0" value="${r.ventas??""}"></td>
         <td><input type="text" disabled value="${conv}%"></td>
-        <td><button class="iconbtn delA" ${!canEdit?"disabled":""}>🗑️</button></td>
+        <td><button class="iconbtn delA">🗑️</button></td>
       </tr>`;
     }
     function renderAcc(){
       tbA.innerHTML = it.historial.map((r,i)=>rowAccHTML(r,i)).join("") || `<tr><td colspan="7" class="muted">Sin filas</td></tr>`;
-      if(canEdit){
-        tbA.querySelectorAll("tr").forEach(tr=>{
-          const i=+tr.dataset.i; const ins=[...tr.querySelectorAll("input")];
-          ins[0].oninput=()=>{it.historial[i].fecha=ins[0].value; updConv(i); setDirty(true);};
-          ins[1].oninput=()=>{it.historial[i].accion=ins[1].value; setDirty(true); updatePreview();};
-          ins[2].oninput=()=>{it.historial[i].derivacion=ins[2].value; setDirty(true); updatePreview();};
-          ins[3].oninput=()=>{it.historial[i].citas=+ins[3].value||0; updConv(i); setDirty(true);};
-          ins[4].oninput=()=>{it.historial[i].ventas=+ins[4].value||0; updConv(i); setDirty(true);};
-          tr.querySelector(".delA").onclick=()=>{ it.historial.splice(i,1); renderAcc(); setDirty(true); updatePreview(); };
-        });
-      }
+      tbA.querySelectorAll("tr").forEach(tr=>{
+        const i=+tr.dataset.i; const ins=[...tr.querySelectorAll("input")];
+        ins[0].oninput=()=>{it.historial[i].fecha=ins[0].value; updConv(i); setDirty(true);};
+        ins[1].oninput=()=>{it.historial[i].accion=ins[1].value; setDirty(true);};
+        ins[2].oninput=()=>{it.historial[i].derivacion=ins[2].value; setDirty(true);};
+        ins[3].oninput=()=>{it.historial[i].citas=+ins[3].value||0; updConv(i); setDirty(true);};
+        ins[4].oninput=()=>{it.historial[i].ventas=+ins[4].value||0; updConv(i); setDirty(true);};
+        tr.querySelector(".delA").onclick=()=>{ it.historial.splice(i,1); renderAcc(); setDirty(true); };
+      });
     }
     function updConv(i){
       const r=it.historial[i]; const conv=(r.citas?(r.ventas||0)/r.citas*100:0).toFixed(1);
       const row=tbA.querySelector(`tr[data-i="${i}"]`); if(row) row.querySelectorAll("input")[5].value=conv+"%";
-      updatePreview();
     }
     renderAcc();
-    $("#addRowAcc").onclick=()=>{ if(!canEdit) return toast("Bloqueado. Pulsa Editar (PIN).");
-      it.historial.push({fecha:"",accion:"",derivacion:"",citas:0,ventas:0}); renderAcc(); setDirty(true); updatePreview();
-    };
+    $("#addRowAcc").onclick=()=>{ it.historial.push({fecha:"",accion:"",derivacion:"",citas:0,ventas:0}); renderAcc(); setDirty(true); };
 
-    /* ---- FORMACIONES (editable, máx 12) ---- */
+    /* ---- FORMACIONES (SIEMPRE editable, máx 12) ---- */
     const tbF=detailForm.querySelector("#tblForm tbody");
     function rowFormHTML(r,i){
       return `<tr data-i="${i}">
-        <td><input type="text" placeholder="Tema del curso o mentoring" value="${r.tema||""}" ${!canEdit?"disabled":""}></td>
-        <td style="text-align:center"><input type="checkbox" ${r.realizado?"checked":""} ${!canEdit?"disabled":""}></td>
-        <td style="text-align:center"><input type="checkbox" ${r.aplica?"checked":""} ${!canEdit?"disabled":""}></td>
-        <td><button class="iconbtn delF" ${!canEdit?"disabled":""}>🗑️</button></td>
+        <td><input type="text" placeholder="Tema del curso o mentoring" value="${r.tema||""}"></td>
+        <td style="text-align:center"><input type="checkbox" ${r.realizado?"checked":""}></td>
+        <td style="text-align:center"><input type="checkbox" ${r.aplica?"checked":""}></td>
+        <td><button class="iconbtn delF">🗑️</button></td>
       </tr>`;
     }
     function renderForm(){
       tbF.innerHTML = it.formaciones.map((r,i)=>rowFormHTML(r,i)).join("") || `<tr><td colspan="4" class="muted">Sin formaciones</td></tr>`;
-      if(canEdit){
-        tbF.querySelectorAll("tr").forEach(tr=>{
-          const i=+tr.dataset.i; const ins=[...tr.querySelectorAll("input")];
-          ins[0].oninput=()=>{it.formaciones[i].tema=ins[0].value; setDirty(true); updatePreview();};
-          ins[1].onchange=()=>{it.formaciones[i].realizado=ins[1].checked; setDirty(true); updatePreview();};
-          ins[2].onchange=()=>{it.formaciones[i].aplica=ins[2].checked; setDirty(true); updatePreview();};
-          tr.querySelector(".delF").onclick=()=>{ it.formaciones.splice(i,1); renderForm(); setDirty(true); updatePreview(); };
-        });
-      }
+      tbF.querySelectorAll("tr").forEach(tr=>{
+        const i=+tr.dataset.i; const ins=[...tr.querySelectorAll("input")];
+        ins[0].oninput =()=>{it.formaciones[i].tema=ins[0].value; setDirty(true);};
+        ins[1].onchange=()=>{it.formaciones[i].realizado=ins[1].checked; setDirty(true);};
+        ins[2].onchange=()=>{it.formaciones[i].aplica=ins[2].checked; setDirty(true);};
+        tr.querySelector(".delF").onclick=()=>{ it.formaciones.splice(i,1); renderForm(); setDirty(true); };
+      });
     }
     renderForm();
-    const addRowForm=$("#addRowForm");
-    addRowForm.onclick=()=>{ if(!canEdit) return toast("Bloqueado. Pulsa Editar (PIN).");
-      if(it.formaciones.length>=12){ toast("Máximo 12 formaciones"); return; }
-      it.formaciones.push({tema:"",realizado:false,aplica:false}); renderForm(); setDirty(true); updatePreview();
+    $("#addRowForm").onclick=()=>{ if(it.formaciones.length>=12){ toast("Máximo 12 formaciones"); return; }
+      it.formaciones.push({tema:"",realizado:false,aplica:false}); renderForm(); setDirty(true);
     };
 
+    /* ---- EVALUACIONES (SIEMPRE editable) ---- */
+    const tbE=detailForm.querySelector("#tblEval tbody");
+    function rowEvalHTML(r,i){
+      const fileLabel = r.archivoName ? `📎 ${r.archivoName}` : "Adjuntar .xls/.xlsx/.csv";
+      return `<tr data-i="${i}">
+        <td><input type="date" value="${r.fecha||""}"></td>
+        <td><input type="number" min="0" max="10" step="0.1" placeholder="0-10" value="${r.puntos??""}"></td>
+        <td><input type="text" placeholder="Áreas de mejora…" value="${r.mejoras||""}"></td>
+        <td>
+          <label class="btn small" style="padding:4px 8px">${fileLabel}<input type="file" accept=".xls,.xlsx,.csv" style="display:none"></label>
+        </td>
+        <td><button class="iconbtn delE">🗑️</button></td>
+      </tr>`;
+    }
+    function renderEval(){
+      tbE.innerHTML = it.evaluaciones.map((r,i)=>rowEvalHTML(r,i)).join("") || `<tr><td colspan="5" class="muted">Sin evaluaciones</td></tr>`;
+      tbE.querySelectorAll("tr").forEach(tr=>{
+        const i=+tr.dataset.i;
+        const date=tr.querySelector('input[type="date"]');
+        const num =tr.querySelector('input[type="number"]');
+        const txt =tr.querySelector('input[type="text"]');
+        const fileLbl=tr.querySelector('label'); const fileInp=fileLbl.querySelector('input[type="file"]');
+
+        date.oninput=()=>{it.evaluaciones[i].fecha=date.value; setDirty(true);};
+        num.oninput =()=>{it.evaluaciones[i].puntos=+num.value||0; setDirty(true);};
+        txt.oninput =()=>{it.evaluaciones[i].mejoras=txt.value; setDirty(true);};
+        fileInp.onchange=()=>{
+          const f=fileInp.files?.[0]; if(!f) return;
+          const r=new FileReader();
+          r.onload=()=>{ it.evaluaciones[i].archivoName=f.name; it.evaluaciones[i].archivoDataUrl=String(r.result||""); fileLbl.firstChild.textContent=`📎 ${f.name}`; setDirty(true); };
+          r.readAsDataURL(f);
+        };
+        tr.querySelector(".delE").onclick=()=>{ it.evaluaciones.splice(i,1); renderEval(); setDirty(true); };
+      });
+    }
+    renderEval();
+    $("#addRowEval").onclick=()=>{ it.evaluaciones.push({fecha:"",puntos:0,mejoras:"",archivoName:"",archivoDataUrl:""}); renderEval(); setDirty(true); };
+
   } else if(section==="visitas"){
-    detailForm.innerHTML=`<div class="row"><div class="col-6"><label>Responsable</label><input id="f_responsable" type="text" value="${it.responsable||""}" ${!canEdit?"disabled":""}></div></div>`;
-    if(canEdit) $("#f_responsable").oninput=()=>{it.responsable=$("#f_responsable").value; renderLists($("#search").value); setDirty(true); updatePreview();};
+    detailForm.innerHTML=`<div class="row"><div class="col-6"><label>Responsable</label><input id="f_responsable" type="text" value="${it.responsable||""}"></div></div>`;
+    $("#f_responsable").oninput=()=>{it.responsable=$("#f_responsable").value; renderLists($("#search").value); setDirty(true);};
   } else {
     detailForm.innerHTML=`<div class="row">
-      <div class="col-6"><label>Título</label><input id="f_titulo" type="text" value="${it.titulo||""}" ${!canEdit?"disabled":""}></div>
-      <div class="col-3"><label>Mentor</label><input id="f_mentor" type="text" value="${it.mentor||""}" ${!canEdit?"disabled":""}></div>
-      <div class="col-3"><label>Fecha</label><input id="f_fecha" type="date" value="${it.fecha||""}" ${!canEdit?"disabled":""}></div>
+      <div class="col-6"><label>Título</label><input id="f_titulo" type="text" value="${it.titulo||""}"></div>
+      <div class="col-3"><label>Mentor</label><input id="f_mentor" type="text" value="${it.mentor||""}"></div>
+      <div class="col-3"><label>Fecha</label><input id="f_fecha" type="date" value="${it.fecha||""}"></div>
     </div>`;
-    if(canEdit){
-      $("#f_titulo").oninput=()=>{it.titulo=$("#f_titulo").value; renderLists($("#search").value); setDirty(true); updatePreview();};
-      $("#f_mentor").oninput=()=>{it.mentor=$("#f_mentor").value; setDirty(true); updatePreview();};
-      $("#f_fecha").oninput=()=>{it.fecha=$("#f_fecha").value; setDirty(true); updatePreview();};
-    }
+    $("#f_titulo").oninput=()=>{it.titulo=$("#f_titulo").value; renderLists($("#search").value); setDirty(true);};
+    $("#f_mentor").oninput=()=>{it.mentor=$("#f_mentor").value; setDirty(true);};
+    $("#f_fecha").oninput =()=>{it.fecha=$("#f_fecha").value; setDirty(true);};
   }
 }
 
@@ -339,27 +385,26 @@ function addItem(section){
   if(section==="exclusivos" && state.exclusivos.length>=10){ toast("Máx. 10 exclusivos"); return; }
   const obj = section==="visitas" ? {id:uid(), responsable:""}
     : section==="formaciones" ? {id:uid(), titulo:"", mentor:"", fecha:""}
-    : {id:uid(), nombre:"", delegado:"", audiologo:"", tipo:"", historial:[], formaciones:[]};
+    : {id:uid(), nombre:"", delegado:"", audiologo:"", tipo:"", historial:[], formaciones:[], evaluaciones:[]};
   state[section].push(obj); selected={section,id:obj.id}; renderLists($("#search").value); renderDetail(); setDirty(true);
 }
 
 /* ===== side controls ===== */
 $$(".toggle").forEach(b=>b.onclick=()=>{const k=b.dataset.toggle; const l=lists[k]; const open=!l.classList.contains("hidden"); if(open){l.classList.add("hidden");b.textContent="►";}else{l.classList.remove("hidden");b.textContent="▼";}});
-$$(".add").forEach(b=>b.onclick=()=>{ if(!canEdit) return toast("Bloqueado. Pulsa Editar (PIN)."); addItem(b.dataset.add); });
+$$(".add").forEach(b=>b.onclick=()=>{ addItem(b.dataset.add); });
 
 /* ===== logo ===== */
 const logoInput=$("#logoInput"), logoPreview=$("#logoPreview");
-logoInput.onchange=()=>{const f=logoInput.files?.[0]; if(!f)return; const r=new FileReader(); r.onload=()=>{state.logoDataUrl=String(r.result||""); logoPreview.src=state.logoDataUrl; logoPreview.classList.remove("hidden"); setDirty(true); updatePreview();}; r.readAsDataURL(f);};
+logoInput.onchange=()=>{const f=logoInput.files?.[0]; if(!f)return; const r=new FileReader(); r.onload=()=>{state.logoDataUrl=String(r.result||""); logoPreview.src=state.logoDataUrl; logoPreview.classList.remove("hidden"); setDirty(true);}; r.readAsDataURL(f);};
 
-/* ===== edit pin ===== */
-function setEdit(on){ canEdit=!!on; editLbl.textContent=canEdit?"Editando":"Bloqueado"; renderDetail(); }
-$("#btnEdit").onclick=()=>{ if(canEdit){ setEdit(false); return; } const p=prompt("Introduce PIN para editar:"); if(p===PIN){ setEdit(true); toast("Edición desbloqueada"); } else alert("PIN incorrecto."); };
+/* ===== edit pin (para campos de cabecera si quieres bloquear; las tablas SIEMPRE editables) ===== */
+function setEdit(on){ canEdit=!!on; editLbl.textContent=canEdit?"Editando":"Bloqueado"; /* tablas no dependen de esto */ }
+$("#btnEdit").onclick=()=>{ if(canEdit){ setEdit(false); return; } const p=prompt("Introduce PIN para editar (tablas ya son editables):"); if(p===PIN){ setEdit(true); toast("Edición desbloqueada"); } else alert("PIN incorrecto."); };
 
 /* ===== cloud with CORS fallbacks ===== */
 async function tryPost(type,mode){const body=JSON.stringify({action:"save",pin:PIN,state}); return fetch(ENDPOINT,{method:"POST",headers:{"Content-Type":type},body,...(mode?{mode}:{})});}
 async function saveToCloud(){
   try{
-    if(!canEdit){ toast("Bloqueado. Pulsa Editar (PIN)."); return; }
     setStatus("💾 Guardando…");
     try{const r1=await tryPost("application/json"); const t1=await r1.text(); let j1=null; try{j1=JSON.parse(t1);}catch{} if(r1.ok&&j1?.ok){setStatus("✅ Guardado"); setLast(j1.updatedAt); setDirty(false); toast("Guardado"); return;} throw 0;}catch{}
     try{const r2=await tryPost("text/plain;charset=utf-8"); const t2=await r2.text(); let j2=null; try{j2=JSON.parse(t2);}catch{} if(r2.ok&&j2?.ok){setStatus("✅ Guardado"); setLast(j2.updatedAt); setDirty(false); toast("Guardado"); return;} throw 0;}catch{}
@@ -375,7 +420,7 @@ async function loadFromCloud(){
     state=Object.assign({logoDataUrl:"",exclusivos:[],flop:[],visitas:[],formaciones:[]}, j.state||{});
     if(state.logoDataUrl){logoPreview.src=state.logoDataUrl; logoPreview.classList.remove("hidden");} else logoPreview.classList.add("hidden");
     selected={section:null,id:null}; renderLists($("#search").value); renderDetail();
-    setStatus("✅ Actualizado"); setLast(j.updatedAt); setDirty(false); updatePreview();
+    setStatus("✅ Actualizado"); setLast(j.updatedAt); setDirty(false);
   }catch(e){console.error(e); setStatus("❌ Error al cargar"); alert("No se pudo cargar.");}
 }
 $("#btnSave").onclick=saveToCloud;
