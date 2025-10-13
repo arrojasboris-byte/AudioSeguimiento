@@ -1,234 +1,142 @@
 <!-- === AudioSeguimiento – Cloud Sync SIN TOKENS (TODO EN UNO) | Pegar antes de </body> === -->
 <script type="module">
 /********************************************************************
- * ✅ Cloud Sync sin tokens (cliente) – TODO EN UNO
- * - Guarda/Carga estado vía un endpoint público (p.ej., Google Apps Script Web App).
- * - No requiere API keys ni tokens en el navegador.
- * - Pide la URL del endpoint solo una vez (se guarda en localStorage).
- * - Sincroniza SOLO elementos [data-cloud] (o #notas como fallback).
- * - PIN fijo: AR4321 (docId virtual en el backend).
- * - Barra flotante: Guardar / Actualizar + Última actualización + ⚙️ Config.
- *
- * IMPORTANTE:
- * 1) Crea un backend sencillo (Google Apps Script Web App "Anyone") y copia su URL.
- *    Si aún no lo tienes, el script te pedirá esa URL al pulsar ⚙️ y la guardará.
- * 2) Abre la página en 2 dispositivos → edita → Guardar → Actualizar.
+ * Cloud Sync sin tokens (cliente) – TODO EN UNO
+ * - Usa un endpoint público (Google Apps Script Web App “Anyone”).
+ * - No requiere claves en el navegador.
+ * - Botón ⚙️ para guardar la URL del endpoint en localStorage (1 vez).
+ * - Sincroniza elementos [data-cloud] (o #notas si no marcas nada).
+ * - PIN compartido: AR4321.
  ********************************************************************/
 
 const PIN = "AR4321";
-const CFG_KEY = "audioseguimiento_endpoint_url"; // dónde guardamos tu endpoint
+const CFG_KEY = "audioseguimiento_endpoint_url"; // almacena la URL del backend
 
-// ========== UI FLOTANTE ==========
+/* =================== UI flotante =================== */
 const bar = document.createElement("div");
-Object.assign(bar.style, {
-  position: "fixed", right: "12px", bottom: "12px", zIndex: 2147483647,
-  background: "rgba(0,0,0,0.82)", color: "#fff", padding: "8px 10px",
-  borderRadius: "12px", fontFamily: "system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,sans-serif",
-  boxShadow: "0 6px 18px rgba(0,0,0,0.25)", display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap"
+Object.assign(bar.style,{
+  position:"fixed",right:"12px",bottom:"12px",zIndex:2147483647,
+  background:"rgba(0,0,0,.82)",color:"#fff",padding:"8px 10px",
+  borderRadius:"12px",fontFamily:"system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,sans-serif",
+  boxShadow:"0 6px 18px rgba(0,0,0,.25)",display:"flex",gap:"8px",alignItems:"center",flexWrap:"wrap"
 });
 bar.innerHTML = `
-  <strong style="font-weight:600">Cloud Sync</strong>
+  <strong>Cloud Sync</strong>
   <button id="cloud-save" style="padding:.4rem .6rem;border:0;border-radius:8px;cursor:pointer;">Guardar</button>
   <button id="cloud-load" style="padding:.4rem .6rem;border:0;border-radius:8px;cursor:pointer;">Actualizar</button>
   <span id="cloud-status" style="opacity:.95">⏳</span>
   <span id="cloud-last" style="opacity:.9">—</span>
-  <button id="cloud-config" title="Configurar Endpoint" style="padding:.2rem .5rem;border:0;border-radius:8px;cursor:pointer;background:#444;color:#fff;">⚙️</button>
+  <button id="cloud-config" title="Configurar endpoint" style="padding:.2rem .5rem;border:0;border-radius:8px;background:#444;color:#fff;cursor:pointer;">⚙️</button>
 `;
 document.body.appendChild(bar);
 const btnSave = bar.querySelector("#cloud-save");
 const btnLoad = bar.querySelector("#cloud-load");
 const btnCfg  = bar.querySelector("#cloud-config");
-const elStatus = bar.querySelector("#cloud-status");
-const elLast   = bar.querySelector("#cloud-last");
+const elStatus= bar.querySelector("#cloud-status");
+const elLast  = bar.querySelector("#cloud-last");
+const setStatus=(t)=> elStatus.textContent=t;
+const setLast=(s)=> elLast.textContent = s ? `Última actualización: ${s}` : "—";
+function disableButtons(msg){ btnSave.disabled=btnLoad.disabled=true; btnSave.style.opacity=btnLoad.style.opacity=.6; setStatus(msg||"⚠️ Inactivo"); }
+function enableButtons(){ btnSave.disabled=btnLoad.disabled=false; btnSave.style.opacity=btnLoad.style.opacity=1; }
 
-function setStatus(t){ elStatus.textContent = t; }
-function setLast(s){ elLast.textContent = s ? `Última actualización: ${s}` : "—"; }
-function disableButtons(reason){
-  btnSave.disabled = true; btnLoad.disabled = true;
-  btnSave.style.opacity = .6; btnLoad.style.opacity = .6;
-  setStatus(reason || "⚠️ Inactivo");
-}
-function enableButtons(){
-  btnSave.disabled = false; btnLoad.disabled = false;
-  btnSave.style.opacity = 1; btnLoad.style.opacity = 1;
-}
+/* Vista previa (puedes eliminarla si no la quieres) */
+const pre=document.createElement("pre");
+Object.assign(pre.style,{position:"fixed",left:"12px",bottom:"12px",maxWidth:"40vw",maxHeight:"32vh",overflow:"auto",background:"rgba(255,255,255,.96)",padding:"8px 10px",borderRadius:"12px",fontSize:"12px",boxShadow:"0 6px 18px rgba(0,0,0,.15)",color:"#111",whiteSpace:"pre-wrap",zIndex:2147483646});
+pre.id="estado-previsualizacion"; document.body.appendChild(pre);
 
-// Vista previa opcional del estado (útil al probar). Borra si no la quieres.
-const pre = document.createElement("pre");
-Object.assign(pre.style, {
-  position: "fixed", left: "12px", bottom: "12px", maxWidth: "40vw", maxHeight: "32vh",
-  overflow: "auto", background: "rgba(255,255,255,0.96)", padding: "8px 10px",
-  borderRadius: "12px", fontSize: "12px", boxShadow: "0 6px 18px rgba(0,0,0,0.15)",
-  color: "#111", whiteSpace: "pre-wrap", zIndex: 2147483646
-});
-pre.id = "estado-previsualizacion";
-document.body.appendChild(pre);
-
-// ========== SELECCIÓN Y SERIALIZACIÓN DEL ESTADO ==========
+/* =================== Qué sincronizar =================== */
+// Marca tus campos con data-cloud. Si no hay, usa #notas (si existe).
 function getCloudElements(){
-  const marked = [...document.querySelectorAll("[data-cloud]")];
+  const marked=[...document.querySelectorAll("[data-cloud]")];
   if (marked.length) return marked;
-  const fb = document.querySelector("#notas");
+  const fb=document.querySelector("#notas");
   return fb ? [fb] : [];
 }
 function readEl(el){
-  if (el.tagName === "INPUT"){
-    const t = (el.type || "text").toLowerCase();
-    if (t === "checkbox") return !!el.checked;
-    if (t === "radio") return el.checked ? el.value : null;
+  if (el.tagName==="INPUT"){
+    const t=(el.type||"text").toLowerCase();
+    if (t==="checkbox") return !!el.checked;
+    if (t==="radio")    return el.checked ? el.value : null;
     return el.value;
   }
-  if (el.tagName === "TEXTAREA" || el.tagName === "SELECT") return el.value;
+  if (el.tagName==="TEXTAREA"||el.tagName==="SELECT") return el.value;
   return el.textContent;
 }
 function writeEl(el,val){
   try{
-    if (el.tagName === "INPUT"){
-      const t = (el.type || "text").toLowerCase();
-      if (t === "checkbox"){ el.checked = !!val; return; }
-      if (t === "radio"){ el.checked = (val === el.value); return; }
-      el.value = (val ?? "");
+    if (el.tagName==="INPUT"){
+      const t=(el.type||"text").toLowerCase();
+      if (t==="checkbox"){ el.checked=!!val; return; }
+      if (t==="radio"){ el.checked=(val===el.value); return; }
+      el.value=(val??"");
       el.dispatchEvent(new Event("input",{bubbles:true}));
       el.dispatchEvent(new Event("change",{bubbles:true}));
       return;
     }
-    if (el.tagName === "TEXTAREA" || el.tagName === "SELECT"){
-      el.value = (val ?? "");
+    if (el.tagName==="TEXTAREA"||el.tagName==="SELECT"){
+      el.value=(val??"");
       el.dispatchEvent(new Event("input",{bubbles:true}));
       el.dispatchEvent(new Event("change",{bubbles:true}));
       return;
     }
-    if (typeof val === "string") el.textContent = val;
-  }catch(e){ console.warn("No se pudo aplicar valor", el, e); }
+    if (typeof val==="string") el.textContent=val;
+  }catch(e){ console.warn("No se pudo aplicar valor", e); }
 }
 function collectState(){
-  const els = getCloudElements();
-  const state = {};
-  els.forEach((el, i)=>{
-    const k = el.id || el.name || `el_${i}`;
-    const v = readEl(el);
-    if (v !== null && k) state[k] = v;
-  });
-  const area = document.getElementById("estado-previsualizacion");
-  if (area) area.textContent = JSON.stringify(state, null, 2);
+  const els=getCloudElements(); const state={};
+  els.forEach((el,i)=>{ const k=el.id||el.name||`el_${i}`; const v=readEl(el); if (v!==null&&k) state[k]=v; });
+  pre.textContent = JSON.stringify(state,null,2);
   return state;
 }
 function applyState(state){
-  if (!state || typeof state !== "object") return;
+  if (!state||typeof state!=="object") return;
   Object.keys(state).forEach(k=>{
-    let el = document.getElementById(k) || document.querySelector(`[name="${CSS.escape(k)}"]`);
-    if (el) writeEl(el, state[k]);
+    let el=document.getElementById(k)||document.querySelector(`[name="${CSS.escape(k)}"]`);
+    if (el) writeEl(el,state[k]);
   });
-  const area = document.getElementById("estado-previsualizacion");
-  if (area) area.textContent = JSON.stringify(state, null, 2);
+  pre.textContent = JSON.stringify(state,null,2);
 }
 
-// ========== CONFIGURACIÓN DEL ENDPOINT ==========
-function getEndpoint(){
-  try { return JSON.parse(localStorage.getItem(CFG_KEY) || "null"); }
-  catch { return null; }
-}
-function setEndpoint(url){
-  localStorage.setItem(CFG_KEY, JSON.stringify(url));
-}
+/* =================== Configuración endpoint =================== */
+function getEndpoint(){ try{ return JSON.parse(localStorage.getItem(CFG_KEY)||"null"); }catch{ return null; } }
+function setEndpoint(url){ localStorage.setItem(CFG_KEY, JSON.stringify(url)); }
 function promptEndpoint(){
-  const example = "https://script.google.com/macros/s/AKfycbx.../exec";
-  const msg = `Pega la URL de tu endpoint público (por ejemplo, Google Apps Script Web App con acceso "Anyone").\\n\\nEjemplo:\\n${example}\\n\\nSe guardará en este navegador.`;
-  const u = prompt(msg, getEndpoint() || "");
-  if (!u) return;
-  try{
-    const test = new URL(u.trim());
-    setEndpoint(test.toString());
-    alert("¡Endpoint guardado! Recarga la página o pulsa Actualizar.");
-    enableButtons();
-  }catch{
-    alert("URL no válida. Intenta de nuevo.");
-  }
+  const example="https://script.google.com/macros/s/AKfycbx.../exec";
+  const msg=`Pega la URL de tu endpoint público (Google Apps Script Web App con acceso "Anyone").\n\nEjemplo:\n${example}\n\nSe guardará en este navegador.`;
+  const u=prompt(msg, getEndpoint()||""); if (!u) return;
+  try{ const test=new URL(u.trim()); setEndpoint(test.toString()); alert("¡Endpoint guardado! Pulsa Actualizar."); enableButtons(); }
+  catch{ alert("URL no válida."); }
 }
 btnCfg.addEventListener("click", promptEndpoint);
 
-// ========== LLAMADAS A LA NUBE (SIN TOKENS) ==========
-// Protocolo simple:
-//  - POST { action:"save", pin, state }  → { ok:true, updatedAt }
-//  - GET  ?action=load&pin=...          → { ok:true, state, updatedAt }
+/* =================== Nube (sin tokens) =================== */
+// Protocolo:
+//  POST ENDPOINT {action:"save", pin, state} → {ok:true, updatedAt}
+//  GET  ENDPOINT?action=load&pin=...       → {ok:true, state, updatedAt}
 async function saveToCloud(){
-  const ENDPOINT = getEndpoint();
-  if (!ENDPOINT){ disableButtons("⚙️ Configura endpoint"); alert("Configura el endpoint (⚙️) para guardar en la nube."); return; }
+  const ENDPOINT=getEndpoint(); if(!ENDPOINT){ disableButtons("⚙️ Configura endpoint"); alert("Configura el endpoint (⚙️) para guardar en la nube."); return; }
   try{
     setStatus("💾 Guardando…");
-    const res = await fetch(ENDPOINT, {
-      method: "POST",
-      headers: {"Content-Type":"application/json"},
-      body: JSON.stringify({ action:"save", pin: PIN, state: collectState() })
-    });
-    const json = await res.json().catch(()=>null);
-    if (!res.ok || !json?.ok) throw new Error(json?.error || ("HTTP "+res.status));
-    setStatus("✅ Guardado");
-    setLast(json.updatedAt);
-    localStorage.setItem("audioseguimiento_backup", JSON.stringify({ when: Date.now(), state: collectState() }));
-  }catch(e){
-    console.error(e);
-    setStatus("❌ Error al guardar");
-    alert("No se pudo guardar en la nube. Revisa la URL del endpoint o el backend.");
-  }
+    const res=await fetch(ENDPOINT,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"save",pin:PIN,state:collectState()})});
+    const json=await res.json().catch(()=>null);
+    if(!res.ok||!json?.ok) throw new Error(json?.error||("HTTP "+res.status));
+    setStatus("✅ Guardado"); setLast(json.updatedAt);
+  }catch(e){ console.error(e); setStatus("❌ Error al guardar"); alert("No se pudo guardar. Revisa la URL del endpoint o el backend."); }
 }
 async function loadFromCloud(){
-  const ENDPOINT = getEndpoint();
-  if (!ENDPOINT){ disableButtons("⚙️ Configura endpoint"); return; }
+  const ENDPOINT=getEndpoint(); if(!ENDPOINT){ disableButtons("⚙️ Configura endpoint"); return; }
   try{
     setStatus("⬇️ Cargando…");
-    const u = new URL(ENDPOINT);
-    u.searchParams.set("action","load");
-    u.searchParams.set("pin", PIN);
-    const res = await fetch(u.toString(), { method:"GET" });
-    const json = await res.json().catch(()=>null);
-    if (!res.ok || !json?.ok) throw new Error(json?.error || ("HTTP "+res.status));
-    applyState(json.state || {});
-    setStatus("✅ Actualizado");
-    setLast(json.updatedAt);
-  }catch(e){
-    console.error(e);
-    setStatus("❌ Error al cargar");
-    alert("No se pudo cargar desde la nube. Revisa la URL del endpoint o el backend.");
-  }
+    const u=new URL(ENDPOINT); u.searchParams.set("action","load"); u.searchParams.set("pin",PIN);
+    const res=await fetch(u.toString(),{method:"GET"});
+    const json=await res.json().catch(()=>null);
+    if(!res.ok||!json?.ok) throw new Error(json?.error||("HTTP "+res.status));
+    applyState(json.state||{}); setStatus("✅ Actualizado"); setLast(json.updatedAt);
+  }catch(e){ console.error(e); setStatus("❌ Error al cargar"); alert("No se pudo cargar. Revisa la URL del endpoint o el backend."); }
 }
 
-// ========== ENLACE DE EVENTOS Y ARRANQUE ==========
-btnSave.addEventListener("click", saveToCloud);
-btnLoad.addEventListener("click", loadFromCloud);
-
-// Si hay endpoint guardado, activamos y cargamos al abrir
-if (getEndpoint()){
-  enableButtons();
-  loadFromCloud();
-} else {
-  disableButtons("⚙️ Configura endpoint");
-}
-
-/********************************************************************
- * REFERENCIA RÁPIDA BACKEND (Google Apps Script – Web App, sin tokens)
- * — Crea un proyecto en https://script.google.com, pega este código y despliega:
- *
- * const CACHE = CacheService.getScriptCache();
- * const KEY_PREFIX = "audioseguimiento_";
- * function doGet(e){ try{
- *   const action=(e.parameter.action||"").toLowerCase(); const pin=e.parameter.pin;
- *   if(!pin) return _json({ok:false,error:"Falta PIN"},400);
- *   if(action==="load"){ const data=_load(pin); return _json({ok:true,state:data.state||{},updatedAt:data.updatedAt||null}); }
- *   return _json({ok:false,error:"Acción inválida"},400);
- * }catch(err){ return _json({ok:false,error:String(err)},500); } }
- * function doPost(e){ try{
- *   const body=JSON.parse(e.postData.contents||"{}"); const action=(body.action||"").toLowerCase(); const pin=body.pin;
- *   if(!pin) return _json({ok:false,error:"Falta PIN"},400);
- *   if(action==="save"){ const state=body.state||{}; const updatedAt=new Date().toISOString(); _save(pin,{state,updatedAt}); return _json({ok:true,updatedAt}); }
- *   return _json({ok:false,error:"Acción inválida"},400);
- * }catch(err){ return _json({ok:false,error:String(err)},500); } }
- * function _k(pin){ return KEY_PREFIX + Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256,pin).map(b=>(b+256)%256).map(b=>("0"+b.toString(16)).slice(-2)).join(""); }
- * function _save(pin,obj){ const key=_k(pin); CACHE.put(key,JSON.stringify(obj),21600); PropertiesService.getScriptProperties().setProperty(key,JSON.stringify(obj)); }
- * function _load(pin){ const key=_k(pin); let str=CACHE.get(key); if(!str){ str=PropertiesService.getScriptProperties().getProperty(key); if(str) CACHE.put(key,str,21600); } return str?JSON.parse(str):{state:{},updatedAt:null}; }
- * function _json(obj){ const out=ContentService.createTextOutput(JSON.stringify(obj)); out.setMimeType(ContentService.MimeType.JSON); return out; }
- *
- * Despliegue: Deploy → New deployment → Web app → Who has access: Anyone.
- * Copia la URL y pégala con el botón ⚙️ del widget en tu página.
- ********************************************************************/
+/* =================== Eventos / arranque =================== */
+document.getElementById("cloud-save").addEventListener("click", saveToCloud);
+document.getElementById("cloud-load").addEventListener("click", loadFromCloud);
+if (getEndpoint()){ enableButtons(); loadFromCloud(); } else { disableButtons("⚙️ Configura endpoint"); }
 </script>
