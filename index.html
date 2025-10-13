@@ -35,14 +35,15 @@
   .actions{display:flex;gap:6px} .iconbtn{border:0;background:#fff;border-radius:8px;padding:5px 8px;cursor:pointer;box-shadow:0 3px 9px rgba(0,0,0,.12)}
 
   label{display:block;font-size:.92rem;margin-bottom:6px}
-  input[type="text"],select,textarea,input[type="number"],input[type="date"]{width:100%;border:1px solid #0001;border-radius:12px;padding:10px 12px;font:inherit;background:#fff;outline:none}
+  input[type="text"],select,textarea,input[type="number"],input[type="date"]{width:100%;border:1px solid #cfd3dc;border-radius:10px;padding:10px 12px;font:inherit;background:#fff;outline:none}
   input:focus,select:focus,textarea:focus{border-color:var(--primary);box-shadow:0 0 0 4px var(--ring)}
   textarea{min-height:110px;resize:vertical}
   .row{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
   .col-6{grid-column:span 6}.col-4{grid-column:span 4}.col-3{grid-column:span 3}
 
-  .table{width:100%;border-collapse:collapse;border-radius:12px;overflow:hidden}
-  .table th,.table td{border:1px solid #e5e7eb;padding:8px 10px;text-align:left;background:#fff}
+  /* tablas cuadrícula */
+  .table{width:100%;border-collapse:collapse;border-radius:12px;overflow:hidden;table-layout:fixed}
+  .table th,.table td{border:1px solid #dfe3eb;padding:8px 10px;text-align:left;background:#fff}
   .table th{background:#f3f4f6}
   .table input{width:100%;border:0;outline:none;background:transparent;padding:6px}
   .tbar{display:flex;justify-content:space-between;align-items:center;margin:6px 0 10px}
@@ -54,7 +55,7 @@
   @media (prefers-color-scheme:dark){:root{--bg:#0e1116;--card:#171a21;--text:#e5e7eb}
     aside,.card{box-shadow:0 14px 34px rgba(0,0,0,.25)} .sec header{background:#111827;color:#e5e7eb}
     .item:hover{background:#1f2430}.item.active{background:#1b2b57}
-    input,select,textarea{background:#0f1217;color:#e5e7eb;border-color:#ffffff26}
+    input,select,textarea{background:#0f1217;color:#e5e7eb;border-color:#2b2f3a}
     .search{background:#ffffffcc} .btn{background:#ffe2e2;color:#7f1212}.btn.secondary{background:#f0f0f0;color:#1f2937}
     .table th,.table td{border-color:#2b2f3a;background:#0f1217}.table th{background:#161a22}
   }
@@ -122,7 +123,7 @@ const PIN="AR4321";
 const ENDPOINT=new URLSearchParams(location.search).get("endpoint")||"https://script.google.com/macros/s/AKfycby5vh1Ja0XllWFB98ypWmDcUfUItwEciVimUd5L6Esi1wfPJbcc2dap6G0lciRf51VR/exec";
 
 /* ===== state ===== */
-let canEdit=false; // sigue existiendo, pero LAS TABLAS son SIEMPRE editables
+let canEdit=false; // las tablas son SIEMPRE editables
 let state={logoDataUrl:"",exclusivos:[],flop:[],visitas:[],formaciones:[]};
 let selected={section:null,id:null};
 let dirty=false;
@@ -179,7 +180,7 @@ function setPanelSub(){
   panelSub.textContent=`Centro: ${name}`;
 }
 
-/* ===== detail with 3 tables (Acciones, Formaciones, Evaluaciones) ===== */
+/* ===== detail with 3 tables ===== */
 function renderDetail(){
   setPanelSub();
   const {section,id}=selected;
@@ -191,9 +192,9 @@ function renderDetail(){
     : section==="visitas"?"Visita de AUDIO":"Formación / Mentoring";
 
   if(section==="exclusivos"||section==="flop"){
-    if(!it.historial) it.historial=[];
-    if(!it.formaciones) it.formaciones=[];
-    if(!it.evaluaciones) it.evaluaciones=[];
+    if(!it.historial) it.historial=[];         // acciones
+    if(!it.formaciones) it.formaciones=[];     // formaciones
+    if(!it.evaluaciones) it.evaluaciones=[];   // evaluaciones
 
     detailForm.innerHTML=`
       <div class="row">
@@ -218,12 +219,14 @@ function renderDetail(){
         <table class="table" id="tblAcc">
           <thead><tr>
             <th style="min-width:120px">Fecha</th>
-            <th style="min-width:220px">Acción</th>
-            <th style="min-width:180px">Derivación</th>
+            <th style="min-width:200px">Acción</th>
+            <th style="min-width:160px">Derivación</th>
             <th style="min-width:90px">Citas</th>
             <th style="min-width:90px">Ventas</th>
-            <th style="min-width:170px">% Conversión (ventas/citas)</th>
-            <th></th>
+            <th style="min-width:150px">% Conversión</th>
+            <th style="min-width:150px">Paquete</th>
+            <th style="min-width:220px">Adjuntar archivo</th>
+            <th style="min-width:60px"></th>
           </tr></thead><tbody></tbody>
         </table>
       </div>
@@ -240,7 +243,7 @@ function renderDetail(){
             <th style="min-width:280px">Tema de curso / Mentoring</th>
             <th style="min-width:120px">Realizado</th>
             <th style="min-width:120px">Aplica</th>
-            <th></th>
+            <th style="min-width:60px"></th>
           </tr></thead><tbody></tbody>
         </table>
       </div>
@@ -257,13 +260,13 @@ function renderDetail(){
             <th style="min-width:120px">Puntuación</th>
             <th style="min-width:260px">Áreas de mejora</th>
             <th style="min-width:240px">Adjuntar Excel</th>
-            <th></th>
+            <th style="min-width:60px"></th>
           </tr></thead><tbody></tbody>
         </table>
       </div>
     `;
 
-    // Campos cabecera (no bloqueados)
+    // Campos cabecera
     $("#f_nombre").oninput =()=>{it.nombre=$("#f_nombre").value; renderLists($("#search").value); setDirty(true);};
     $("#f_delegado").oninput=()=>{it.delegado=$("#f_delegado").value; renderLists($("#search").value); setDirty(true);};
     $("#f_audiologo").oninput=()=>{it.audiologo=$("#f_audiologo").value; setDirty(true);};
@@ -273,6 +276,7 @@ function renderDetail(){
     const tbA=detailForm.querySelector("#tblAcc tbody");
     function rowAccHTML(r,i){
       const conv=(Number(r.citas)||0)?(((Number(r.ventas)||0)/(Number(r.citas)||1))*100).toFixed(1):"0.0";
+      const fileLabel = r.archivoName ? `📎 ${r.archivoName}` : "Adjuntar .xls/.xlsx/.csv";
       return `<tr data-i="${i}">
         <td><input type="date" value="${r.fecha||""}"></td>
         <td><input type="text" placeholder="Llamada / Taller / Visita…" value="${r.accion||""}"></td>
@@ -280,27 +284,41 @@ function renderDetail(){
         <td><input type="number" min="0" value="${r.citas??""}"></td>
         <td><input type="number" min="0" value="${r.ventas??""}"></td>
         <td><input type="text" disabled value="${conv}%"></td>
+        <td><input type="text" placeholder="Paquete…" value="${r.paquete||""}"></td>
+        <td>
+          <label class="btn small" style="padding:4px 8px">${fileLabel}
+            <input type="file" accept=".xls,.xlsx,.csv" style="display:none">
+          </label>
+        </td>
         <td><button class="iconbtn delA">🗑️</button></td>
       </tr>`;
     }
     function renderAcc(){
-      tbA.innerHTML = it.historial.map((r,i)=>rowAccHTML(r,i)).join("") || `<tr><td colspan="7" class="muted">Sin filas</td></tr>`;
+      tbA.innerHTML = it.historial.map((r,i)=>rowAccHTML(r,i)).join("") || `<tr><td colspan="9" class="muted">Sin filas</td></tr>`;
       tbA.querySelectorAll("tr").forEach(tr=>{
-        const i=+tr.dataset.i; const ins=[...tr.querySelectorAll("input")];
-        ins[0].oninput=()=>{it.historial[i].fecha=ins[0].value; updConv(i); setDirty(true);};
-        ins[1].oninput=()=>{it.historial[i].accion=ins[1].value; setDirty(true);};
-        ins[2].oninput=()=>{it.historial[i].derivacion=ins[2].value; setDirty(true);};
-        ins[3].oninput=()=>{it.historial[i].citas=+ins[3].value||0; updConv(i); setDirty(true);};
-        ins[4].oninput=()=>{it.historial[i].ventas=+ins[4].value||0; updConv(i); setDirty(true);};
+        const i=+tr.dataset.i;
+        const ins=tr.querySelectorAll("input");
+        const date=ins[0], acc=ins[1], der=ins[2], citas=ins[3], ventas=ins[4], conv=ins[5], paquete=ins[6];
+        const fileLbl=tr.querySelector('label'); const fileInp=fileLbl.querySelector('input[type="file"]');
+
+        date.oninput =()=>{set(i,'fecha',date.value);};
+        acc.oninput  =()=>{set(i,'accion',acc.value);};
+        der.oninput  =()=>{set(i,'derivacion',der.value);};
+        citas.oninput=()=>{set(i,'citas',+citas.value||0,true);};
+        ventas.oninput=()=>{set(i,'ventas',+ventas.value||0,true);};
+        paquete.oninput=()=>{set(i,'paquete',paquete.value);};
+        fileInp.onchange=()=>{
+          const f=fileInp.files?.[0]; if(!f) return;
+          const r=new FileReader();
+          r.onload=()=>{ it.historial[i].archivoName=f.name; it.historial[i].archivoDataUrl=String(r.result||""); fileLbl.firstChild.textContent=`📎 ${f.name}`; setDirty(true); };
+          r.readAsDataURL(f);
+        };
         tr.querySelector(".delA").onclick=()=>{ it.historial.splice(i,1); renderAcc(); setDirty(true); };
+        function set(idx,key,val,updateConv=false){ it.historial[idx][key]=val; if(updateConv){ const r=it.historial[idx]; const p=(r.citas?(r.ventas||0)/r.citas*100:0).toFixed(1); conv.value=p+"%"; } setDirty(true); }
       });
     }
-    function updConv(i){
-      const r=it.historial[i]; const conv=(r.citas?(r.ventas||0)/r.citas*100:0).toFixed(1);
-      const row=tbA.querySelector(`tr[data-i="${i}"]`); if(row) row.querySelectorAll("input")[5].value=conv+"%";
-    }
     renderAcc();
-    $("#addRowAcc").onclick=()=>{ it.historial.push({fecha:"",accion:"",derivacion:"",citas:0,ventas:0}); renderAcc(); setDirty(true); };
+    $("#addRowAcc").onclick=()=>{ it.historial.push({fecha:"",accion:"",derivacion:"",citas:0,ventas:0,paquete:"",archivoName:"",archivoDataUrl:""}); renderAcc(); setDirty(true); };
 
     /* ---- FORMACIONES (SIEMPRE editable, máx 12) ---- */
     const tbF=detailForm.querySelector("#tblForm tbody");
@@ -397,8 +415,8 @@ $$(".add").forEach(b=>b.onclick=()=>{ addItem(b.dataset.add); });
 const logoInput=$("#logoInput"), logoPreview=$("#logoPreview");
 logoInput.onchange=()=>{const f=logoInput.files?.[0]; if(!f)return; const r=new FileReader(); r.onload=()=>{state.logoDataUrl=String(r.result||""); logoPreview.src=state.logoDataUrl; logoPreview.classList.remove("hidden"); setDirty(true);}; r.readAsDataURL(f);};
 
-/* ===== edit pin (para campos de cabecera si quieres bloquear; las tablas SIEMPRE editables) ===== */
-function setEdit(on){ canEdit=!!on; editLbl.textContent=canEdit?"Editando":"Bloqueado"; /* tablas no dependen de esto */ }
+/* ===== edit pin (opcional; tablas no dependen) ===== */
+function setEdit(on){ canEdit=!!on; editLbl.textContent=canEdit?"Editando":"Bloqueado"; }
 $("#btnEdit").onclick=()=>{ if(canEdit){ setEdit(false); return; } const p=prompt("Introduce PIN para editar (tablas ya son editables):"); if(p===PIN){ setEdit(true); toast("Edición desbloqueada"); } else alert("PIN incorrecto."); };
 
 /* ===== cloud with CORS fallbacks ===== */
