@@ -8,7 +8,6 @@
   :root{--primary:#d32f2f;--primary2:#b71c1c;--bg:#f7f8fc;--card:#fff;--text:#111827;--ring:rgba(211,47,47,.25);color-scheme:light dark}
   *{box-sizing:border-box} html,body{margin:0}
   body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,sans-serif;background:var(--bg);color:var(--text);line-height:1.35}
-  /* header */
   header{position:sticky;top:0;z-index:50;background:linear-gradient(90deg,var(--primary2),var(--primary));color:#fff;padding:10px 14px;box-shadow:0 10px 24px rgba(0,0,0,.28)}
   .bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
   .title{font-weight:900;letter-spacing:.3px;font-size:1.05rem;margin-right:6px}
@@ -18,7 +17,6 @@
   .status{font-weight:800}.last{opacity:.92}
   .search{min-width:260px;border:0;outline:none;border-radius:999px;padding:9px 12px;background:#fff;color:#1f2937}
   .logo{height:36px;width:auto;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.25)} .hidden{display:none}
-  /* layout */
   .layout{display:grid;grid-template-columns:340px 1fr;gap:18px;max-width:1300px;margin:18px auto;padding:0 16px}
   aside{background:var(--card);border-radius:16px;box-shadow:0 14px 34px rgba(30,41,59,.08);padding:12px}
   main{display:grid;gap:16px}
@@ -26,7 +24,6 @@
   .card h2{margin:0 0 6px;font-size:1.05rem}
   .subtle{font-size:.85rem;opacity:.75;margin:0 0 12px}
   .muted{opacity:.7;font-size:.9rem}
-  /* secciones */
   .sec{border:1px solid #0001;border-radius:12px;margin:10px 0;overflow:hidden}
   .sec header{all:unset;display:flex;align-items:center;justify-content:space-between;background:#f3f4f6;color:#111;padding:10px 12px;font-weight:800}
   .sec header button{border:0;background:#fff;color:#1f2937;border-radius:8px;padding:6px 10px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.12)}
@@ -34,14 +31,12 @@
   .item{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:8px;border-radius:10px;cursor:pointer}
   .item:hover{background:#f5f6fb} .item.active{background:#e9ecff}
   .actions{display:flex;gap:6px} .iconbtn{border:0;background:#fff;border-radius:8px;padding:5px 8px;cursor:pointer;box-shadow:0 3px 9px rgba(0,0,0,.12)}
-  /* form */
   label{display:block;font-size:.92rem;margin-bottom:6px}
   input[type="text"],select,textarea,input[type="number"],input[type="date"]{width:100%;border:1px solid #0001;border-radius:12px;padding:10px 12px;font:inherit;background:#fff;outline:none}
   input:focus,select:focus,textarea:focus{border-color:var(--primary);box-shadow:0 0 0 4px var(--ring)}
   textarea{min-height:110px;resize:vertical}
   .row{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
   .col-6{grid-column:span 6}.col-4{grid-column:span 4}.col-3{grid-column:span 3}
-  /* tabla acciones */
   .table{width:100%;border-collapse:collapse;border-radius:12px;overflow:hidden}
   .table th,.table td{border:1px solid #e5e7eb;padding:8px 10px;text-align:left;background:#fff}
   .table th{background:#f3f4f6}
@@ -77,7 +72,6 @@
   </header>
 
   <div class="layout">
-    <!-- izquierda -->
     <aside id="aside">
       <section class="sec" data-sec="exclusivos">
         <header><div>🏥 <strong>CENTROS EXCLUSIVOS</strong> <span class="muted">(máx. 10)</span></div>
@@ -101,7 +95,6 @@
       </section>
     </aside>
 
-    <!-- derecha -->
     <main>
       <section class="card">
         <h2 id="detail-title">Detalle</h2>
@@ -139,18 +132,16 @@ const toast=m=>{const x=document.createElement("div");x.className="toast";x.text
 const uid=()=>Math.random().toString(36).slice(2,10);
 const updatePreview=()=>{prevEl.textContent=JSON.stringify(state,null,2)};
 const setDirty=v=>{dirty=v; dirtyHint.textContent=v?"• Tienes cambios sin guardar":"—";};
-
-/* ===== lists & search ===== */
 const lists={exclusivos:$("#list-exclusivos"), flop:$("#list-flop"), visitas:$("#list-visitas"), formaciones:$("#list-formaciones")};
 const sectionsDom={"exclusivos":document.querySelector('[data-sec="exclusivos"]'),"flop":document.querySelector('[data-sec="flop"]'),"visitas":document.querySelector('[data-sec="visitas"]'),"formaciones":document.querySelector('[data-sec="formaciones"]')};
 
+/* ===== search + render lists ===== */
 function renderLists(filter=""){
   const f=filter.trim().toLowerCase();
   Object.keys(lists).forEach(sec=>{
     const data=state[sec]||[];
-    const results = f? data.filter(it=>JSON.stringify(it).toLowerCase().includes(f)) : data;
-    // mostrar/ocultar secciones completas
-    sectionsDom[sec].style.display = (f && results.length===0) ? "none" : "";
+    const results=f?data.filter(it=>JSON.stringify(it).toLowerCase().includes(f)):data;
+    sectionsDom[sec].style.display=(f && results.length===0)?"none":"";
     const ul=lists[sec]; ul.innerHTML="";
     results.forEach(it=>{
       const div=document.createElement("div");
@@ -167,7 +158,7 @@ function renderLists(filter=""){
         }
       });
       div.querySelector(".edit").onclick=()=>{selected={section:sec,id:it.id}; renderDetail();};
-      div.querySelector(".del").onclick=()=>{ if(!canEdit) return toast("Bloqueado. Pulsa Editar (PIN).");
+      div.querySelector(".del").onclick=()=>{ if(!canEdit)return toast("Bloqueado. Pulsa Editar (PIN).");
         if(confirm("¿Eliminar este elemento?")){ state[sec]=state[sec].filter(x=>x.id!==it.id); selected={section:null,id:null}; renderLists($("#search").value); renderDetail(); setDirty(true); updatePreview(); }
       };
       ul.appendChild(div);
@@ -177,17 +168,15 @@ function renderLists(filter=""){
 }
 $("#search").addEventListener("input",e=>renderLists(e.target.value));
 
-/* ===== context labels ===== */
+/* ===== context label ===== */
 function setPanelSub(){
   if(!selected.section){ panelSub.textContent="—"; return; }
   const it=(state[selected.section]||[]).find(x=>x.id===selected.id);
-  const name = selected.section==="visitas"? (it?.responsable||"—")
-              : selected.section==="formaciones"? (it?.titulo||"—")
-              : (it?.nombre||"—");
-  panelSub.textContent = `Centro: ${name}`;
+  const name=selected.section==="visitas"?(it?.responsable||"—"):selected.section==="formaciones"?(it?.titulo||"—"):(it?.nombre||"—");
+  panelSub.textContent=`Centro: ${name}`;
 }
 
-/* ===== detail ===== */
+/* ===== detail (actions + trainings) ===== */
 function renderDetail(){
   setPanelSub();
   const {section,id}=selected;
@@ -200,9 +189,11 @@ function renderDetail(){
 
   if(section==="exclusivos"||section==="flop"){
     if(!it.historial) it.historial=[];
+    if(!it.formaciones) it.formaciones=[]; // hasta 12
+
     detailForm.innerHTML=`
       <div class="row">
-        <div class="col-6"><label>Nombre</label><input id="f_nombre" type="text" placeholder="Nombre del centro" value="${it.nombre||""}" ${!canEdit?"disabled":""}></div>
+        <div class="col-6"><label>Nombre</label><input id="f_nombre" type="text" placeholder="Nombre del centro" value="${it.nombre||""}" ${!canEdit?"":"autofocus"} ${!canEdit?"disabled":""}></div>
         <div class="col-6"><label>Delegado</label><input id="f_delegado" type="text" placeholder="Persona delegada" value="${it.delegado||""}" ${!canEdit?"disabled":""}></div>
         <div class="col-6"><label>Audiólogo</label><input id="f_audiologo" type="text" placeholder="Audiólogo/a" value="${it.audiologo||""}" ${!canEdit?"disabled":""}></div>
         <div class="col-6"><label>Tipo</label>
@@ -213,26 +204,55 @@ function renderDetail(){
           </select>
         </div>
       </div>
-      <div class="tbar">
+
+      <!-- ACCIONES -->
+      <div class="tbar" style="margin-top:10px">
         <h3 style="margin:12px 0 6px">Acciones</h3>
-        <button class="addrow" id="addRow">＋ Añadir fila</button>
+        <button class="addrow" id="addRowAcc">＋ Añadir fila</button>
       </div>
       <div style="overflow:auto">
-        <table class="table" id="excel">
+        <table class="table" id="tblAcc">
           <thead><tr>
-            <th>Fecha</th><th>Acción</th><th>Derivación</th>
-            <th>Citas</th><th>Ventas</th><th>% Conversión (ventas/citas)</th><th></th>
+            <th style="min-width:120px">Fecha</th>
+            <th style="min-width:220px">Acción</th>
+            <th style="min-width:180px">Derivación</th>
+            <th style="min-width:90px">Citas</th>
+            <th style="min-width:90px">Ventas</th>
+            <th style="min-width:170px">% Conversión (ventas/citas)</th>
+            <th></th>
           </tr></thead><tbody></tbody>
         </table>
-      </div>`;
+      </div>
+
+      <!-- FORMACIONES -->
+      <div class="tbar" style="margin-top:18px">
+        <h3 style="margin:12px 0 6px">Formaciones</h3>
+        <button class="addrow" id="addRowForm">＋ Añadir fila</button>
+      </div>
+      <p class="muted" style="margin-top:-6px">Espacio para 12 formaciones</p>
+      <div style="overflow:auto">
+        <table class="table" id="tblForm">
+          <thead><tr>
+            <th style="min-width:280px">Tema de curso / Mentoring</th>
+            <th style="min-width:120px">Realizado</th>
+            <th style="min-width:120px">Aplica</th>
+            <th></th>
+          </tr></thead><tbody></tbody>
+        </table>
+      </div>
+    `;
+
+    /* ---- enlazar campos cabecera ---- */
     if(canEdit){
-      $("#f_nombre").oninput=()=>{it.nombre=$("#f_nombre").value; renderLists($("#search").value); setDirty(true); updatePreview();};
+      $("#f_nombre").oninput =()=>{it.nombre=$("#f_nombre").value; renderLists($("#search").value); setDirty(true); updatePreview();};
       $("#f_delegado").oninput=()=>{it.delegado=$("#f_delegado").value; renderLists($("#search").value); setDirty(true); updatePreview();};
       $("#f_audiologo").oninput=()=>{it.audiologo=$("#f_audiologo").value; setDirty(true); updatePreview();};
-      $("#f_tipo").onchange =()=>{it.tipo=$("#f_tipo").value; setDirty(true); updatePreview();};
+      $("#f_tipo").onchange  =()=>{it.tipo=$("#f_tipo").value; setDirty(true); updatePreview();};
     }
-    const tb=detailForm.querySelector("#excel tbody");
-    function rowHTML(r,i){
+
+    /* ---- ACCIONES (editable) ---- */
+    const tbA=detailForm.querySelector("#tblAcc tbody");
+    function rowAccHTML(r,i){
       const conv=(Number(r.citas)||0)?(((Number(r.ventas)||0)/(Number(r.citas)||1))*100).toFixed(1):"0.0";
       return `<tr data-i="${i}">
         <td><input type="date" value="${r.fecha||""}" ${!canEdit?"disabled":""}></td>
@@ -241,31 +261,60 @@ function renderDetail(){
         <td><input type="number" min="0" value="${r.citas??""}" ${!canEdit?"disabled":""}></td>
         <td><input type="number" min="0" value="${r.ventas??""}" ${!canEdit?"disabled":""}></td>
         <td><input type="text" disabled value="${conv}%"></td>
-        <td><button class="iconbtn delrow" ${!canEdit?"disabled":""}>🗑️</button></td>
+        <td><button class="iconbtn delA" ${!canEdit?"disabled":""}>🗑️</button></td>
       </tr>`;
     }
-    function renderRows(){
-      tb.innerHTML= it.historial.map((r,i)=>rowHTML(r,i)).join("") || `<tr><td colspan="7" class="muted">Sin filas</td></tr>`;
+    function renderAcc(){
+      tbA.innerHTML = it.historial.map((r,i)=>rowAccHTML(r,i)).join("") || `<tr><td colspan="7" class="muted">Sin filas</td></tr>`;
       if(canEdit){
-        tb.querySelectorAll("tr").forEach(tr=>{
+        tbA.querySelectorAll("tr").forEach(tr=>{
           const i=+tr.dataset.i; const ins=[...tr.querySelectorAll("input")];
-          ins[0].oninput=()=>{it.historial[i].fecha=ins[0].value; updateConv(i); setDirty(true);};
+          ins[0].oninput=()=>{it.historial[i].fecha=ins[0].value; updConv(i); setDirty(true);};
           ins[1].oninput=()=>{it.historial[i].accion=ins[1].value; setDirty(true); updatePreview();};
           ins[2].oninput=()=>{it.historial[i].derivacion=ins[2].value; setDirty(true); updatePreview();};
-          ins[3].oninput=()=>{it.historial[i].citas=+ins[3].value||0; updateConv(i); setDirty(true);};
-          ins[4].oninput=()=>{it.historial[i].ventas=+ins[4].value||0; updateConv(i); setDirty(true);};
-          tr.querySelector(".delrow").onclick=()=>{ it.historial.splice(i,1); renderRows(); setDirty(true); updatePreview(); };
+          ins[3].oninput=()=>{it.historial[i].citas=+ins[3].value||0; updConv(i); setDirty(true);};
+          ins[4].oninput=()=>{it.historial[i].ventas=+ins[4].value||0; updConv(i); setDirty(true);};
+          tr.querySelector(".delA").onclick=()=>{ it.historial.splice(i,1); renderAcc(); setDirty(true); updatePreview(); };
         });
       }
     }
-    function updateConv(i){
+    function updConv(i){
       const r=it.historial[i]; const conv=(r.citas?(r.ventas||0)/r.citas*100:0).toFixed(1);
-      const row=tb.querySelector(`tr[data-i="${i}"]`); if(row) row.querySelectorAll("input")[5].value=conv+"%";
+      const row=tbA.querySelector(`tr[data-i="${i}"]`); if(row) row.querySelectorAll("input")[5].value=conv+"%";
       updatePreview();
     }
-    renderRows();
-    $("#addRow").onclick=()=>{ if(!canEdit) return toast("Bloqueado. Pulsa Editar (PIN).");
-      it.historial.push({fecha:"",accion:"",derivacion:"",citas:0,ventas:0}); renderRows(); setDirty(true); updatePreview();
+    renderAcc();
+    $("#addRowAcc").onclick=()=>{ if(!canEdit) return toast("Bloqueado. Pulsa Editar (PIN).");
+      it.historial.push({fecha:"",accion:"",derivacion:"",citas:0,ventas:0}); renderAcc(); setDirty(true); updatePreview();
+    };
+
+    /* ---- FORMACIONES (editable, máx 12) ---- */
+    const tbF=detailForm.querySelector("#tblForm tbody");
+    function rowFormHTML(r,i){
+      return `<tr data-i="${i}">
+        <td><input type="text" placeholder="Tema del curso o mentoring" value="${r.tema||""}" ${!canEdit?"disabled":""}></td>
+        <td style="text-align:center"><input type="checkbox" ${r.realizado?"checked":""} ${!canEdit?"disabled":""}></td>
+        <td style="text-align:center"><input type="checkbox" ${r.aplica?"checked":""} ${!canEdit?"disabled":""}></td>
+        <td><button class="iconbtn delF" ${!canEdit?"disabled":""}>🗑️</button></td>
+      </tr>`;
+    }
+    function renderForm(){
+      tbF.innerHTML = it.formaciones.map((r,i)=>rowFormHTML(r,i)).join("") || `<tr><td colspan="4" class="muted">Sin formaciones</td></tr>`;
+      if(canEdit){
+        tbF.querySelectorAll("tr").forEach(tr=>{
+          const i=+tr.dataset.i; const ins=[...tr.querySelectorAll("input")];
+          ins[0].oninput=()=>{it.formaciones[i].tema=ins[0].value; setDirty(true); updatePreview();};
+          ins[1].onchange=()=>{it.formaciones[i].realizado=ins[1].checked; setDirty(true); updatePreview();};
+          ins[2].onchange=()=>{it.formaciones[i].aplica=ins[2].checked; setDirty(true); updatePreview();};
+          tr.querySelector(".delF").onclick=()=>{ it.formaciones.splice(i,1); renderForm(); setDirty(true); updatePreview(); };
+        });
+      }
+    }
+    renderForm();
+    const addRowForm=$("#addRowForm");
+    addRowForm.onclick=()=>{ if(!canEdit) return toast("Bloqueado. Pulsa Editar (PIN).");
+      if(it.formaciones.length>=12){ toast("Máximo 12 formaciones"); return; }
+      it.formaciones.push({tema:"",realizado:false,aplica:false}); renderForm(); setDirty(true); updatePreview();
     };
 
   } else if(section==="visitas"){
@@ -285,12 +334,12 @@ function renderDetail(){
   }
 }
 
-/* ===== add item ===== */
+/* ===== add items ===== */
 function addItem(section){
   if(section==="exclusivos" && state.exclusivos.length>=10){ toast("Máx. 10 exclusivos"); return; }
   const obj = section==="visitas" ? {id:uid(), responsable:""}
     : section==="formaciones" ? {id:uid(), titulo:"", mentor:"", fecha:""}
-    : {id:uid(), nombre:"", delegado:"", audiologo:"", tipo:"", historial:[]};
+    : {id:uid(), nombre:"", delegado:"", audiologo:"", tipo:"", historial:[], formaciones:[]};
   state[section].push(obj); selected={section,id:obj.id}; renderLists($("#search").value); renderDetail(); setDirty(true);
 }
 
@@ -306,7 +355,7 @@ logoInput.onchange=()=>{const f=logoInput.files?.[0]; if(!f)return; const r=new 
 function setEdit(on){ canEdit=!!on; editLbl.textContent=canEdit?"Editando":"Bloqueado"; renderDetail(); }
 $("#btnEdit").onclick=()=>{ if(canEdit){ setEdit(false); return; } const p=prompt("Introduce PIN para editar:"); if(p===PIN){ setEdit(true); toast("Edición desbloqueada"); } else alert("PIN incorrecto."); };
 
-/* ===== cloud (con fallbacks CORS) ===== */
+/* ===== cloud with CORS fallbacks ===== */
 async function tryPost(type,mode){const body=JSON.stringify({action:"save",pin:PIN,state}); return fetch(ENDPOINT,{method:"POST",headers:{"Content-Type":type},body,...(mode?{mode}:{})});}
 async function saveToCloud(){
   try{
