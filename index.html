@@ -2,15 +2,15 @@
 <script type="module">
 /********************************************************************
  * Cloud Sync sin tokens (cliente) – TODO EN UNO
- * - Usa un endpoint público (Google Apps Script Web App “Anyone”).
- * - No requiere claves en el navegador.
- * - Botón ⚙️ para guardar la URL del endpoint en localStorage (1 vez).
- * - Sincroniza elementos [data-cloud] (o #notas si no marcas nada).
- * - PIN compartido: AR4321.
+ * - Usa un endpoint público (Google Apps Script Web App con acceso "Anyone").
+ * - Sin claves ni tokens en el navegador.
+ * - Botón ⚙️: guarda la URL del endpoint en localStorage (una vez).
+ * - Sincroniza elementos [data-cloud] (o #notas si no hay marcados).
+ * - PIN compartido: AR4321 (para agrupar el estado de todos los dispositivos).
  ********************************************************************/
 
 const PIN = "AR4321";
-const CFG_KEY = "audioseguimiento_endpoint_url"; // almacena la URL del backend
+const CFG_KEY = "audioseguimiento_endpoint_url"; // guarda la URL del backend
 
 /* =================== UI flotante =================== */
 const bar = document.createElement("div");
@@ -24,62 +24,70 @@ bar.innerHTML = `
   <strong>Cloud Sync</strong>
   <button id="cloud-save" style="padding:.4rem .6rem;border:0;border-radius:8px;cursor:pointer;">Guardar</button>
   <button id="cloud-load" style="padding:.4rem .6rem;border:0;border-radius:8px;cursor:pointer;">Actualizar</button>
+  <label style="display:flex;align-items:center;gap:.4rem;font-size:.9em;opacity:.95;">
+    <input id="cloud-autosave" type="checkbox" style="transform:translateY(1px)" />
+    Auto
+  </label>
   <span id="cloud-status" style="opacity:.95">⏳</span>
   <span id="cloud-last" style="opacity:.9">—</span>
   <button id="cloud-config" title="Configurar endpoint" style="padding:.2rem .5rem;border:0;border-radius:8px;background:#444;color:#fff;cursor:pointer;">⚙️</button>
 `;
 document.body.appendChild(bar);
+
 const btnSave = bar.querySelector("#cloud-save");
 const btnLoad = bar.querySelector("#cloud-load");
 const btnCfg  = bar.querySelector("#cloud-config");
+const chkAuto = bar.querySelector("#cloud-autosave");
 const elStatus= bar.querySelector("#cloud-status");
 const elLast  = bar.querySelector("#cloud-last");
+
 const setStatus=(t)=> elStatus.textContent=t;
 const setLast=(s)=> elLast.textContent = s ? `Última actualización: ${s}` : "—";
-function disableButtons(msg){ btnSave.disabled=btnLoad.disabled=true; btnSave.style.opacity=btnLoad.style.opacity=.6; setStatus(msg||"⚠️ Inactivo"); }
-function enableButtons(){ btnSave.disabled=btnLoad.disabled=false; btnSave.style.opacity=btnLoad.style.opacity=1; }
+function disableButtons(msg){btnSave.disabled=btnLoad.disabled=true;btnSave.style.opacity=btnLoad.style.opacity=.6;setStatus(msg||"⚠️ Inactivo");}
+function enableButtons(){btnSave.disabled=btnLoad.disabled=false;btnSave.style.opacity=btnLoad.style.opacity=1;}
 
-/* Vista previa (puedes eliminarla si no la quieres) */
+/* =================== Vista previa (puedes quitarla si no la necesitas) =================== */
 const pre=document.createElement("pre");
 Object.assign(pre.style,{position:"fixed",left:"12px",bottom:"12px",maxWidth:"40vw",maxHeight:"32vh",overflow:"auto",background:"rgba(255,255,255,.96)",padding:"8px 10px",borderRadius:"12px",fontSize:"12px",boxShadow:"0 6px 18px rgba(0,0,0,.15)",color:"#111",whiteSpace:"pre-wrap",zIndex:2147483646});
 pre.id="estado-previsualizacion"; document.body.appendChild(pre);
 
 /* =================== Qué sincronizar =================== */
-// Marca tus campos con data-cloud. Si no hay, usa #notas (si existe).
+// Marca en tu HTML lo que quieras guardar con: data-cloud
+// Si no marcas nada, como respaldo usa #notas (si existe).
 function getCloudElements(){
   const marked=[...document.querySelectorAll("[data-cloud]")];
-  if (marked.length) return marked;
+  if(marked.length) return marked;
   const fb=document.querySelector("#notas");
   return fb ? [fb] : [];
 }
 function readEl(el){
-  if (el.tagName==="INPUT"){
+  if(el.tagName==="INPUT"){
     const t=(el.type||"text").toLowerCase();
-    if (t==="checkbox") return !!el.checked;
-    if (t==="radio")    return el.checked ? el.value : null;
+    if(t==="checkbox") return !!el.checked;
+    if(t==="radio")    return el.checked ? el.value : null;
     return el.value;
   }
-  if (el.tagName==="TEXTAREA"||el.tagName==="SELECT") return el.value;
+  if(el.tagName==="TEXTAREA"||el.tagName==="SELECT") return el.value;
   return el.textContent;
 }
 function writeEl(el,val){
   try{
-    if (el.tagName==="INPUT"){
+    if(el.tagName==="INPUT"){
       const t=(el.type||"text").toLowerCase();
-      if (t==="checkbox"){ el.checked=!!val; return; }
-      if (t==="radio"){ el.checked=(val===el.value); return; }
+      if(t==="checkbox"){ el.checked=!!val; return; }
+      if(t==="radio"){ el.checked=(val===el.value); return; }
       el.value=(val??"");
       el.dispatchEvent(new Event("input",{bubbles:true}));
       el.dispatchEvent(new Event("change",{bubbles:true}));
       return;
     }
-    if (el.tagName==="TEXTAREA"||el.tagName==="SELECT"){
+    if(el.tagName==="TEXTAREA"||el.tagName==="SELECT"){
       el.value=(val??"");
       el.dispatchEvent(new Event("input",{bubbles:true}));
       el.dispatchEvent(new Event("change",{bubbles:true}));
       return;
     }
-    if (typeof val==="string") el.textContent=val;
+    if(typeof val==="string") el.textContent=val;
   }catch(e){ console.warn("No se pudo aplicar valor", e); }
 }
 function collectState(){
@@ -89,25 +97,30 @@ function collectState(){
   return state;
 }
 function applyState(state){
-  if (!state||typeof state!=="object") return;
+  if(!state||typeof state!=="object") return;
   Object.keys(state).forEach(k=>{
     let el=document.getElementById(k)||document.querySelector(`[name="${CSS.escape(k)}"]`);
-    if (el) writeEl(el,state[k]);
+    if(el) writeEl(el,state[k]);
   });
   pre.textContent = JSON.stringify(state,null,2);
 }
 
-/* =================== Configuración endpoint =================== */
+/* =================== Configuración del endpoint =================== */
 function getEndpoint(){ try{ return JSON.parse(localStorage.getItem(CFG_KEY)||"null"); }catch{ return null; } }
 function setEndpoint(url){ localStorage.setItem(CFG_KEY, JSON.stringify(url)); }
 function promptEndpoint(){
   const example="https://script.google.com/macros/s/AKfycbx.../exec";
   const msg=`Pega la URL de tu endpoint público (Google Apps Script Web App con acceso "Anyone").\n\nEjemplo:\n${example}\n\nSe guardará en este navegador.`;
-  const u=prompt(msg, getEndpoint()||""); if (!u) return;
+  const u = prompt(msg, getEndpoint()||""); if(!u) return;
   try{ const test=new URL(u.trim()); setEndpoint(test.toString()); alert("¡Endpoint guardado! Pulsa Actualizar."); enableButtons(); }
   catch{ alert("URL no válida."); }
 }
 btnCfg.addEventListener("click", promptEndpoint);
+
+/* =================== Guardado local de respaldo (offline) =================== */
+const BK_KEY = "audioseguimiento_backup";
+function saveBackup(state){ try{ localStorage.setItem(BK_KEY, JSON.stringify({when:Date.now(), state})); }catch{} }
+function loadBackup(){ try{ return JSON.parse(localStorage.getItem(BK_KEY)||"null"); }catch{ return null; } }
 
 /* =================== Nube (sin tokens) =================== */
 // Protocolo:
@@ -117,11 +130,21 @@ async function saveToCloud(){
   const ENDPOINT=getEndpoint(); if(!ENDPOINT){ disableButtons("⚙️ Configura endpoint"); alert("Configura el endpoint (⚙️) para guardar en la nube."); return; }
   try{
     setStatus("💾 Guardando…");
-    const res=await fetch(ENDPOINT,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"save",pin:PIN,state:collectState()})});
+    const state=collectState();
+    const res=await fetch(ENDPOINT,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({action:"save", pin:PIN, state})
+    });
     const json=await res.json().catch(()=>null);
     if(!res.ok||!json?.ok) throw new Error(json?.error||("HTTP "+res.status));
     setStatus("✅ Guardado"); setLast(json.updatedAt);
-  }catch(e){ console.error(e); setStatus("❌ Error al guardar"); alert("No se pudo guardar. Revisa la URL del endpoint o el backend."); }
+    saveBackup(state);
+  }catch(e){
+    console.error(e);
+    setStatus("❌ Error al guardar");
+    alert("No se pudo guardar. Revisa la URL del endpoint o el backend.");
+  }
 }
 async function loadFromCloud(){
   const ENDPOINT=getEndpoint(); if(!ENDPOINT){ disableButtons("⚙️ Configura endpoint"); return; }
@@ -132,11 +155,82 @@ async function loadFromCloud(){
     const json=await res.json().catch(()=>null);
     if(!res.ok||!json?.ok) throw new Error(json?.error||("HTTP "+res.status));
     applyState(json.state||{}); setStatus("✅ Actualizado"); setLast(json.updatedAt);
-  }catch(e){ console.error(e); setStatus("❌ Error al cargar"); alert("No se pudo cargar. Revisa la URL del endpoint o el backend."); }
+  }catch(e){
+    console.error(e);
+    setStatus("❌ Error al cargar");
+    alert("No se pudo cargar. Revisa la URL del endpoint o el backend.");
+    // Fallback: intenta restaurar del backup local
+    const bk=loadBackup(); if(bk?.state){ applyState(bk.state); setStatus("ℹ️ Restaurado desde copia local"); }
+  }
+}
+
+/* =================== Auto-guardado opcional =================== */
+let autosaveTimer=null;
+function autoSaveTick(){
+  if(!chkAuto.checked) return;
+  clearTimeout(autosaveTimer);
+  autosaveTimer=setTimeout(saveToCloud, 800); // guarda 800 ms tras el último cambio
+}
+function hookAutosave(){
+  const els=getCloudElements();
+  els.forEach(el=>{
+    ["input","change","keyup","blur"].forEach(evt=>el.addEventListener(evt, autoSaveTick));
+  });
 }
 
 /* =================== Eventos / arranque =================== */
-document.getElementById("cloud-save").addEventListener("click", saveToCloud);
-document.getElementById("cloud-load").addEventListener("click", loadFromCloud);
-if (getEndpoint()){ enableButtons(); loadFromCloud(); } else { disableButtons("⚙️ Configura endpoint"); }
+btnSave.addEventListener("click", saveToCloud);
+btnLoad.addEventListener("click", loadFromCloud);
+chkAuto.addEventListener("change", ()=>{ if(chkAuto.checked) autoSaveTick(); });
+
+if(getEndpoint()){
+  enableButtons();
+  hookAutosave();
+  loadFromCloud();
+} else {
+  disableButtons("⚙️ Configura endpoint");
+  hookAutosave(); // permite backup local aunque no haya endpoint todavía
+}
+
+/********************************************************************
+ * BACKEND sugerido (Google Apps Script – Web App, sin tokens)
+ * - Crea un proyecto en https://script.google.com, pega este código y publica
+ *   como Web App con acceso "Anyone". Copia la URL y pégala con ⚙️.
+ *
+ * const CACHE = CacheService.getScriptCache();
+ * const KEY_PREFIX = "audioseguimiento_";
+ * function doGet(e){
+ *   try{
+ *     const action=(e.parameter.action||"").toLowerCase(); const pin=e.parameter.pin;
+ *     if(!pin) return json({ok:false,error:"Falta PIN"},400);
+ *     if(action==="load"){ const data=loadState(pin); return json({ok:true,state:data.state||{},updatedAt:data.updatedAt||null}); }
+ *     return json({ok:false,error:"Acción inválida"},400);
+ *   }catch(err){ return json({ok:false,error:String(err)},500); }
+ * }
+ * function doPost(e){
+ *   try{
+ *     const body=JSON.parse(e.postData.contents||"{}"); const action=(body.action||"").toLowerCase(); const pin=body.pin;
+ *     if(!pin) return json({ok:false,error:"Falta PIN"},400);
+ *     if(action==="save"){ const state=body.state||{}; const updatedAt=new Date().toISOString(); saveState(pin,{state,updatedAt}); return json({ok:true,updatedAt}); }
+ *     return json({ok:false,error:"Acción inválida"},400);
+ *   }catch(err){ return json({ok:false,error:String(err)},500); }
+ * }
+ * function keyFromPin(pin){
+ *   const hex=Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256,pin).map(b=>(b+256)%256).map(b=>("0"+b.toString(16)).slice(-2)).join("");
+ *   return KEY_PREFIX+hex;
+ * }
+ * function saveState(pin,obj){
+ *   const k=keyFromPin(pin); const str=JSON.stringify(obj);
+ *   CACHE.put(k,str,21600); PropertiesService.getScriptProperties().setProperty(k,str);
+ * }
+ * function loadState(pin){
+ *   const k=keyFromPin(pin); let str=CACHE.get(k);
+ *   if(!str){ str=PropertiesService.getScriptProperties().getProperty(k); if(str) CACHE.put(k,str,21600); }
+ *   return str ? JSON.parse(str) : {state:{},updatedAt:null};
+ * }
+ * function json(obj){
+ *   const out=ContentService.createTextOutput(JSON.stringify(obj));
+ *   out.setMimeType(ContentService.MimeType.JSON); return out;
+ * }
+ ********************************************************************/
 </script>
