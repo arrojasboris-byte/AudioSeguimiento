@@ -4,65 +4,688 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>AUDIOLOGIA-SEGUIMIENTO</title>
-  <!-- Tailwind (CDN) -->
+  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- React + ReactDOM (CDN) -->
+  <!-- React -->
   <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-  <!-- Babel para permitir type="text/babel" en GitHub Pages -->
+  <!-- Babel -->
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    /* Evita “salto” visual mientras carga Tailwind/React */
+    body { visibility: hidden; }
+  </style>
 </head>
 <body class="bg-gradient-to-br from-gray-100 to-gray-200 min-h-screen">
   <div id="root"></div>
 
   <script type="text/babel">
-    // App mínima para verificar que GitHub Pages funciona.
+    // ---------- Utilidades ----------
+    const PIN_REQUIRED = "AR4321";         // PIN para desbloquear Guardado en nube (no se pide al entrar)
+    const LS_KEY_SETTINGS = "audiologia_cloud_settings_v1";
+    const LS_KEY_TOKEN_ENC = "audiologia_token_enc_v1";
+    const LS_KEY_APPDATA  = "audiologia_data_backup_v1";
+
+    // Ofuscación simple para guardar token cifrado localmente (XOR + base64)
+    function xorEncryptToB64(text, key) {
+      const t = Array.from(text), k = Array.from(key);
+      const out = t.map((ch, i) => String.fromCharCode(ch.charCodeAt(0) ^ k[i % k.length].charCodeAt(0))).join("");
+      return btoa(unescape(encodeURIComponent(out)));
+    }
+    function xorDecryptFromB64(b64, key) {
+      try {
+        const bin = decodeURIComponent(escape(atob(b64)));
+        const b = Array.from(bin), k = Array.from(key);
+        return b.map((ch, i) => String.fromCharCode(ch.charCodeAt(0) ^ k[i % k.length].charCodeAt(0))).join("");
+      } catch(e) { return ""; }
+    }
+
+    // ---------- App ----------
     const App = () => {
-      const [q, setQ] = React.useState("");
-      const secciones = [
-        { id: "centros_exclusivos", nombre: "Centros exclusivos", items: ["Madrid Norte", "Barcelona Centro"] },
-        { id: "visitas_audio", nombre: "Visitas Audio", items: ["Visita 01", "Visita 02"] },
-        { id: "formacion", nombre: "Formación", items: ["Curso 1", "Curso 2"] },
-      ];
-      const filtradas = secciones
-        .map(s => ({...s, items: s.items.filter(it => it.toLowerCase().includes(q.toLowerCase()))}))
-        .filter(s => s.nombre.toLowerCase().includes(q.toLowerCase()) || s.items.length>0);
+      React.useEffect(() => { document.body.style.visibility = 'visible'; }, []);
 
+      // Marca + empresa
+      const [companyName, setCompanyName] = React.useState("AUDIOLOGÍA");
+      const [logoUrl, setLogoUrl] = React.useState("");
+
+      // Navegación
+      const [search, setSearch] = React.useState("");
+
+      // Centros
+      const [centrosOpen, setCentrosOpen] = React.useState(true);
+      const [centros, setCentros] = React.useState([
+        { id: 1, nombre: "Centro Madrid Norte", delegado: "Ana Martínez", audiologo: "Dr. García", tipo: "Franquicia" },
+        { id: 2, nombre: "Centro Barcelona Centro", delegado: "Carlos Ruiz", audiologo: "Dra. López", tipo: "Sucursal" },
+      ]);
+      const [editingCentroId, setEditingCentroId] = React.useState(null);
+      const [newCentro, setNewCentro] = React.useState({ nombre: "", delegado: "", audiologo: "", tipo: "" });
+
+      // Panel derecho (plegables)
+      const [panelAccionesOpen, setPanelAccionesOpen] = React.useState(true);
+      const [panelFormacionOpen, setPanelFormacionOpen] = React.useState(true);
+      const [panelProcesosOpen, setPanelProcesosOpen] = React.useState(true);
+
+      // Data por centro
+      const [activeCentroId, setActiveCentroId] = React.useState(1);
+      const [acciones, setAcciones] = React.useState({
+        1: [ { id:1, fecha:"", accion:"", derivacion:0, cita:0, observ:"" } ],
+        2: [ { id:1, fecha:"", accion:"", derivacion:0, cita:0, observ:"" } ],
+      });
+      const [formaciones, setFormaciones] = React.useState({
+        1: Array.from({length:10}, (_,i)=>({ id:i+1, fecha:"", asistencia:"", titulo:"", aplicacion:"" })),
+        2: Array.from({length:10}, (_,i)=>({ id:i+1, fecha:"", asistencia:"", titulo:"", aplicacion:"" })),
+      });
+      const [procesos, setProcesos] = React.useState({
+        1: [ { id:1, nombre:"", descripcion:"", puntuacion:"", observaciones:"", fechaVisita:"", archivos:[], enlaces:[] } ],
+        2: [ { id:1, nombre:"", descripcion:"", puntuacion:"", observaciones:"", fechaVisita:"", archivos:[], enlaces:[] } ],
+      });
+
+      // Modal Guardar en nube
+      const [cloudOpen, setCloudOpen] = React.useState(false);
+      const [cloudPIN, setCloudPIN] = React.useState("");
+      const [ghOwner, setGhOwner] = React.useState("");
+      const [ghRepo, setGhRepo] = React.useState("");
+      const [ghPath, setGhPath] = React.useState("data/audiologia.json");
+      const [ghTokenPlain, setGhTokenPlain] = React.useState("");
+
+      // Cargar ajustes guardados
+      React.useEffect(() => {
+        const s = localStorage.getItem(LS_KEY_SETTINGS);
+        if (s) {
+          try {
+            const cfg = JSON.parse(s);
+            setGhOwner(cfg.owner || "");
+            setGhRepo(cfg.repo || "");
+            setGhPath(cfg.path || "data/audiologia.json");
+          } catch {}
+        }
+        const backup = localStorage.getItem(LS_KEY_APPDATA);
+        if (backup) {
+          try {
+            const d = JSON.parse(backup);
+            if (d.companyName) setCompanyName(d.companyName);
+            if (d.logoUrl) setLogoUrl(d.logoUrl);
+            if (d.centros) setCentros(d.centros);
+            if (d.acciones) setAcciones(d.acciones);
+            if (d.formaciones) setFormaciones(d.formaciones);
+            if (d.procesos) setProcesos(d.procesos);
+            if (d.activeCentroId) setActiveCentroId(d.activeCentroId);
+          } catch {}
+        }
+      }, []);
+
+      // Helpers de datos
+      const currentAcc = acciones[activeCentroId] || [];
+      const currentFor = formaciones[activeCentroId] || [];
+      const currentPro = procesos[activeCentroId] || [];
+
+      // ------- Logo -------
+      function handleLogoUpload(e){
+        const f = e.target.files?.[0];
+        if (!f) return;
+        const rd = new FileReader();
+        rd.onload = ev => setLogoUrl(ev.target.result);
+        rd.readAsDataURL(f);
+      }
+
+      // ------- Centros -------
+      function addCentro(){
+        const nombre = newCentro.nombre.trim();
+        if (!nombre) return;
+        const id = Math.max(0, ...centros.map(c=>c.id)) + 1;
+        const c = { id, ...newCentro };
+        setCentros(prev => [...prev, c]);
+        setAcciones(prev => ({...prev, [id]: [{ id:1, fecha:"", accion:"", derivacion:0, cita:0, observ:"" }]}));
+        setFormaciones(prev => ({...prev, [id]: Array.from({length:10},(_,i)=>({ id:i+1, fecha:"", asistencia:"", titulo:"", aplicacion:"" }))}));
+        setProcesos(prev => ({...prev, [id]: [{ id:1, nombre:"", descripcion:"", puntuacion:"", observaciones:"", fechaVisita:"", archivos:[], enlaces:[] }]}));
+        setNewCentro({ nombre:"", delegado:"", audiologo:"", tipo:"" });
+        setActiveCentroId(id);
+      }
+      function removeCentro(id){
+        if (!confirm("¿Eliminar este centro?")) return;
+        setCentros(prev => prev.filter(c => c.id !== id));
+        setAcciones(prev => { const x={...prev}; delete x[id]; return x; });
+        setFormaciones(prev => { const x={...prev}; delete x[id]; return x; });
+        setProcesos(prev => { const x={...prev}; delete x[id]; return x; });
+        if (activeCentroId === id) {
+          const rest = centros.filter(c => c.id !== id);
+          setActiveCentroId(rest[0]?.id ?? null);
+        }
+      }
+      function saveCentroEdit(id, edits){
+        setCentros(prev => prev.map(c => c.id===id ? {...c, ...edits} : c));
+        setEditingCentroId(null);
+      }
+
+      // ------- Acciones -------
+      function addAccion(){
+        const list = acciones[activeCentroId] || [];
+        const id = Math.max(0, ...list.map(a=>a.id)) + 1;
+        const upd = [...list, { id, fecha:"", accion:"", derivacion:0, cita:0, observ:"" }];
+        setAcciones(prev => ({...prev, [activeCentroId]: upd}));
+      }
+      function updAccion(id, field, value){
+        const list = acciones[activeCentroId] || [];
+        const upd = list.map(a => a.id===id ? {...a, [field]: value} : a);
+        setAcciones(prev => ({...prev, [activeCentroId]: upd}));
+      }
+      function delAccion(id){
+        const list = acciones[activeCentroId] || [];
+        if (list.length<=1) return;
+        const upd = list.filter(a => a.id!==id);
+        setAcciones(prev => ({...prev, [activeCentroId]: upd}));
+      }
+
+      // ------- Formaciones -------
+      function updForm(id, field, value){
+        const list = formaciones[activeCentroId] || [];
+        setFormaciones(prev => ({
+          ...prev,
+          [activeCentroId]: list.map(f => f.id===id ? {...f, [field]: value} : f)
+        }));
+      }
+
+      // ------- Procesos -------
+      function addProceso(){
+        const list = procesos[activeCentroId] || [];
+        const id = Math.max(0, ...list.map(p=>p.id)) + 1;
+        const upd = [...list, { id, nombre:"", descripcion:"", puntuacion:"", observaciones:"", fechaVisita:"", archivos:[], enlaces:[] }];
+        setProcesos(prev => ({...prev, [activeCentroId]: upd}));
+      }
+      function updProceso(id, field, value){
+        const list = procesos[activeCentroId] || [];
+        const upd = list.map(p => p.id===id ? {...p, [field]: value} : p);
+        setProcesos(prev => ({...prev, [activeCentroId]: upd}));
+      }
+      function delProceso(id){
+        const list = procesos[activeCentroId] || [];
+        if (list.length<=1) return;
+        const upd = list.filter(p => p.id!==id);
+        setProcesos(prev => ({...prev, [activeCentroId]: upd}));
+      }
+
+      // ------- Filtro global -------
+      const q = search.trim().toLowerCase();
+      const filteredCentros = !q ? centros : centros.filter(c =>
+        c.nombre.toLowerCase().includes(q) ||
+        c.delegado.toLowerCase().includes(q) ||
+        c.audiologo.toLowerCase().includes(q) ||
+        c.tipo.toLowerCase().includes(q)
+      );
+      function anyMatchRight(){
+        if (!q) return true;
+        const hasA = (acciones[activeCentroId]||[]).some(a =>
+          (a.accion||"").toLowerCase().includes(q) ||
+          (a.observ||"").toLowerCase().includes(q)
+        );
+        const hasF = (formaciones[activeCentroId]||[]).some(f =>
+          (f.titulo||"").toLowerCase().includes(q) ||
+          (f.aplicacion||"").toLowerCase().includes(q)
+        );
+        const hasP = (procesos[activeCentroId]||[]).some(p =>
+          (p.nombre||"").toLowerCase().includes(q) ||
+          (p.descripcion||"").toLowerCase().includes(q) ||
+          (p.observaciones||"").toLowerCase().includes(q)
+        );
+        return hasA || hasF || hasP;
+      }
+
+      // ------- Backup local (descarga/subida) -------
+      function exportJSON(){
+        const payload = buildPayload();
+        const blob = new Blob([JSON.stringify(payload,null,2)], {type:"application/json"});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href=url; a.download="audiologia_backup.json"; a.click();
+        URL.revokeObjectURL(url);
+        localStorage.setItem(LS_KEY_APPDATA, JSON.stringify(payload)); // copia local
+        alert("✅ Backup descargado y guardado localmente");
+      }
+      function importJSONFile(e){
+        const f = e.target.files?.[0];
+        if (!f) return;
+        const rd = new FileReader();
+        rd.onload = ev => {
+          try{
+            const p = JSON.parse(ev.target.result);
+            applyPayload(p);
+            localStorage.setItem(LS_KEY_APPDATA, JSON.stringify(p));
+            alert("✅ Datos importados");
+          }catch{
+            alert("❌ Archivo inválido");
+          }
+        };
+        rd.readAsText(f);
+        e.target.value="";
+      }
+
+      function buildPayload(){
+        return {
+          version: 1,
+          companyName, logoUrl,
+          centros,
+          acciones,
+          formaciones,
+          procesos,
+          activeCentroId
+        };
+      }
+      function applyPayload(p){
+        if (p.companyName!==undefined) setCompanyName(p.companyName);
+        if (p.logoUrl!==undefined) setLogoUrl(p.logoUrl);
+        if (p.centros) setCentros(p.centros);
+        if (p.acciones) setAcciones(p.acciones);
+        if (p.formaciones) setFormaciones(p.formaciones);
+        if (p.procesos) setProcesos(p.procesos);
+        if (p.activeCentroId!==undefined) setActiveCentroId(p.activeCentroId);
+      }
+
+      // ------- Guardado en la nube (GitHub) -------
+      function openCloud(){ setCloudOpen(true); }
+      function closeCloud(){ setCloudOpen(false); setCloudPIN(""); }
+      function saveCloudSettings(){
+        localStorage.setItem(LS_KEY_SETTINGS, JSON.stringify({ owner: ghOwner, repo: ghRepo, path: ghPath }));
+        if (ghTokenPlain) {
+          if (cloudPIN !== PIN_REQUIRED) { alert("PIN incorrecto"); return; }
+          const enc = xorEncryptToB64(ghTokenPlain, cloudPIN);
+          localStorage.setItem(LS_KEY_TOKEN_ENC, enc);
+          setGhTokenPlain("");
+          alert("✅ Ajustes guardados (token protegido con PIN)");
+        } else {
+          alert("✅ Ajustes guardados");
+        }
+      }
+      function getTokenWithPIN(pin){
+        const enc = localStorage.getItem(LS_KEY_TOKEN_ENC);
+        if (!enc) return "";
+        return xorDecryptFromB64(enc, pin);
+      }
+      async function pushToGitHub(){
+        if (cloudPIN !== PIN_REQUIRED) { alert("PIN incorrecto"); return; }
+        if (!ghOwner || !ghRepo || !ghPath) { alert("Configura Owner/Repo/Path"); return; }
+        const token = getTokenWithPIN(cloudPIN);
+        if (!token) { alert("No hay token guardado. Escribe uno y pulsa Guardar ajustes."); return; }
+
+        const payload = buildPayload();
+        try{
+          // 1) Comprobar si existe archivo para obtener SHA
+          let sha = null;
+          const getRes = await fetch(`https://api.github.com/repos/${ghOwner}/${ghRepo}/contents/${encodeURIComponent(ghPath)}`, {
+            headers: { Authorization: `Bearer ${token}`, "Accept":"application/vnd.github+json" }
+          });
+          if (getRes.ok){
+            const info = await getRes.json();
+            sha = info.sha || null;
+          }
+          // 2) PUT contenido base64
+          const contentB64 = btoa(unescape(encodeURIComponent(JSON.stringify(payload, null, 2))));
+          const putRes = await fetch(`https://api.github.com/repos/${ghOwner}/${ghRepo}/contents/${encodeURIComponent(ghPath)}`, {
+            method: "PUT",
+            headers: { Authorization: `Bearer ${token}`, "Accept":"application/vnd.github+json" },
+            body: JSON.stringify({
+              message: "Update audiologia data",
+              content: contentB64,
+              branch: "main",
+              sha
+            })
+          });
+          if (!putRes.ok) {
+            const t = await putRes.text();
+            throw new Error(t);
+          }
+          localStorage.setItem(LS_KEY_APPDATA, JSON.stringify(payload));
+          alert("✅ Guardado en la nube (GitHub) completado");
+          closeCloud();
+        }catch(err){
+          console.error(err);
+          alert("❌ Error guardando en la nube. Revisa Owner/Repo/Path/Token/Permisos (scope repo).");
+        }
+      }
+      async function loadFromGitHub(){
+        if (cloudPIN !== PIN_REQUIRED) { alert("PIN incorrecto"); return; }
+        if (!ghOwner || !ghRepo || !ghPath) { alert("Configura Owner/Repo/Path"); return; }
+        const token = getTokenWithPIN(cloudPIN);
+        if (!token) { alert("No hay token guardado. Escribe uno y pulsa Guardar ajustes."); return; }
+        try{
+          const res = await fetch(`https://api.github.com/repos/${ghOwner}/${ghRepo}/contents/${encodeURIComponent(ghPath)}`, {
+            headers: { Authorization: `Bearer ${token}`, "Accept":"application/vnd.github+json" }
+          });
+          if (!res.ok) { throw new Error(await res.text()); }
+          const data = await res.json();
+          const json = JSON.parse(decodeURIComponent(escape(atob(data.content))));
+          applyPayload(json);
+          localStorage.setItem(LS_KEY_APPDATA, JSON.stringify(json));
+          alert("✅ Datos cargados desde la nube");
+          closeCloud();
+        }catch(err){
+          console.error(err);
+          alert("❌ Error cargando desde la nube. Asegúrate de que el archivo existe y el token tiene permisos.");
+        }
+      }
+
+      // ---------- UI ----------
       return (
-        <div className="max-w-5xl mx-auto px-6 py-10">
-          <header className="bg-white border-b-4 border-red-600 rounded-xl p-6 shadow">
-            <h1 className="text-3xl md:text-4xl font-extrabold text-gray-800">AUDIOLOGIA-SEGUIMIENTO</h1>
-            <p className="text-red-600">Plataforma cargada correctamente desde GitHub Pages ✅</p>
-          </header>
+        <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">
+          {/* Header */}
+          <div className="bg-white border-b-4 border-red-600 rounded-xl shadow px-4 md:px-6 py-4 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              {logoUrl ? (
+                <img src={logoUrl} alt="Logo" className="h-14 w-auto object-contain rounded" />
+              ) : (
+                <div className="h-14 w-14 bg-red-600/90 rounded flex items-center justify-center text-white font-bold">LOGO</div>
+              )}
+              <div>
+                <div className="text-xs text-gray-500">Plataforma</div>
+                <h1 className="text-2xl md:text-3xl font-extrabold text-gray-800">AUDIOLOGIA-SEGUIMIENTO</h1>
+                <div className="text-red-600 text-sm -mt-1">{companyName}</div>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <label className="hidden md:flex items-center gap-2 bg-gray-600 text-white px-3 py-2 rounded-lg cursor-pointer hover:bg-gray-700">
+                <span>Logo</span>
+                <input type="file" className="hidden" accept="image/*" onChange={handleLogoUpload} />
+              </label>
+              <input
+                className="hidden md:block border-2 border-gray-300 rounded-lg px-3 py-2 w-56 focus:outline-none focus:border-red-600"
+                value={companyName}
+                onChange={e=>setCompanyName(e.target.value)}
+              />
+              <button onClick={openCloud} className="bg-red-600 text-white px-3 py-2 rounded-lg hover:bg-red-700 shadow">Guardar en nube</button>
+              <div className="relative">
+                <button className="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 shadow">Backup</button>
+                <div className="absolute right-0 mt-2 bg-white border rounded-lg shadow-md w-56 hidden group-hover:block"></div>
+                <div className="absolute right-0 mt-2 bg-white border rounded-lg shadow-md w-60">
+                  <button onClick={exportJSON} className="w-full text-left px-3 py-2 hover:bg-blue-50">Descargar JSON</button>
+                  <label className="w-full block px-3 py-2 hover:bg-blue-50 cursor-pointer">
+                    Cargar desde archivo
+                    <input type="file" className="hidden" accept="application/json" onChange={importJSONFile} />
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
 
-          <div className="mt-6 bg-white p-4 rounded-xl shadow flex items-center gap-3">
+          {/* Buscador */}
+          <div className="mt-4 bg-white rounded-xl shadow p-3 flex items-center gap-3">
             <input
               className="flex-1 border-2 border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-red-600"
-              placeholder="Buscar secciones o elementos…"
-              value={q}
-              onChange={e => setQ(e.target.value)}
+              placeholder="Buscar en secciones, centros y datos…"
+              value={search}
+              onChange={e=>setSearch(e.target.value)}
             />
-            <span className="text-sm text-gray-500">({filtradas.length} secciones)</span>
+            <span className="text-xs text-gray-500">PIN de nube: AR4321 (solo al guardar/cargar)</span>
           </div>
 
-          <div className="mt-6 grid md:grid-cols-2 gap-4">
-            {filtradas.map(s => (
-              <div key={s.id} className="bg-white rounded-xl p-4 border-l-4 border-red-600 shadow">
-                <div className="font-bold text-xl text-gray-800 mb-2">{s.nombre}</div>
-                {s.items.length===0 ? (
-                  <div className="text-gray-500 text-sm">Sin resultados</div>
-                ) : (
-                  <ul className="list-disc pl-6 text-gray-700">
-                    {s.items.map((it, i) => <li key={i}>{it}</li>)}
-                  </ul>
+          {/* Layout */}
+          <div className="mt-6 grid grid-cols-12 gap-5">
+            {/* Sidebar - Centros */}
+            <div className="col-span-12 md:col-span-4">
+              <div className="bg-white rounded-xl shadow p-4 border-l-4 border-red-600">
+                <div className="flex items-center justify-between mb-2">
+                  <h2 className="font-bold text-gray-800">Centros exclusivos</h2>
+                  <button onClick={()=>setCentrosOpen(o=>!o)} className="text-sm text-red-600">{centrosOpen? "Ocultar":"Mostrar"}</button>
+                </div>
+
+                {centrosOpen && (
+                  <div className="space-y-2">
+                    {filteredCentros.map(c => (
+                      <div key={c.id} className={`rounded-lg border ${activeCentroId===c.id ? "border-red-600 bg-red-50":"border-gray-200 bg-gray-50"} p-2`}>
+                        {editingCentroId===c.id ? (
+                          <CentroEditor
+                            centro={c}
+                            onCancel={()=>setEditingCentroId(null)}
+                            onSave={(edits)=>saveCentroEdit(c.id, edits)}
+                          />
+                        ) : (
+                          <div className="flex items-start gap-2">
+                            <button
+                              onClick={()=>setActiveCentroId(c.id)}
+                              className="flex-1 text-left"
+                              title="Seleccionar centro"
+                            >
+                              <div className="font-semibold">{c.nombre}</div>
+                              <div className="text-xs text-gray-600">👤 {c.delegado} — 🎧 {c.audiologo} — 📍 {c.tipo||"-"}</div>
+                            </button>
+                            <div className="flex flex-col gap-1">
+                              <button onClick={()=>setEditingCentroId(c.id)} className="px-2 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700">Editar</button>
+                              <button onClick={()=>removeCentro(c.id)} className="px-2 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700">Eliminar</button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+
+                    {/* Añadir centro */}
+                    <div className="mt-3 border-t pt-3">
+                      <div className="text-sm font-semibold mb-2">Añadir centro</div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <input className="border rounded px-2 py-1 text-sm" placeholder="Nombre" value={newCentro.nombre} onChange={e=>setNewCentro({...newCentro, nombre:e.target.value})}/>
+                        <input className="border rounded px-2 py-1 text-sm" placeholder="Delegado" value={newCentro.delegado} onChange={e=>setNewCentro({...newCentro, delegado:e.target.value})}/>
+                        <input className="border rounded px-2 py-1 text-sm" placeholder="Audiólogo" value={newCentro.audiologo} onChange={e=>setNewCentro({...newCentro, audiologo:e.target.value})}/>
+                        <select className="border rounded px-2 py-1 text-sm" value={newCentro.tipo} onChange={e=>setNewCentro({...newCentro, tipo:e.target.value})}>
+                          <option value="">Tipo…</option>
+                          <option value="Franquicia">Franquicia</option>
+                          <option value="Sucursal">Sucursal</option>
+                        </select>
+                      </div>
+                      <button onClick={addCentro} className="mt-2 px-3 py-1.5 text-sm bg-green-600 text-white rounded hover:bg-green-700">Añadir</button>
+                    </div>
+                  </div>
                 )}
               </div>
-            ))}
+            </div>
+
+            {/* Panel derecho */}
+            <div className="col-span-12 md:col-span-8 space-y-5">
+              {/* Acciones */}
+              <Panel
+                title="Acciones - Resultado"
+                open={panelAccionesOpen}
+                onToggle={()=>setPanelAccionesOpen(o=>!o)}
+              >
+                <div className="flex justify-end mb-2">
+                  <button onClick={addAccion} className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded hover:bg-blue-700">Añadir</button>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="min-w-full bg-white border rounded">
+                    <thead className="bg-red-600 text-white">
+                      <tr>
+                        <th className="px-2 py-2 text-left">#</th>
+                        <th className="px-2 py-2 text-left">Fecha</th>
+                        <th className="px-2 py-2 text-left">Acción</th>
+                        <th className="px-2 py-2 text-center">Derivación</th>
+                        <th className="px-2 py-2 text-center">Cita</th>
+                        <th className="px-2 py-2 text-left">Observaciones</th>
+                        <th className="px-2 py-2"></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {currentAcc.map((a, i) => {
+                        const green = (a.derivacion||0) > 0 && (a.cita||0) > 0;
+                        if (q) {
+                          const txt = `${a.accion||""} ${a.observ||""}`.toLowerCase();
+                          if (!txt.includes(q)) return null;
+                        }
+                        return (
+                          <tr key={a.id} className={green ? "bg-green-50" : ""}>
+                            <td className="border px-2 py-1">{i+1}</td>
+                            <td className="border px-2 py-1"><input type="date" className="w-full border rounded px-2 py-1 text-sm" value={a.fecha} onChange={e=>updAccion(a.id,"fecha",e.target.value)}/></td>
+                            <td className="border px-2 py-1"><input className="w-full border rounded px-2 py-1 text-sm" placeholder="Descripción…" value={a.accion} onChange={e=>updAccion(a.id,"accion",e.target.value)}/></td>
+                            <td className="border px-2 py-1 text-center"><input type="number" min="0" className="w-20 border rounded px-2 py-1 text-sm text-center" value={a.derivacion} onChange={e=>updAccion(a.id,"derivacion",parseInt(e.target.value||"0"))}/></td>
+                            <td className="border px-2 py-1 text-center"><input type="number" min="0" className="w-20 border rounded px-2 py-1 text-sm text-center" value={a.cita} onChange={e=>updAccion(a.id,"cita",parseInt(e.target.value||"0"))}/></td>
+                            <td className="border px-2 py-1"><input className="w-full border rounded px-2 py-1 text-sm" placeholder="Observaciones…" value={a.observ} onChange={e=>updAccion(a.id,"observ",e.target.value)}/></td>
+                            <td className="border px-2 py-1 text-right">
+                              <button onClick={()=>delAccion(a.id)} disabled={currentAcc.length<=1} className={`px-2 py-1 text-sm rounded ${currentAcc.length<=1? "bg-gray-200 text-gray-400":"bg-red-600 text-white hover:bg-red-700"}`}>Eliminar</button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </Panel>
+
+              {/* Formación */}
+              <Panel
+                title="Formación continua"
+                open={panelFormacionOpen}
+                onToggle={()=>setPanelFormacionOpen(o=>!o)}
+              >
+                <div className="overflow-x-auto">
+                  <table className="min-w-full bg-white border rounded">
+                    <thead className="bg-red-600 text-white">
+                      <tr>
+                        <th className="px-2 py-2 text-left">#</th>
+                        <th className="px-2 py-2 text-left">Fecha</th>
+                        <th className="px-2 py-2 text-left">Asistencia</th>
+                        <th className="px-2 py-2 text-left">Título</th>
+                        <th className="px-2 py-2 text-left">Aplicación</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {currentFor.map((f, i) => {
+                        if (q) {
+                          const txt = `${f.titulo||""} ${f.aplicacion||""} ${f.asistencia||""}`.toLowerCase();
+                          if (!txt.includes(q)) return null;
+                        }
+                        const asiste = ["si","sí"].includes((f.asistencia||"").toLowerCase());
+                        const aplica  = asiste && ((f.aplicacion||"").trim().length>0);
+                        const bg = aplica ? "bg-green-50" : asiste ? "bg-orange-50" : "";
+                        return (
+                          <tr key={f.id} className={bg}>
+                            <td className="border px-2 py-1">{i+1}</td>
+                            <td className="border px-2 py-1"><input type="date" className="w-full border rounded px-2 py-1 text-sm" value={f.fecha} onChange={e=>updForm(f.id,"fecha",e.target.value)}/></td>
+                            <td className="border px-2 py-1">
+                              <select className="w-full border rounded px-2 py-1 text-sm" value={f.asistencia} onChange={e=>updForm(f.id,"asistencia",e.target.value)}>
+                                <option value=""></option>
+                                <option value="SI">SI</option>
+                                <option value="NO">NO</option>
+                                <option value="Pendiente">Pendiente</option>
+                              </select>
+                            </td>
+                            <td className="border px-2 py-1"><input className="w-full border rounded px-2 py-1 text-sm" value={f.titulo} placeholder="Nombre del curso…" onChange={e=>updForm(f.id,"titulo",e.target.value)}/></td>
+                            <td className="border px-2 py-1"><input className="w-full border rounded px-2 py-1 text-sm" value={f.aplicacion} placeholder="¿Cómo se aplicará? o SI/NO" onChange={e=>updForm(f.id,"aplicacion",e.target.value)}/></td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </Panel>
+
+              {/* Procesos */}
+              <Panel
+                title="Procesos y paquetes personalizados"
+                open={panelProcesosOpen}
+                onToggle={()=>setPanelProcesosOpen(o=>!o)}
+              >
+                <div className="flex justify-end mb-2">
+                  <button onClick={addProceso} className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded hover:bg-blue-700">Añadir</button>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="min-w-full bg-white border rounded">
+                    <thead className="bg-red-600 text-white">
+                      <tr>
+                        <th className="px-2 py-2 text-left">#</th>
+                        <th className="px-2 py-2 text-left">Nombre</th>
+                        <th className="px-2 py-2 text-left">Descripción</th>
+                        <th className="px-2 py-2 text-center">Puntuación</th>
+                        <th className="px-2 py-2 text-left">Observaciones</th>
+                        <th className="px-2 py-2 text-left">Fecha visita</th>
+                        <th className="px-2 py-2"></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {currentPro.map((p, i) => {
+                        if (q) {
+                          const txt = `${p.nombre||""} ${p.descripcion||""} ${p.observaciones||""}`.toLowerCase();
+                          if (!txt.includes(q)) return null;
+                        }
+                        return (
+                          <tr key={p.id}>
+                            <td className="border px-2 py-1">{i+1}</td>
+                            <td className="border px-2 py-1"><input className="w-full border rounded px-2 py-1 text-sm" value={p.nombre} placeholder="Paquete…" onChange={e=>updProceso(p.id,"nombre",e.target.value)}/></td>
+                            <td className="border px-2 py-1"><input className="w-full border rounded px-2 py-1 text-sm" value={p.descripcion} placeholder="Descripción…" onChange={e=>updProceso(p.id,"descripcion",e.target.value)}/></td>
+                            <td className="border px-2 py-1 text-center"><input className="w-24 border rounded px-2 py-1 text-sm text-center" value={p.puntuacion} placeholder="8/10" onChange={e=>updProceso(p.id,"puntuacion",e.target.value)}/></td>
+                            <td className="border px-2 py-1"><input className="w-full border rounded px-2 py-1 text-sm" value={p.observaciones} placeholder="Observaciones…" onChange={e=>updProceso(p.id,"observaciones",e.target.value)}/></td>
+                            <td className="border px-2 py-1"><input type="date" className="w-full border rounded px-2 py-1 text-sm" value={p.fechaVisita} onChange={e=>updProceso(p.id,"fechaVisita",e.target.value)}/></td>
+                            <td className="border px-2 py-1 text-right">
+                              <button onClick={()=>delProceso(p.id)} disabled={currentPro.length<=1} className={`px-2 py-1 text-sm rounded ${currentPro.length<=1? "bg-gray-200 text-gray-400":"bg-red-600 text-white hover:bg-red-700"}`}>Eliminar</button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </Panel>
+            </div>
           </div>
 
-          <footer className="mt-10 text-center text-gray-500 text-sm">
-            {new Date().toLocaleString("es-ES")}
-          </footer>
+          {/* Modal Nube */}
+          {cloudOpen && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-xl shadow-xl border-2 border-red-600 max-w-lg w-full mx-4">
+                <div className="p-5">
+                  <h3 className="text-2xl font-bold text-gray-800 mb-1">Guardar / Cargar en la nube (GitHub)</h3>
+                  <p className="text-gray-600 text-sm mb-4">
+                    Se guardará un <b>JSON</b> en tu repositorio usando el API de GitHub.  
+                    Requiere un <b>Personal Access Token (PAT)</b> con permiso <code>repo</code>.  
+                    El token se guarda ofuscado en tu navegador y solo se desbloquea con PIN.
+                  </p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <input className="border-2 rounded px-3 py-2" placeholder="Owner (usuario u org)" value={ghOwner} onChange={e=>setGhOwner(e.target.value)} />
+                    <input className="border-2 rounded px-3 py-2" placeholder="Repo" value={ghRepo} onChange={e=>setGhRepo(e.target.value)} />
+                    <input className="col-span-2 border-2 rounded px-3 py-2" placeholder="Ruta archivo (p.ej. data/audiologia.json)" value={ghPath} onChange={e=>setGhPath(e.target.value)} />
+                    <input className="col-span-2 border-2 rounded px-3 py-2" placeholder="Token (se guardará protegido)" value={ghTokenPlain} onChange={e=>setGhTokenPlain(e.target.value)} />
+                    <input className="border-2 rounded px-3 py-2" placeholder="PIN (para guardar token)" value={cloudPIN} onChange={e=>setCloudPIN(e.target.value)} />
+                  </div>
+                  <div className="flex items-center gap-2 mt-3">
+                    <button onClick={saveCloudSettings} className="px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-900">Guardar ajustes</button>
+                    <div className="flex-1"></div>
+                    <button onClick={loadFromGitHub} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Cargar de nube</button>
+                    <button onClick={pushToGitHub} className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">Guardar en nube</button>
+                  </div>
+                </div>
+                <div className="bg-gray-100 px-5 py-3 flex items-center justify-between rounded-b-xl">
+                  <div className="text-xs text-gray-600">PIN de seguridad requerido al operar: <b>{PIN_REQUIRED}</b></div>
+                  <button onClick={closeCloud} className="px-3 py-1.5 bg-gray-400 text-white rounded hover:bg-gray-500">Cerrar</button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    const Panel = ({title, open, onToggle, children}) => (
+      <div className="bg-white rounded-xl shadow p-4 border-l-4 border-red-600">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-xl font-bold text-gray-800">{title}</h3>
+          <button onClick={onToggle} className="text-sm text-red-600">{open? "Ocultar":"Mostrar"}</button>
+        </div>
+        {open && <div>{children}</div>}
+      </div>
+    );
+
+    const CentroEditor = ({centro, onCancel, onSave}) => {
+      const [form, setForm] = React.useState({...centro});
+      return (
+        <div className="space-y-2">
+          <input className="w-full border rounded px-2 py-1 text-sm" value={form.nombre} onChange={e=>setForm({...form, nombre:e.target.value})}/>
+          <div className="grid grid-cols-2 gap-2">
+            <input className="border rounded px-2 py-1 text-sm" value={form.delegado} onChange={e=>setForm({...form, delegado:e.target.value})}/>
+            <input className="border rounded px-2 py-1 text-sm" value={form.audiologo} onChange={e=>setForm({...form, audiologo:e.target.value})}/>
+            <select className="border rounded px-2 py-1 text-sm" value={form.tipo} onChange={e=>setForm({...form, tipo:e.target.value})}>
+              <option value="">Tipo…</option>
+              <option value="Franquicia">Franquicia</option>
+              <option value="Sucursal">Sucursal</option>
+            </select>
+          </div>
+          <div className="flex gap-2">
+            <button onClick={()=>onSave(form)} className="px-3 py-1.5 text-sm bg-green-600 text-white rounded hover:bg-green-700">Guardar</button>
+            <button onClick={onCancel} className="px-3 py-1.5 text-sm bg-gray-400 text-white rounded hover:bg-gray-500">Cancelar</button>
+          </div>
         </div>
       );
     };
