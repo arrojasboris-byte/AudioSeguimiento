@@ -1,743 +1,439 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>AUDIOLOGIA-SEGUIMIENTO</title>
-<link rel="icon" href="data:," />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-:root{
-  --red:#e1192a;--red-2:#f04a54;--ink:#20252d;--muted:#8a9099;--panel:#f5f6f8;--line:#e7e9ee;--ok:#22a06b;--warn:#f5a524;--primary:#1f78ff;
-}
-*{box-sizing:border-box}
-html,body{height:100%}
-body{margin:0;font:16px/1.4 system-ui,Segoe UI,Roboto,Arial,sans-serif;background:#eef0f3;color:var(--ink)}
-.container{max-width:1180px;margin:0 auto;padding:16px}
-
-.header{display:flex;align-items:center;gap:16px;background:#fff;border:2px solid var(--red);border-radius:16px;padding:10px 14px}
-.logo-wrap{width:170px;height:56px;border:1px dashed var(--line);border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#fafafa;cursor:pointer}
-.logo-wrap img{max-height:56px;width:auto;object-fit:contain;display:block}
-.title{flex:1}
-.title h1{margin:0;font-size:28px;letter-spacing:.5px}
-.badge{display:inline-flex;gap:6px;align-items:center;margin-left:8px}
-.iconbar{display:flex;gap:12px}
-.iconbtn{width:42px;height:42px;border-radius:12px;border:none;cursor:pointer;display:grid;place-items:center;background:#353b46;color:#fff}
-.iconbtn.red{background:var(--red)}
-.iconbtn.blue{background:var(--primary)}
-.iconbtn.gray{background:#9096a1}
-.iconbtn[disabled]{opacity:.45;cursor:not-allowed}
-
-.search{margin:14px 0 8px}
-.search input{width:100%;border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:15px;background:#fff}
-
-.layout{display:grid;grid-template-columns:360px 1fr;gap:18px}
-.panel{background:#fff;border-radius:16px;border-left:6px solid var(--red);padding:12px}
-.panel h2{margin:6px 0 10px;font-size:20px;display:flex;justify-content:space-between;align-items:center}
-.btn{border:none;border-radius:10px;padding:8px 12px;cursor:pointer}
-.btn.red{background:var(--red);color:#fff}
-.btn.gray{background:#f0f2f5;color:#222;border:1px solid var(--line)}
-.btn.icon{width:36px;height:36px;display:grid;place-items:center;padding:0}
-.row{display:flex;gap:8px;align-items:center}
-.section-box{background:#f7f8fa;border:1px solid var(--line);border-radius:12px;padding:10px;margin:10px 0}
-.section-head{display:flex;align-items:center;justify-content:space-between}
-.counter{background:#fff;border:1px solid var(--line);border-radius:999px;padding:2px 8px;font-size:12px;color:#444}
-.sub-list{display:grid;gap:10px;margin-top:8px}
-.sub-item{background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px;display:flex;align-items:center;justify-content:space-between}
-.sub-left{display:flex;align-items:center;gap:8px}
-.dot{width:10px;height:10px;border-radius:999px}
-.tag{font-size:12px;border-radius:999px;padding:2px 8px;border:1px solid var(--line);background:#fafbfc;color:#333}
-.actions{display:flex;gap:6px}
-
-.right h3{margin:2px 0 10px;font-size:20px}
-.sheet{background:#fbfcfe;border:1px solid var(--line);border-radius:14px;padding:10px}
-.sheet .toolbar{display:flex;justify-content:flex-end;gap:8px;margin-bottom:8px}
-.table{width:100%;border-collapse:collapse;table-layout:fixed}
-.table th,.table td{border:1px solid var(--line);padding:6px 8px;font-size:14px;background:#fff}
-.table th{position:sticky;top:0;background:#10131a;color:#fff;font-weight:600}
-.table td input,.table td textarea,.table td select{
-  width:100%;border:none;outline:0;background:transparent;padding:6px 4px;font:inherit
-}
-.table td textarea{resize:vertical;min-height:36px}
-.compact .table th,.compact .table td{padding:4px 6px;font-size:13px}
-
-.status{font-size:12px;color:var(--muted);margin-left:8px}
-.ok{color:var(--ok)} .warn{color:var(--warn)} .err{color:var(--red)}
-
-.modal-back{position:fixed;inset:0;background:#0007;display:none;align-items:center;justify-content:center;z-index:50}
-.modal{background:#fff;border-radius:16px;max-width:520px;width:92%;padding:16px;border:2px solid var(--line)}
-.modal h3{margin:0 0 8px}
-.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-input[type="text"],input[type="password"]{border:1px solid var(--line);border-radius:10px;padding:10px}
-.helper{font-size:12px;color:#666}
-
-.locked [data-edit], .locked input, .locked select, .locked textarea {pointer-events:none; opacity:.9}
-.lock-pill{background:#ffe7e7;color:#aa1b1b;font-size:12px;padding:2px 8px;border-radius:999px;margin-left:8px;border:1px solid #ffd0d0}
+  :root{
+    --brand:#e11d48; --ink:#0f172a; --muted:#64748b; --bg:#f1f5f9; --card:#ffffff; --ok:#16a34a; --warn:#f59e0b;
+  }
+  *{box-sizing:border-box} body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+  .app{max-width:1220px;margin:24px auto;padding:0 16px}
+  .bar{display:flex;align-items:center;gap:12px;background:var(--card);border-radius:14px;padding:10px 14px;border:3px solid var(--brand)}
+  .logo{width:140px;height:44px;object-fit:contain;border-radius:8px;background:#f8fafc;display:block}
+  .title{font-weight:800;font-size:26px;letter-spacing:.5px}
+  .grow{flex:1}
+  .btn-ic{width:42px;height:42px;border-radius:12px;border:none;display:grid;place-items:center;background:#1f2937;color:#fff;cursor:pointer}
+  .btn-ic.red{background:#ef4444} .btn-ic.blue{background:#2563eb} .btn-ic.gray{background:#374151}
+  .btn{background:var(--brand);color:#fff;border:none;border-radius:10px;padding:9px 14px;font-weight:600;cursor:pointer}
+  .pill{display:inline-flex;align-items:center;gap:8px;background:#f8fafc;border:1px solid #e2e8f0;padding:8px 12px;border-radius:12px}
+  .wrap{display:grid;grid-template-columns:360px 1fr;gap:16px;margin-top:16px}
+  .card{background:var(--card);border-radius:14px;padding:14px;border:1px solid #e5e7eb}
+  .h{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+  .h h3{margin:0;font-size:18px}
+  .sec{margin-bottom:10px;border:1px solid #e5e7eb;border-radius:12px;padding:10px;background:#fcfcfd}
+  .sec-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+  .mini{display:flex;align-items:center;gap:8px}
+  .tag{font-weight:700}
+  .sublist{display:grid;gap:8px}
+  .sub{display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px dashed #e5e7eb;border-radius:10px;padding:8px 10px}
+  .sub .meta{font-size:12px;color:var(--muted)}
+  .badge{font-size:12px;padding:2px 8px;border-radius:999px;border:1px solid #e5e7eb;background:#fff}
+  .b1{background:#eef2ff;border-color:#c7d2fe} .b2{background:#ecfeff;border-color:#a5f3fc}
+  .b3{background:#ecfccb;border-color:#bef264} .b4{background:#fee2e2;border-color:#fecaca}
+  .actions{display:flex;gap:6px}
+  .x{cursor:pointer;border:none;background:#fff;border-radius:8px;padding:6px}
+  .x:hover{background:#f1f5f9}
+  .proc-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+  .proc-title{font-size:20px;font-weight:800}
+  .t{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb}
+  .t th,.t td{border-bottom:1px solid #e5e7eb;padding:10px;font-size:14px}
+  .t th{background:#0f172a;color:#fff;text-align:left}
+  input,select{border:1px solid #e5e7eb;border-radius:8px;padding:8px 10px;font:inherit;width:100%}
+  .foot{margin-top:10px;display:flex;gap:8px;justify-content:flex-end}
+  .muted{color:var(--muted);font-size:12px}
+  .note{font-size:12px;color:#475569;margin-top:8px}
+  @media(max-width:980px){.wrap{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-<div class="container">
-
-  <!-- HEADER -->
-  <div class="header">
-    <div class="logo-wrap" id="logoBox" title="Click para subir logo">
-      <img id="logoImg" alt="Logo" />
-      <input id="logoFile" type="file" accept="image/*" hidden />
-    </div>
-    <div class="title">
-      <h1>AUDIOLOGIA-SEGUIMIENTO <span id="lockState" class="lock-pill" hidden>modo lectura</span></h1>
-      <div class="badge">
-        <small id="cloudStatus" class="status">nube: sin configurar</small>
-      </div>
-    </div>
-    <div class="iconbar">
-      <button class="iconbtn" id="btnPin" title="Editar (PIN AR4321)">🔒</button>
-      <button class="iconbtn red" id="btnSaveCloud" title="Guardar en nube">☁️</button>
-      <button class="iconbtn blue" id="btnLoadCloud" title="Cargar de nube">⬇️</button>
-      <button class="iconbtn gray" id="btnBackup" title="Backup local (JSON)">💾</button>
-      <button class="iconbtn gray" id="btnSettings" title="Ajustes nube">⚙️</button>
-    </div>
+<div class="app">
+  <!-- TOP BAR -->
+  <div class="bar">
+    <img id="logo" class="logo" alt="Logo">
+    <div class="pill"><strong>Plataforma</strong> <span class="title">AUDIOLOGIA-SEGUIMIENTO</span></div>
+    <div class="grow"></div>
+    <button class="btn-ic gray" id="btnLogo" title="Subir logo">🖼️</button>
+    <button class="btn-ic gray" id="btnLock" title="Editar (PIN)">🔒</button>
+    <button class="btn-ic red"  id="btnSaveLocal" title="Guardar local">💾</button>
+    <button class="btn-ic blue" id="btnExport" title="Exportar JSON (subir al repo como data.json)">⬇️</button>
+    <button class="btn-ic gray" id="btnCloud" title="Actualizar de nube (leer data.json)">🔄</button>
+    <button class="btn-ic gray" id="btnCfg" title="Ajustes">⚙️</button>
+    <input id="fileLogo" type="file" accept="image/*" hidden>
   </div>
 
   <!-- SEARCH -->
-  <div class="search"><input id="search" placeholder="Buscar en secciones, centros y datos..." /></div>
+  <div class="card" style="margin-top:12px">
+    <input id="q" placeholder="Buscar en secciones, centros y datos…">
+  </div>
 
-  <div class="layout" id="appRoot">
-
-    <!-- LEFT: SECCIONES -->
-    <div class="panel left" id="leftPanel">
-      <h2>
-        Secciones
-        <button class="btn red" id="btnAddSection" data-edit>+ Añadir sección</button>
-      </h2>
-
-      <!-- Bloque: Centros exclusivos -->
-      <div class="section-box" data-sec="exclusivos">
-        <div class="section-head">
-          <div class="row">
-            <strong>Centros exclusivos</strong>
-            <span id="countEx" class="counter">0</span>
-          </div>
-          <div class="row">
-            <button class="btn gray" id="toggleEx">Mostrar</button>
-            <button class="btn icon gray" id="addSubEx" title="Añadir sub" data-edit>＋</button>
-            <button class="btn icon gray" id="editEx" title="Editar sección" data-edit>✎</button>
-            <button class="btn icon gray" id="delEx" title="Eliminar sección" data-edit>🗑️</button>
-          </div>
-        </div>
-        <div class="sub-list" id="listEx"></div>
+  <div class="wrap">
+    <!-- LEFT: SECTIONS -->
+    <div class="card" id="left">
+      <div class="h">
+        <h3>Secciones</h3>
+        <button class="btn" id="addSection">+ Añadir sección</button>
       </div>
 
-      <!-- Bloque: Centros flop -->
-      <div class="section-box" data-sec="flop">
-        <div class="section-head">
-          <div class="row">
-            <strong>Centros flop</strong>
-            <span id="countFlop" class="counter">0</span>
-          </div>
-          <div class="row">
-            <button class="btn gray" id="toggleFlop">Mostrar</button>
-            <button class="btn icon gray" id="addSubFlop" title="Añadir sub" data-edit>＋</button>
-            <button class="btn icon gray" id="editFlop" title="Editar sección" data-edit>✎</button>
-            <button class="btn icon gray" id="delFlop" title="Eliminar sección" data-edit>🗑️</button>
-          </div>
-        </div>
-        <div class="sub-list" id="listFlop"></div>
-      </div>
-
-      <!-- Bloque: Formaciones – Mentoring -->
-      <div class="section-box" data-sec="formacion">
-        <div class="section-head">
-          <div class="row">
-            <strong>Formaciones – Mentoring</strong>
-            <span id="countForm" class="counter">0</span>
-          </div>
-          <div class="row">
-            <button class="btn gray" id="toggleForm">Mostrar</button>
-            <button class="btn icon gray" id="addSubForm" title="Añadir sub" data-edit>＋</button>
-            <button class="btn icon gray" id="editForm" title="Editar sección" data-edit>✎</button>
-            <button class="btn icon gray" id="delForm" title="Eliminar sección" data-edit>🗑️</button>
-          </div>
-        </div>
-        <div class="sub-list" id="listForm"></div>
-      </div>
-
-      <!-- Bloque: Visitas a centros -->
-      <div class="section-box" data-sec="visitas">
-        <div class="section-head">
-          <div class="row">
-            <strong>Visitas a centros</strong>
-            <span id="countVis" class="counter">0</span>
-          </div>
-          <div class="row">
-            <button class="btn gray" id="toggleVis">Mostrar</button>
-            <button class="btn icon gray" id="addSubVis" title="Añadir sub" data-edit>＋</button>
-            <button class="btn icon gray" id="editVis" title="Editar sección" data-edit>✎</button>
-            <button class="btn icon gray" id="delVis" title="Eliminar sección" data-edit>🗑️</button>
-          </div>
-        </div>
-        <div class="sub-list" id="listVis"></div>
-      </div>
-
-      <div class="helper">Consejo: pulsa el nombre de un centro para cargar sus procedimientos en el panel derecho.</div>
+      <!-- Secciones fijas -->
+      <div id="sections"></div>
+      <div class="note">Consejo: pulsa el nombre de un centro para cargar sus procedimientos.</div>
     </div>
 
     <!-- RIGHT: PROCEDIMIENTOS -->
-    <div class="panel right" id="rightPanel">
-      <h3 id="procTitle">Procedimientos — </h3>
+    <div class="card">
+      <div class="proc-head">
+        <div class="proc-title" id="procTitle">Procedimientos — </div>
+        <span class="badge" id="itemsCount">0 ítems</span>
+        <div class="grow"></div>
+        <button class="btn" id="addProc">+ Añadir</button>
+        <button class="btn" id="saveProc">Guardar</button>
+      </div>
 
-      <!-- Acciones – Resultado -->
-      <div class="sheet compact" id="sheetAcc">
-        <div class="toolbar">
-          <button class="btn gray" id="addRowAcc" data-edit>+ Añadir</button>
-          <button class="btn red" id="saveAcc" data-edit>Guardar</button>
-        </div>
+      <!-- Acciones-Resultado -->
+      <div class="sec">
+        <div class="sec-h"><div class="mini"><span class="tag">Acciones – Resultado</span></div></div>
         <div class="table-wrap">
-          <table class="table" id="tblAcc">
-            <thead>
-              <tr>
-                <th style="width:44px">#</th>
-                <th style="width:160px">Fecha</th>
-                <th>Acción</th>
-                <th style="width:120px">Derivación</th>
-                <th style="width:120px">Cita</th>
-                <th>Observaciones</th>
-                <th style="width:60px">❌</th>
-              </tr>
-            </thead>
+          <table class="t" id="tblAcc">
+            <thead><tr>
+              <th>#</th><th>Fecha</th><th>Acción</th><th>Derivación</th><th>Cita</th><th>Observaciones</th><th></th>
+            </tr></thead>
             <tbody></tbody>
           </table>
         </div>
       </div>
 
-      <!-- Formación continua -->
-      <div class="sheet compact" id="sheetForm">
-        <div class="toolbar">
-          <button class="btn red" id="saveFormTbl" data-edit>Guardar</button>
-        </div>
-        <table class="table" id="tblForm">
-          <thead>
-            <tr>
-              <th style="width:44px">#</th>
-              <th style="width:160px">Fecha</th>
-              <th style="width:140px">Asistencia (SI/NO)</th>
-              <th>Título</th>
-              <th>Aplicación</th>
-            </tr>
-          </thead>
+      <!-- Formación Continua -->
+      <div class="sec">
+        <div class="sec-h"><div class="mini"><span class="tag">Formación continua</span></div></div>
+        <table class="t" id="tblForm">
+          <thead><tr>
+            <th>#</th><th>Fecha</th><th>Asistencia (SI/NO)</th><th>Título</th><th>Aplicación</th><th></th>
+          </tr></thead>
           <tbody></tbody>
         </table>
+        <div class="foot"><button class="btn" id="saveForm">Guardar</button></div>
       </div>
 
-      <!-- Procesos y paquetes personalizados -->
-      <div class="sheet compact" id="sheetProc">
-        <div class="toolbar">
-          <button class="btn gray" id="addRowProc" data-edit>+ Añadir</button>
-          <button class="btn red" id="saveProc" data-edit>Guardar</button>
-        </div>
-        <table class="table" id="tblProc">
-          <thead>
-            <tr>
-              <th style="width:44px">#</th>
-              <th style="width:220px">Nombre paquete</th>
-              <th>Descripción</th>
-              <th style="width:120px">Puntuación</th>
-              <th>Observaciones</th>
-              <th style="width:160px">Fecha visita</th>
-              <th style="width:60px">❌</th>
-            </tr>
-          </thead>
+      <!-- Procesos personalizados -->
+      <div class="sec">
+        <div class="sec-h"><div class="mini"><span class="tag">Procesos y paquetes personalizados</span></div></div>
+        <table class="t" id="tblProc">
+          <thead><tr>
+            <th>#</th><th>Nombre paquete</th><th>Descripción</th><th>Puntuación</th><th>Observaciones</th><th>Fecha visita</th><th></th>
+          </tr></thead>
           <tbody></tbody>
         </table>
+        <div class="foot"><button class="btn" id="savePP">Guardar</button></div>
       </div>
-
     </div>
   </div>
-</div>
 
-<!-- MODAL AJUSTES NUBE -->
-<div class="modal-back" id="modalBack">
-  <div class="modal">
-    <h3>Ajustes de nube (Gist)</h3>
-    <p class="helper">Crea un token en GitHub con permiso <strong>gist</strong> y pégalo aquí una sola vez. Se guardará cifrado en tu navegador.</p>
-    <div class="row2">
-      <div>
-        <label>Token</label>
-        <input id="inpToken" type="password" placeholder="ghp_…" />
-      </div>
-      <div>
-        <label>Gist ID (deja vacío para crear uno)</label>
-        <input id="inpGist" type="text" placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" />
-      </div>
-    </div>
-    <div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end">
-      <button class="btn gray" id="btnCloseModal">Cancelar</button>
-      <button class="btn red" id="btnSaveModal">OK</button>
-    </div>
-  </div>
+  <div class="muted" id="status"></div>
 </div>
 
 <script>
-/* ====== Estado y utilidades ====== */
-const $ = sel => document.querySelector(sel);
-const $$ = sel => Array.from(document.querySelectorAll(sel));
+/* ===== CONFIG NUBE LOCAL =====
+   URL del JSON en la nube (mismo repo). Sube/actualiza un archivo 'data.json' en la raíz.
+   Ejemplo de acceso: https://arrojasboris-byte.github.io/AudioSeguimiento/data.json
+*/
+const CLOUD_URL = location.origin + location.pathname.replace(/index\.html?$/,'') + 'data.json';
 
-const STORAGE_KEY = 'audio_state_v1';
-const LOGO_KEY = 'audio_logo_v1';
-const CLOUD_KEY = 'audio_cloud_v1'; // {tokenEnc, gistId}
-const PIN_CODE = 'AR4321';
-
+// Estado principal
 let state = {
-  locked: true,
-  activeSection: 'exclusivos',
-  activeCentroId: null,
-  logo: null,
-  secciones: {
-    exclusivos: {
-      nombre: 'Centros exclusivos',
-      items: [
-        {id: 1, nombre:'Reina Mercedes', delegado:'Ana Martínez', audiologo:'Dr. García', tipo:'Franquicia', color:1},
-        {id: 2, nombre:'Barcelona Centro', delegado:'Carlos Ruiz', audiologo:'Dra. López', tipo:'Sucursal', color:2}
-      ],
-      data: {
-        // por centroId
-        1: {
-          acciones: [{id:1,fecha:'',accion:'',derivacion:0,cita:0,obs:''}],
-          form: [
-            {id:1,fecha:'',asistencia:'',titulo:'',aplicacion:''},
-            {id:2,fecha:'',asistencia:'',titulo:'',aplicacion:''},
-            {id:3,fecha:'',asistencia:'',titulo:'',aplicacion:''},
-            {id:4,fecha:'',asistencia:'',titulo:'',aplicacion:''},
-            {id:5,fecha:'',asistencia:'',titulo:'',aplicacion:''},
-            {id:6,fecha:'',asistencia:'',titulo:'',aplicacion:''},
-            {id:7,fecha:'',asistencia:'',titulo:'',aplicacion:''},
-            {id:8,fecha:'',asistencia:'',titulo:'',aplicacion:''},
-            {id:9,fecha:'',asistencia:'',titulo:'',aplicacion:''},
-            {id:10,fecha:'',asistencia:'',titulo:'',aplicacion:''}
-          ],
-          procesos: [{id:1,nombre:'',desc:'',punt:'',obs:'',fecha:''}]
-        },
-        2: {
-          acciones: [{id:1,fecha:'',accion:'',derivacion:0,cita:0,obs:''}],
-          form: Array.from({length:10},(_,i)=>({id:i+1,fecha:'',asistencia:'',titulo:'',aplicacion:''})),
-          procesos: [{id:1,nombre:'',desc:'',punt:'',obs:'',fecha:''}]
-        }
-      }
-    },
-    flop: {nombre:'Centros flop', items:[], data:{}},
-    formacion: {nombre:'Formaciones – Mentoring', items:[], data:{}},
-    visitas: {nombre:'Visitas a centros', items:[], data:{}}
-  }
+  logo: "", company: "AUDIOLOGÍA",
+  pin: "AR4321", edit:false,
+  sections: [
+    { id:'exclusivos', title:'Centros exclusivos', subs:[
+      { id:'c1', name:'Reina Mercedes', delegado:'Ana Martínez', audiologo:'Dr. García', tipo:'Franquicia', color:'b1' },
+      { id:'c2', name:'Barcelona Centro', delegado:'Carlos Ruiz', audiologo:'Dra. López', tipo:'Sucursal', color:'b2' },
+    ]},
+    { id:'flop', title:'Centros flop', subs:[] },
+    { id:'form', title:'Formaciones – Mentoring', subs:[] },
+    { id:'visitas', title:'Visitas a centros', subs:[] },
+  ],
+  // Datos por centro exclusivo
+  dataByCentro:{
+    c1: sampleCentroData(),
+    c2: sampleCentroData()
+  },
+  activeCentro:'c1'
 };
 
-const palette = [
-  '#dbeafe','#dcfce7','#fde68a','#fbcfe8','#e9d5ff','#fecaca',
-  '#cffafe','#e5e7eb','#fef3c7','#bbf7d0','#bae6fd','#f5d0fe'
-];
-
-function centerColor(idx){ return palette[(idx-1) % palette.length]; }
-
-function saveLocal(){
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-}
-function loadLocal(){
-  const raw = localStorage.getItem(STORAGE_KEY);
-  if (raw) {
-    try{ state = {...state, ...JSON.parse(raw)} }catch(e){}
+function sampleCentroData(){
+  return {
+    acciones:[{id:1, fecha:'', accion:'', derivacion:0, cita:0, obs:''}],
+    formaciones:Array.from({length:10},(_,i)=>({id:i+1,fecha:'',asistencia:'',titulo:'',aplica:''})),
+    procesos:[{id:1,nombrePaquete:'',descripcion:'',puntuacion:'',obs:'',fecha:''}]
   }
-  const logo = localStorage.getItem(LOGO_KEY);
-  if (logo) state.logo = logo;
 }
 
-function setLockUI(){
-  const root = $('#appRoot');
-  if (state.locked){ root.classList.add('locked'); $('#lockState').hidden=false; }
-  else { root.classList.remove('locked'); $('#lockState').hidden=true; }
-}
+// Helpers
+const $ = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
+function uid(){ return Math.random().toString(36).slice(2,9) }
+function setStatus(msg){ $('#status').textContent = msg }
 
-/* ====== Render ====== */
+// Render
 function renderLogo(){
-  const img = $('#logoImg');
-  if (state.logo){ img.src = state.logo; } else { img.removeAttribute('src'); img.alt='Logo'; }
+  const el = $('#logo');
+  if(state.logo){ el.src = state.logo; el.alt='Logo' } else { el.removeAttribute('src'); el.alt='Logo' }
 }
-
-function renderLeft(){
-  const ex = state.secciones.exclusivos.items;
-  $('#countEx').textContent = ex.length;
-  const listEx = $('#listEx'); listEx.innerHTML='';
-  ex.forEach(item=>{
-    const div = document.createElement('div');
-    div.className='sub-item';
-    div.innerHTML = `
-      <div class="sub-left">
-        <span class="dot" style="background:${centerColor(item.color||1)}"></span>
-        <div>
-          <div><strong style="cursor:pointer" data-centro="${item.id}">${item.nombre}</strong></div>
-          <div class="tag">👤 ${item.delegado} | 🎧 ${item.audiologo} | 📍 ${item.tipo||'-'}</div>
+function renderSections(){
+  const box = $('#sections'); box.innerHTML='';
+  state.sections.forEach(sec=>{
+    const wrap = document.createElement('div'); wrap.className='sec';
+    const count = sec.subs.length;
+    wrap.innerHTML = `
+      <div class="sec-h">
+        <div class="mini"><span class="tag">${sec.title}</span> <span class="badge">${count}</span></div>
+        <div class="actions">
+          <button class="x" title="Añadir sub" data-act="addSub" data-sec="${sec.id}">➕</button>
         </div>
       </div>
-      <div class="actions" data-edit>
-        <button class="btn icon gray" title="Editar" data-editar="${item.id}">✎</button>
-        <button class="btn icon gray" title="Eliminar" data-borrar="${item.id}">🗑️</button>
-      </div>
+      <div class="sublist" id="list-${sec.id}"></div>
     `;
-    listEx.appendChild(div);
+    box.appendChild(wrap);
+    const list = wrap.querySelector('.sublist');
+
+    sec.subs.forEach((s,i)=>{
+      const row = document.createElement('div'); row.className='sub';
+      row.innerHTML = `
+        <div style="display:flex;flex-direction:column;gap:2px;max-width:70%">
+          <div style="display:flex;align-items:center;gap:8px;cursor:pointer" data-act="selectCentro" data-id="${s.id}">
+            <strong>${s.name}</strong>
+            <span class="badge ${s.color||'b3'}">${s.tipo||'-'}</span>
+          </div>
+          <div class="meta">👤 ${s.delegado||'-'} · 🎧 ${s.audiologo||'-'}</div>
+        </div>
+        <div class="actions">
+          <button class="x" title="Editar" data-act="editSub" data-sec="${sec.id}" data-id="${s.id}">✏️</button>
+          <button class="x" title="Eliminar" data-act="delSub" data-sec="${sec.id}" data-id="${s.id}">🗑️</button>
+        </div>
+      `;
+      list.appendChild(row);
+    });
   });
-
-  // otros conteos
-  $('#countFlop').textContent = state.secciones.flop.items.length;
-  $('#countForm').textContent = state.secciones.formacion.items.length;
-  $('#countVis').textContent = state.secciones.visitas.items.length;
 }
-
-function ensureCentroData(secKey, id){
-  const sec = state.secciones[secKey];
-  if (!sec.data[id]){
-    sec.data[id] = {
-      acciones:[{id:1,fecha:'',accion:'',derivacion:0,cita:0,obs:''}],
-      form:Array.from({length:10},(_,i)=>({id:i+1,fecha:'',asistencia:'',titulo:'',aplicacion:''})),
-      procesos:[{id:1,nombre:'',desc:'',punt:'',obs:'',fecha:''}]
-    };
+function activeCentroName(){
+  for(const sec of state.sections){
+    for(const s of sec.subs){ if(s.id===state.activeCentro) return s.name }
   }
-  return sec.data[id];
+  return '';
 }
-
-function renderRight(){
-  const secKey = 'exclusivos'; // ahora ligamos procedimientos a exclusivos
-  const centroId = state.activeCentroId ?? state.secciones.exclusivos.items[0]?.id;
-  if (!centroId){ $('#procTitle').textContent = 'Procedimientos —'; return; }
-  state.activeCentroId = centroId;
-  const centro = state.secciones.exclusivos.items.find(c=>c.id===centroId);
-  $('#procTitle').textContent = `Procedimientos — ${centro?.nombre || ''}`;
-
-  const data = ensureCentroData(secKey, centroId);
-
+function ensureCentroData(id){
+  if(!state.dataByCentro[id]) state.dataByCentro[id]=sampleCentroData();
+  return state.dataByCentro[id];
+}
+function renderTablas(){
+  const centro = ensureCentroData(state.activeCentro);
+  $('#procTitle').textContent = 'Procedimientos — ' + (activeCentroName()||'');
   // Acciones
-  const tbodyA = $('#tblAcc tbody'); tbodyA.innerHTML='';
-  data.acciones.forEach((r,i)=>{
-    const tr = document.createElement('tr');
+  const tbA = $('#tblAcc tbody'); tbA.innerHTML='';
+  centro.acciones.forEach((a,idx)=>{
+    const tr=document.createElement('tr');
     tr.innerHTML = `
-      <td>${i+1}</td>
-      <td><input type="date" value="${r.fecha||''}" data-a="fecha" data-id="${r.id}"></td>
-      <td><input type="text" value="${r.accion||''}" data-a="accion" data-id="${r.id}"></td>
-      <td><input type="number" min="0" value="${r.derivacion||0}" data-a="derivacion" data-id="${r.id}"></td>
-      <td><input type="number" min="0" value="${r.cita||0}" data-a="cita" data-id="${r.id}"></td>
-      <td><input type="text" value="${r.obs||''}" data-a="obs" data-id="${r.id}"></td>
-      <td><button class="btn icon gray" data-del-acc="${r.id}" data-edit>✖</button></td>
+      <td>${idx+1}</td>
+      <td><input type="date" value="${a.fecha||''}" data-k="fecha" data-t="acc" data-id="${a.id}"></td>
+      <td><input value="${a.accion||''}" data-k="accion" data-t="acc" data-id="${a.id}"></td>
+      <td><input type="number" min="0" value="${a.derivacion||0}" data-k="derivacion" data-t="acc" data-id="${a.id}"></td>
+      <td><input type="number" min="0" value="${a.cita||0}" data-k="cita" data-t="acc" data-id="${a.id}"></td>
+      <td><input value="${a.obs||''}" data-k="obs" data-t="acc" data-id="${a.id}"></td>
+      <td><button class="x" data-act="delAcc" data-id="${a.id}">✖</button></td>
     `;
-    // resaltar fila verde si hay derivación y cita
-    if ((+r.derivacion>0) && (+r.cita>0)){ tr.style.background='#ecfdf5'; }
-    tbodyA.appendChild(tr);
+    tbA.appendChild(tr);
   });
-
   // Formaciones
-  const tbodyF = $('#tblForm tbody'); tbodyF.innerHTML='';
-  data.form.forEach((r,i)=>{
-    const tr = document.createElement('tr');
-    const asis = r.asistencia||'';
-    const bg = (asis.toLowerCase()==='si'||asis.toLowerCase()==='sí')
-      ? (r.aplicacion?.trim()? '#ecfdf5':'#fff7ed') : '#fff';
-    tr.style.background = bg;
-    tr.innerHTML = `
-      <td>${i+1}</td>
-      <td><input type="date" value="${r.fecha||''}" data-f="fecha" data-id="${r.id}"></td>
-      <td>
-        <select data-f="asistencia" data-id="${r.id}">
-          <option value="" ${asis===''?'selected':''}>-</option>
-          <option value="SI" ${asis.toLowerCase()==='si'||asis.toLowerCase()==='sí'?'selected':''}>SI</option>
-          <option value="NO" ${asis==='NO'?'selected':''}>NO</option>
-          <option value="Pendiente" ${asis==='Pendiente'?'selected':''}>Pendiente</option>
-        </select>
-      </td>
-      <td><input type="text" value="${r.titulo||''}" data-f="titulo" data-id="${r.id}"></td>
-      <td><input type="text" value="${r.aplicacion||''}" data-f="aplicacion" data-id="${r.id}"></td>
+  const tbF = $('#tblForm tbody'); tbF.innerHTML='';
+  centro.formaciones.forEach((f,idx)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td>${idx+1}</td>
+      <td><input type="date" value="${f.fecha||''}" data-k="fecha" data-t="form" data-id="${f.id}"></td>
+      <td><input value="${f.asistencia||''}" placeholder="SI/NO" data-k="asistencia" data-t="form" data-id="${f.id}"></td>
+      <td><input value="${f.titulo||''}" data-k="titulo" data-t="form" data-id="${f.id}"></td>
+      <td><input value="${f.aplica||''}" data-k="aplica" data-t="form" data-id="${f.id}"></td>
+      <td><button class="x" data-act="clearForm" data-id="${f.id}" title="Limpiar">🧹</button></td>
     `;
-    tbodyF.appendChild(tr);
+    tbF.appendChild(tr);
   });
-
   // Procesos
-  const tbodyP = $('#tblProc tbody'); tbodyP.innerHTML='';
-  data.procesos.forEach((r,i)=>{
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${i+1}</td>
-      <td><input type="text" value="${r.nombre||''}" data-p="nombre" data-id="${r.id}"></td>
-      <td><input type="text" value="${r.desc||''}" data-p="desc" data-id="${r.id}"></td>
-      <td><input type="text" value="${r.punt||''}" data-p="punt" data-id="${r.id}" placeholder="Ej: 8/10"></td>
-      <td><input type="text" value="${r.obs||''}" data-p="obs" data-id="${r.id}"></td>
-      <td><input type="date" value="${r.fecha||''}" data-p="fecha" data-id="${r.id}"></td>
-      <td><button class="btn icon gray" data-del-proc="${r.id}" data-edit>✖</button></td>
+  const tbP = $('#tblProc tbody'); tbP.innerHTML='';
+  centro.procesos.forEach((p,idx)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td>${idx+1}</td>
+      <td><input value="${p.nombrePaquete||''}" data-k="nombrePaquete" data-t="pp" data-id="${p.id}"></td>
+      <td><input value="${p.descripcion||''}" data-k="descripcion" data-t="pp" data-id="${p.id}"></td>
+      <td><input value="${p.puntuacion||''}" data-k="puntuacion" data-t="pp" data-id="${p.id}"></td>
+      <td><input value="${p.obs||''}" data-k="obs" data-t="pp" data-id="${p.id}"></td>
+      <td><input type="date" value="${p.fecha||''}" data-k="fecha" data-t="pp" data-id="${p.id}"></td>
+      <td><button class="x" data-act="delPP" data-id="${p.id}">✖</button></td>
     `;
-    tbodyP.appendChild(tr);
+    tbP.appendChild(tr);
   });
+
+  $('#itemsCount').textContent = (centro.acciones.length + centro.formaciones.length + centro.procesos.length) + ' ítems';
 }
 
-function renderAll(){
-  setLockUI();
-  renderLogo();
-  renderLeft();
-  renderRight();
-}
-
-/* ====== Eventos UI ====== */
-$('#logoBox').addEventListener('click', ()=>{
-  if (state.locked) return;
-  $('#logoFile').click();
-});
-$('#logoFile').addEventListener('change', e=>{
-  const f = e.target.files?.[0]; if(!f) return;
-  const rd = new FileReader();
-  rd.onload = () => {
-    state.logo = rd.result;
-    localStorage.setItem(LOGO_KEY, state.logo);
-    saveLocal(); renderLogo();
-  };
-  rd.readAsDataURL(f);
-});
-
-$('#btnPin').addEventListener('click', ()=>{
-  if (state.locked){
-    const pin = prompt('Introduce PIN para editar:');
-    if (pin===PIN_CODE){ state.locked=false; saveLocal(); renderAll(); }
-    else alert('PIN incorrecto.');
-  } else {
-    state.locked=true; saveLocal(); renderAll();
-  }
-});
-
-$('#leftPanel').addEventListener('click', (e)=>{
-  const t = e.target;
-  // seleccionar centro
-  const s = t.closest('[data-centro]');
-  if (s){
-    state.activeCentroId = +s.getAttribute('data-centro');
-    saveLocal(); renderRight();
+// Eventos globales
+document.addEventListener('click',e=>{
+  const act = e.target.dataset.act;
+  if(!act) return;
+  if(!state.edit && ['addSub','editSub','delSub','selectCentro','delAcc','delPP','clearForm'].includes(act)){
+    alert('Bloqueado. Pulsa el candado y usa el PIN AR4321.');
     return;
   }
-  // editar/borrar sub
-  if (t.dataset.editar){
-    if (state.locked) return;
-    const id = +t.dataset.editar;
-    const c = state.secciones.exclusivos.items.find(x=>x.id===id);
-    const nombre = prompt('Nombre', c.nombre); if(nombre===null) return;
-    const delegado = prompt('Delegado', c.delegado) ?? '';
-    const audio = prompt('Audiólogo', c.audiologo) ?? '';
-    const tipo = prompt('Tipo (Franquicia/Sucursal)', c.tipo||'') ?? '';
-    c.nombre=nombre; c.delegado=delegado; c.audiologo=audio; c.tipo=tipo;
-    saveLocal(); renderLeft(); renderRight();
+  if(act==='addSub'){
+    const secId = e.target.dataset.sec;
+    const name = prompt('Nombre del centro/subsección:'); if(!name) return;
+    const delegado = prompt('Delegado:')||''; const audiologo=prompt('Audiólogo:')||''; const tipo = prompt('Tipo (Franquicia/Sucursal):')||'';
+    const color = ['b1','b2','b3','b4'][Math.floor(Math.random()*4)];
+    const sub = {id:uid(),name,delegado,audiologo,tipo,color};
+    const sec = state.sections.find(s=>s.id===secId); sec.subs.push(sub);
+    if(secId==='exclusivos') state.dataByCentro[sub.id]=sampleCentroData();
+    saveLocal(); renderSections();
   }
-  if (t.dataset.borrar){
-    if (state.locked) return;
-    const id = +t.dataset.borrar;
-    if (confirm('¿Eliminar centro?')){
-      state.secciones.exclusivos.items = state.secciones.exclusivos.items.filter(x=>x.id!==id);
-      delete state.secciones.exclusivos.data[id];
-      if (state.activeCentroId===id) state.activeCentroId=null;
-      saveLocal(); renderAll();
-    }
+  if(act==='editSub'){
+    const secId=e.target.dataset.sec, id=e.target.dataset.id;
+    const sec = state.sections.find(s=>s.id===secId); const s = sec.subs.find(x=>x.id===id);
+    const name = prompt('Nombre:',s.name); if(!name) return;
+    s.name=name; s.delegado=prompt('Delegado:',s.delegado||'')||''; s.audiologo=prompt('Audiólogo:',s.audiologo||'')||''; s.tipo=prompt('Tipo:',s.tipo||'')||'';
+    renderSections(); saveLocal();
   }
-});
-
-$('#addSubEx').addEventListener('click', ()=>{
-  if (state.locked) return;
-  const nombre = prompt('Nombre del centro'); if(!nombre) return;
-  const delegado = prompt('Delegado')||''; const audio = prompt('Audiólogo')||'';
-  const tipo = prompt('Tipo (Franquicia/Sucursal)')||'';
-  const items = state.secciones.exclusivos.items;
-  const id = (items.reduce((m,x)=>Math.max(m,x.id),0)+1)||1;
-  items.push({id,nombre,delegado,audiologo:audio,tipo,color:items.length+1});
-  saveLocal(); renderLeft();
-});
-
-$('#addRowAcc').addEventListener('click', ()=>{
-  if (state.locked) return;
-  const cId = state.activeCentroId; if(!cId) return;
-  const arr = state.secciones.exclusivos.data[cId].acciones;
-  const id = arr.reduce((m,x)=>Math.max(m,x.id),0)+1;
-  arr.push({id,fecha:'',accion:'',derivacion:0,cita:0,obs:''});
-  saveLocal(); renderRight();
-});
-$('#saveAcc').addEventListener('click', ()=>{
-  if (state.locked) return;
-  const cId = state.activeCentroId; if(!cId) return;
-  const inputs = $$('#tblAcc [data-id]');
-  const arr = state.secciones.exclusivos.data[cId].acciones;
-  inputs.forEach(el=>{
-    const id = +el.dataset.id; const key = el.dataset.a;
-    const row = arr.find(r=>r.id===id); if (row) row[key] = el.type==='number'? +el.value : el.value;
-  });
-  saveLocal(); renderRight();
-});
-$('#tblAcc').addEventListener('click', e=>{
-  const t=e.target; if(!t.dataset.delAcc) return;
-  if (state.locked) return;
-  const id = +t.dataset.delAcc;
-  const cId = state.activeCentroId; if(!cId) return;
-  const arr = state.secciones.exclusivos.data[cId].acciones;
-  if (arr.length>1){
-    state.secciones.exclusivos.data[cId].acciones = arr.filter(x=>x.id!==id);
-    saveLocal(); renderRight();
+  if(act==='delSub'){
+    if(!confirm('¿Eliminar?')) return;
+    const secId=e.target.dataset.sec, id=e.target.dataset.id;
+    const sec = state.sections.find(s=>s.id===secId);
+    sec.subs = sec.subs.filter(x=>x.id!==id);
+    delete state.dataByCentro[id];
+    if(state.activeCentro===id) state.activeCentro='';
+    renderSections(); renderTablas(); saveLocal();
+  }
+  if(act==='selectCentro'){
+    state.activeCentro = e.target.closest('[data-id]').dataset.id;
+    renderTablas();
+  }
+  if(act==='delAcc'){
+    const id=e.target.dataset.id;
+    const c=ensureCentroData(state.activeCentro);
+    c.acciones=c.acciones.filter(x=>String(x.id)!==String(id));
+    renderTablas(); saveLocal();
+  }
+  if(act==='delPP'){
+    const id=e.target.dataset.id;
+    const c=ensureCentroData(state.activeCentro);
+    c.procesos=c.procesos.filter(x=>String(x.id)!==String(id));
+    renderTablas(); saveLocal();
+  }
+  if(act==='clearForm'){
+    const id=e.target.dataset.id;
+    const c=ensureCentroData(state.activeCentro);
+    const f=c.formaciones.find(x=>x.id==id); if(!f) return;
+    Object.assign(f,{fecha:'',asistencia:'',titulo:'',aplica:''});
+    renderTablas(); saveLocal();
   }
 });
 
-$('#saveFormTbl').addEventListener('click', ()=>{
-  if (state.locked) return;
-  const cId = state.activeCentroId; if(!cId) return;
-  const arr = state.secciones.exclusivos.data[cId].form;
-  $$('#tblForm [data-id]').forEach(el=>{
-    const id=+el.dataset.id; const k=el.dataset.f; const row=arr.find(r=>r.id===id);
-    if(row) row[k] = el.value;
-  });
-  saveLocal(); renderRight();
+document.addEventListener('input',e=>{
+  const t=e.target.dataset.t; if(!t) return;
+  const id=e.target.dataset.id, k=e.target.dataset.k, v=e.target.value;
+  const c=ensureCentroData(state.activeCentro);
+  if(t==='acc'){ const it=c.acciones.find(x=>x.id==id); it[k]= (k==='derivacion'||k==='cita') ? Number(v||0) : v; }
+  if(t==='form'){ const it=c.formaciones.find(x=>x.id==id); it[k]=v; }
+  if(t==='pp'){ const it=c.procesos.find(x=>x.id==id); it[k]=v; }
+  setStatus('Editando… (no olvides Guardar)'); 
 });
 
-$('#addRowProc').addEventListener('click', ()=>{
-  if (state.locked) return;
-  const cId = state.activeCentroId; if(!cId) return;
-  const arr = state.secciones.exclusivos.data[cId].procesos;
-  const id = arr.reduce((m,x)=>Math.max(m,x.id),0)+1;
-  arr.push({id,nombre:'',desc:'',punt:'',obs:'',fecha:''});
-  saveLocal(); renderRight();
-});
-$('#saveProc').addEventListener('click', ()=>{
-  if (state.locked) return;
-  const cId = state.activeCentroId; if(!cId) return;
-  const arr = state.secciones.exclusivos.data[cId].procesos;
-  $$('#tblProc [data-id]').forEach(el=>{
-    const id = +el.dataset.id; const k = el.dataset.p; const row = arr.find(r=>r.id===id);
-    if(row) row[k] = el.value;
-  });
-  saveLocal(); renderRight();
-});
-$('#tblProc').addEventListener('click', e=>{
-  const t=e.target; if(!t.dataset.delProc) return;
-  if (state.locked) return;
-  const id = +t.dataset.delProc;
-  const cId = state.activeCentroId; if(!cId) return;
-  const arr = state.secciones.exclusivos.data[cId].procesos;
-  if (arr.length>1){
-    state.secciones.exclusivos.data[cId].procesos = arr.filter(x=>x.id!==id);
-    saveLocal(); renderRight();
-  }
-});
-
-/* ====== Nube (Gist) ====== */
-const modal = $('#modalBack');
-function openModal(){
-  $('#inpToken').value=''; $('#inpGist').value=getCloud().gistId||'';
-  modal.style.display='flex';
+$('#addProc').onclick=()=>{
+  const c=ensureCentroData(state.activeCentro);
+  const nid = Math.max(0,...c.acciones.map(x=>x.id))+1;
+  c.acciones.push({id:nid,fecha:'',accion:'',derivacion:0,cita:0,obs:''});
+  renderTablas();
 }
-function closeModal(){ modal.style.display='none'; }
+$('#saveProc').onclick=()=>{ saveLocal(); setStatus('Acciones guardadas localmente. Exporta JSON para subir al repo.'); }
+$('#saveForm').onclick=()=>{ saveLocal(); setStatus('Formaciones guardadas localmente.'); }
+$('#savePP').onclick =()=>{ saveLocal(); setStatus('Procesos guardados localmente.'); }
 
-$('#btnSettings').addEventListener('click', ()=>{
-  if (state.locked) { alert('Desbloquea con el PIN para editar ajustes.'); return; }
-  openModal();
-});
-$('#btnCloseModal').addEventListener('click', closeModal);
+$('#btnLogo').onclick=()=>$('#fileLogo').click();
+$('#fileLogo').onchange=e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const r=new FileReader(); r.onload=ev=>{ state.logo=ev.target.result; renderLogo(); saveLocal(); };
+  r.readAsDataURL(f);
+};
 
-function getCloud(){
+$('#btnLock').onclick=()=>{
+  if(state.edit){ state.edit=false; $('#btnLock').textContent='🔒'; setStatus('Edición bloqueada.'); return; }
+  const pin=prompt('PIN:'); if(pin===state.pin){ state.edit=true; $('#btnLock').textContent='🔓'; setStatus('Edición habilitada.'); }
+  else alert('PIN incorrecto.');
+};
+
+function saveLocal(){
+  localStorage.setItem('audioseguimiento', JSON.stringify(state));
+}
+function loadLocal(){
+  const raw=localStorage.getItem('audioseguimiento'); if(!raw) return false;
+  try{ state=JSON.parse(raw); return true }catch{ return false }
+}
+function exportJSON(){
+  const blob = new Blob([JSON.stringify(state,null,2)],{type:'application/json;charset=utf-8'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='data.json'; a.click(); URL.revokeObjectURL(a.href);
+}
+$('#btnExport').onclick=exportJSON;
+$('#btnSaveLocal').onclick=()=>{ saveLocal(); setStatus('Guardado local OK. Ahora exporta y sube data.json al repo.'); };
+
+async function loadCloud(){
   try{
-    const raw = localStorage.getItem(CLOUD_KEY);
-    return raw? JSON.parse(raw): {};
-  }catch(e){ return {}; }
-}
-function setCloud(v){
-  localStorage.setItem(CLOUD_KEY, JSON.stringify(v||{}));
-}
-function updateCloudStatus(msg, cls=''){
-  const el = $('#cloudStatus'); el.textContent = `nube: ${msg}`; el.className = `status ${cls}`;
-}
-async function apiGist(method, url, body, token){
-  const res = await fetch(url, {
-    method,
-    headers: {
-      'Accept':'application/vnd.github+json',
-      ...(token? {'Authorization':'Bearer '+token} : {}),
-    },
-    body: body? JSON.stringify(body): undefined
-  });
-  if (!res.ok){
-    const txt = await res.text().catch(()=>res.statusText);
-    throw new Error(txt || res.statusText);
-  }
-  return await res.json();
-}
-
-$('#btnSaveModal').addEventListener('click', async ()=>{
-  const token = $('#inpToken').value.trim();
-  const gistId = $('#inpGist').value.trim();
-  if (!token){ alert('Necesitas un token con permiso "gist".'); return; }
-  setCloud({token, gistId: gistId||''});
-  updateCloudStatus('configurado', 'ok');
-  closeModal();
-});
-
-async function saveToCloud(){
-  const {token, gistId} = getCloud();
-  if (!token){
-    updateCloudStatus('requiere token', 'warn'); openModal(); return;
-  }
-  updateCloudStatus('guardando…');
-  const payload = {
-    version:1,
-    savedAt: new Date().toISOString(),
-    state,
-    logo: state.logo || null
-  };
-  const files = {'audiologia.json': {content: JSON.stringify(payload, null, 2)}};
-  try{
-    let id = gistId;
-    if (!id){
-      const r = await apiGist('POST','https://api.github.com/gists', {public:false, description:'Backup Audiologia Seguimiento', files}, token);
-      id = r.id;
-      const c = getCloud(); c.gistId = id; setCloud(c);
-    }else{
-      await apiGist('PATCH',`https://api.github.com/gists/${id}`, {files}, token);
-    }
-    updateCloudStatus('guardado OK', 'ok');
-  }catch(err){
-    console.error(err);
-    updateCloudStatus('error al guardar', 'err');
-    alert('Error al guardar en la nube:\n'+err.message);
-  }
-}
-async function loadFromCloud(){
-  const {token, gistId} = getCloud();
-  if (!token || !gistId){ updateCloudStatus('sin configuración', 'warn'); openModal(); return; }
-  updateCloudStatus('cargando…');
-  try{
-    const r = await apiGist('GET',`https://api.github.com/gists/${gistId}`, null, token);
-    const file = r.files?.['audiologia.json'];
-    if (!file || !file.content) throw new Error('No existe audiologia.json en ese Gist.');
-    const data = JSON.parse(file.content);
-    // mezclar (no perder lo ya bien cargado)
-    state = data.state || state;
-    state.logo = data.logo || state.logo || null;
+    const url = CLOUD_URL + (CLOUD_URL.includes('?')?'&':'?') + 'ts=' + Date.now();
+    const res=await fetch(url,{cache:'no-store'}); 
+    if(!res.ok) throw 0;
+    const data=await res.json();
+    // preserva el PIN local y el modo edición; acepta logo remota si existe
+    const keepPin = state.pin, wasEdit = state.edit;
+    state = data; state.pin = keepPin; state.edit = wasEdit;
     saveLocal();
-    renderAll();
-    updateCloudStatus('cargado OK', 'ok');
-  }catch(err){
-    console.error(err);
-    updateCloudStatus('error al cargar', 'err');
-    alert('Error al cargar desde la nube:\n'+err.message);
+    bootstrap();
+    setStatus('Datos actualizados desde la nube (data.json).');
+  }catch{
+    setStatus('No se encontró data.json en la nube o fallo de lectura.');
   }
 }
+$('#btnCloud').onclick=loadCloud;
 
-$('#btnSaveCloud').addEventListener('click', saveToCloud);
-$('#btnLoadCloud').addEventListener('click', loadFromCloud);
-$('#btnBackup').addEventListener('click', ()=>{
-  const blob = new Blob([JSON.stringify({state, logo:state.logo}, null, 2)], {type:'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href=url; a.download='backup_audiologia.json'; a.click();
-  URL.revokeObjectURL(url);
+$('#btnCfg').onclick=()=>alert(
+  'Nube local (sin tokens):\n\n1) Pulsa Exportar JSON para descargar data.json.\n2) En GitHub → tu repo → Add file → Upload files → sube/actualiza data.json (en la raíz).\n3) Espera el deploy de Pages.\n4) En cualquier equipo pulsa 🔄 Actualizar de nube.\n\nTodos verán el último data.json del repositorio.'
+);
+
+// Buscador simple
+$('#q').addEventListener('input',e=>{
+  const q=e.target.value.toLowerCase();
+  $$('#sections .sub').forEach(row=>{
+    const txt=row.textContent.toLowerCase();
+    row.style.display = txt.includes(q)?'flex':'none';
+  });
 });
 
-/* ====== Init ====== */
-loadLocal();
-renderAll();
-// mostrar estado nube
-const c = getCloud();
-if (c?.token) updateCloudStatus(c.gistId? 'listo' : 'token OK (creará Gist)', 'ok');
-else updateCloudStatus('sin configurar');
+// Inicialización
+function bootstrap(){
+  renderLogo();
+  renderSections();
+  if(!state.activeCentro){
+    const ex = state.sections.find(s=>s.id==='exclusivos');
+    if(ex && ex.subs[0]) state.activeCentro = ex.subs[0].id;
+  }
+  renderTablas();
+}
+
+(function init(){
+  const had = loadLocal();
+  bootstrap();
+  // Cargar de nube al entrar, si existe data.json (no bloquea UI)
+  loadCloud();
+  setStatus(had ? 'Cargado desde local. Intentando nube…' : 'Bienvenido. Crea/Exporta data.json para la nube.');
+})();
 </script>
 </body>
 </html>
