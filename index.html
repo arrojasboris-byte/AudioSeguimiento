@@ -1,651 +1,233 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>AUDIOLOGIA-SEGUIMIENTO</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<style>
-  /* Evita zoom feo en móviles al usar inputs */
-  input, select, button { font-size: 16px; }
-  /* Scroll table */
-  .table-scroll { overflow-x:auto; }
-  /* Celda arrastrable */
-  .drag-dots{display:flex;flex-direction:column;gap:3px;align-items:center;}
-  .drag-dots span{width:3px;height:3px;border-radius:9999px;background:#9ca3af;display:block}
-  /* Logo */
-  #logoImg{max-height:48px;max-width:180px;object-fit:contain}
-</style>
-</head>
-<body class="bg-gray-50 text-gray-800">
-<div id="app" class="max-w-7xl mx-auto p-4">
-  <!-- CABECERA -->
-  <div class="bg-white rounded-xl shadow border border-red-200 p-3 mb-4 flex items-center justify-between">
-    <div class="flex items-center gap-3">
-      <img id="logoImg" alt="Logo" src="" class="cursor-pointer" title="Cambiar logo (requiere PIN)"/>
-      <div class="flex items-center gap-2">
-        <!-- Iconos cabecera -->
-        <button id="btnEdit" class="p-2 rounded-lg bg-gray-100 hover:bg-gray-200" title="Editar (PIN)">
-          ✎
-        </button>
-        <button id="btnBackup" class="p-2 rounded-lg bg-gray-100 hover:bg-gray-200" title="Descargar backup .json">
-          💾
-        </button>
-        <button id="btnImport" class="p-2 rounded-lg bg-gray-100 hover:bg-gray-200" title="Importar backup .json">
-          ⬆️
-        </button>
-        <button id="btnCloudUrl" class="p-2 rounded-lg bg-gray-100 hover:bg-gray-200" title="Configurar URL nube (data.json)">
-          ☁️🔧
-        </button>
-        <button id="btnCloudPull" class="p-2 rounded-lg bg-gray-100 hover:bg-gray-200" title="Actualizar de nube (leer)">
-          ☁️🔄
-        </button>
-      </div>
-    </div>
-    <div class="text-right">
-      <div class="text-sm text-gray-500">Última carga nube: <span id="lastCloudTs">–</span></div>
-    </div>
-  </div>
+<!-- === Pegar justo antes de </body> en https://arrojasboris-byte.github.io/AudioSeguimiento/ === -->
+<script type="module">
+  /********************************************************************
+   * AudioSeguimiento – Sincronización en la nube (Firestore)
+   * - Guarda/recupera el estado desde la nube
+   * - PIN fijo: AR4321 (se guarda en localStorage)
+   * - Muestra "Última actualización" y estado de sincronización
+   *
+   * INSTRUCCIONES (una sola vez):
+   * 1) Crea un proyecto en https://console.firebase.google.com
+   * 2) Activa Firestore (modo production)
+   * 3) Copia tu CONFIG de Firebase aquí abajo (apiKey, authDomain, projectId...)
+   * 4) En Firestore Reglas, para prototipo, puedes usar (restringe más tarde):
+   *    rules_version = '2';
+   *    service cloud.firestore {
+   *      match /databases/{database}/documents {
+   *        match /platformStates/{docId} {
+   *          allow read, write: if true;
+   *        }
+   *      }
+   *    }
+   ********************************************************************/
 
-  <div class="grid grid-cols-12 gap-4">
-    <!-- LADO IZQUIERDO: SECCIONES -->
-    <div class="col-span-12 md:col-span-4">
-      <div class="bg-white rounded-xl shadow border border-gray-200 p-3">
-        <div class="flex items-center justify-between mb-2">
-          <h2 class="font-bold">Secciones</h2>
-          <button id="btnAddSection" class="px-2 py-1 bg-red-600 text-white rounded-lg text-sm" title="Añadir sección">+</button>
-        </div>
-
-        <div id="sections"></div>
-      </div>
-    </div>
-
-    <!-- DERECHA: PROCEDIMIENTOS -->
-    <div class="col-span-12 md:col-span-8">
-      <div class="bg-white rounded-xl shadow border border-gray-200 p-3">
-        <div class="flex items-center justify-between mb-3">
-          <div>
-            <h2 class="font-bold text-xl">Procedimientos</h2>
-            <div id="activeCentroBadge" class="text-sm text-gray-600"></div>
-          </div>
-          <button id="btnAddProc" class="px-3 py-1 bg-blue-600 text-white rounded-lg text-sm" title="Añadir procedimiento">+</button>
-        </div>
-
-        <!-- BLOQUES (colapsables) para Centros Exclusivos -->
-        <div class="space-y-4" id="procArea">
-          <!-- ACCIONES-RESULTADO -->
-          <details open class="border rounded-lg">
-            <summary class="cursor-pointer px-3 py-2 bg-gray-100 font-semibold">Acciones – Resultado</summary>
-            <div class="p-2 table-scroll">
-              <table class="min-w-full border bg-white rounded">
-                <thead>
-                  <tr class="bg-red-600 text-white text-sm">
-                    <th class="p-2 w-8">↕</th>
-                    <th class="p-2 w-10">#</th>
-                    <th class="p-2 w-36">Fecha</th>
-                    <th class="p-2 w-56">Acción</th>
-                    <th class="p-2 w-24">Derivación</th>
-                    <th class="p-2 w-24">Cita</th>
-                    <th class="p-2">Observaciones</th>
-                    <th class="p-2 w-12">❌</th>
-                  </tr>
-                </thead>
-                <tbody id="tbAcciones"></tbody>
-              </table>
-              <div class="mt-2 flex justify-end">
-                <button id="addAccion" class="px-3 py-1 bg-blue-600 text-white rounded">Añadir</button>
-              </div>
-            </div>
-          </details>
-
-          <!-- FORMACION CONTINUA -->
-          <details class="border rounded-lg">
-            <summary class="cursor-pointer px-3 py-2 bg-gray-100 font-semibold">Formación Continua</summary>
-            <div class="p-2 table-scroll">
-              <table class="min-w-full border bg-white rounded">
-                <thead>
-                  <tr class="bg-red-600 text-white text-sm">
-                    <th class="p-2 w-8">↕</th>
-                    <th class="p-2 w-10">#</th>
-                    <th class="p-2 w-36">Fecha</th>
-                    <th class="p-2 w-32">Asistencia</th>
-                    <th class="p-2">Título</th>
-                    <th class="p-2">Aplicación</th>
-                  </tr>
-                </thead>
-                <tbody id="tbFormacion"></tbody>
-              </table>
-            </div>
-          </details>
-
-          <!-- PROCESOS PERSONALIZADOS -->
-          <details class="border rounded-lg">
-            <summary class="cursor-pointer px-3 py-2 bg-gray-100 font-semibold">Procesos / Paquetes</summary>
-            <div class="p-2 table-scroll">
-              <table class="min-w-full border bg-white rounded">
-                <thead>
-                  <tr class="bg-red-600 text-white text-sm">
-                    <th class="p-2 w-8">↕</th>
-                    <th class="p-2 w-10">#</th>
-                    <th class="p-2 w-48">Nombre Paquete</th>
-                    <th class="p-2">Descripción</th>
-                    <th class="p-2 w-28">Puntuación</th>
-                    <th class="p-2">Observaciones</th>
-                    <th class="p-2 w-36">Fecha Visita</th>
-                    <th class="p-2 w-12">❌</th>
-                  </tr>
-                </thead>
-                <tbody id="tbProcesos"></tbody>
-              </table>
-              <div class="mt-2 flex justify-end">
-                <button id="addProceso" class="px-3 py-1 bg-blue-600 text-white rounded">Añadir</button>
-              </div>
-            </div>
-          </details>
-
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<input type="file" id="fileImport" accept="application/json" class="hidden"/>
-
-<script>
-/* =========================
-   ESTADO + NUBE SENCILLA
-========================= */
-const STORAGE_KEY = "audioseguimiento_state_v1";
-const CLOUD_URL_KEY = "audioseguimiento_cloud_url";
-let STATE = null;
-let EDIT_MODE = false;
-const PIN = "AR4321"; // tu PIN
-
-// URL de nube (LEER). PON AQUÍ tu URL final cuando ya subas data.json a Pages
-// Ejemplo root:  https://TUUSUARIO.github.io/TU_REPO/data.json
-// Ejemplo /docs: https://TUUSUARIO.github.io/TU_REPO/docs/data.json
-let CLOUD_URL = localStorage.getItem(CLOUD_URL_KEY) || "";
-
-// Datos por defecto (para que nunca tengas 404)
-const DEFAULT_STATE = {
-  logo: "",
-  company: "AUDIOLOGÍA",
-  activeCentro: "c1",
-  sections: [
-    {
-      id: "exclusivos",
-      title: "Centros Exclusivos",
-      color: "red",
-      subs: [
-        { id:"c1", name:"Centro Madrid Norte", delegado:"Ana Martínez", audiologo:"Dr. García", tipo:"Franquicia", color:"bg-blue-100 border-blue-400 text-blue-800" },
-        { id:"c2", name:"Centro Barcelona Centro", delegado:"Carlos Ruiz", audiologo:"Dra. López", tipo:"Sucursal", color:"bg-green-100 border-green-400 text-green-800" }
-      ]
-    },
-    { id:"flop", title:"Centros FLOP", color:"gray", subs:[] },
-    { id:"form", title:"Formaciones – Mentoring", color:"gray", subs:[] },
-    { id:"visitas", title:"Visitas a centros", color:"gray", subs:[] }
-  ],
-  dataByCentro: {
-    "c1": {
-      acciones: [
-        { id:1, fecha:"", accion:"", derivacion:0, cita:0, obs:"" }
-      ],
-      formaciones: [
-        { id:1, fecha:"", asistencia:"", titulo:"", aplica:"" },
-        { id:2, fecha:"", asistencia:"", titulo:"", aplica:"" },
-        { id:3, fecha:"", asistencia:"", titulo:"", aplica:"" },
-        { id:4, fecha:"", asistencia:"", titulo:"", aplica:"" }
-      ],
-      procesos: [
-        { id:1, nombrePaquete:"", descripcion:"", puntuacion:"", obs:"", fecha:"" }
-      ]
-    },
-    "c2": {
-      acciones: [
-        { id:1, fecha:"", accion:"", derivacion:0, cita:0, obs:"" }
-      ],
-      formaciones: [
-        { id:1, fecha:"", asistencia:"", titulo:"", aplica:"" },
-        { id:2, fecha:"", asistencia:"", titulo:"", aplica:"" },
-        { id:3, fecha:"", asistencia:"", titulo:"", aplica:"" },
-        { id:4, fecha:"", asistencia:"", titulo:"", aplica:"" }
-      ],
-      procesos: [
-        { id:1, nombrePaquete:"", descripcion:"", puntuacion:"", obs:"", fecha:"" }
-      ]
-    }
-  }
-};
-
-/* =========================
-   UTILIDADES
-========================= */
-function saveLocal(){
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(STATE));
-}
-
-function loadLocal(){
-  const raw = localStorage.getItem(STORAGE_KEY);
-  if(!raw) return null;
-  try { return JSON.parse(raw); } catch { return null; }
-}
-
-function download(filename, text){
-  const blob = new Blob([text], {type:"application/json"});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href=url; a.download=filename; a.click();
-  URL.revokeObjectURL(url);
-}
-
-async function pullCloud(){
-  if(!CLOUD_URL){
-    alert("Configura primero la URL de nube (☁️🔧). Debe apuntar a tu data.json en GitHub Pages.");
-    return;
-  }
-  const url = CLOUD_URL + (CLOUD_URL.includes("?") ? "&" : "?") + "t=" + Date.now();
-  try{
-    const r = await fetch(url);
-    if(!r.ok){ throw new Error("HTTP "+r.status); }
-    const json = await r.json();
-    STATE = json;
-    saveLocal();
-    renderAll();
-    document.getElementById("lastCloudTs").textContent = new Date().toLocaleString();
-    alert("Actualizado desde nube ✔");
-  }catch(e){
-    alert("No se pudo leer de la nube: "+e.message);
-  }
-}
-
-function setCloudUrl(){
-  const val = prompt("Pega aquí la URL completa de tu data.json (GitHub Pages).", CLOUD_URL || "https://TUUSUARIO.github.io/TU_REPO/data.json");
-  if(val){
-    CLOUD_URL = val.trim();
-    localStorage.setItem(CLOUD_URL_KEY, CLOUD_URL);
-    alert("URL de nube guardada.");
-  }
-}
-
-/* =========================
-   RENDER
-========================= */
-function renderAll(){
-  // Logo
-  const logo = STATE.logo || "";
-  const logoImg = document.getElementById("logoImg");
-  logoImg.src = logo || "https://dummyimage.com/200x48/ffffff/aaaaaa&text=AUDIOLOGIA";
-  logoImg.onclick = ()=>{
-    if(!EDIT_MODE){ return; }
-    const input = document.createElement("input");
-    input.type="file"; input.accept="image/*";
-    input.onchange = e=>{
-      const file = e.target.files?.[0];
-      if(!file) return;
-      const fr = new FileReader();
-      fr.onload = ()=>{
-        STATE.logo = fr.result;
-        saveLocal();
-        renderAll();
-      };
-      fr.readAsDataURL(file);
-    };
-    input.click();
+  // 1) CONFIG de tu proyecto Firebase (Rellena con tus valores)
+  const firebaseConfig = {
+    apiKey: "TU_API_KEY",
+    authDomain: "TU_AUTH_DOMAIN",
+    projectId: "TU_PROJECT_ID",
+    // Opcionales, pero recomendables si los tienes:
+    // storageBucket: "TU_STORAGE_BUCKET",
+    // messagingSenderId: "TU_SENDER_ID",
+    // appId: "TU_APP_ID",
   };
 
-  renderSections();
-  renderProcedures();
-}
+  // 2) Import del SDK v9 modular (desde CDN oficial)
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js';
+  import {
+    getFirestore, doc, getDoc, setDoc, onSnapshot, serverTimestamp
+  } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js';
 
-function renderSections(){
-  const wrap = document.getElementById("sections");
-  wrap.innerHTML = "";
+  // 3) Utilidad: hash SHA-256 (hex)
+  async function sha256Hex(text) {
+    const enc = new TextEncoder().encode(text);
+    const buf = await crypto.subtle.digest('SHA-256', enc);
+    return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+  }
 
-  STATE.sections.forEach(section=>{
-    const secBox = document.createElement("div");
-    secBox.className = "mb-2 border rounded-lg";
+  // 4) PIN fijo (AR4321) → se guarda en localStorage para no preguntar
+  const FIXED_PIN = "AR4321";
+  localStorage.setItem('audioseguimiento_pin', FIXED_PIN);
 
-    const header = document.createElement("div");
-    header.className = "flex items-center justify-between px-3 py-2 bg-gray-100 rounded-t-lg";
-    const title = document.createElement("div");
-    title.className = "font-semibold";
-    title.textContent = section.title;
-
-    const right = document.createElement("div");
-    right.className = "flex items-center gap-2";
-    const btnAddSub = document.createElement("button");
-    btnAddSub.className = "px-2 py-1 bg-red-600 text-white rounded text-sm";
-    btnAddSub.textContent = "+";
-    btnAddSub.title = "Añadir subcategoría";
-    btnAddSub.onclick = ()=>{
-      if(!EDIT_MODE) return;
-      const name = prompt("Nombre del centro / subcategoría:");
-      if(!name) return;
-      const id = "s"+Date.now();
-      const colorClasses = pickCentroColor(section.subs.length);
-      section.subs.push({
-        id, name, delegado:"", audiologo:"", tipo:"", color: colorClasses
-      });
-      if(section.id==="exclusivos" && !STATE.dataByCentro[id]){
-        STATE.dataByCentro[id] = JSON.parse(JSON.stringify(STATE.dataByCentro[STATE.activeCentro] || {acciones:[],formaciones:[],procesos:[]}));
+  // 5) Hooks necesarios (AJUSTA ESTO A TU APLICACIÓN REAL)
+  // Deben existir 2 funciones globales para serializar/aplicar el estado.
+  // Si ya las tienes, elimina estos "fallbacks" y usa las tuyas.
+  if (typeof window.getPlatformState !== 'function') {
+    // EJEMPLO: recoge campos típicos de la UI. ADÁPTALO a tu DOM.
+    window.getPlatformState = () => {
+      const notas = document.querySelector('#notas')?.value || '';
+      // Si tienes listados, tablas o sliders, léelos aquí.
+      return {
+        notas,
+        // pacientes: leerPacientesDeTuUI(),
+        // ajustes: leerAjustesDeTuUI(),
+        version: 'demo',
+        savedAt: Date.now()
+      };
+    };
+  }
+  if (typeof window.applyPlatformState !== 'function') {
+    // EJEMPLO: aplica el estado en la UI. ADÁPTALO a tu DOM.
+    window.applyPlatformState = (state) => {
+      if (!state) return;
+      try {
+        if (typeof state.notas === 'string' && document.querySelector('#notas')) {
+          document.querySelector('#notas').value = state.notas;
+        }
+        // if (state.pacientes) pintarPacientesEnTuUI(state.pacientes);
+        // if (state.ajustes) aplicarAjustesEnTuUI(state.ajustes);
+      } catch (e) {
+        console.warn('No se pudo aplicar parte del estado:', e);
       }
-      if(!STATE.activeCentro && section.id==="exclusivos") STATE.activeCentro=id;
-      saveLocal();
-      renderAll();
+      // Vista previa rápida (opcional)
+      const area = document.querySelector('#estado-previsualizacion');
+      if (area) area.textContent = JSON.stringify(state, null, 2);
     };
-
-    const btnEditSec = document.createElement("button");
-    btnEditSec.className = "px-2 py-1 bg-gray-200 rounded text-sm";
-    btnEditSec.textContent = "✎";
-    btnEditSec.title = "Renombrar sección";
-    btnEditSec.onclick = ()=>{
-      if(!EDIT_MODE) return;
-      const nv = prompt("Nuevo nombre de la sección:", section.title);
-      if(!nv) return;
-      section.title = nv.trim();
-      saveLocal(); renderAll();
-    };
-
-    right.appendChild(btnAddSub);
-    right.appendChild(btnEditSec);
-    header.appendChild(title);
-    header.appendChild(right);
-    secBox.appendChild(header);
-
-    // Lista de subs con desplegable + editar/eliminar
-    const list = document.createElement("div");
-    list.className="p-2 space-y-2";
-
-    section.subs.forEach((sub, idx)=>{
-      const row = document.createElement("div");
-      row.className="flex items-center gap-2";
-
-      const btnSel = document.createElement("button");
-      btnSel.className = "flex-1 text-left border px-2 py-2 rounded hover:bg-gray-50";
-      btnSel.innerHTML = `
-        <div class="font-semibold">${sub.name}</div>
-        <div class="text-xs text-gray-600">👤 ${sub.delegado||"-"} | 🎧 ${sub.audiologo||"-"} | 📍 ${sub.tipo||"-"}</div>
-      `;
-      btnSel.onclick = ()=>{
-        if(section.id==="exclusivos"){
-          STATE.activeCentro = sub.id;
-          saveLocal(); renderProcedures();
-        }
-      };
-
-      const btnEdit = document.createElement("button");
-      btnEdit.className = "px-2 py-1 bg-blue-600 text-white rounded text-sm";
-      btnEdit.textContent = "Editar";
-      btnEdit.onclick = ()=>{
-        if(!EDIT_MODE) return;
-        const name = prompt("Nombre:", sub.name) || sub.name;
-        const del = prompt("Delegado:", sub.delegado||"") || sub.delegado;
-        const aud = prompt("Audiólogo:", sub.audiologo||"") || sub.audiologo;
-        const tipo = prompt("Tipo (Franquicia/Sucursal):", sub.tipo||"") || sub.tipo;
-        sub.name=name; sub.delegado=del; sub.audiologo=aud; sub.tipo=tipo;
-        saveLocal(); renderAll();
-      };
-
-      const btnDel = document.createElement("button");
-      btnDel.className = "px-2 py-1 bg-red-600 text-white rounded text-sm";
-      btnDel.textContent = "Eliminar";
-      btnDel.onclick = ()=>{
-        if(!EDIT_MODE) return;
-        if(!confirm("¿Eliminar subcategoría?")) return;
-        section.subs.splice(idx,1);
-        if(section.id==="exclusivos"){
-          if(STATE.activeCentro===sub.id) STATE.activeCentro = section.subs[0]?.id || "";
-          delete STATE.dataByCentro[sub.id];
-        }
-        saveLocal(); renderAll();
-      };
-
-      row.appendChild(btnSel);
-      row.appendChild(btnEdit);
-      row.appendChild(btnDel);
-      list.appendChild(row);
-    });
-
-    secBox.appendChild(list);
-    wrap.appendChild(secBox);
-  });
-}
-
-function renderProcedures(){
-  const centroId = STATE.activeCentro || "";
-  const badge = document.getElementById("activeCentroBadge");
-  const centroObj = findCentroById(centroId);
-  badge.textContent = centroObj ? ("Centro activo: "+centroObj.name) : "Selecciona un centro…";
-
-  const dataset = centroId ? (STATE.dataByCentro[centroId] || (STATE.dataByCentro[centroId]={acciones:[],formaciones:[],procesos:[]})) : null;
-
-  // Acciones
-  const tbA = document.getElementById("tbAcciones");
-  tbA.innerHTML="";
-  (dataset?.acciones||[]).forEach((a, i)=>{
-    const tr = document.createElement("tr");
-    tr.className="border-b";
-
-    const drag = document.createElement("td");
-    drag.className="p-2 text-center align-top";
-    drag.innerHTML='<div class="drag-dots"><span></span><span></span><span></span></div>';
-
-    const idx = document.createElement("td");
-    idx.className="p-2 text-center align-top";
-    idx.innerHTML = `<span class="inline-flex items-center justify-center w-6 h-6 bg-red-600 text-white rounded-full text-xs font-bold">${i+1}</span>`;
-
-    const tdFecha = document.createElement("td");
-    tdFecha.className="p-1";
-    tdFecha.innerHTML = `<input type="date" class="w-full border rounded px-2 py-1" ${!EDIT_MODE?"disabled":""} value="${a.fecha||""}">`;
-    tdFecha.querySelector("input").oninput = e=>{ a.fecha=e.target.value; saveLocal(); };
-
-    const tdAccion = document.createElement("td");
-    tdAccion.className="p-1";
-    tdAccion.innerHTML = `<input type="text" class="w-full border rounded px-2 py-1" ${!EDIT_MODE?"disabled":""} placeholder="Descripción..." value="${a.accion||""}">`;
-    tdAccion.querySelector("input").oninput = e=>{ a.accion=e.target.value; saveLocal(); };
-
-    const tdDer = document.createElement("td");
-    tdDer.className="p-1";
-    tdDer.innerHTML = `<input type="number" min="0" class="w-full border rounded px-2 py-1 text-center" ${!EDIT_MODE?"disabled":""} value="${a.derivacion||0}">`;
-    tdDer.querySelector("input").oninput = e=>{ a.derivacion = parseInt(e.target.value||0); saveLocal(); };
-
-    const tdCita = document.createElement("td");
-    tdCita.className="p-1";
-    tdCita.innerHTML = `<input type="number" min="0" class="w-full border rounded px-2 py-1 text-center" ${!EDIT_MODE?"disabled":""} value="${a.cita||0}">`;
-    tdCita.querySelector("input").oninput = e=>{ a.cita = parseInt(e.target.value||0); saveLocal(); };
-
-    const tdObs = document.createElement("td");
-    tdObs.className="p-1";
-    tdObs.innerHTML = `<input type="text" class="w-full border rounded px-2 py-1" ${!EDIT_MODE?"disabled":""} placeholder="Observaciones..." value="${a.obs||""}">`;
-    tdObs.querySelector("input").oninput = e=>{ a.obs=e.target.value; saveLocal(); };
-
-    const tdDel = document.createElement("td");
-    tdDel.className="p-1 text-center";
-    const delBtn = document.createElement("button");
-    delBtn.className = "px-2 py-1 bg-red-100 text-red-700 rounded";
-    delBtn.textContent = "✕";
-    delBtn.disabled = !EDIT_MODE || (dataset.acciones.length<=1);
-    delBtn.onclick = ()=>{
-      if(!EDIT_MODE) return;
-      if(dataset.acciones.length<=1) return;
-      dataset.acciones.splice(i,1);
-      saveLocal(); renderProcedures();
-    };
-    tdDel.appendChild(delBtn);
-
-    tr.appendChild(drag); tr.appendChild(idx); tr.appendChild(tdFecha);
-    tr.appendChild(tdAccion); tr.appendChild(tdDer); tr.appendChild(tdCita);
-    tr.appendChild(tdObs); tr.appendChild(tdDel);
-    // color fila si hay derivación y cita
-    if((a.derivacion||0)>0 && (a.cita||0)>0){ tr.classList.add("bg-green-50"); }
-    tbA.appendChild(tr);
-  });
-
-  // Formación
-  const tbF = document.getElementById("tbFormacion");
-  tbF.innerHTML="";
-  (dataset?.formaciones||[]).forEach((f,i)=>{
-    const tr=document.createElement("tr"); tr.className="border-b";
-    const tds=[
-      `<td class="p-2 text-center align-top"><div class="drag-dots"><span></span><span></span><span></span></div></td>`,
-      `<td class="p-2 text-center align-top"><span class="inline-flex items-center justify-center w-6 h-6 bg-red-600 text-white rounded-full text-xs font-bold">${i+1}</span></td>`
-    ].join("");
-    const tdFecha = `<td class="p-1"><input type="date" class="w-full border rounded px-2 py-1" ${!EDIT_MODE?"disabled":""} value="${f.fecha||""}"></td>`;
-    const tdAsis = `<td class="p-1"><select class="w-full border rounded px-2 py-1" ${!EDIT_MODE?"disabled":""}>
-      <option value="" ${f.asistencia===""?"selected":""}>-</option>
-      <option value="SI" ${f.asistencia==="SI"?"selected":""}>SI</option>
-      <option value="NO" ${f.asistencia==="NO"?"selected":""}>NO</option>
-      <option value="Pendiente" ${f.asistencia==="Pendiente"?"selected":""}>Pendiente</option>
-    </select></td>`;
-    const tdTit = `<td class="p-1"><input type="text" class="w-full border rounded px-2 py-1" ${!EDIT_MODE?"disabled":""} value="${f.titulo||""}" placeholder="Nombre del curso..."></td>`;
-    const tdApl = `<td class="p-1"><input type="text" class="w-full border rounded px-2 py-1" ${!EDIT_MODE?"disabled":""} value="${f.aplica||""}" placeholder="¿Cómo se aplicará? o SI/NO"></td>`;
-    tr.innerHTML = tds + tdFecha + tdAsis + tdTit + tdApl;
-
-    const inputs = tr.querySelectorAll("input,select");
-    inputs[0].oninput = e=>{ f.fecha=e.target.value; saveLocal(); }
-    inputs[1].oninput = e=>{ f.asistencia=e.target.value; saveLocal(); }
-    inputs[2].oninput = e=>{ f.titulo=e.target.value; saveLocal(); }
-    inputs[3].oninput = e=>{ f.aplica=e.target.value; saveLocal(); }
-
-    // Colores
-    const asiste = (f.asistencia||"").toLowerCase();
-    const aplica = (f.aplica||"").toLowerCase();
-    if(asiste==="si" && (aplica==="si" || aplica==="sí" || (f.aplica||"").trim().length>2)){
-      tr.classList.add("bg-green-50");
-    }else if(asiste==="si"){
-      tr.classList.add("bg-orange-50");
-    }
-
-    tbF.appendChild(tr);
-  });
-
-  // Procesos
-  const tbP = document.getElementById("tbProcesos");
-  tbP.innerHTML="";
-  (dataset?.procesos||[]).forEach((p,i)=>{
-    const tr = document.createElement("tr"); tr.className="border-b";
-    const drag = `<td class="p-2 text-center align-top"><div class="drag-dots"><span></span><span></span><span></span></div></td>`;
-    const idx = `<td class="p-2 text-center align-top"><span class="inline-flex items-center justify-center w-6 h-6 bg-red-600 text-white rounded-full text-xs font-bold">${i+1}</span></td>`;
-    const tdNom = `<td class="p-1"><input type="text" class="w-full border rounded px-2 py-1 font-semibold" ${!EDIT_MODE?"disabled":""} placeholder="Nombre del paquete..." value="${p.nombrePaquete||""}"></td>`;
-    const tdDesc = `<td class="p-1"><input type="text" class="w-full border rounded px-2 py-1" ${!EDIT_MODE?"disabled":""} placeholder="Descripción..." value="${p.descripcion||""}"></td>`;
-    const tdPunt = `<td class="p-1"><input type="text" class="w-full border rounded px-2 py-1 text-center" ${!EDIT_MODE?"disabled":""} placeholder="8/10" value="${p.puntuacion||""}"></td>`;
-    const tdObs  = `<td class="p-1"><input type="text" class="w-full border rounded px-2 py-1" ${!EDIT_MODE?"disabled":""} placeholder="Observaciones..." value="${p.obs||""}"></td>`;
-    const tdFecha= `<td class="p-1"><input type="date" class="w-full border rounded px-2 py-1" ${!EDIT_MODE?"disabled":""} value="${p.fecha||""}"></td>`;
-    const tdDel  = document.createElement("td"); tdDel.className="p-1 text-center";
-    const delBtn = document.createElement("button");
-    delBtn.className="px-2 py-1 bg-red-100 text-red-700 rounded";
-    delBtn.textContent="✕"; delBtn.disabled=!EDIT_MODE || (STATE.dataByCentro[centroId].procesos.length<=1);
-    delBtn.onclick = ()=>{
-      if(!EDIT_MODE) return;
-      if(STATE.dataByCentro[centroId].procesos.length<=1) return;
-      STATE.dataByCentro[centroId].procesos.splice(i,1);
-      saveLocal(); renderProcedures();
-    };
-    tdDel.appendChild(delBtn);
-
-    tr.innerHTML = drag+idx+tdNom+tdDesc+tdPunt+tdObs+tdFecha;
-    tr.appendChild(tdDel);
-
-    const inputs = tr.querySelectorAll("input");
-    inputs[0].oninput = e=>{ p.nombrePaquete=e.target.value; saveLocal(); };
-    inputs[1].oninput = e=>{ p.descripcion=e.target.value; saveLocal(); };
-    inputs[2].oninput = e=>{ p.puntuacion=e.target.value; saveLocal(); };
-    inputs[3].oninput = e=>{ p.obs=e.target.value; saveLocal(); };
-    inputs[4].oninput = e=>{ p.fecha=e.target.value; saveLocal(); };
-
-    tbP.appendChild(tr);
-  });
-}
-
-function findCentroById(id){
-  for(const s of STATE.sections){
-    for(const sub of s.subs){
-      if(sub.id===id) return sub;
-    }
   }
-  return null;
-}
-function pickCentroColor(n){
-  const arr = [
-    'bg-blue-100 border-blue-400 text-blue-800',
-    'bg-green-100 border-green-400 text-green-800',
-    'bg-purple-100 border-purple-400 text-purple-800',
-    'bg-orange-100 border-orange-400 text-orange-800',
-    'bg-pink-100 border-pink-400 text-pink-800',
-    'bg-indigo-100 border-indigo-400 text-indigo-800',
-    'bg-yellow-100 border-yellow-400 text-yellow-800',
-    'bg-red-100 border-red-400 text-red-800',
-    'bg-teal-100 border-teal-400 text-teal-800',
-    'bg-cyan-100 border-cyan-400 text-cyan-800',
-    'bg-lime-100 border-lime-400 text-lime-800',
-    'bg-rose-100 border-rose-400 text-rose-800'
-  ];
-  return arr[n % arr.length];
-}
 
-/* =========================
-   HANDLERS UI
-========================= */
-document.getElementById("btnEdit").onclick = ()=>{
-  if(!EDIT_MODE){
-    const p = prompt("Introduce PIN:");
-    if(p===PIN){ EDIT_MODE=true; alert("Edición activada."); renderAll(); }
-    else { alert("PIN incorrecto."); }
-  }else{
-    EDIT_MODE=false; alert("Edición desactivada."); renderAll();
-  }
-};
+  // 6) UI mínima: barra flotante + previsualización de estado (puedes quitarlo)
+  const toolbar = document.createElement('div');
+  toolbar.style.position = 'fixed';
+  toolbar.style.right = '1rem';
+  toolbar.style.bottom = '1rem';
+  toolbar.style.zIndex = '2147483647';
+  toolbar.style.background = 'rgba(0,0,0,0.75)';
+  toolbar.style.color = '#fff';
+  toolbar.style.padding = '10px 12px';
+  toolbar.style.borderRadius = '12px';
+  toolbar.style.fontFamily = 'system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, sans-serif';
+  toolbar.style.boxShadow = '0 6px 18px rgba(0,0,0,0.25)';
+  toolbar.innerHTML = `
+    <div style="display:flex; align-items:center; gap:.5rem; flex-wrap:wrap;">
+      <strong>Cloud Sync</strong>
+      <button id="btn-actualizar" style="padding:.4rem .7rem; border:0; border-radius:8px; cursor:pointer;">Actualizar</button>
+      <button id="btn-guardar" style="padding:.4rem .7rem; border:0; border-radius:8px; cursor:pointer;">Guardar</button>
+      <span id="sync-status" style="opacity:.9">⏳ Inicializando…</span>
+      <span id="last-update" style="opacity:.9">—</span>
+    </div>`;
+  document.body.appendChild(toolbar);
 
-document.getElementById("btnBackup").onclick = ()=>{
-  const payload = JSON.stringify(STATE, null, 2);
-  download("data.json", payload);
-};
+  const pre = document.createElement('pre');
+  pre.id = 'estado-previsualizacion';
+  pre.style.position = 'fixed';
+  pre.style.left = '1rem';
+  pre.style.bottom = '1rem';
+  pre.style.maxWidth = '40vw';
+  pre.style.maxHeight = '30vh';
+  pre.style.overflow = 'auto';
+  pre.style.background = 'rgba(255,255,255,0.95)';
+  pre.style.padding = '8px 10px';
+  pre.style.borderRadius = '12px';
+  pre.style.fontSize = '12px';
+  pre.style.boxShadow = '0 6px 18px rgba(0,0,0,0.15)';
+  pre.style.color = '#111';
+  pre.style.whiteSpace = 'pre-wrap';
+  document.body.appendChild(pre);
 
-document.getElementById("btnImport").onclick = ()=> document.getElementById("fileImport").click();
-document.getElementById("fileImport").onchange = (e)=>{
-  const f = e.target.files?.[0];
-  if(!f) return;
-  const fr = new FileReader();
-  fr.onload = ()=>{
-    try{
-      const json = JSON.parse(fr.result);
-      STATE = json; saveLocal(); renderAll();
-      alert("Importado correctamente.");
-    }catch(e){
-      alert("JSON inválido.");
+  const statusEl = document.getElementById('sync-status');
+  const lastEl = document.getElementById('last-update');
+  const setStatus = (t) => statusEl.textContent = t;
+  const setLast = (date) => {
+    if (!date) { lastEl.textContent = '—'; return; }
+    try {
+      const d = date.toDate ? date.toDate() : new Date(date);
+      lastEl.textContent = `Última actualización: ${d.toLocaleString('es-ES')}`;
+    } catch {
+      lastEl.textContent = '—';
     }
   };
-  fr.readAsText(f);
-};
 
-document.getElementById("btnCloudUrl").onclick = setCloudUrl;
-document.getElementById("btnCloudPull").onclick = pullCloud;
+  // 7) Firebase / Firestore
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
 
-document.getElementById("btnAddSection").onclick = ()=>{
-  if(!EDIT_MODE) return;
-  const name = prompt("Nombre de sección:");
-  if(!name) return;
-  STATE.sections.push({ id: "sec"+Date.now(), title: name.trim(), color:"gray", subs: [] });
-  saveLocal(); renderAll();
-};
+  // 8) Derivar docId a partir del PIN hasheado (evita doc predecible)
+  const currentPIN = localStorage.getItem('audioseguimiento_pin') || FIXED_PIN;
+  const docId = await sha256Hex(currentPIN.trim());
+  const docRef = doc(db, 'platformStates', docId);
 
-document.getElementById("btnAddProc").onclick = ()=>{
-  if(!EDIT_MODE) return;
-  const cid = STATE.activeCentro; if(!cid){ alert("Selecciona un centro en ‘Centros Exclusivos’."); return; }
-  const d = STATE.dataByCentro[cid];
-  // Por defecto añadimos una fila a acciones
-  const newId = Math.max(0, ...(d.acciones.map(x=>x.id))) + 1;
-  d.acciones.push({ id:newId, fecha:"", accion:"", derivacion:0, cita:0, obs:"" });
-  saveLocal(); renderProcedures();
-};
+  // 9) Suscripción en tiempo real
+  setStatus('🔄 Conectando…');
+  let initialApplied = false;
+  onSnapshot(docRef, (snap) => {
+    if (snap.exists()) {
+      const data = snap.data();
+      setLast(data.lastUpdated);
+      if (data && data.state) {
+        // Evita que la primera aplicación pise cambios locales no guardados:
+        if (!initialApplied) {
+          window.applyPlatformState(data.state);
+          initialApplied = true;
+        }
+        setStatus('✅ Sincronizado');
+      } else {
+        setStatus('ℹ️ Documento vacío');
+      }
+    } else {
+      setStatus('➕ Aún no hay estado en la nube');
+      setLast(null);
+    }
+  }, (err) => {
+    console.error(err);
+    setStatus('⚠️ Error escuchando cambios');
+  });
 
-/* =========================
-   INICIO
-========================= */
-(function init(){
-  STATE = loadLocal() || JSON.parse(JSON.stringify(DEFAULT_STATE));
-  renderAll();
-})();
+  // 10) Guardar a nube
+  async function saveToCloud() {
+    try {
+      setStatus('💾 Guardando…');
+      const state = await Promise.resolve(window.getPlatformState());
+      await setDoc(docRef, {
+        state,
+        lastUpdated: serverTimestamp(),
+        updatedBy: 'web'
+      }, { merge: true });
+      setStatus('✅ Guardado');
+    } catch (e) {
+      console.error(e);
+      setStatus('❌ Error al guardar');
+      alert('Error guardando en la nube. Revisa la consola.');
+    }
+  }
+
+  // 11) Forzar actualización desde nube
+  async function refreshFromCloud() {
+    try {
+      setStatus('⬇️ Actualizando…');
+      const snap = await getDoc(docRef);
+      if (snap.exists()) {
+        const data = snap.data();
+        setLast(data.lastUpdated);
+        if (data && data.state) {
+          window.applyPlatformState(data.state);
+          setStatus('✅ Actualizado');
+        } else {
+          setStatus('ℹ️ Documento vacío');
+        }
+      } else {
+        setStatus('➕ No existe estado aún');
+        setLast(null);
+      }
+    } catch (e) {
+      console.error(e);
+      setStatus('❌ Error al actualizar');
+      alert('Error actualizando desde la nube.');
+    }
+  }
+
+  // 12) Auto-guardado opcional (descomenta si quieres autosave por cambios)
+  // let saveTimer;
+  // function autoSave() {
+  //   clearTimeout(saveTimer);
+  //   saveTimer = setTimeout(saveToCloud, 800);
+  // }
+  // Ejemplos:
+  // document.querySelector('#notas')?.addEventListener('input', autoSave);
+
+  // 13) Eventos de la barra
+  document.getElementById('btn-guardar').addEventListener('click', saveToCloud);
+  document.getElementById('btn-actualizar').addEventListener('click', refreshFromCloud);
+
+  // 14) (Opcional) Guardar al cerrar/recargar
+  // window.addEventListener('beforeunload', () => { navigator.sendBeacon ? navigator.sendBeacon(...) : saveToCloud(); });
 </script>
-</body>
-</html>
