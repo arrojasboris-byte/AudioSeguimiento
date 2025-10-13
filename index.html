@@ -1,71 +1,62 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>SEGUIMIENTO AUDIO</title>
-  <style>
-    :root{--primary:#d32f2f;--primary2:#b71c1c;--bg:#f7f8fc;--card:#ffffff;--text:#111827;--ring:rgba(211,47,47,.25);color-scheme:light dark}
-    *{box-sizing:border-box} html,body{margin:0}
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,sans-serif;background:var(--bg);color:var(--text);line-height:1.35}
-
-    /* ===== CABECERA ===== */
-    header{position:sticky;top:0;z-index:50;background:linear-gradient(90deg,var(--primary2),var(--primary));
-      color:#fff;padding:10px 14px;box-shadow:0 10px 24px rgba(0,0,0,.28)}
-    .bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-    .title{font-weight:900;letter-spacing:.3px;font-size:1.05rem;margin-right:6px}
-    .btn{display:inline-flex;align-items:center;gap:.5rem;cursor:pointer;border:0;border-radius:999px;padding:8px 12px;
-      font-weight:800;background:#fff;color:var(--primary2);box-shadow:0 8px 18px rgba(0,0,0,.28)}
-    .btn.secondary{background:#f7f7f9;color:#1f2937} .btn.small{padding:6px 10px}
-    .chip{display:inline-flex;align-items:center;gap:.5rem;background:#ffffff22;padding:8px 12px;border-radius:999px;font-weight:700}
-    .status{font-weight:800}.last{opacity:.92}
-    .search{min-width:260px;border:0;outline:none;border-radius:999px;padding:9px 12px;background:#ffffff;color:#1f2937}
-    .logo{height:36px;width:auto;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.25)} .hidden{display:none}
-
-    /* ===== LAYOUT ===== */
-    .layout{display:grid;grid-template-columns:340px 1fr;gap:18px;max-width:1300px;margin:18px auto;padding:0 16px}
-    aside{background:var(--card);border-radius:16px;box-shadow:0 14px 34px rgba(30,41,59,.08);padding:12px}
-    main{display:grid;gap:16px}
-    .card{background:var(--card);border-radius:16px;box-shadow:0 14px 34px rgba(30,41,59,.08);padding:16px}
-    .card h2{margin:0 0 10px;font-size:1.05rem}
-    .muted{opacity:.7;font-size:.9rem}
-
-    /* ===== SECCIONES LATERALES ===== */
-    .sec{border:1px solid #00000012;border-radius:12px;margin:10px 0;overflow:hidden}
-    .sec header{all:unset;display:flex;align-items:center;justify-content:space-between;background:#f3f4f6;color:#111;padding:10px 12px;font-weight:800}
-    .sec header button{border:0;background:#fff;color:#1f2937;border-radius:8px;padding:6px 10px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.12)}
-    .sec .list{padding:8px 8px 10px;max-height:340px;overflow:auto}
-    .item{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:8px;border-radius:10px;cursor:pointer}
-    .item:hover{background:#f5f6fb} .item.active{background:#e9ecff}
-    .actions{display:flex;gap:6px} .iconbtn{border:0;background:#fff;border-radius:8px;padding:5px 8px;cursor:pointer;box-shadow:0 3px 9px rgba(0,0,0,.12)}
-
-    /* ===== FORM ===== */
-    label{display:block;font-size:.92rem;margin-bottom:6px}
-    input[type="text"],select,textarea,input[type="number"],input[type="date"]{
-      width:100%;border:1px solid #0000001f;border-radius:12px;padding:10px 12px;font:inherit;background:#fff;outline:none}
-    input:focus,select:focus,textarea:focus{border-color:var(--primary);box-shadow:0 0 0 4px var(--ring)}
-    textarea{min-height:110px;resize:vertical} input[type="checkbox"],input[type="radio"]{accent-color:#d32f2f}
-    .row{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
-    .col-6{grid-column:span 6}.col-4{grid-column:span 4}.col-3{grid-column:span 3}
-
-    /* ===== Tabla Excel ===== */
-    .table{width:100%;border-collapse:collapse;border-radius:12px;overflow:hidden}
-    .table th,.table td{border:1px solid #e5e7eb;padding:8px 10px;text-align:left;background:#fff}
-    .table th{background:#f3f4f6}
-    .table input{width:100%;border:0;outline:none;background:transparent;padding:6px}
-    .tbar{display:flex;justify-content:space-between;align-items:center;margin:6px 0 10px}
-    .tbar .addrow{border:0;background:#fff;border-radius:10px;padding:6px 10px;cursor:pointer;box-shadow:0 3px 9px rgba(0,0,0,.12)}
-
-    .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:20px;background:#111;color:#fff;padding:10px 14px;border-radius:12px;box-shadow:0 14px 30px rgba(0,0,0,.25);z-index:9999;opacity:.98}
-
-    @media (prefers-color-scheme:dark){:root{--bg:#0e1116;--card:#171a21;--text:#e5e7eb}
-      aside,.card{box-shadow:0 14px 34px rgba(0,0,0,.25)} .sec header{background:#111827;color:#e5e7eb}
-      .item:hover{background:#1f2430}.item.active{background:#1b2b57}
-      input,select,textarea{background:#0f1217;color:#e5e7eb;border-color:#ffffff26}
-      .search{background:#ffffffcc} .btn{background:#ffe2e2;color:#7f1212}.btn.secondary{background:#f0f0f0;color:#1f2937}
-      .table th,.table td{border-color:#2b2f3a;background:#0f1217}.table th{background:#161a22}
-    }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>SEGUIMIENTO AUDIO</title>
+<style>
+  :root{--primary:#d32f2f;--primary2:#b71c1c;--bg:#f7f8fc;--card:#fff;--text:#111827;--ring:rgba(211,47,47,.25);color-scheme:light dark}
+  *{box-sizing:border-box} html,body{margin:0}
+  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,sans-serif;background:var(--bg);color:var(--text)}
+  /* CABECERA */
+  header{position:sticky;top:0;z-index:50;background:linear-gradient(90deg,var(--primary2),var(--primary));color:#fff;padding:10px 14px;box-shadow:0 10px 24px rgba(0,0,0,.28)}
+  .bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .title{font-weight:900;letter-spacing:.3px;font-size:1.05rem;margin-right:6px}
+  .btn{display:inline-flex;align-items:center;gap:.5rem;cursor:pointer;border:0;border-radius:999px;padding:8px 12px;font-weight:800;background:#fff;color:var(--primary2);box-shadow:0 8px 18px rgba(0,0,0,.28)}
+  .btn.secondary{background:#f7f7f9;color:#1f2937} .btn.small{padding:6px 10px}
+  .chip{display:inline-flex;align-items:center;gap:.5rem;background:#ffffff22;padding:8px 12px;border-radius:999px;font-weight:700}
+  .status{font-weight:800}.last{opacity:.92}
+  .search{min-width:260px;border:0;outline:none;border-radius:999px;padding:9px 12px;background:#fff;color:#1f2937}
+  .logo{height:36px;width:auto;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.25)} .hidden{display:none}
+  /* LAYOUT */
+  .layout{display:grid;grid-template-columns:340px 1fr;gap:18px;max-width:1300px;margin:18px auto;padding:0 16px}
+  aside{background:var(--card);border-radius:16px;box-shadow:0 14px 34px rgba(30,41,59,.08);padding:12px}
+  main{display:grid;gap:16px}
+  .card{background:var(--card);border-radius:16px;box-shadow:0 14px 34px rgba(30,41,59,.08);padding:16px}
+  .card h2{margin:0 0 10px;font-size:1.05rem}
+  .muted{opacity:.7;font-size:.9rem}
+  /* SECCIONES */
+  .sec{border:1px solid #00000012;border-radius:12px;margin:10px 0;overflow:hidden}
+  .sec header{all:unset;display:flex;align-items:center;justify-content:space-between;background:#f3f4f6;color:#111;padding:10px 12px;font-weight:800}
+  .sec header button{border:0;background:#fff;color:#1f2937;border-radius:8px;padding:6px 10px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.12)}
+  .sec .list{padding:8px 8px 10px;max-height:340px;overflow:auto}
+  .item{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:8px;border-radius:10px;cursor:pointer}
+  .item:hover{background:#f5f6fb} .item.active{background:#e9ecff}
+  .actions{display:flex;gap:6px} .iconbtn{border:0;background:#fff;border-radius:8px;padding:5px 8px;cursor:pointer;box-shadow:0 3px 9px rgba(0,0,0,.12)}
+  /* FORM */
+  label{display:block;font-size:.92rem;margin-bottom:6px}
+  input[type="text"],select,textarea,input[type="number"],input[type="date"]{width:100%;border:1px solid #0001;border-radius:12px;padding:10px 12px;font:inherit;background:#fff;outline:none}
+  input:focus,select:focus,textarea:focus{border-color:var(--primary);box-shadow:0 0 0 4px var(--ring)}
+  textarea{min-height:110px;resize:vertical} input[type="checkbox"],input[type="radio"]{accent-color:#d32f2f}
+  .row{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
+  .col-6{grid-column:span 6}.col-4{grid-column:span 4}.col-3{grid-column:span 3}
+  /* TABLA */
+  .table{width:100%;border-collapse:collapse;border-radius:12px;overflow:hidden}
+  .table th,.table td{border:1px solid #e5e7eb;padding:8px 10px;text-align:left;background:#fff}
+  .table th{background:#f3f4f6}
+  .table input{width:100%;border:0;outline:none;background:transparent;padding:6px}
+  .tbar{display:flex;justify-content:space-between;align-items:center;margin:6px 0 10px}
+  .tbar .addrow{border:0;background:#fff;border-radius:10px;padding:6px 10px;cursor:pointer;box-shadow:0 3px 9px rgba(0,0,0,.12)}
+  .saveStrip{display:flex;gap:10px;align-items:center;justify-content:flex-end;margin-top:12px}
+  .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:20px;background:#111;color:#fff;padding:10px 14px;border-radius:12px;box-shadow:0 14px 30px rgba(0,0,0,.25);z-index:9999;opacity:.98}
+  @media (prefers-color-scheme:dark){:root{--bg:#0e1116;--card:#171a21;--text:#e5e7eb}
+    aside,.card{box-shadow:0 14px 34px rgba(0,0,0,.25)} .sec header{background:#111827;color:#e5e7eb}
+    .item:hover{background:#1f2430}.item.active{background:#1b2b57}
+    input,select,textarea{background:#0f1217;color:#e5e7eb;border-color:#ffffff26}
+    .search{background:#ffffffcc} .btn{background:#ffe2e2;color:#7f1212}.btn.secondary{background:#f0f0f0;color:#1f2937}
+    .table th,.table td{border-color:#2b2f3a;background:#0f1217}.table th{background:#161a22}
+  }
+</style>
 </head>
 <body>
   <header>
@@ -75,6 +66,8 @@
       <input id="logoInput" type="file" accept="image/*" class="hidden" />
       <img id="logoPreview" class="logo hidden" alt="Logo" />
       <input id="search" class="search" type="search" placeholder="Buscar: secciones / centros / delegados / audiólogos…" />
+      <!-- chip de contexto (sección + nombre) -->
+      <span class="chip" id="contextChip" title="Elemento activo">—</span>
       <span class="chip status" id="status">⏳</span>
       <span class="chip last" id="last">—</span>
       <span class="chip">🔒 <strong id="editState">Bloqueado</strong></span>
@@ -85,6 +78,7 @@
   </header>
 
   <div class="layout">
+    <!-- LADO IZQUIERDO -->
     <aside>
       <section class="sec" data-sec="exclusivos">
         <header><div>🏥 <strong>CENTROS EXCLUSIVOS</strong> <span class="muted">(máx. 10)</span></div>
@@ -108,10 +102,16 @@
       </section>
     </aside>
 
+    <!-- DETALLE -->
     <main>
       <section class="card">
         <h2 id="detail-title">Detalle</h2>
         <div id="detail-form"><p class="muted">Selecciona un item a la izquierda o crea uno con ＋.</p></div>
+        <!-- tira de acciones dentro del panel derecho -->
+        <div class="saveStrip">
+          <span class="muted" id="dirtyHint">—</span>
+          <button class="btn" id="btnSaveDetail">💾 Guardar cambios</button>
+        </div>
       </section>
 
       <section class="card">
@@ -121,231 +121,243 @@
     </main>
   </div>
 
-  <script type="module">
-    /* ===== CONFIG ===== */
-    const PIN = "AR4321"; // se pedirá para editar
-    const ENDPOINT = new URLSearchParams(location.search).get("endpoint")
-      || "https://script.google.com/macros/s/AKfycby5vh1Ja0XllWFB98ypWmDcUfUItwEciVimUd5L6Esi1wfPJbcc2dap6G0lciRf51VR/exec";
+<script type="module">
+/* ===== CONFIG ===== */
+const PIN = "AR4321"; // para editar
+const ENDPOINT = new URLSearchParams(location.search).get("endpoint")
+  || "https://script.google.com/macros/s/AKfycby5vh1Ja0XllWFB98ypWmDcUfUItwEciVimUd5L6Esi1wfPJbcc2dap6G0lciRf51VR/exec";
 
-    /* ===== ESTADO ===== */
-    let canEdit = false;
-    let state = { logoDataUrl:"", exclusivos:[], flop:[], visitas:[], formaciones:[] };
-    let selected = { section:null, id:null };
+/* ===== ESTADO ===== */
+let canEdit=false;
+let state={logoDataUrl:"",exclusivos:[],flop:[],visitas:[],formaciones:[]};
+let selected={section:null,id:null};
+let dirty=false;
 
-    /* ===== HELPERS ===== */
-    const $ = s => document.querySelector(s);
-    const $$ = s => [...document.querySelectorAll(s)];
-    const statusEl=$("#status"), lastEl=$("#last"), editLbl=$("#editState"), prevEl=$("#preview");
-    const detailTitle=$("#detail-title"), detailForm=$("#detail-form");
-    const lists={exclusivos:$("#list-exclusivos"), flop:$("#list-flop"), visitas:$("#list-visitas"), formaciones:$("#list-formaciones")};
-    const setStatus=t=>statusEl.textContent=t; const setLast=t=>lastEl.textContent=t?`Actualizado: ${t}`:"—";
-    const toast=m=>{const t=document.createElement("div");t.className="toast";t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),1800);};
-    const uid=()=>Math.random().toString(36).slice(2,10);
-    const updatePreview=()=>{ prevEl.textContent = JSON.stringify(state,null,2); };
+/* ===== HELPERS ===== */
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const statusEl=$("#status"), lastEl=$("#last"), editLbl=$("#editState"), prevEl=$("#preview");
+const detailTitle=$("#detail-title"), detailForm=$("#detail-form"), contextChip=$("#contextChip"), dirtyHint=$("#dirtyHint");
+const lists={exclusivos:$("#list-exclusivos"), flop:$("#list-flop"), visitas:$("#list-visitas"), formaciones:$("#list-formaciones")};
+const setStatus=t=>statusEl.textContent=t, setLast=t=>lastEl.textContent=t?`Actualizado: ${t}`:"—";
+const toast=m=>{const t=document.createElement("div");t.className="toast";t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),1800);};
+const uid=()=>Math.random().toString(36).slice(2,10);
+const updatePreview=()=>{prevEl.textContent=JSON.stringify(state,null,2)};
+const setDirty=(v)=>{dirty=v; dirtyHint.textContent = v? "• Tienes cambios sin guardar" : "—";};
 
-    /* ===== RENDER LISTAS ===== */
-    function renderLists(filter=""){
-      ["exclusivos","flop","visitas","formaciones"].forEach(sec=>{
-        const ul=lists[sec]; ul.innerHTML="";
-        (state[sec]||[]).filter(it=>JSON.stringify(it).toLowerCase().includes(filter.toLowerCase()))
-          .forEach(it=>{
-            const div=document.createElement("div");
-            div.className="item"+(selected.section===sec&&selected.id===it.id?" active":"");
-            const label = sec==="visitas" ? (it.responsable||"(Responsable)")
-                        : sec==="formaciones" ? (it.titulo||"(Formación)")
-                        : (it.nombre||"(Centro)");
-            div.innerHTML = `<span>${label}</span>
-              <span class="actions">
-                <button class="iconbtn edit" title="Editar">✏️</button>
-                <button class="iconbtn del" title="Eliminar">🗑️</button>
-              </span>`;
-            div.addEventListener("click", e=>{
-              if(!(e.target.classList.contains("edit")||e.target.classList.contains("del"))){
-                selected={section:sec,id:it.id}; renderLists(filter); renderDetail();
-              }
-            });
-            div.querySelector(".edit").onclick=()=>{ selected={section:sec,id:it.id}; renderDetail(); };
-            div.querySelector(".del").onclick=()=>{ if(!canEdit)return toast("Bloqueado. Pulsa Editar (PIN).");
-              if(confirm("¿Eliminar este elemento?")){ state[sec]=state[sec].filter(x=>x.id!==it.id); selected={section:null,id:null}; renderLists($("#search").value); renderDetail(); updatePreview(); }
-            };
-            ul.appendChild(div);
-          });
+/* ===== BUSCADOR ===== */
+$("#search").addEventListener("input",e=>renderLists(e.target.value));
+
+/* ===== LISTAS ===== */
+function renderLists(filter=""){
+  ["exclusivos","flop","visitas","formaciones"].forEach(sec=>{
+    const ul=lists[sec]; ul.innerHTML="";
+    (state[sec]||[]).filter(it=>JSON.stringify(it).toLowerCase().includes(filter.toLowerCase()))
+    .forEach(it=>{
+      const div=document.createElement("div");
+      div.className="item"+(selected.section===sec&&selected.id===it.id?" active":"");
+      const label = sec==="visitas"? (it.responsable||"(Responsable)")
+                  : sec==="formaciones"? (it.titulo||"(Formación)")
+                  : (it.nombre||"(Centro)");
+      div.innerHTML=`<span>${label}</span>
+        <span class="actions">
+          <button class="iconbtn edit" title="Editar">✏️</button>
+          <button class="iconbtn del" title="Eliminar">🗑️</button>
+        </span>`;
+      div.addEventListener("click",e=>{
+        if(!(e.target.classList.contains("edit")||e.target.classList.contains("del"))){
+          selected={section:sec,id:it.id}; renderLists(filter); renderDetail();
+        }
       });
+      div.querySelector(".edit").onclick=()=>{selected={section:sec,id:it.id}; renderDetail();};
+      div.querySelector(".del").onclick=()=>{ if(!canEdit) return toast("Bloqueado. Pulsa Editar (PIN).");
+        if(confirm("¿Eliminar este elemento?")){ state[sec]=state[sec].filter(x=>x.id!==it.id); selected={section:null,id:null}; renderLists($("#search").value); renderDetail(); setDirty(true); updatePreview(); }
+      };
+      ul.appendChild(div);
+    });
+  });
+  updatePreview();
+}
+
+/* ===== CONTEXTO EN CABECERA ===== */
+function setContextChip(){
+  if(!selected.section){ contextChip.textContent="—"; return; }
+  const it=(state[selected.section]||[]).find(x=>x.id===selected.id);
+  const nombre = selected.section==="visitas" ? (it?.responsable||"—")
+                : selected.section==="formaciones" ? (it?.titulo||"—")
+                : (it?.nombre||"—");
+  const titulo = selected.section==="exclusivos" ? "Centro EXCLUSIVO"
+               : selected.section==="flop" ? "Centro FLOP"
+               : selected.section==="visitas" ? "Visita AUDIO"
+               : "Formación";
+  contextChip.textContent = `${titulo}: ${nombre}`;
+}
+
+/* ===== DETALLE ===== */
+function renderDetail(){
+  setContextChip();
+  const {section,id}=selected;
+  if(!section){ detailTitle.textContent="Detalle"; detailForm.innerHTML='<p class="muted">Selecciona un item o créalo con ＋.</p>'; return; }
+  const arr=state[section]; const it=arr.find(x=>x.id===id); if(!it) return;
+  detailTitle.textContent = section==="exclusivos"?"Centro EXCLUSIVO"
+    : section==="flop"?"Centro FLOP"
+    : section==="visitas"?"Visita de AUDIO":"Formación / Mentoring";
+
+  if(section==="exclusivos"||section==="flop"){
+    if(!it.historial) it.historial=[];
+    detailForm.innerHTML=`
+      <div class="row">
+        <div class="col-6"><label>Nombre</label><input id="f_nombre" type="text" placeholder="Nombre del centro" value="${it.nombre||""}" ${!canEdit?"disabled":""}></div>
+        <div class="col-6"><label>Delegado</label><input id="f_delegado" type="text" placeholder="Persona delegada" value="${it.delegado||""}" ${!canEdit?"disabled":""}></div>
+        <div class="col-6"><label>Audiólogo</label><input id="f_audiologo" type="text" placeholder="Audiólogo/a" value="${it.audiologo||""}" ${!canEdit?"disabled":""}></div>
+        <div class="col-6"><label>Tipo</label>
+          <select id="f_tipo" ${!canEdit?"disabled":""}>
+            <option value="">—</option>
+            <option value="sucursal" ${it.tipo==="sucursal"?"selected":""}>Sucursal</option>
+            <option value="franquicia" ${it.tipo==="franquicia"?"selected":""}>Franquicia</option>
+          </select>
+        </div>
+      </div>
+      <div class="tbar">
+        <h3 style="margin:12px 0 6px">Historial (tipo Excel)</h3>
+        <button class="addrow" id="addRow">＋ Añadir fila</button>
+      </div>
+      <div style="overflow:auto">
+        <table class="table" id="excel">
+          <thead><tr>
+            <th>Fecha</th><th>Acción</th><th>Derivación</th>
+            <th>Citas</th><th>Ventas</th><th>% Conversión (ventas/citas)</th><th></th>
+          </tr></thead><tbody></tbody>
+        </table>
+      </div>`;
+    // Bind cambios
+    if(canEdit){
+      $("#f_nombre").oninput=()=>{it.nombre=$("#f_nombre").value; renderLists($("#search").value); setDirty(true); updatePreview();};
+      $("#f_delegado").oninput=()=>{it.delegado=$("#f_delegado").value; renderLists($("#search").value); setDirty(true); updatePreview();};
+      $("#f_audiologo").oninput=()=>{it.audiologo=$("#f_audiologo").value; setDirty(true); updatePreview();};
+      $("#f_tipo").onchange =()=>{it.tipo=$("#f_tipo").value; setDirty(true); updatePreview();};
+    }
+    // Tabla
+    const tb=detailForm.querySelector("#excel tbody");
+    function rowHTML(r,i){
+      const conv=(Number(r.citas)||0)?(((Number(r.ventas)||0)/(Number(r.citas)||1))*100).toFixed(1):"0.0";
+      return `<tr data-i="${i}">
+        <td><input type="date" value="${r.fecha||""}" ${!canEdit?"disabled":""}></td>
+        <td><input type="text" placeholder="Llamada / Taller / Visita…" value="${r.accion||""}" ${!canEdit?"disabled":""}></td>
+        <td><input type="text" placeholder="Hospital / Proveedor…" value="${r.derivacion||""}" ${!canEdit?"disabled":""}></td>
+        <td><input type="number" min="0" value="${r.citas??""}" ${!canEdit?"disabled":""}></td>
+        <td><input type="number" min="0" value="${r.ventas??""}" ${!canEdit?"disabled":""}></td>
+        <td><input type="text" disabled value="${conv}%"></td>
+        <td><button class="iconbtn delrow" ${!canEdit?"disabled":""}>🗑️</button></td>
+      </tr>`;
+    }
+    function renderRows(){
+      tb.innerHTML = it.historial.map((r,i)=>rowHTML(r,i)).join("") || `<tr><td colspan="7" class="muted">Sin filas</td></tr>`;
+      if(canEdit){
+        tb.querySelectorAll("tr").forEach(tr=>{
+          const i=+tr.dataset.i; const ins=[...tr.querySelectorAll("input")];
+          ins[0].oninput=()=>{it.historial[i].fecha=ins[0].value; updateConv(i); setDirty(true);};
+          ins[1].oninput=()=>{it.historial[i].accion=ins[1].value; setDirty(true); updatePreview();};
+          ins[2].oninput=()=>{it.historial[i].derivacion=ins[2].value; setDirty(true); updatePreview();};
+          ins[3].oninput=()=>{it.historial[i].citas=+ins[3].value||0; updateConv(i); setDirty(true);};
+          ins[4].oninput=()=>{it.historial[i].ventas=+ins[4].value||0; updateConv(i); setDirty(true);};
+          tr.querySelector(".delrow").onclick=()=>{ it.historial.splice(i,1); renderRows(); setDirty(true); updatePreview(); };
+        });
+      }
+    }
+    function updateConv(i){
+      const r=it.historial[i]; const conv=(r.citas?(r.ventas||0)/r.citas*100:0).toFixed(1);
+      const row=tb.querySelector(`tr[data-i="${i}"]`); if(row) row.querySelectorAll("input")[5].value=conv+"%";
       updatePreview();
     }
+    renderRows();
+    $("#addRow").onclick=()=>{ if(!canEdit) return toast("Bloqueado. Pulsa Editar (PIN).");
+      it.historial.push({fecha:"",accion:"",derivacion:"",citas:0,ventas:0}); renderRows(); setDirty(true); updatePreview();
+    };
 
-    /* ===== DETALLE (editable + tabla excel) ===== */
-    function renderDetail(){
-      const {section,id}=selected;
-      if(!section){ detailTitle.textContent="Detalle"; detailForm.innerHTML='<p class="muted">Selecciona un item o créalo con ＋.</p>'; return; }
-      const arr=state[section]; const it=arr.find(x=>x.id===id); if(!it) return;
-      detailTitle.textContent = section==="exclusivos"?"Centro EXCLUSIVO"
-        : section==="flop"?"Centro FLOP"
-        : section==="visitas"?"Visita de AUDIO":"Formación / Mentoring";
-
-      if(section==="exclusivos"||section==="flop"){
-        if(!it.historial) it.historial=[];
-        detailForm.innerHTML=`
-          <div class="row">
-            <div class="col-6"><label>Nombre</label><input id="f_nombre" type="text" value="${it.nombre||""}" ${!canEdit?"disabled":""}></div>
-            <div class="col-6"><label>Delegado</label><input id="f_delegado" type="text" value="${it.delegado||""}" ${!canEdit?"disabled":""}></div>
-            <div class="col-6"><label>Audiólogo</label><input id="f_audiologo" type="text" value="${it.audiologo||""}" ${!canEdit?"disabled":""}></div>
-            <div class="col-6"><label>Tipo</label>
-              <select id="f_tipo" ${!canEdit?"disabled":""}>
-                <option value="">—</option>
-                <option value="sucursal" ${it.tipo==="sucursal"?"selected":""}>Sucursal</option>
-                <option value="franquicia" ${it.tipo==="franquicia"?"selected":""}>Franquicia</option>
-              </select>
-            </div>
-          </div>
-          <div class="tbar">
-            <h3 style="margin:12px 0 6px">Historial (tipo Excel)</h3>
-            <button class="addrow" id="addRow">＋ Añadir fila</button>
-          </div>
-          <div style="overflow:auto">
-            <table class="table" id="excel">
-              <thead><tr>
-                <th>Fecha</th><th>Acción</th><th>Derivación</th>
-                <th>Citas</th><th>Ventas</th><th>% Conversión (ventas/citas)</th><th></th>
-              </tr></thead><tbody></tbody>
-            </table>
-          </div>`;
-        const bind=()=>{ if(!canEdit)return;
-          $("#f_nombre").oninput=()=>{it.nombre=$("#f_nombre").value; renderLists($("#search").value); updatePreview();};
-          $("#f_delegado").oninput=()=>{it.delegado=$("#f_delegado").value; renderLists($("#search").value); updatePreview();};
-          $("#f_audiologo").oninput=()=>{it.audiologo=$("#f_audiologo").value; updatePreview();};
-          $("#f_tipo").onchange=()=>{it.tipo=$("#f_tipo").value; updatePreview();};
-        }; bind();
-
-        const tb=detailForm.querySelector("#excel tbody");
-        function rowHTML(r,i){
-          const conv=(Number(r.citas)||0)?(((Number(r.ventas)||0)/(Number(r.citas)||1))*100).toFixed(1):"0.0";
-          return `<tr data-i="${i}">
-            <td><input type="date" value="${r.fecha||""}" ${!canEdit?"disabled":""}></td>
-            <td><input type="text" value="${r.accion||""}" ${!canEdit?"disabled":""}></td>
-            <td><input type="text" value="${r.derivacion||""}" ${!canEdit?"disabled":""}></td>
-            <td><input type="number" min="0" value="${r.citas??""}" ${!canEdit?"disabled":""}></td>
-            <td><input type="number" min="0" value="${r.ventas??""}" ${!canEdit?"disabled":""}></td>
-            <td><input type="text" disabled value="${conv}%"></td>
-            <td><button class="iconbtn delrow" ${!canEdit?"disabled":""}>🗑️</button></td>
-          </tr>`;
-        }
-        function renderRows(){
-          tb.innerHTML= it.historial.map((r,i)=>rowHTML(r,i)).join("") || `<tr><td colspan="7" class="muted">Sin filas</td></tr>`;
-          if(canEdit){
-            tb.querySelectorAll("tr").forEach(tr=>{
-              const i=+tr.dataset.i; const ins=[...tr.querySelectorAll("input")];
-              ins[0].oninput=()=>{it.historial[i].fecha=ins[0].value; updateConv(i);};
-              ins[1].oninput=()=>{it.historial[i].accion=ins[1].value; updatePreview();};
-              ins[2].oninput=()=>{it.historial[i].derivacion=ins[2].value; updatePreview();};
-              ins[3].oninput=()=>{it.historial[i].citas=+ins[3].value||0; updateConv(i);};
-              ins[4].oninput=()=>{it.historial[i].ventas=+ins[4].value||0; updateConv(i);};
-              tr.querySelector(".delrow").onclick=()=>{ it.historial.splice(i,1); renderRows(); updatePreview(); };
-            });
-          }
-        }
-        function updateConv(i){
-          const r=it.historial[i]; const conv=(r.citas? (r.ventas||0)/r.citas*100 : 0).toFixed(1);
-          const row=tb.querySelector(`tr[data-i="${i}"]`); if(row) row.querySelectorAll("input")[5].value=conv+"%";
-          updatePreview();
-        }
-        renderRows();
-        $("#addRow").onclick=()=>{ if(!canEdit)return toast("Bloqueado. Pulsa Editar (PIN)."); it.historial.push({fecha:"",accion:"",derivacion:"",citas:0,ventas:0}); renderRows(); updatePreview(); };
-
-      } else if(section==="visitas"){
-        detailForm.innerHTML=`<div class="row"><div class="col-6"><label>Responsable</label><input id="f_responsable" type="text" value="${it.responsable||""}" ${!canEdit?"disabled":""}></div></div>`;
-        if(canEdit) $("#f_responsable").oninput=()=>{it.responsable=$("#f_responsable").value; renderLists($("#search").value); updatePreview();};
-      } else {
-        detailForm.innerHTML=`<div class="row">
-          <div class="col-6"><label>Título</label><input id="f_titulo" type="text" value="${it.titulo||""}" ${!canEdit?"disabled":""}></div>
-          <div class="col-3"><label>Mentor</label><input id="f_mentor" type="text" value="${it.mentor||""}" ${!canEdit?"disabled":""}></div>
-          <div class="col-3"><label>Fecha</label><input id="f_fecha" type="date" value="${it.fecha||""}" ${!canEdit?"disabled":""}></div>
-        </div>`;
-        if(canEdit){ $("#f_titulo").oninput=()=>{it.titulo=$("#f_titulo").value; renderLists($("#search").value); updatePreview();};
-          $("#f_mentor").oninput=()=>{it.mentor=$("#f_mentor").value; updatePreview();};
-          $("#f_fecha").oninput=()=>{it.fecha=$("#f_fecha").value; updatePreview();}; }
-      }
+  } else if(section==="visitas"){
+    detailForm.innerHTML=`<div class="row"><div class="col-6"><label>Responsable</label><input id="f_responsable" type="text" placeholder="Nombre" value="${it.responsable||""}" ${!canEdit?"disabled":""}></div></div>`;
+    if(canEdit) $("#f_responsable").oninput=()=>{it.responsable=$("#f_responsable").value; renderLists($("#search").value); setDirty(true); updatePreview();};
+  } else {
+    detailForm.innerHTML=`<div class="row">
+      <div class="col-6"><label>Título</label><input id="f_titulo" type="text" placeholder="Tema / curso" value="${it.titulo||""}" ${!canEdit?"disabled":""}></div>
+      <div class="col-3"><label>Mentor</label><input id="f_mentor" type="text" placeholder="Formador" value="${it.mentor||""}" ${!canEdit?"disabled":""}></div>
+      <div class="col-3"><label>Fecha</label><input id="f_fecha" type="date" value="${it.fecha||""}" ${!canEdit?"disabled":""}></div>
+    </div>`;
+    if(canEdit){
+      $("#f_titulo").oninput=()=>{it.titulo=$("#f_titulo").value; renderLists($("#search").value); setDirty(true); updatePreview();};
+      $("#f_mentor").oninput=()=>{it.mentor=$("#f_mentor").value; setDirty(true); updatePreview();};
+      $("#f_fecha").oninput=()=>{it.fecha=$("#f_fecha").value; setDirty(true); updatePreview();};
     }
+  }
+}
 
-    /* ===== AÑADIR ===== */
-    function addItem(section){
-      if(section==="exclusivos" && state.exclusivos.length>=10){ toast("Máx. 10 exclusivos"); return; }
-      const obj = section==="visitas" ? {id:uid(), responsable:""}
-        : section==="formaciones" ? {id:uid(), titulo:"", mentor:"", fecha:""}
-        : {id:uid(), nombre:"", delegado:"", audiologo:"", tipo:"", historial:[]};
-      state[section].push(obj); selected={section,id:obj.id}; renderLists($("#search").value); renderDetail();
-    }
+/* ===== AÑADIR ELEMENTO ===== */
+function addItem(section){
+  if(section==="exclusivos" && state.exclusivos.length>=10){ toast("Máx. 10 exclusivos"); return; }
+  const obj = section==="visitas" ? {id:uid(), responsable:""}
+    : section==="formaciones" ? {id:uid(), titulo:"", mentor:"", fecha:""}
+    : {id:uid(), nombre:"", delegado:"", audiologo:"", tipo:"", historial:[]};
+  state[section].push(obj);
+  selected={section,id:obj.id}; renderLists($("#search").value); renderDetail(); setDirty(true);
+}
 
-    /* ===== LOGO ===== */
-    const logoInput=$("#logoInput"), logoPreview=$("#logoPreview");
-    logoInput.onchange=()=>{const f=logoInput.files?.[0]; if(!f)return; const r=new FileReader(); r.onload=()=>{state.logoDataUrl=String(r.result||""); logoPreview.src=state.logoDataUrl; logoPreview.classList.remove("hidden"); updatePreview();}; r.readAsDataURL(f);};
+/* ===== LOGO ===== */
+const logoInput=$("#logoInput"), logoPreview=$("#logoPreview");
+logoInput.onchange=()=>{const f=logoInput.files?.[0]; if(!f)return; const r=new FileReader(); r.onload=()=>{state.logoDataUrl=String(r.result||""); logoPreview.src=state.logoDataUrl; logoPreview.classList.remove("hidden"); setDirty(true); updatePreview();}; r.readAsDataURL(f);};
 
-    /* ===== CONTROLES ===== */
-    $$(".toggle").forEach(b=>b.onclick=()=>{const k=b.dataset.toggle; const l=lists[k]; const open=!l.classList.contains("hidden"); if(open){l.classList.add("hidden");b.textContent="►";}else{l.classList.remove("hidden");b.textContent="▼";}});
-    $$(".add").forEach(b=>b.onclick=()=>{ if(!canEdit) return toast("Bloqueado. Pulsa Editar (PIN)."); addItem(b.dataset.add); });
-    $("#search").oninput=e=>renderLists(e.target.value);
+/* ===== CONTROLES LATERALES ===== */
+$$(".toggle").forEach(b=>b.onclick=()=>{const k=b.dataset.toggle; const l=lists[k]; const open=!l.classList.contains("hidden"); if(open){l.classList.add("hidden");b.textContent="►";}else{l.classList.remove("hidden");b.textContent="▼";}});
+$$(".add").forEach(b=>b.onclick=()=>{ if(!canEdit) return toast("Bloqueado. Pulsa Editar (PIN)."); addItem(b.dataset.add); });
 
-    function setEdit(on){ canEdit=!!on; editLbl.textContent=canEdit?"Editando":"Bloqueado"; renderDetail(); }
-    $("#btnEdit").onclick=()=>{ if(canEdit){ setEdit(false); return; } const p=prompt("Introduce PIN para editar:"); if(p===PIN){ setEdit(true); toast("Edición desbloqueada"); } else alert("PIN incorrecto."); };
+/* ===== EDITAR POR PIN ===== */
+function setEdit(on){ canEdit=!!on; editLbl.textContent=canEdit?"Editando":"Bloqueado"; renderDetail(); }
+$("#btnEdit").onclick=()=>{ if(canEdit){ setEdit(false); return; } const p=prompt("Introduce PIN para editar:"); if(p===PIN){ setEdit(true); toast("Edición desbloqueada"); } else alert("PIN incorrecto."); };
 
-    /* ===== NUBE: 3 INTENTOS (JSON -> text/plain -> no-cors) ===== */
-    async function tryPost(contentType, mode){
-      const body = JSON.stringify({action:"save", pin:PIN, state});
-      const res = await fetch(ENDPOINT, { method:"POST", headers:{ "Content-Type":contentType }, body, ...(mode?{mode}:{} ) });
-      return res;
-    }
+/* ===== GUARDAR / CARGAR (con fallback CORS) ===== */
+async function tryPost(contentType, mode){
+  const body=JSON.stringify({action:"save",pin:PIN,state});
+  const res=await fetch(ENDPOINT,{method:"POST",headers:{"Content-Type":contentType},body,...(mode?{mode}:{})});
+  return res;
+}
+async function saveToCloud(){
+  try{
+    if(!canEdit){ toast("Bloqueado. Pulsa Editar (PIN)."); return; }
+    setStatus("💾 Guardando…");
+    // intento 1: json
+    try{
+      const r1=await tryPost("application/json"); const t1=await r1.text(); let j1=null; try{j1=JSON.parse(t1);}catch{}
+      if(r1.ok&&j1?.ok){ setStatus("✅ Guardado"); setLast(j1.updatedAt); setDirty(false); toast("Guardado en la nube"); return; }
+      throw new Error();
+    }catch{}
+    // intento 2: text/plain
+    try{
+      const r2=await tryPost("text/plain;charset=utf-8"); const t2=await r2.text(); let j2=null; try{j2=JSON.parse(t2);}catch{}
+      if(r2.ok&&j2?.ok){ setStatus("✅ Guardado"); setLast(j2.updatedAt); setDirty(false); toast("Guardado (plain)"); return; }
+      throw new Error();
+    }catch{}
+    // intento 3: no-cors
+    await tryPost("text/plain;charset=utf-8","no-cors");
+    setStatus("⏳ Verificando…"); setTimeout(async()=>{ await loadFromCloud(); setDirty(false); toast("Guardado (no-cors) verificado"); }, 400);
+  }catch(e){ console.error(e); setStatus("❌ Error al guardar"); alert("No se pudo guardar."); }
+}
+async function loadFromCloud(){
+  try{
+    setStatus("⬇️ Cargando…");
+    const u=new URL(ENDPOINT); u.searchParams.set("action","load"); u.searchParams.set("pin",PIN);
+    const res=await fetch(u.toString(),{method:"GET"}); const t=await res.text(); let j=null; try{j=JSON.parse(t);}catch{}
+    if(!res.ok||!j?.ok) throw new Error();
+    state = Object.assign({logoDataUrl:"",exclusivos:[],flop:[],visitas:[],formaciones:[]}, j.state||{});
+    if(state.logoDataUrl){ logoPreview.src=state.logoDataUrl; logoPreview.classList.remove("hidden"); } else logoPreview.classList.add("hidden");
+    selected={section:null,id:null}; renderLists($("#search").value); renderDetail();
+    setStatus("✅ Actualizado"); setLast(j.updatedAt); setDirty(false); updatePreview();
+  }catch(e){ console.error(e); setStatus("❌ Error al cargar"); alert("No se pudo cargar."); }
+}
+$("#btnSave").onclick=saveToCloud;
+$("#btnLoad").onclick=loadFromCloud;
+$("#btnSaveDetail").onclick=saveToCloud;
 
-    async function saveToCloud(){
-      try{
-        if(!canEdit){ toast("Bloqueado. Pulsa Editar (PIN)."); return; }
-        setStatus("💾 Guardando…");
-
-        // 1) Intento ideal: application/json
-        try{
-          const r1 = await tryPost("application/json");
-          const t1 = await r1.text(); let j1=null; try{ j1=JSON.parse(t1); }catch{}
-          if(r1.ok && j1?.ok){ setStatus("✅ Guardado"); setLast(j1.updatedAt); toast("Guardado en la nube"); return; }
-          throw new Error(`JSON fail HTTP ${r1.status} ${t1.slice(0,80)}`);
-        }catch(_){ /* pasa al intento 2 */ }
-
-        // 2) text/plain (evita preflight)
-        try{
-          const r2 = await tryPost("text/plain;charset=utf-8");
-          const t2 = await r2.text(); let j2=null; try{ j2=JSON.parse(t2); }catch{}
-          if(r2.ok && j2?.ok){ setStatus("✅ Guardado"); setLast(j2.updatedAt); toast("Guardado (plain)"); return; }
-          throw new Error(`Plain fail HTTP ${r2.status} ${t2.slice(0,80)}`);
-        }catch(_){ /* pasa al intento 3 */ }
-
-        // 3) text/plain + no-cors (respuesta opaca). Asumimos éxito y verificamos con load().
-        await tryPost("text/plain;charset=utf-8","no-cors");
-        setStatus("⏳ Verificando…");
-        // pequeña espera y carga
-        setTimeout(async()=>{ await loadFromCloud(); toast("Guardado (no-cors) verificado"); }, 400);
-
-      }catch(e){
-        console.error(e); setStatus("❌ Error al guardar"); alert("No se pudo guardar.\n\nDetalle: "+e.message);
-      }
-    }
-
-    async function loadFromCloud(){
-      try{
-        setStatus("⬇️ Cargando…");
-        const u=new URL(ENDPOINT); u.searchParams.set("action","load"); u.searchParams.set("pin",PIN);
-        const res=await fetch(u.toString(),{method:"GET"});
-        const text=await res.text(); let json=null; try{ json=JSON.parse(text);}catch{}
-        if(!res.ok || !json?.ok){ throw new Error(`HTTP ${res.status} ${text.slice(0,120)}`); }
-        state = Object.assign({logoDataUrl:"",exclusivos:[],flop:[],visitas:[],formaciones:[]}, json.state||{});
-        if(state.logoDataUrl){ logoPreview.src=state.logoDataUrl; logoPreview.classList.remove("hidden"); } else { logoPreview.classList.add("hidden"); }
-        selected={section:null,id:null}; renderLists($("#search").value); renderDetail();
-        setStatus("✅ Actualizado"); setLast(json.updatedAt);
-      }catch(e){ console.error(e); setStatus("❌ Error al cargar"); alert("No se pudo cargar.\n\nDetalle: "+e.message); }
-    }
-
-    $("#btnSave").onclick=saveToCloud;
-    $("#btnLoad").onclick=loadFromCloud;
-
-    /* ===== ARRANQUE ===== */
-    setEdit(false); renderLists(); renderDetail(); loadFromCloud();
-  </script>
+/* ===== ARRANQUE ===== */
+setEdit(false); renderLists(); renderDetail(); loadFromCloud();
+</script>
 </body>
 </html>
