@@ -6,33 +6,59 @@
   <title>AudioSeguimiento – Cloud Sync</title>
   <style>
     :root { color-scheme: light dark; }
+    * { box-sizing: border-box; }
     body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, sans-serif; line-height: 1.35; }
-    header { padding: 16px 18px; background: linear-gradient(90deg, #5a7bf7, #7a9dff); color: #fff; }
-    header h1 { margin: 0; font-size: 1.2rem; letter-spacing: .3px; }
+    header { padding: 12px 16px; background: linear-gradient(90deg, #5a7bf7, #7a9dff); color: #fff; }
+    header h1 { margin: 0 0 8px; font-size: 1.15rem; }
+    .toolbar-top { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .btn {
+      border: 0; border-radius: 10px; padding: 8px 12px; cursor: pointer;
+      background: #fff; color: #2a45b8; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,.15);
+    }
+    .btn.secondary { background: rgba(255,255,255,.9); color: #1d1f24; }
+    .status { font-size: .95rem; opacity: .95; margin-left: 6px; }
+    .last   { font-size: .9rem; opacity: .9; margin-left: 6px; }
     main { padding: 18px; display: grid; gap: 16px; max-width: 900px; margin: 0 auto; }
     .card { background: rgba(255,255,255,.75); backdrop-filter: blur(6px); border-radius: 14px; box-shadow: 0 8px 28px rgba(0,0,0,.08); padding: 14px; }
     .label { font-size: .9rem; opacity: .85; margin-bottom: 6px; display: block; }
-    textarea, input, select { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(0,0,0,.15); outline: none; font: inherit; background: rgba(255,255,255,.9); }
-    small.helper { opacity: .75; display: block; margin-top: 8px; }
+    textarea, input, select {
+      width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(0,0,0,.15);
+      outline: none; font: inherit; background: rgba(255,255,255,.92);
+    }
     pre.preview { max-height: 280px; overflow: auto; font-size: 12px; padding: 10px; background: rgba(0,0,0,.05); border-radius: 10px; margin: 0; }
     @media (prefers-color-scheme: dark) {
       .card { background: rgba(25,25,28,.6); }
-      textarea, input, select { background: rgba(30,30,35,.9); color: #eee; border-color: rgba(255,255,255,.15); }
+      textarea, input, select { background: rgba(30,30,35,.92); color: #eee; border-color: rgba(255,255,255,.15); }
       pre.preview { background: rgba(255,255,255,.06); color: #ddd; }
+      .btn { background: #e9edff; color: #18329b; }
+      .btn.secondary { background: #f2f2f2; color: #222; }
     }
   </style>
 </head>
 <body>
   <header>
     <h1>AudioSeguimiento – Edición con guardado en la nube</h1>
+    <!-- BOTONES VISIBLES ARRIBA -->
+    <div class="toolbar-top">
+      <button id="top-save" class="btn">Guardar</button>
+      <button id="top-load" class="btn secondary">Actualizar</button>
+      <label style="display:flex;align-items:center;gap:.4rem;">
+        <input id="top-auto" type="checkbox" />
+        Auto
+      </label>
+      <span id="top-status" class="status">⏳</span>
+      <span id="top-last" class="last">—</span>
+    </div>
   </header>
 
   <main>
-    <!-- Marca tus campos reales con data-cloud; #notas se usa como respaldo -->
+    <!-- Marca tus campos con data-cloud; #notas se usa como respaldo -->
     <div class="card">
       <label for="notas" class="label">Notas (ejemplo, sincroniza con la nube)</label>
       <textarea id="notas" data-cloud rows="7" placeholder="Escribe aquí..."></textarea>
-      <small class="helper">Pon <code>data-cloud</code> en cada campo de tu plataforma que quieras sincronizar.</small>
+      <small style="opacity:.75;display:block;margin-top:8px;">
+        Pon <code>data-cloud</code> en cada campo de tu plataforma que quieras sincronizar.
+      </small>
     </div>
 
     <div class="card">
@@ -45,58 +71,28 @@
   <script type="module">
     /***** CONFIG *****/
     const PIN = "AR4321";
-    // Endpoint integrado (tu Apps Script Web App):
     const ENDPOINT_EMBED = "https://script.google.com/macros/s/AKfycby5vh1Ja0XllWFB98ypWmDcUfUItwEciVimUd5L6Esi1wfPJbcc2dap6G0lciRf51VR/exec";
     const CFG_KEY = "audioseguimiento_endpoint_url";
     const BK_KEY  = "audioseguimiento_backup";
 
-    /***** Utilidades *****/
-    function qs(name){ const u = new URL(location.href); return u.searchParams.get(name); }
-    function getEndpoint(){
-      // Prioridad: ?endpoint=... > guardado en localStorage > embebido
-      const ep = qs("endpoint");
-      if (ep) return ep;
-      try { return JSON.parse(localStorage.getItem(CFG_KEY)||"null") || ENDPOINT_EMBED; } catch { return ENDPOINT_EMBED; }
-    }
-    function setEndpoint(url){ localStorage.setItem(CFG_KEY, JSON.stringify(url)); }
+    /***** Utils *****/
+    const qs = n => new URL(location.href).searchParams.get(n);
+    const getEndpoint = () => {
+      const viaQS = qs("endpoint");
+      if (viaQS) return viaQS;
+      try { return JSON.parse(localStorage.getItem(CFG_KEY) || "null") || ENDPOINT_EMBED; } catch { return ENDPOINT_EMBED; }
+    };
+    const setEndpoint = url => localStorage.setItem(CFG_KEY, JSON.stringify(url));
+    (function captureQS(){ const ep = qs("endpoint"); if (ep) { try { setEndpoint(new URL(ep).toString()); } catch {} } })();
 
-    // Si llegó via ?endpoint=..., guardarlo para futuras visitas
-    (function captureEndpointFromLink(){
-      const ep = qs("endpoint");
-      if (ep) { try { const url = new URL(ep); setEndpoint(url.toString()); } catch {} }
-    })();
+    const statusTop = document.getElementById("top-status");
+    const lastTop   = document.getElementById("top-last");
+    const setStatus = t => statusTop.textContent = t;
+    const setLast   = s => lastTop.textContent = s ? `Última actualización: ${s}` : "—";
+    const preview   = document.getElementById("estado-previsualizacion");
+    const chkAuto   = document.getElementById("top-auto");
 
-    /***** UI flotante *****/
-    const bar = document.createElement("div");
-    Object.assign(bar.style,{
-      position:"fixed", right:"12px", bottom:"12px", zIndex:2147483647,
-      background:"rgba(0,0,0,.82)", color:"#fff", padding:"8px 10px",
-      borderRadius:"12px", fontFamily:"system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,sans-serif",
-      boxShadow:"0 6px 18px rgba(0,0,0,.25)", display:"flex", gap:"8px", alignItems:"center", flexWrap:"wrap"
-    });
-    bar.innerHTML = `
-      <strong>Cloud Sync</strong>
-      <button id="cloud-save" style="padding:.4rem .6rem;border:0;border-radius:8px;cursor:pointer;">Guardar</button>
-      <button id="cloud-load" style="padding:.4rem .6rem;border:0;border-radius:8px;cursor:pointer;">Actualizar</button>
-      <label style="display:flex;align-items:center;gap:.35rem;font-size:.9em;opacity:.95;">
-        <input id="cloud-autosave" type="checkbox" style="transform:translateY(1px)" />
-        Auto
-      </label>
-      <span id="cloud-status" style="opacity:.95">⏳</span>
-      <span id="cloud-last" style="opacity:.9">—</span>
-    `;
-    document.body.appendChild(bar);
-    const btnSave = bar.querySelector("#cloud-save");
-    const btnLoad = bar.querySelector("#cloud-load");
-    const chkAuto = bar.querySelector("#cloud-autosave");
-    const elStatus= bar.querySelector("#cloud-status");
-    const elLast  = bar.querySelector("#cloud-last");
-
-    const preview = document.getElementById("estado-previsualizacion");
-    const setStatus = (t)=> elStatus.textContent = t;
-    const setLast   = (s)=> elLast.textContent = s ? `Última actualización: ${s}` : "—";
-
-    /***** Qué sincronizar *****/
+    /* Qué sincronizar */
     function getCloudElements(){
       const marked = [...document.querySelectorAll("[data-cloud]")];
       if (marked.length) return marked;
@@ -104,67 +100,67 @@
       return fb ? [fb] : [];
     }
     function readEl(el){
-      if (el.tagName==="INPUT"){
-        const t=(el.type||"text").toLowerCase();
-        if (t==="checkbox") return !!el.checked;
-        if (t==="radio")    return el.checked ? el.value : null;
+      if (el.tagName === "INPUT"){
+        const t = (el.type || "text").toLowerCase();
+        if (t === "checkbox") return !!el.checked;
+        if (t === "radio")    return el.checked ? el.value : null;
         return el.value;
       }
-      if (el.tagName==="TEXTAREA"||el.tagName==="SELECT") return el.value;
+      if (el.tagName === "TEXTAREA" || el.tagName === "SELECT") return el.value;
       return el.textContent;
     }
     function writeEl(el,val){
       try{
-        if (el.tagName==="INPUT"){
-          const t=(el.type||"text").toLowerCase();
-          if (t==="checkbox"){ el.checked=!!val; return; }
-          if (t==="radio"){ el.checked=(val===el.value); return; }
-          el.value=(val??"");
+        if (el.tagName === "INPUT"){
+          const t = (el.type || "text").toLowerCase();
+          if (t === "checkbox"){ el.checked = !!val; return; }
+          if (t === "radio"){ el.checked = (val === el.value); return; }
+          el.value = (val ?? "");
           el.dispatchEvent(new Event("input",{bubbles:true}));
           el.dispatchEvent(new Event("change",{bubbles:true}));
           return;
         }
-        if (el.tagName==="TEXTAREA"||el.tagName==="SELECT"){
-          el.value=(val??"");
+        if (el.tagName === "TEXTAREA" || el.tagName === "SELECT"){
+          el.value = (val ?? "");
           el.dispatchEvent(new Event("input",{bubbles:true}));
           el.dispatchEvent(new Event("change",{bubbles:true}));
           return;
         }
-        if (typeof val==="string") el.textContent=val;
+        if (typeof val === "string") el.textContent = val;
       }catch(e){ console.warn("No se pudo aplicar valor", e); }
     }
     function collectState(){
-      const els=getCloudElements(); const state={};
-      els.forEach((el,i)=>{ const k=el.id||el.name||`el_${i}`; const v=readEl(el); if (v!==null&&k) state[k]=v; });
-      if (preview) preview.textContent = JSON.stringify(state, null, 2);
+      const els = getCloudElements(); const state = {};
+      els.forEach((el,i)=>{ const k = el.id || el.name || `el_${i}`; const v = readEl(el); if (v !== null && k) state[k] = v; });
+      preview.textContent = JSON.stringify(state, null, 2);
       return state;
     }
     function applyState(state){
-      if (!state || typeof state!=="object") return;
+      if (!state || typeof state !== "object") return;
       Object.keys(state).forEach(k=>{
-        let el=document.getElementById(k)||document.querySelector(`[name="${CSS.escape(k)}"]`);
-        if (el) writeEl(el,state[k]);
+        const el = document.getElementById(k) || document.querySelector(`[name="${CSS.escape(k)}"]`);
+        if (el) writeEl(el, state[k]);
       });
-      if (preview) preview.textContent = JSON.stringify(state, null, 2);
+      preview.textContent = JSON.stringify(state, null, 2);
     }
 
-    /***** Backup local (offline) *****/
-    function saveBackup(state){ try{ localStorage.setItem(BK_KEY, JSON.stringify({when:Date.now(), state})); }catch{} }
-    function loadBackup(){ try{ return JSON.parse(localStorage.getItem(BK_KEY)||"null"); }catch{ return null; } }
+    /* Backup local */
+    const saveBackup = s => { try { localStorage.setItem(BK_KEY, JSON.stringify({when:Date.now(), state:s})); } catch {} };
+    const loadBackup = () => { try { return JSON.parse(localStorage.getItem(BK_KEY) || "null"); } catch { return null; } };
 
-    /***** Nube (sin tokens) *****/
+    /* Nube */
     async function saveToCloud(){
-      const ENDPOINT = getEndpoint();
       try{
         setStatus("💾 Guardando…");
+        const ENDPOINT = getEndpoint();
         const state = collectState();
-        const res = await fetch(ENDPOINT,{
-          method:"POST",
-          headers:{"Content-Type":"application/json"},
-          body:JSON.stringify({action:"save", pin:PIN, state})
+        const res = await fetch(ENDPOINT, {
+          method: "POST",
+          headers: {"Content-Type":"application/json"},
+          body: JSON.stringify({ action:"save", pin: PIN, state })
         });
         const json = await res.json().catch(()=>null);
-        if(!res.ok || !json?.ok) throw new Error(json?.error || ("HTTP "+res.status));
+        if (!res.ok || !json?.ok) throw new Error(json?.error || ("HTTP "+res.status));
         setStatus("✅ Guardado"); setLast(json.updatedAt);
         saveBackup(state);
       }catch(e){
@@ -174,15 +170,13 @@
       }
     }
     async function loadFromCloud(){
-      const ENDPOINT = getEndpoint();
       try{
         setStatus("⬇️ Cargando…");
-        const u = new URL(ENDPOINT);
-        u.searchParams.set("action","load");
-        u.searchParams.set("pin", PIN);
-        const res = await fetch(u.toString(),{method:"GET"});
+        const u = new URL(getEndpoint());
+        u.searchParams.set("action","load"); u.searchParams.set("pin", PIN);
+        const res = await fetch(u.toString(), { method: "GET" });
         const json = await res.json().catch(()=>null);
-        if(!res.ok || !json?.ok) throw new Error(json?.error || ("HTTP "+res.status));
+        if (!res.ok || !json?.ok) throw new Error(json?.error || ("HTTP "+res.status));
         applyState(json.state || {}); setStatus("✅ Actualizado"); setLast(json.updatedAt);
       }catch(e){
         console.error(e);
@@ -192,10 +186,7 @@
       }
     }
 
-    /***** Auto-guardado opcional *****
-     * Activa la casilla “Auto” y cada cambio en campos data-cloud
-     * disparará un guardado (con pequeño debounce).
-     */
+    /* Auto-guardado + atajos */
     let autosaveTimer=null;
     function autoSaveTick(){
       if (!chkAuto.checked) return;
@@ -203,18 +194,25 @@
       autosaveTimer = setTimeout(saveToCloud, 800);
     }
     function hookAutosave(){
-      const els=getCloudElements();
-      els.forEach(el=>["input","change","keyup","blur"].forEach(evt=>el.addEventListener(evt, autoSaveTick)));
+      getCloudElements().forEach(el=>{
+        ["input","change","keyup","blur"].forEach(evt=>el.addEventListener(evt, autoSaveTick));
+      });
     }
+    // Ctrl/Cmd + S → Guardar
+    document.addEventListener("keydown", e => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
+        e.preventDefault(); saveToCloud();
+      }
+    });
 
-    /***** Eventos / arranque *****/
-    const chkAuto = document.getElementById("cloud-autosave");
-    document.getElementById("cloud-save").addEventListener("click", saveToCloud);
-    document.getElementById("cloud-load").addEventListener("click", loadFromCloud);
-    document.getElementById("cloud-autosave").addEventListener("change", ()=>{ if(chkAuto.checked) autoSaveTick(); });
+    /* Eventos */
+    document.getElementById("top-save").addEventListener("click", saveToCloud);
+    document.getElementById("top-load").addEventListener("click", loadFromCloud);
+    document.getElementById("top-auto").addEventListener("change", ()=>{ if (chkAuto.checked) autoSaveTick(); });
 
+    /* Arranque */
     hookAutosave();
-    loadFromCloud(); // carga inicial automática usando el endpoint embebido (o el de la URL)
+    loadFromCloud();
   </script>
 </body>
 </html>
