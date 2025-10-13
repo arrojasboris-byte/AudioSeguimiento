@@ -1,454 +1,599 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>AUDIOLOGIA-SEGUIMIENTO</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#eef1f5; --card:#ffffff; --ink:#1f2937; --muted:#6b7280;
-    --accent:#dc2626; --accent-2:#0ea5e9; --ok:#16a34a; --line:#e5e7eb;
-    --chip:#f8fafc; --shadow:0 12px 22px rgba(0,0,0,.06); --radius:18px;
+    --primary:#e11d48;
+    --primary-600:#dc1b45;
+    --ink:#0f172a;
+    --muted:#6b7280;
+    --bg:#f3f4f6;
+    --panel:#ffffff;
+    --ring:#e5e7eb;
+    --ok:#16a34a;
+    --warn:#d97706;
+    --chip:#ef4444;
+    --shadow:0 10px 20px rgba(15,23,42,.06);
+    --radius:14px;
   }
   *{box-sizing:border-box}
   html,body{height:100%}
-  body{margin:0;background:linear-gradient(150deg,#f4f6f9 0%,#edf1f7 100%);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--ink)}
-  .wrap{max-width:1200px;margin:0 auto;padding:18px}
-  .bar{background:var(--card);border-left:5px solid var(--accent);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-radius:14px;box-shadow:var(--shadow)}
-  .brand{display:flex;align-items:center;gap:14px}
-  .logo{width:190px;height:56px;background:#fff url('https://upload.wikimedia.org/wikipedia/commons/1/1c/Alain_Afflelou_logo.png') center/contain no-repeat;border-radius:10px;border:1px solid var(--line)}
-  h1{margin:0;font-weight:800;letter-spacing:.4px}
-  .sub{font-size:12px;color:var(--muted)}
+  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,"Noto Sans",sans-serif;background:linear-gradient(180deg,#fafafa,#f0f1f5)}
+  .app{max-width:1200px;margin:22px auto;padding:0 16px}
+  /* Topbar */
+  .top{display:flex;align-items:center;gap:14px;background:var(--panel);border:1px solid var(--ring);box-shadow:var(--shadow);border-radius:var(--radius);padding:18px}
+  .brand{display:flex;align-items:center;gap:16px;flex:1}
+  .logo{height:42px;width:120px;object-fit:contain;border-radius:10px;border:1px dashed #ddd;background:#fff}
+  .titlewrap{line-height:1}
+  .caption{font-size:13px;color:var(--muted)}
+  h1{margin:0;font-size:30px;letter-spacing:.5px;color:#0b1323}
   .actions{display:flex;gap:10px}
-  .icon{width:46px;height:46px;border-radius:12px;border:1px solid var(--line);background:#101827;display:grid;place-items:center;color:#fff;cursor:pointer;box-shadow:var(--shadow)}
-  .icon.blue{background:#2563eb}.icon.red{background:#dc2626}
-  .icon img{width:22px;height:22px;opacity:.95}
-  .search{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:10px;margin:16px 0;box-shadow:var(--shadow)}
-  .search input{border:0;outline:0;width:100%;background:transparent;font-size:16px;color:var(--ink)}
-  .grid{display:grid;grid-template-columns:380px 1fr;gap:16px}
-  .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:12px}
-  /* columnas izquierda */
-  .sec{border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:12px}
-  .sec header{display:flex;align-items:center;gap:10px;justify-content:space-between}
-  .sec-title{display:flex;align-items:center;gap:10px}
-  .badge{background:#f3f4f6;border:1px solid var(--line);border-radius:999px;padding:2px 8px;font-size:12px}
-  .chip{color:#dc2626;font-weight:700;cursor:pointer}
-  .sec-tools{display:flex;gap:6px}
-  .btn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:7px 10px;font-weight:600;cursor:pointer}
-  .btn.add{background:#0ea5e9;border-color:#0ea5e9;color:#fff}
-  .btn.del{background:#ef4444;border-color:#ef4444;color:#fff}
-  .list{margin-top:10px;display:none}
-  .list.show{display:block}
-  .item{display:flex;align-items:center;justify-content:space-between;border:1px dashed var(--line);border-radius:12px;padding:8px 10px;margin-bottom:8px}
-  .tiny{font-size:12px;color:var(--muted)}
-  .item-tools{display:flex;gap:6px;align-items:center}
-  .tag{font-size:12px;background:#fff;border:1px solid var(--line);padding:4px 8px;border-radius:999px;color:#334155}
-  .tag.sel{background:#dcfce7;border-color:#22c55e}
-  /* derecha */
-  .panel .head{display:flex;align-items:center;justify-content:space-between}
-  .title{font-weight:800;font-size:24px}
-  .fold{border:1px solid var(--line);border-radius:12px;margin-top:12px}
-  .fold summary{list-style:none;cursor:pointer;padding:14px 16px;font-weight:700;border-radius:12px}
-  .fold[open] summary{background:#f9fafb}
-  .fold .inner{padding:12px 16px;border-top:1px solid var(--line)}
-  .row{display:grid;grid-template-columns:110px 1fr 90px 90px 1fr 36px;gap:8px;align-items:center;margin-bottom:6px}
-  .row input,.row select{width:100%;border:1px solid var(--line);border-radius:9px;padding:7px 8px}
-  .row .x{color:#ef4444;font-weight:700;cursor:pointer;text-align:center}
-  .note{font-size:12px;color:var(--muted);margin-top:6px}
-  @media (max-width:1000px){.grid{grid-template-columns:1fr}}
+  .iconbtn{height:44px;width:44px;border-radius:12px;border:1px solid var(--ring);display:grid;place-items:center;cursor:pointer;background:#2b303b;color:#fff;box-shadow:var(--shadow)}
+  .iconbtn[data-type="accent"]{background:var(--primary)}
+  .iconbtn[disabled]{opacity:.45;pointer-events:none}
+  .iconbtn svg{width:22px;height:22px}
+  /* Search */
+  .search{margin:18px 0}
+  .search input{width:100%;height:48px;border-radius:12px;border:1px solid var(--ring);padding:0 14px;font-size:15px;outline:none}
+  .layout{display:grid;grid-template-columns:360px 1fr;gap:16px}
+  /* Left panel */
+  .left,.right{background:var(--panel);border:1px solid var(--ring);border-radius:var(--radius);box-shadow:var(--shadow)}
+  .left{padding:16px}
+  .section-header{display:flex;align-items:center;justify-content:space-between;padding:8px 4px 12px;border-bottom:1px solid var(--ring)}
+  .section-header h3{margin:0;color:#0b1323}
+  .addbtn{display:flex;align-items:center;gap:8px;background:#0b1323;color:#fff;border:none;border-radius:10px;padding:8px 10px;font-weight:600;cursor:pointer}
+  .category{margin:14px 0;border:1px solid var(--ring);border-radius:12px}
+  .cat-title{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;font-weight:800;color:#0b1323}
+  .pill{background:#0b1323;color:#fff;border-radius:999px;padding:4px 9px;font-size:12px}
+  .toggle{color:var(--primary);cursor:pointer;font-weight:700}
+  .cat-body{padding:10px 12px;display:grid;gap:10px}
+  .subcard{border:1px solid var(--ring);border-radius:10px;padding:10px;background:#fafafa;display:grid;gap:6px}
+  .subhead{display:flex;align-items:center;justify-content:space-between}
+  .subinfo{font-size:13px;color:#475569}
+  .chip{display:inline-block;background:#fee2e2;color:#991b1b;border:1px solid #fecaca;border-radius:999px;padding:.5px 8px;font-size:12px}
+  .minirow{display:flex;gap:6px}
+  .small{height:32px;padding:0 10px;border-radius:10px;border:1px solid var(--ring);background:#fff}
+  .btnmini{height:32px;padding:0 10px;border-radius:10px;border:1px solid var(--ring);background:#0b1323;color:#fff;cursor:pointer}
+  .danger{background:#ef4444}
+  /* Right panel */
+  .right{padding:16px}
+  .proc-head{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--ring);padding-bottom:10px;margin-bottom:10px}
+  .proc-title{font-size:20px;font-weight:900;color:#0b1323}
+  .group{margin:14px 0;border:1px solid var(--ring);border-radius:12px;background:#f6f7fb}
+  .group h4{margin:0;padding:12px 14px;border-bottom:1px solid var(--ring);font-size:18px}
+  .group .body{padding:12px}
+  table{width:100%;border-collapse:separate;border-spacing:0 8px}
+  th,td{padding:10px;background:#fff;border:1px solid var(--ring)}
+  th:first-child,td:first-child{border-top-left-radius:8px;border-bottom-left-radius:8px}
+  th:last-child,td:last-child{border-top-right-radius:8px;border-bottom-right-radius:8px}
+  .rowbtns{display:flex;gap:6px}
+  .link{color:#2563eb;cursor:pointer}
+  .controls{display:flex;gap:8px;flex-wrap:wrap}
+  .ghost{background:#fff}
+  .muted{color:#64748b}
+  .hidden{display:none!important}
+  .ok{color:var(--ok)}
+  .note{font-size:12px;color:#556}
+  .flex{display:flex;gap:8px;align-items:center}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="bar">
+<div class="app">
+  <!-- TOPBAR -->
+  <div class="top">
     <div class="brand">
-      <div id="logo" class="logo" title="Click para cambiar logo"></div>
-      <div>
-        <div class="sub">Plataforma</div>
+      <img id="logo" class="logo" alt="Logo" />
+      <div class="titlewrap">
+        <div class="caption">Plataforma</div>
         <h1>AUDIOLOGIA-SEGUIMIENTO</h1>
       </div>
     </div>
     <div class="actions">
-      <div class="icon" id="btnLogo" title="Cambiar logo"><img src="https://cdn.jsdelivr.net/gh/tabler/tabler-icons/icons/photo.svg" alt=""></div>
-      <div class="icon" id="btnLock" title="Modo edición (PIN)"><img src="https://cdn.jsdelivr.net/gh/tabler/tabler-icons/icons/lock.svg" alt=""></div>
-      <div class="icon red" id="btnCloud" title="Guardar en la nube"><img src="https://cdn.jsdelivr.net/gh/tabler/tabler-icons/icons/cloud-upload.svg" alt=""></div>
-      <div class="icon blue" id="btnBackup" title="Backup (descargar/subir json)"><img src="https://cdn.jsdelivr.net/gh/tabler/tabler-icons/icons/device-floppy.svg" alt=""></div>
-      <div class="icon" id="btnCloudLoad" title="Cargar desde nube"><img src="https://cdn.jsdelivr.net/gh/tabler/tabler-icons/icons/cloud-download.svg" alt=""></div>
-      <div class="icon" id="btnSettings" title="Configurar nube (token/gist)"><img src="https://cdn.jsdelivr.net/gh/tabler/tabler-icons/icons/settings.svg" alt=""></div>
+      <!-- subir logo -->
+      <button id="btnLogo" class="iconbtn" title="Logo" disabled>
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 5.5l4 4h-3v4h-2v-4H8l4-4zM4 18h16v2H4v-2z"/></svg>
+      </button>
+      <!-- lock / pin -->
+      <button id="btnLock" class="iconbtn" title="Editar con PIN (AR4321)">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a5 5 0 00-5 5v3H6a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2v-8a2 2 0 00-2-2h-1V7a5 5 0 00-5-5zm-3 8V7a3 3 0 116 0v3H9z"/></svg>
+      </button>
+      <!-- guardar nube -->
+      <button id="btnSaveCloud" class="iconbtn" data-type="accent" title="Guardar en la nube (Gist)" disabled>
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 12l-7 7-7-7h4V4h6v8h4z"/></svg>
+      </button>
+      <!-- cargar nube -->
+      <button id="btnLoadCloud" class="iconbtn" title="Cargar desde nube (Gist)" disabled>
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 12l7-7 7 7h-4v8h-6v-8H5z"/></svg>
+      </button>
+      <!-- backup local -->
+      <button id="btnBackup" class="iconbtn" title="Backup JSON (descargar)" disabled>
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3v12l4-4 1.41 1.41L12 18.83l-5.41-5.42L8 11l4 4V3h0zM4 19h16v2H4z"/></svg>
+      </button>
+      <!-- settings token -->
+      <button id="btnSettings" class="iconbtn" title="Ajustes nube (Token/Gist)" disabled>
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.14,12.94a7.23,7.23,0,0,0,.05-.94,7.23,7.23,0,0,0-.05-.94l2.11-1.65a.5.5,0,0,0,.12-.65l-2-3.46a.5.5,0,0,0-.61-.22l-2.49,1a7.38,7.38,0,0,0-1.63-.94l-.38-2.65A.5.5,0,0,0,11.8,2H8.2a.5.5,0,0,0-.49.41L7.33,5.06a7.38,7.38,0,0,0-1.63.94l-2.49-1a.5.5,0,0,0-.61.22l-2,3.46a.5.5,0,0,0,.12.65L2.94,11a7.23,7.23,0,0,0-.05.94,7.23,7.23,0,0,0,.05.94L.83,14.53a.5.5,0,0,0-.12.65l2,3.46a.5.5,0,0,0,.61.22l2.49-1a7.38,7.38,0,0,0,1.63.94l.38,2.65a.5.5,0,0,0,.49.41h3.6a.5.5,0,0,0,.49-.41l.38-2.65a7.38,7.38,0,0,0,1.63-.94l2.49,1a.5.5,0,0,0,.61-.22l2-3.46a.5.5,0,0,0-.12-.65ZM10,15a3,3,0,1,1,3-3A3,3,0,0,1,10,15Z"/></svg>
+      </button>
+      <input id="fileLogo" type="file" accept="image/*" class="hidden" />
     </div>
   </div>
 
-  <div class="search">
-    <img src="https://cdn.jsdelivr.net/gh/tabler/tabler-icons/icons/search.svg" width="18" height="18" alt="">
-    <input id="q" placeholder="Buscar en secciones, centros y datos…">
-  </div>
+  <!-- SEARCH -->
+  <div class="search"><input id="search" placeholder="Buscar en secciones, centros y datos…" /></div>
 
-  <div class="grid">
-    <!-- IZQUIERDA -->
-    <div class="card" id="left"></div>
-
-    <!-- DERECHA -->
-    <div class="card panel">
-      <div class="head">
-        <div class="title">Procedimientos — <span id="currentItem">-</span></div>
+  <div class="layout">
+    <!-- LEFT -->
+    <div class="left">
+      <div class="section-header">
+        <h3>Secciones</h3>
+        <button id="btnAddSection" class="addbtn" disabled>＋ Añadir sección</button>
       </div>
 
-      <details class="fold" open>
-        <summary>Acciones - Resultado</summary>
-        <div class="inner" id="accionesBox"></div>
-        <div style="padding:12px 16px">
-          <button class="btn" id="addAccion">+ Acción</button>
-        </div>
-      </details>
+      <div id="leftList"></div>
+      <div class="note">Consejo: pulsa el nombre de un centro para cargar sus procedimientos.</div>
+    </div>
 
-      <details class="fold">
-        <summary>Formación continua</summary>
-        <div class="inner" id="formacionBox"></div>
-        <div style="padding:12px 16px">
-          <button class="btn" id="addFormacion">+ Registro</button>
+    <!-- RIGHT -->
+    <div class="right">
+      <div class="proc-head">
+        <div class="proc-title" id="procTitle">Procedimientos —</div>
+        <div class="controls">
+          <button id="btnAddAccion" class="btnmini" disabled>＋ Acción</button>
+          <button id="btnSaveProc" class="btnmini" disabled>💾 Guardar</button>
         </div>
-      </details>
+      </div>
 
-      <details class="fold">
-        <summary>Procesos y paquetes personalizados</summary>
-        <div class="inner" id="procesosBox"></div>
-        <div style="padding:12px 16px">
-          <button class="btn" id="addProceso">+ Proceso</button>
+      <div id="proceduresZone">
+        <!-- Acciones-Resultado -->
+        <div class="group" id="grpAcc">
+          <h4>Acciones - Resultado</h4>
+          <div class="body">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:140px">Fecha</th>
+                  <th>Acción</th>
+                  <th style="width:110px">Derivación</th>
+                  <th style="width:80px">Cita</th>
+                  <th>Observaciones</th>
+                  <th style="width:120px">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="tbAcc"></tbody>
+            </table>
+          </div>
         </div>
-      </details>
 
-      <div class="note">Modo edición con PIN <code>AR4321</code> (🔒). “Guardar en la nube” usa <b>GitHub Gist privado</b>.</div>
+        <!-- Formación continua -->
+        <div class="group" id="grpForm">
+          <h4>Formación continua</h4>
+          <div class="body">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:140px">Fecha</th>
+                  <th style="width:140px">Asistencia (SI/NO)</th>
+                  <th>Título</th>
+                  <th>Aplicación</th>
+                </tr>
+              </thead>
+              <tbody id="tbForm"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Procesos y paquetes personalizados -->
+        <div class="group" id="grpProc">
+          <h4>Procesos y paquetes personalizados</h4>
+          <div class="body" id="procList"></div>
+          <div class="controls">
+            <button id="btnAddProceso" class="btnmini" disabled>＋ Paquete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Simple prompts -->
+<div id="modal" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,.45);display:grid;place-items:center;">
+  <div style="background:#fff;border-radius:12px;border:1px solid var(--ring);box-shadow:var(--shadow);max-width:560px;width:92%;padding:16px">
+    <div id="modalBody"></div>
+    <div class="flex" style="justify-content:flex-end;margin-top:10px">
+      <button id="mCancel" class="btnmini ghost">Cancelar</button>
+      <button id="mOk" class="btnmini">OK</button>
     </div>
   </div>
 </div>
 
 <script>
-/* Utilidades */
-const $ = s => document.querySelector(s);
-const $$ = s => Array.from(document.querySelectorAll(s));
-const uid = () => Date.now()+Math.random().toString(16).slice(2);
+/* ---------- STATE ---------- */
+const PIN = "AR4321";
 
-/* Estado */
-let editMode = false;
-let state = {
-  logo:"",
-  selected:{ sectionId:null, itemId:null },
+const DEFAULT_STATE = {
+  meta:{companyName:"AUDIOLOGÍA", logo:"", activeSection:"centros_exclusivos", activeCentroId:1},
   sections:[
-    { id:'centros_exclusivos', title:'Centros exclusivos', type:'centros', open:true, items:[
-      { id:1, nombre:'Reina Mercedes', delegado:'Ana Martínez', audiologo:'Dr. García', tipo:'Franquicia' },
-      { id:2, nombre:'Barcelona Centro', delegado:'Carlos Ruiz', audiologo:'Dra. López', tipo:'Sucursal' }
-    ]},
-    { id:'centros_flop', title:'Centros flop', type:'centros', open:false, items:[] },
-    { id:'formacion_mentoring', title:'Formaciones – Mentoring', type:'formaciones', open:false, items:[] },
-    { id:'visitas', title:'Visitas a centros', type:'visitas', open:false, items:[] }
-  ],
-  // Procedimientos por clave "sectionId:itemId"
-  dataByKey:{}
-};
-
-/* Persistencia local */
-function localSave(){ localStorage.setItem('audiologia_state_v2', JSON.stringify(state)); }
-function localLoad(){ const r=localStorage.getItem('audiologia_state_v2'); if(r){try{state=JSON.parse(r);}catch{}} }
-
-/* Helpers de datos */
-const keyFor = (sectionId,itemId)=> `${sectionId}:${itemId}`;
-function ensureData(sectionId,itemId){
-  const k = keyFor(sectionId,itemId);
-  if(!state.dataByKey[k]){
-    state.dataByKey[k] = {
-      acciones:[{id:1,fecha:'',accion:'',derivacion:0,cita:0,obs:''}],
-      formaciones:[{id:1,fecha:'',asistencia:'',titulo:'',aplicacion:''}],
-      procesos:[{id:1,nombre:'',descripcion:'',puntuacion:'',observaciones:'',fecha:''}]
-    };
-  }
-}
-function displayName(section, item){
-  if(section.type==='centros') return item.nombre;
-  if(section.type==='formaciones') return item.titulo||'(formación)';
-  if(section.type==='visitas') return item.objetivo||'(visita)';
-  return item.nombre||item.titulo||'(item)';
-}
-
-/* Render izquierda */
-function renderLeft(){
-  const left = $('#left'); left.innerHTML='';
-  state.sections.forEach(sec=>{
-    const box = document.createElement('div'); box.className='sec';
-    const header = document.createElement('header');
-
-    const t = document.createElement('div'); t.className='sec-title';
-    const h = document.createElement('h3'); h.style.margin='0'; h.textContent = sec.title;
-    const badge = document.createElement('span'); badge.className='badge'; badge.textContent = sec.items.length;
-    t.append(h,badge);
-
-    const actions = document.createElement('div'); actions.className='sec-tools';
-    const toggle = document.createElement('span'); toggle.className='chip'; toggle.textContent = sec.open?'Ocultar':'Mostrar';
-    toggle.addEventListener('click',()=>{sec.open=!sec.open;localSave();renderLeft();});
-    const add = document.createElement('button'); add.className='btn add'; add.textContent=' + Añadir';
-    add.addEventListener('click',()=>addItemToSection(sec));
-    actions.append(toggle, add);
-
-    header.append(t,actions);
-    box.appendChild(header);
-
-    const list = document.createElement('div'); list.className='list'+(sec.open?' show':'');
-    sec.items.forEach(it=>{
-      const row = document.createElement('div'); row.className='item';
-      row.innerHTML = `
-        <div>
-          <div><b>${displayName(sec,it)}</b></div>
-          <div class="tiny">
-            ${sec.type==='centros'
-              ? `👤 ${it.delegado||'-'} · 🎧 ${it.audiologo||'-'} · ${it.tipo||'-'}`
-              : (sec.type==='formaciones'
-                  ? `${it.ciclo||'-'} · ${it.grupo||'-'}`
-                  : (sec.fecha?`📅 ${it.fecha}`:'')
-                )
-            }
-          </div>
-        </div>
-        <div class="item-tools">
-          <span class="tag ${state.selected.sectionId===sec.id && state.selected.itemId===it.id?'sel':''}">Seleccionar</span>
-          ${editMode?'<button class="btn">Editar</button><button class="btn del">Eliminar</button>':''}
-        </div>
-      `;
-      // seleccionar
-      row.querySelector('.tag').addEventListener('click',()=>{
-        state.selected={sectionId:sec.id,itemId:it.id};
-        ensureData(sec.id,it.id); localSave(); renderRight(); renderLeft();
-      });
-      if(editMode){
-        const [editBtn, delBtn] = row.querySelectorAll('button');
-        editBtn.addEventListener('click',()=>{
-          if(sec.type==='centros'){
-            const nombre = prompt('Nombre', it.nombre||'') ?? it.nombre;
-            const delegado = prompt('Delegado', it.delegado||'') ?? it.delegado;
-            const aud = prompt('Audiólogo', it.audiologo||'') ?? it.audiologo;
-            const tipo = prompt('Tipo (Franquicia/Sucursal)', it.tipo||'') ?? it.tipo;
-            Object.assign(it,{nombre,delegado,audiologo:aud,tipo});
-          }else if(sec.type==='formaciones'){
-            const titulo = prompt('Título del grupo', it.titulo||'') ?? it.titulo;
-            const ciclo = prompt('Ciclo (mensual/trimestral/…)', it.ciclo||'') ?? it.ciclo;
-            const grupo = prompt('Grupo/Delegado', it.grupo||'') ?? it.grupo;
-            Object.assign(it,{titulo,ciclo,grupo});
-          }else if(sec.type==='visitas'){
-            const fecha = prompt('Fecha', it.fecha||new Date().toISOString().slice(0,10)) ?? it.fecha;
-            const objetivo = prompt('Objetivo', it.objetivo||'') ?? it.objetivo;
-            Object.assign(it,{fecha,objetivo});
-          }
-          localSave(); renderLeft();
-        });
-        delBtn.addEventListener('click',()=>{
-          if(confirm('¿Eliminar elemento?')){
-            sec.items=sec.items.filter(x=>x.id!==it.id);
-            if(state.selected.sectionId===sec.id && state.selected.itemId===it.id){
-              state.selected={sectionId:null,itemId:null};
-            }
-            localSave(); renderLeft(); renderRight();
-          }
-        });
+    { id:"centros_exclusivos", title:"Centros exclusivos", type:"centros",
+      items:[
+        { id:1, nombre:"Reina Mercedes", delegado:"Ana Martínez", audiologo:"Dr. García", tipo:"Franquicia" },
+        { id:2, nombre:"Barcelona Centro", delegado:"Carlos Ruiz", audiologo:"Dra. López", tipo:"Sucursal" }
+      ],
+      // procedimientos por centro
+      data:{
+        "1": seedCentroData(),
+        "2": seedCentroData()
       }
-      list.appendChild(row);
-    });
-    box.appendChild(list);
-    left.appendChild(box);
-  });
-}
-function addItemToSection(sec){
-  if(sec.type==='centros'){
-    const nombre = prompt('Nombre del centro'); if(!nombre) return;
-    const it={id:uid(),nombre,delegado:'',audiologo:'',tipo:''};
-    sec.items.push(it); state.selected={sectionId:sec.id,itemId:it.id}; ensureData(sec.id,it.id);
-  }else if(sec.type==='formaciones'){
-    const titulo = prompt('Título del grupo/mentoring'); if(!titulo) return;
-    const it={id:uid(),titulo,ciclo:'',grupo:''};
-    sec.items.push(it); state.selected={sectionId:sec.id,itemId:it.id}; ensureData(sec.id,it.id);
-  }else if(sec.type==='visitas'){
-    const objetivo = prompt('Objetivo de la visita'); if(!objetivo) return;
-    const it={id:uid(),fecha:new Date().toISOString().slice(0,10),objetivo};
-    sec.items.push(it); state.selected={sectionId:sec.id,itemId:it.id}; ensureData(sec.id,it.id);
-  }
-  localSave(); renderLeft(); renderRight();
-}
-
-/* Render derecha (procedimientos por sección+item) */
-function renderRight(){
-  const titleEl = $('#currentItem');
-  const [sec,item] = getSelected();
-  if(!sec||!item){ titleEl.textContent='-'; $('#accionesBox').innerHTML=$('#formacionBox').innerHTML=$('#procesosBox').innerHTML=''; return; }
-  titleEl.textContent = displayName(sec,item);
-  ensureData(sec.id,item.id);
-  const k = keyFor(sec.id,item.id), d = state.dataByKey[k];
-
-  // Acciones
-  const A=$('#accionesBox'); A.innerHTML='';
-  d.acciones.forEach(a=>{
-    const row=document.createElement('div'); row.className='row';
-    row.innerHTML=`
-      <input type="date" value="${a.fecha||''}">
-      <input placeholder="Acción…" value="${a.accion||''}">
-      <input type="number" min="0" value="${a.derivacion||0}">
-      <input type="number" min="0" value="${a.cita||0}">
-      <input placeholder="Observaciones" value="${a.obs||''}">
-      <div class="x">✕</div>`;
-    const [f,ac,de,ci,ob]=row.querySelectorAll('input');
-    [f,ac,de,ci,ob].forEach(el=>el.addEventListener('input',()=>{
-      Object.assign(a,{fecha:f.value,accion:ac.value,derivacion:+de.value||0,cita:+ci.value||0,obs:ob.value}); localSave();
-    }));
-    row.querySelector('.x').addEventListener('click',()=>{ if(!editMode) return; d.acciones=d.acciones.filter(x=>x!==a); localSave(); renderRight();});
-    A.appendChild(row);
-  });
-
-  // Formación
-  const F=$('#formacionBox'); F.innerHTML='';
-  d.formaciones.forEach(f=>{
-    const row=document.createElement('div'); row.className='row';
-    row.innerHTML=`
-      <input type="date" value="${f.fecha||''}">
-      <input placeholder="Título" value="${f.titulo||''}">
-      <select>
-        <option value="">Asistencia</option>
-        <option ${f.asistencia==='SI'?'selected':''}>SI</option>
-        <option ${f.asistencia==='NO'?'selected':''}>NO</option>
-        <option ${f.asistencia==='Pendiente'?'selected':''}>Pendiente</option>
-      </select>
-      <input placeholder="Aplicación / Nota" value="${f.aplicacion||''}">
-      <div></div>
-      <div class="x">✕</div>`;
-    const [fe,ti,se,ap]=[row.children[0],row.children[1],row.children[2],row.children[3]];
-    [fe,ti,se,ap].forEach(el=>el.addEventListener('input',()=>{
-      Object.assign(f,{fecha:fe.value,titulo:ti.value,asistencia:se.value,aplicacion:ap.value}); localSave();
-    }));
-    row.querySelector('.x').addEventListener('click',()=>{ if(!editMode) return; d.formaciones=d.formaciones.filter(x=>x!==f); localSave(); renderRight();});
-    F.appendChild(row);
-  });
-
-  // Procesos
-  const P=$('#procesosBox'); P.innerHTML='';
-  d.procesos.forEach(p=>{
-    const row=document.createElement('div'); row.className='row';
-    row.innerHTML=`
-      <input placeholder="Nombre paquete" value="${p.nombre||''}">
-      <input placeholder="Descripción" value="${p.descripcion||''}">
-      <input placeholder="Puntuación" value="${p.puntuacion||''}">
-      <input placeholder="Observaciones" value="${p.observaciones||''}">
-      <input type="date" value="${p.fecha||''}">
-      <div class="x">✕</div>`;
-    const [no,de,pu,ob,fe]=[row.children[0],row.children[1],row.children[2],row.children[3],row.children[4]];
-    ;[no,de,pu,ob,fe].forEach(el=>el.addEventListener('input',()=>{
-      Object.assign(p,{nombre:no.value,descripcion:de.value,puntuacion:pu.value,observaciones:ob.value,fecha:fe.value}); localSave();
-    }));
-    row.querySelector('.x').addEventListener('click',()=>{ if(!editMode) return; d.procesos=d.procesos.filter(x=>x!==p); localSave(); renderRight();});
-    P.appendChild(row);
-  });
-}
-
-/* Añadir filas */
-$('#addAccion').addEventListener('click', ()=>{const s=getSelectedKey(); if(!s) return; state.dataByKey[s].acciones.push({id:uid(),fecha:'',accion:'',derivacion:0,cita:0,obs:''}); localSave(); renderRight();});
-$('#addFormacion').addEventListener('click', ()=>{const s=getSelectedKey(); if(!s) return; state.dataByKey[s].formaciones.push({id:uid(),fecha:'',asistencia:'',titulo:'',aplicacion:''}); localSave(); renderRight();});
-$('#addProceso').addEventListener('click', ()=>{const s=getSelectedKey(); if(!s) return; state.dataByKey[s].procesos.push({id:uid(),nombre:'',descripcion:'',puntuacion:'',observaciones:'',fecha:''}); localSave(); renderRight();});
-function getSelected(){const sec=state.sections.find(s=>s.id===state.selected.sectionId); const item=sec?.items?.find(i=>i.id===state.selected.itemId); return [sec,item];}
-function getSelectedKey(){const [sec,item]=getSelected(); if(!sec||!item){alert('Selecciona un elemento de alguna sección.');return null;} ensureData(sec.id,item.id); return keyFor(sec.id,item.id);}
-
-/* Buscador */
-$('#q').addEventListener('input', e=>{
-  const k=e.target.value.toLowerCase();
-  $$('#left .item').forEach(n=>{ n.style.display = n.textContent.toLowerCase().includes(k)?'flex':'none'; });
-});
-
-/* Logo + PIN */
-$('#btnLogo').addEventListener('click', ()=>{
-  if(!editMode) return alert('Activa el modo edición (candado).');
-  const input=document.createElement('input'); input.type='file'; input.accept='image/*';
-  input.onchange=e=>{
-    const f=e.target.files?.[0]; if(!f) return;
-    const r=new FileReader(); r.onload=ev=>{state.logo=ev.target.result; $('#logo').style.background=`#fff url('${state.logo}') center/contain no-repeat`; localSave();};
-    r.readAsDataURL(f);
-  }; input.click();
-});
-$('#btnLock').addEventListener('click', ()=>{
-  if(editMode){ editMode=false; alert('Modo edición DESACTIVADO'); renderLeft(); return; }
-  const pin=prompt('PIN de edición'); if(pin==='AR4321'){ editMode=true; alert('Modo edición ACTIVADO'); renderLeft(); } else alert('PIN incorrecto');
-});
-
-/* Backup local (descargar/subir) */
-$('#btnBackup').addEventListener('click', ()=>{
-  const isDownload = confirm('OK = Descargar JSON\nCancelar = Cargar desde archivo');
-  if(isDownload){
-    const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
-    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='audiologia_backup.json'; a.click();
-  }else{
-    const input=document.createElement('input'); input.type='file'; input.accept='application/json';
-    input.onchange=async e=>{const f=e.target.files?.[0]; if(!f) return; const txt=await f.text(); try{state=JSON.parse(txt);}catch{return alert('Archivo inválido');} localSave(); hydrate(); alert('Backup cargado.');};
-    input.click();
-  }
-});
-
-/* Nube (GitHub Gist) */
-const gh={
-  get token(){return localStorage.getItem('gist_token')||'';},
-  set token(v){localStorage.setItem('gist_token',v||'');},
-  get id(){return localStorage.getItem('gist_id')||'';},
-  set id(v){localStorage.setItem('gist_id',v||'');}
+    },
+    { id:"centros_flop", title:"Centros flop", type:"centros", items:[], data:{} },
+    { id:"formaciones_mentoring", title:"Formaciones – Mentoring", type:"grupos", items:[], data:{} },
+    { id:"visitas_audio", title:"Visitas a centros", type:"lista", items:[], data:{} },
+  ],
+  cloud:{token:"", gistId:""}
 };
-$('#btnSettings').addEventListener('click', ()=>{
-  const tok=prompt('Pega tu GitHub Token (scope: gist). Deja vacío para borrar.', gh.token);
-  if(tok===null) return; gh.token=tok.trim();
-  if(!gh.id){ const id=prompt('Opcional: si ya tienes un Gist, pega su ID',''); if(id!==null&&id.trim()) gh.id=id.trim(); }
-  alert('Configuración guardada.');
-});
-$('#btnCloud').addEventListener('click', cloudSave);
-$('#btnCloudLoad').addEventListener('click', cloudLoad);
 
-async function cloudSave(){
-  try{
-    let token=gh.token; if(!token){ token=prompt('Token (scope: gist)'); if(!token) return; gh.token=token; }
-    const headers={'Authorization':'Bearer '+token,'Accept':'application/vnd.github+json','Content-Type':'application/json'};
-    const body={description:'AUDIOLOGIA-SEGUIMIENTO backup', public:false, files:{'audiologia_backup.json':{content:JSON.stringify(state,null,2)}}};
-    let res,data;
-    if(!gh.id){
-      res=await fetch('https://api.github.com/gists',{method:'POST',headers,body:JSON.stringify(body)});
-      data=await res.json(); if(!res.ok) throw new Error(data.message||'Error creando Gist'); gh.id=data.id; alert('✅ Copia creada (Gist ID: '+gh.id+')');
-    }else{
-      res=await fetch('https://api.github.com/gists/'+gh.id,{method:'PATCH',headers,body:JSON.stringify(body)});
-      data=await res.json(); if(!res.ok) throw new Error(data.message||'Error actualizando Gist'); alert('✅ Copia actualizada en la nube.');
-    }
-  }catch(e){alert('❌ '+e.message);}
-}
-async function cloudLoad(){
-  try{
-    let token=gh.token; if(!token){ token=prompt('Token (scope: gist)'); if(!token) return; gh.token=token; }
-    if(!gh.id){ const id=prompt('Pega el Gist ID'); if(!id) return; gh.id=id.trim(); }
-    const headers={'Authorization':'Bearer '+gh.token,'Accept':'application/vnd.github+json'};
-    const res=await fetch('https://api.github.com/gists/'+gh.id,{headers}); const data=await res.json();
-    if(!res.ok) throw new Error(data.message||'No se pudo leer el Gist');
-    const file=data.files['audiologia_backup.json']; if(!file) throw new Error('No existe audiologia_backup.json');
-    state=JSON.parse(file.content); localSave(); hydrate(); alert('✅ Datos cargados.');
-  }catch(e){alert('❌ '+e.message);}
+function seedCentroData(){
+  return {
+    acciones:[{id:1,fecha:"",accion:"",derivacion:0,cita:0,obs:""}],
+    formaciones:[...Array(10)].map((_,i)=>({id:i+1,fecha:"",asistencia:"",titulo:"",aplicacion:""})),
+    procesos:[{id:1,nombrePaquete:"",descripcion:"",puntuacion:"",observaciones:"",fechaVisita:"",archivos:[],enlaces:[]}]
+  };
 }
 
-/* Hidratación inicial */
-function hydrate(){
-  if(state.logo) $('#logo').style.background=`#fff url('${state.logo}') center/contain no-repeat`;
-  // Selección por defecto
-  if(!state.selected.sectionId || !state.selected.itemId){
-    // priorizar centros exclusivos si hay
-    const pref=state.sections.find(s=>s.items.length>0);
-    if(pref) state.selected={sectionId:pref.id,itemId:pref.items[0].id};
-  }
+let S = JSON.parse(localStorage.getItem("audiologia_state_v2")||"null") || DEFAULT_STATE;
+let EDIT = false;
+
+/* ---------- HELPERS ---------- */
+const qs = (s,sc=document)=>sc.querySelector(s);
+const qsa = (s,sc=document)=>[...sc.querySelectorAll(s)];
+const el = (t,attrs={})=>Object.assign(document.createElement(t),attrs);
+function saveLocal(){ localStorage.setItem("audiologia_state_v2", JSON.stringify(S)); }
+function setEdit(v){
+  EDIT=v;
+  [btnLogo,btnSaveCloud,btnLoadCloud,btnBackup,btnSettings,btnAddSection,btnAddAccion,btnSaveProc,btnAddProceso]
+    .forEach(b=>b.disabled=!v);
+  qsa(".btn-mini-enable").forEach(b=>b.disabled=!v);
   renderLeft(); renderRight();
 }
-localLoad(); hydrate();
-// Autoload nube si ya hay token+id
-(async()=>{ if(!gh.token||!gh.id) return; try{
-  const headers={'Authorization':'Bearer '+gh.token,'Accept':'application/vnd.github+json'};
-  const r=await fetch('https://api.github.com/gists/'+gh.id,{headers}); if(!r.ok) return;
-  const d=await r.json(); const f=d.files['audiologia_backup.json'];
-  if(f){ state=JSON.parse(f.content); localSave(); hydrate(); console.log('Auto-cargado desde nube'); }
-}catch(_){}})();
+
+/* ---------- LEFT RENDER ---------- */
+function renderLeft(){
+  const wrap = qs("#leftList"); wrap.innerHTML="";
+  S.sections.forEach(sec=>{
+    const card = el("div",{className:"category"});
+    const head = el("div",{className:"cat-title"});
+    head.innerHTML = `<span>${sec.title}</span>
+      <span class="pill">${(sec.items||[]).length}</span>`;
+    const right = el("div");
+    const tg = el("span",{className:"toggle",textContent:"Mostrar"});
+    right.appendChild(tg);
+    if(EDIT){
+      const add = el("button",{className:"btnmini",textContent:"＋ Sub"});
+      add.onclick=()=>addSub(sec.id);
+      right.appendChild(add);
+    }
+    head.appendChild(right);
+    card.appendChild(head);
+
+    const body = el("div",{className:"cat-body hidden"});
+    (sec.items||[]).forEach(item=>{
+      const sub = el("div",{className:"subcard"});
+      const sh = el("div",{className:"subhead"});
+      const title = el("div",{innerHTML:`<strong>${item.nombre||item.titulo||"Sin nombre"}</strong>`});
+      const actions = el("div",{className:"minirow"});
+      const btnSel = el("button",{className:"btnmini",textContent:"Seleccionar"});
+      btnSel.onclick=()=>{
+        S.meta.activeSection=sec.id;
+        if(sec.type==="centros") S.meta.activeCentroId=item.id;
+        renderRight(); saveLocal();
+      };
+      actions.appendChild(btnSel);
+      if(EDIT){
+        const ebtn = el("button",{className:"btnmini",textContent:"Editar"});
+        ebtn.onclick=()=>editSub(sec.id,item.id);
+        const dbtn = el("button",{className:"btnmini danger",textContent:"Eliminar"});
+        dbtn.onclick=()=>deleteSub(sec.id,item.id);
+        actions.append(ebtn,dbtn);
+      }
+      sh.append(title,actions);
+      sub.appendChild(sh);
+
+      const meta = el("div",{className:"subinfo"});
+      if(sec.type==="centros"){
+        meta.innerHTML = `👤 ${item.delegado||"-"} &nbsp; 🎧 ${item.audiologo||"-"} &nbsp; <span class="chip">${item.tipo||"-"}</span>`;
+      }
+      sub.appendChild(meta);
+      body.appendChild(sub);
+    });
+    card.appendChild(body);
+
+    tg.onclick=()=>{
+      body.classList.toggle("hidden");
+      tg.textContent = body.classList.contains("hidden") ? "Mostrar" : "Ocultar";
+    };
+
+    wrap.appendChild(card);
+  });
+}
+
+/* ---------- RIGHT RENDER ---------- */
+function currentSection(){
+  return S.sections.find(x=>x.id===S.meta.activeSection) || S.sections[0];
+}
+function currentCentroData(){
+  const sec = currentSection();
+  if(sec.type!=="centros") return null;
+  const id = S.meta.activeCentroId;
+  if(!sec.data[id]) sec.data[id]=seedCentroData();
+  return sec.data[id];
+}
+function renderRight(){
+  const sec = currentSection();
+  const title = qs("#procTitle");
+  if(sec.type==="centros"){
+    const centro = (sec.items||[]).find(c=>c.id===S.meta.activeCentroId);
+    title.textContent = `Procedimientos — ${centro?centro.nombre:""}`;
+  }else{
+    title.textContent = `Procedimientos — ${sec.title}`;
+  }
+
+  // show groups only for Centros exclusivos (según pedido)
+  qs("#grpAcc").style.display = sec.id==="centros_exclusivos" ? "" : "none";
+  qs("#grpForm").style.display = sec.id==="centros_exclusivos" ? "" : "none";
+  qs("#grpProc").style.display = sec.id==="centros_exclusivos" ? "" : "none";
+
+  if(sec.id!=="centros_exclusivos") return;
+
+  const data = currentCentroData();
+  /* Acciones */
+  const tba = qs("#tbAcc"); tba.innerHTML="";
+  data.acciones.forEach(row=>{
+    const tr = el("tr");
+    tr.append(
+      tdInput("date",row,"fecha"),
+      tdInput("text",row,"accion"),
+      tdInput("number",row,"derivacion",0),
+      tdInput("number",row,"cita",0),
+      tdInput("text",row,"obs"),
+    );
+    const td = el("td");
+    const rm = el("button",{className:"btnmini danger",textContent:"Eliminar",disabled:!EDIT});
+    rm.onclick=()=>{ data.acciones = data.acciones.filter(a=>a.id!==row.id); renderRight(); saveLocal(); }
+    td.appendChild(rm);
+    tr.appendChild(td);
+    tba.appendChild(tr);
+  });
+
+  /* Formación */
+  const tbf = qs("#tbForm"); tbf.innerHTML="";
+  data.formaciones.forEach(row=>{
+    const tr = el("tr");
+    tr.append(
+      tdInput("date",row,"fecha"),
+      tdInput("text",row,"asistencia"),
+      tdInput("text",row,"titulo"),
+      tdInput("text",row,"aplicacion")
+    );
+    tbf.appendChild(tr);
+  });
+
+  /* Procesos */
+  const pl = qs("#procList"); pl.innerHTML="";
+  data.procesos.forEach(p=>{
+    const box = el("div",{className:"group",style:"margin:10px 0;background:#fff"});
+    const h = el("h4"); h.textContent = p.nombrePaquete||"Paquete";
+    box.appendChild(h);
+    const bd = el("div",{className:"body"});
+    bd.append(
+      rowInput("Nombre del paquete",p,"nombrePaquete"),
+      rowInput("Descripción",p,"descripcion"),
+      rowInput("Puntuación",p,"puntuacion"),
+      rowInput("Observaciones",p,"observaciones"),
+      rowInput("Fecha visita",p,"fechaVisita","date")
+    );
+
+    // archivos y enlaces (solo metadatos)
+    const fl = el("div",{className:"controls"});
+    const file = el("input",{type:"file",multiple:true,disabled:!EDIT,className:"small"});
+    file.onchange=(e)=>{
+      const arr=[...e.target.files].map(f=>({id:Date.now()+Math.random(),name:f.name,size:f.size,type:f.type}));
+      p.archivos.push(...arr); saveLocal(); renderRight();
+    };
+    const addL = el("button",{className:"btnmini",textContent:"＋ Enlace",disabled:!EDIT});
+    addL.onclick=()=>{
+      promptModal("Nuevo enlace","<input id='lurl' class='small' placeholder='URL' style='width:100%'><input id='lt' class='small' placeholder='Título' style='width:100%;margin-top:6px'>",()=>{
+        const u=qs("#lurl").value.trim(),t=qs("#lt").value.trim()||u;
+        if(u){ p.enlaces.push({id:Date.now(),url:u,title:t}); saveLocal(); renderRight(); }
+      });
+    };
+    fl.append(file,addL);
+    bd.appendChild(fl);
+
+    if(p.archivos.length){
+      const ul=el("div",{className:"note",innerHTML:"<strong>Archivos:</strong> "+p.archivos.map(a=>a.name).join(", ")});
+      bd.appendChild(ul);
+    }
+    if(p.enlaces.length){
+      const ul=el("div",{className:"note"});
+      ul.innerHTML="<strong>Enlaces:</strong> "+p.enlaces.map(l=>`<a class="link" target="_blank" href="${l.url}">${l.title}</a>`).join(" · ");
+      bd.appendChild(ul);
+    }
+
+    if(EDIT){
+      const del = el("button",{className:"btnmini danger",textContent:"Eliminar paquete"});
+      del.onclick=()=>{ data.procesos=data.procesos.filter(x=>x.id!==p.id); saveLocal(); renderRight(); }
+      bd.appendChild(del);
+    }
+
+    box.appendChild(bd);
+    pl.appendChild(box);
+  });
+}
+
+function tdInput(type,obj,key,def=""){
+  const td = el("td");
+  const ip = el("input",{type,value:obj[key]??def,disabled:!EDIT,className:"small",style:"width:100%"});
+  ip.oninput=()=>{ obj[key]= type==="number" ? (parseInt(ip.value||"0")||0) : ip.value; saveLocal(); };
+  td.appendChild(ip); return td;
+}
+function rowInput(lbl,obj,key,type="text"){
+  const w=el("div",{className:"flex"});
+  w.append(el("div",{style:"width:180px",innerHTML:`<span class='muted'>${lbl}</span>`}));
+  const ip = el("input",{type,value:obj[key]||"",disabled:!EDIT,className:"small",style:"flex:1"});
+  ip.oninput=()=>{ obj[key]=ip.value; saveLocal(); };
+  w.appendChild(ip); return w;
+}
+
+/* ---------- CRUD SUB ---------- */
+function addSub(sectionId){
+  const sec = S.sections.find(s=>s.id===sectionId);
+  if(sec.type==="centros"){
+    promptModal("Nuevo centro",
+      "<input id='n' class='small' placeholder='Nombre' style='width:100%'>\
+       <input id='d' class='small' placeholder='Delegado' style='width:100%;margin-top:6px'>\
+       <input id='a' class='small' placeholder='Audiólogo' style='width:100%;margin-top:6px'>\
+       <input id='t' class='small' placeholder='Tipo (Franquicia/Sucursal)' style='width:100%;margin-top:6px'>",
+      ()=>{
+        const id=Math.max(0,...sec.items.map(i=>i.id))+1;
+        sec.items.push({id,nombre:qs("#n").value,delegado:qs("#d").value,audiologo:qs("#a").value,tipo:qs("#t").value});
+        sec.data[id]=seedCentroData();
+        saveLocal(); renderLeft();
+      });
+  }else{
+    promptModal("Nueva subcategoría",
+      "<input id='n' class='small' placeholder='Nombre' style='width:100%'>",()=>{
+        const id=Math.max(0,...sec.items.map(i=>i.id))+1;
+        sec.items.push({id,nombre:qs("#n").value});
+        saveLocal(); renderLeft();
+      });
+  }
+}
+function editSub(sectionId,subId){
+  const sec=S.sections.find(s=>s.id===sectionId);
+  const it=sec.items.find(i=>i.id===subId);
+  if(sec.type==="centros"){
+    promptModal("Editar centro",
+      `<input id='n' class='small' value="${it.nombre||""}" style='width:100%'>
+       <input id='d' class='small' value="${it.delegado||""}" style='width:100%;margin-top:6px'>
+       <input id='a' class='small' value="${it.audiologo||""}" style='width:100%;margin-top:6px'>
+       <input id='t' class='small' value="${it.tipo||""}" style='width:100%;margin-top:6px'>`,
+      ()=>{ it.nombre=qs("#n").value; it.delegado=qs("#d").value; it.audiologo=qs("#a").value; it.tipo=qs("#t").value; saveLocal(); renderLeft(); renderRight(); });
+  }else{
+    promptModal("Editar",`<input id='n' class='small' value="${it.nombre||""}" style='width:100%'>`,
+      ()=>{ it.nombre=qs("#n").value; saveLocal(); renderLeft(); });
+  }
+}
+function deleteSub(sectionId,subId){
+  const sec=S.sections.find(s=>s.id===sectionId);
+  sec.items=sec.items.filter(i=>i.id!==subId);
+  if(sec.data) delete sec.data[subId];
+  saveLocal(); renderLeft(); renderRight();
+}
+
+/* ---------- MODAL ---------- */
+function promptModal(title,html,onok){
+  qs("#modalBody").innerHTML=`<h3 style="margin:0 0 10px">${title}</h3>${html}`;
+  qs("#modal").classList.remove("hidden");
+  qs("#mOk").onclick=()=>{ onok&&onok(); qs("#modal").classList.add("hidden"); };
+  qs("#mCancel").onclick=()=>qs("#modal").classList.add("hidden");
+}
+
+/* ---------- TOP ACTIONS ---------- */
+btnLock.onclick=()=>{
+  if(EDIT){ setEdit(false); return; }
+  const p = prompt("Introduce PIN para editar:");
+  if(p===PIN){ setEdit(true); alert("Edición habilitada."); }
+  else alert("PIN incorrecto.");
+};
+btnLogo.onclick=()=>fileLogo.click();
+fileLogo.onchange=(e)=>{
+  const f=e.target.files[0]; if(!f) return;
+  const r=new FileReader(); r.onload=ev=>{ S.meta.logo=ev.target.result; qs("#logo").src=S.meta.logo; saveLocal(); };
+  r.readAsDataURL(f);
+};
+function wireAdders(){
+  btnAddAccion.onclick=()=>{
+    const d=currentCentroData(); const id=Math.max(0,...d.acciones.map(a=>a.id))+1;
+    d.acciones.push({id,fecha:"",accion:"",derivacion:0,cita:0,obs:""}); saveLocal(); renderRight();
+  };
+  btnAddProceso.onclick=()=>{
+    const d=currentCentroData(); const id=Math.max(0,...d.procesos.map(a=>a.id))+1;
+    d.procesos.push({id,nombrePaquete:"",descripcion:"",puntuacion:"",observaciones:"",fechaVisita:"",archivos:[],enlaces:[]});
+    saveLocal(); renderRight();
+  };
+  btnSaveProc.onclick=()=>{ saveLocal(); alert("Guardado local."); };
+}
+wireAdders();
+
+/* ---------- BACKUP LOCAL ---------- */
+btnBackup.onclick=()=>{
+  const blob = new Blob([JSON.stringify(S,null,2)],{type:"application/json"});
+  const url=URL.createObjectURL(blob);
+  const a=el("a",{href:url,download:"audiologia_backup.json"}); document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+};
+
+/* ---------- CLOUD (GIST) ---------- */
+btnSettings.onclick=()=>{
+  promptModal("Ajustes de nube (Gist)",
+    `<div class="note">Crea un token en GitHub con permiso <b>Gists: read&write</b>.</div>
+     <input id='tk' class='small' placeholder='Token' style='width:100%' value="${S.cloud.token||""}">
+     <input id='gs' class='small' placeholder='Gist ID (vacío para crear uno nuevo)' style='width:100%;margin-top:6px' value="${S.cloud.gistId||""}">`,
+    ()=>{ S.cloud.token=qs("#tk").value.trim(); S.cloud.gistId=qs("#gs").value.trim(); saveLocal(); alert("Ajustes guardados."); });
+};
+async function saveToGist(){
+  if(!S.cloud.token){ alert("Configura Token en ⚙ primero."); return; }
+  const body = {
+    description:"AUDIOLOGIA-SEGUIMIENTO backup",
+    files:{ "audiologia_state.json": { content: JSON.stringify(S) } },
+    public:false
+  };
+  const headers = { "Content-Type":"application/json", "Authorization":"Bearer "+S.cloud.token };
+  let res;
+  if(S.cloud.gistId){
+    res = await fetch("https://api.github.com/gists/"+S.cloud.gistId,{method:"PATCH",headers,body:JSON.stringify(body)});
+  }else{
+    res = await fetch("https://api.github.com/gists",{method:"POST",headers,body:JSON.stringify(body)});
+  }
+  if(!res.ok){ alert("Error al guardar en la nube."); return; }
+  const j = await res.json();
+  S.cloud.gistId = j.id; saveLocal();
+  alert("Guardado en la nube ✓");
+}
+async function loadFromGist(){
+  if(!S.cloud.token || !S.cloud.gistId){ alert("Configura Token y Gist en ⚙."); return; }
+  const res = await fetch(`https://api.github.com/gists/${S.cloud.gistId}`,{
+    headers:{ "Authorization":"Bearer "+S.cloud.token }
+  });
+  if(!res.ok){ alert("No se pudo cargar desde la nube."); return; }
+  const j = await res.json();
+  const file = j.files["audiologia_state.json"];
+  if(!file){ alert("No se encontró el archivo en el Gist."); return; }
+  try{
+    S = JSON.parse(file.content);
+    saveLocal();
+    boot();
+    alert("Cargado desde la nube ✓");
+  }catch(e){ alert("Contenido inválido en el Gist."); }
+}
+btnSaveCloud.onclick=()=>saveToGist();
+btnLoadCloud.onclick=()=>loadFromGist();
+
+/* ---------- SEARCH ---------- */
+search.oninput=()=>{
+  const q = search.value.trim().toLowerCase();
+  qsa(".subcard").forEach(card=>{
+    const t = card.textContent.toLowerCase();
+    card.style.display = t.includes(q) ? "" : "none";
+  });
+};
+
+/* ---------- BOOT ---------- */
+function boot(){
+  if(S.meta.logo) qs("#logo").src=S.meta.logo;
+  renderLeft(); renderRight();
+}
+boot();
 </script>
 </body>
 </html>
