@@ -6,92 +6,82 @@
   <title>SEGUIMIENTO AUDIO</title>
   <style>
     :root{
-      --primary:#d32f2f;         /* rojo principal */
-      --primary2:#b71c1c;        /* rojo oscuro */
+      --primary:#d32f2f;        /* rojo principal */
+      --primary2:#b71c1c;       /* rojo oscuro */
       --bg:#f7f8fc;
       --card:#ffffff;
       --text:#111827;
       --muted:#6b7280;
-      --chip:#ffffff26;
       --ring: rgba(211,47,47,.45);
       color-scheme: light dark;
     }
     *{box-sizing:border-box}
     html,body{margin:0}
-    body{
-      font-family: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,sans-serif;
-      background:var(--bg); color:var(--text); line-height:1.35;
-    }
-    /* ===== Header rojo ===== */
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,sans-serif;background:var(--bg);color:var(--text);line-height:1.35}
+    /* ===== CABECERA ROJA ===== */
     header{
-      position:sticky; top:0; z-index:50;
+      position:sticky;top:0;z-index:50;
       background:linear-gradient(90deg,var(--primary2),var(--primary));
-      color:#fff; padding:12px 16px;
-      box-shadow:0 10px 24px rgba(0,0,0,.28);
+      color:#fff;padding:10px 14px;
+      box-shadow:0 10px 24px rgba(0,0,0,.28)
     }
     .bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-    .title{font-weight:900;letter-spacing:.3px;margin-right:8px;font-size:1.15rem}
+    .title{font-weight:900;letter-spacing:.3px;font-size:1.05rem;margin-right:6px}
     .chip{
-      display:inline-flex;align-items:center;gap:.45rem;
-      background:var(--chip);padding:8px 12px;border-radius:999px;
-      font-weight:700;box-shadow:inset 0 0 0 1px #ffffff2b
-    }
-    .chip input[type="text"]{
-      width:140px;border:0;outline:none;font:inherit;background:transparent;color:#fff;
-      border-bottom:1px dashed #ffffff85;padding-bottom:2px
+      display:inline-flex;align-items:center;gap:.5rem;background:#ffffff22;
+      padding:8px 12px;border-radius:999px;font-weight:700;box-shadow:inset 0 0 0 1px #ffffff33
     }
     .btn{
-      display:inline-flex;align-items:center;gap:.55rem;cursor:pointer;
-      border:0;border-radius:999px;padding:9px 14px;font-weight:800;
+      display:inline-flex;align-items:center;gap:.5rem;cursor:pointer;
+      border:0;border-radius:999px;padding:8px 12px;font-weight:800;
       background:#fff;color:var(--primary2);box-shadow:0 8px 18px rgba(0,0,0,.28)
     }
     .btn.secondary{background:#f7f7f9;color:#1f2937}
-    .sep{opacity:.5;margin:0 .35rem}
+    .btn.small{padding:6px 10px;font-weight:800}
+    .sep{opacity:.6;margin:0 .35rem}
     .status{font-weight:800}
     .last{opacity:.92}
-
-    /* ===== Layout ===== */
-    main{max-width:1060px;margin:18px auto;padding:0 16px;display:grid;gap:16px}
-    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}
-    .card{
-      grid-column:span 12;background:var(--card);border-radius:16px;padding:16px;
-      box-shadow:0 14px 34px rgba(30,41,59,.08)
-    }
+    .search{min-width:230px;border:0;outline:none;border-radius:999px;padding:9px 12px;background:#ffffff; color:#1f2937}
+    /* ===== LAYOUT ===== */
+    .layout{display:grid;grid-template-columns:320px 1fr;gap:18px;max-width:1200px;margin:18px auto;padding:0 16px}
+    aside{background:var(--card);border-radius:16px;box-shadow:0 14px 34px rgba(30,41,59,.08);padding:12px}
+    main{display:grid;gap:16px}
+    .card{background:var(--card);border-radius:16px;box-shadow:0 14px 34px rgba(30,41,59,.08);padding:16px}
     .card h2{margin:0 0 10px;font-size:1.05rem}
-    label{display:block;font-size:.92rem;color:#111827;opacity:.9;margin-bottom:6px}
-
-    /* ===== Campos con acento rojo ===== */
-    input[type="text"],select,textarea,input[type="range"]{
+    /* ===== SECCIONES LATERALES ===== */
+    .sec{border:1px solid #00000012;border-radius:12px;margin:10px 0;overflow:hidden}
+    .sec header{all:unset;display:flex;align-items:center;justify-content:space-between;background:#f3f4f6;color:#111;padding:10px 12px;font-weight:800}
+    .sec header .left{display:flex;align-items:center;gap:.5rem}
+    .sec header button{border:0;background:#fff;color:#1f2937;border-radius:8px;padding:6px 10px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.12)}
+    .sec header .toggle{background:#eaeef8}
+    .list{padding:8px 8px 10px;max-height:320px;overflow:auto}
+    .item{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:8px;border-radius:10px;cursor:pointer}
+    .item:hover{background:#f5f6fb}
+    .item.active{background:#e9ecff}
+    .muted{opacity:.7;font-size:.9rem}
+    /* ===== FORMULARIOS ===== */
+    label{display:block;font-size:.92rem;opacity:.9;margin-bottom:6px}
+    input[type="text"],select,textarea{
       width:100%;border:1px solid #0000001f;border-radius:12px;padding:10px 12px;font:inherit;background:#fff;
       outline:none;transition:border .15s, box-shadow .15s
     }
-    input:focus,select:focus,textarea:focus{
-      border-color:var(--primary);
-      box-shadow:0 0 0 4px var(--ring)
-    }
+    input:focus,select:focus,textarea:focus{border-color:var(--primary);box-shadow:0 0 0 4px var(--ring)}
     textarea{min-height:120px;resize:vertical}
     input[type="checkbox"],input[type="radio"]{accent-color:var(--primary)}
-    input[type="range"]{
-      accent-color:var(--primary);
-      background:linear-gradient(90deg,var(--primary) 0%,var(--primary) var(--val,0%), #d1d5db var(--val,0%), #d1d5db 100%);
-      height:6px;border-radius:999px
-    }
     .row{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
-    .col-6{grid-column:span 6}.col-4{grid-column:span 4}.col-3{grid-column:span 3}
-    .muted{opacity:.7;font-size:.9rem}
-    pre#preview{background:#eef1f7;border-radius:12px;padding:10px;margin:0;max-height:260px;overflow:auto;font-size:12px}
-
-    /* Estado coloreado */
-    .estado--nuevo    {border-color:#2563eb;color:#1e3a8a}
-    .estado--en_progreso{border-color:#16a34a;color:#065f46}
-    .estado--bloqueado{border-color:#dc2626;color:#7f1d1d}
-    .estado--finalizado{border-color:#6b7280;color:#111827}
-
-    /* Dark */
+    .col-6{grid-column:span 6}.col-4{grid-column:span 4}.col-3{grid-column:span 3}.col-12{grid-column:span 12}
+    /* ===== LOGO ===== */
+    .logo{height:36px;width:auto;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.25)}
+    .hidden{display:none}
+    .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:20px;background:#111;color:#fff;padding:10px 14px;border-radius:12px;box-shadow:0 14px 30px rgba(0,0,0,.25);z-index:9999;opacity:.98}
     @media (prefers-color-scheme: dark){
-      :root{--bg:#0e1116;--card:#171a21;--text:#e5e7eb;--chip:#ffffff14}
+      :root{--bg:#0e1116;--card:#171a21;--text:#e5e7eb}
+      aside, .card{box-shadow:0 14px 34px rgba(0,0,0,.25)}
+      .sec header{background:#111827;color:#e5e7eb}
+      .item:hover{background:#1f2430}
+      .item.active{background:#1b2b57}
       input,select,textarea{background:#0f1217;color:#e5e7eb;border-color:#ffffff26}
-      pre#preview{background:#0f1217;color:#d7dbea}
+      .search{background:#ffffffcc}
       .btn{background:#ffe2e2;color:#7f1212}
       .btn.secondary{background:#f0f0f0;color:#1f2937}
     }
@@ -103,244 +93,315 @@
     <div class="bar">
       <span class="title">SEGUIMIENTO AUDIO</span>
 
-      <!-- LO (identificador) -->
-      <span class="chip" title="Identificador del seguimiento (cada LO es un seguimiento separado)">
-        🔖 LO: <input id="lo" type="text" placeholder="p.ej. 001" />
-      </span>
+      <!-- Logo (adjuntar) -->
+      <label class="btn small" for="logoInput" title="Adjuntar logo">📎 Logo</label>
+      <input id="logoInput" type="file" accept="image/*" class="hidden" />
+      <img id="logoPreview" class="logo hidden" alt="Logo" />
 
-      <!-- Botones con iconos -->
-      <button id="btnSave" class="btn" title="Guardar en la nube">💾 Guardar</button>
-      <button id="btnLoad" class="btn secondary" title="Actualizar desde la nube">🔄 Actualizar</button>
+      <input id="search" class="search" type="search" placeholder="Buscar secciones / centros…" />
 
       <span class="sep">—</span>
-      <label class="chip" title="Guardado automático"><input id="chkAuto" type="checkbox" /> Auto</label>
-
-      <!-- PIN fijo -->
-      <span class="chip" title="PIN">🔑 PIN: <strong>&nbsp;AR4321&nbsp;</strong></span>
+      <button id="btnEdit" class="btn secondary" title="Introducir PIN para editar">🔒 Editar</button>
+      <button id="btnLoad" class="btn secondary" title="Actualizar desde la nube" disabled>🔄 Actualizar</button>
+      <button id="btnSave" class="btn" title="Guardar en la nube" disabled>💾 Guardar</button>
 
       <span class="chip status" id="status">⏳</span>
       <span class="chip last" id="last">—</span>
     </div>
   </header>
 
-  <!-- CUERPO -->
-  <main class="grid">
-    <section class="card">
-      <h2>Proyecto</h2>
-      <div class="row">
-        <div class="col-6">
-          <label>Título</label>
-          <input data-cloud id="titulo" type="text" placeholder="Nombre del proyecto..." />
-        </div>
-        <div class="col-3">
-          <label>Estado</label>
-          <select data-cloud id="estado">
-            <option value="">—</option>
-            <option value="nuevo">Nuevo</option>
-            <option value="en_progreso">En progreso</option>
-            <option value="bloqueado">Bloqueado</option>
-            <option value="finalizado">Finalizado</option>
-          </select>
-        </div>
-        <div class="col-3">
-          <label>Progreso: <span id="lblProgreso" class="muted">0%</span></label>
-          <input data-cloud id="progreso" type="range" min="0" max="100" step="1" value="0" />
-        </div>
-      </div>
-    </section>
-
-    <section class="card">
-      <h2>Prioridad y opciones</h2>
-      <div class="row">
-        <div class="col-4">
-          <label>Prioridad</label>
+  <!-- LAYOUT -->
+  <div class="layout">
+    <!-- LADO IZQUIERDO: SECCIONES -->
+    <aside>
+      <!-- CENTROS EXCLUSIVOS -->
+      <section class="sec" data-sec="exclusivos">
+        <header>
+          <div class="left">🏥 <span><strong>CENTROS EXCLUSIVOS</strong> <span class="muted">(máx. 10)</span></span></div>
           <div>
-            <label><input data-cloud name="prioridad" type="radio" value="alta" /> Alta</label>&nbsp;&nbsp;
-            <label><input data-cloud name="prioridad" type="radio" value="media" /> Media</label>&nbsp;&nbsp;
-            <label><input data-cloud name="prioridad" type="radio" value="baja" /> Baja</label>
+            <button class="toggle" data-toggle="exclusivos">▼</button>
+            <button class="add" data-add="exclusivos">＋</button>
           </div>
+        </header>
+        <div class="list" id="list-exclusivos"></div>
+      </section>
+
+      <!-- CENTROS FLOP -->
+      <section class="sec" data-sec="flop">
+        <header>
+          <div class="left">🏥 <span><strong>CENTROS FLOP</strong></span></div>
+          <div>
+            <button class="toggle" data-toggle="flop">▼</button>
+            <button class="add" data-add="flop">＋</button>
+          </div>
+        </header>
+        <div class="list" id="list-flop"></div>
+      </section>
+
+      <!-- VISITAS AUDIO -->
+      <section class="sec" data-sec="visitas">
+        <header>
+          <div class="left">📋 <span><strong>VISITAS AUDIO</strong></span></div>
+          <div>
+            <button class="toggle" data-toggle="visitas">▼</button>
+            <button class="add" data-add="visitas">＋</button>
+          </div>
+        </header>
+        <div class="list" id="list-visitas"></div>
+      </section>
+
+      <!-- FORMACIONES Y MENTORING -->
+      <section class="sec" data-sec="formaciones">
+        <header>
+          <div class="left">🎓 <span><strong>FORMACIONES Y MENTORING</strong></span></div>
+          <div>
+            <button class="toggle" data-toggle="formaciones">▼</button>
+            <button class="add" data-add="formaciones">＋</button>
+          </div>
+        </header>
+        <div class="list" id="list-formaciones"></div>
+      </section>
+    </aside>
+
+    <!-- LADO DERECHO: DETALLE -->
+    <main>
+      <section class="card">
+        <h2 id="detail-title">Detalle</h2>
+        <div id="detail-form">
+          <p class="muted">Selecciona una entrada en la izquierda o crea una nueva con ＋.</p>
         </div>
-        <div class="col-4">
-          <label><input data-cloud id="aviso" type="checkbox" /> Avisarme cuando cambie</label>
-        </div>
-        <div class="col-4">
-          <label>Responsable</label>
-          <input data-cloud id="responsable" type="text" placeholder="Nombre..." />
-        </div>
-      </div>
-    </section>
+      </section>
 
-    <section class="card">
-      <h2>Checklist</h2>
-      <div class="row">
-        <div class="col-6"><label><input data-cloud id="tarea1" type="checkbox" /> Brief recibido</label></div>
-        <div class="col-6"><label><input data-cloud id="tarea2" type="checkbox" /> Material validado</label></div>
-        <div class="col-6"><label><input data-cloud id="tarea3" type="checkbox" /> QA interno</label></div>
-        <div class="col-6"><label><input data-cloud id="tarea4" type="checkbox" /> Entregado a cliente</label></div>
-      </div>
-    </section>
+      <section class="card">
+        <h2>Vista previa del estado</h2>
+        <pre id="preview">—</pre>
+      </section>
+    </main>
+  </div>
 
-    <section class="card">
-      <h2>Notas</h2>
-      <textarea data-cloud id="notas" placeholder="Escribe aquí…"></textarea>
-      <p class="muted">Todo lo marcado con <code>data-cloud</code> se sincroniza por LO usando el PIN <strong>AR4321</strong>.</p>
-    </section>
-
-    <section class="card">
-      <h2>Vista previa del estado guardado</h2>
-      <pre id="preview">—</pre>
-    </section>
-  </main>
-
-  <!-- ===== LÓGICA (Cloud Sync + UI) ===== -->
+  <!-- ===== LÓGICA (estado, nube y UI) ===== -->
   <script type="module">
     /********** Config **********/
-    const PIN_BASE = "AR4321"; // PIN fijo
-    const ENDPOINT_EMBED = "https://script.google.com/macros/s/AKfycby5vh1Ja0XllWFB98ypWmDcUfUItwEciVimUd5L6Esi1wfPJbcc2dap6G0lciRf51VR/exec";
-    const CFG_KEY = "audioseguimiento_endpoint_url";
-    const LO_KEY  = "audioseguimiento_lo";
-    const BK_KEY  = "audioseguimiento_backup";
+    const PIN = "AR4321";                      // NO visible; se solicita al editar
+    const ENDPOINT = "https://script.google.com/macros/s/AKfycby5vh1Ja0XllWFB98ypWmDcUfUItwEciVimUd5L6Esi1wfPJbcc2dap6G0lciRf51VR/exec";
+
+    /********** Estado **********/
+    let state = {
+      logoDataUrl: "",
+      exclusivos: [],   // {id, nombre, delegado, audiologo, tipo}
+      flop: [],         // {id, nombre, delegado, audiologo, tipo}
+      visitas: [],      // {id, responsable}
+      formaciones: []   // {id, titulo, mentor, fecha}
+    };
+    let editing = false; // bloquea edición hasta introducir PIN
+    let selected = { section:null, id:null };
 
     /********** Helpers **********/
     const $ = s => document.querySelector(s);
-    const qs = n => new URL(location.href).searchParams.get(n);
-    function getEndpoint(){
-      const viaQS = qs("endpoint");
-      if (viaQS) return viaQS;
-      try { return JSON.parse(localStorage.getItem(CFG_KEY) || "null") || ENDPOINT_EMBED; }
-      catch { return ENDPOINT_EMBED; }
-    }
-    function toast(msg){ const t=document.createElement("div"); t.className="toast"; t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),1800); }
-
-    // Persistir endpoint pasado por URL
-    (function persistEndpointQS(){ const ep = qs("endpoint"); if(ep){ try{ new URL(ep); localStorage.setItem(CFG_KEY, JSON.stringify(ep)); }catch{} } })();
-
-    // LO (identificador)
-    const loInput = $("#lo");
-    (function initLO(){
-      const fromQS = qs("lo");
-      const stored = localStorage.getItem(LO_KEY) || "";
-      loInput.value = (fromQS ?? stored ?? "");
-      loInput.addEventListener("change", ()=> localStorage.setItem(LO_KEY, loInput.value.trim()));
-    })();
-    const effectivePIN = () => {
-      const lo = loInput.value.trim();
-      return lo ? `${PIN_BASE}:${lo}` : PIN_BASE;
+    const $$ = s => [...document.querySelectorAll(s)];
+    const statusEl = $("#status"), lastEl = $("#last"), prevEl = $("#preview");
+    const detailTitle = $("#detail-title"), detailForm = $("#detail-form");
+    const listEls = {
+      exclusivos: $("#list-exclusivos"),
+      flop: $("#list-flop"),
+      visitas: $("#list-visitas"),
+      formaciones: $("#list-formaciones")
     };
+    const setStatus = t => statusEl.textContent = t;
+    const setLast   = t => lastEl.textContent = t ? `Actualizado: ${t}` : "—";
+    const toast = m => { const t=document.createElement("div"); t.className="toast"; t.textContent=m; document.body.appendChild(t); setTimeout(()=>t.remove(),1800); };
+    const uid = () => Math.random().toString(36).slice(2,10);
 
-    const status = $("#status"), last = $("#last"), preview = $("#preview");
-    const btnSave = $("#btnSave"), btnLoad = $("#btnLoad"), chkAuto = $("#chkAuto");
-    const lblProg = $("#lblProgreso"), rngProg = $("#progreso"), estadoSel = $("#estado");
+    function updatePreview(){ prevEl.textContent = JSON.stringify(state, null, 2); }
 
-    const setStatus = s => status.textContent = s;
-    const setLast   = s => last.textContent = s ? `Actualizado: ${s}` : "—";
-
-    // Slider color progresivo
-    function setRangeBg(){
-      const v = (+rngProg.value||0); rngProg.style.setProperty("--val", v+"%");
-    }
-    rngProg.addEventListener("input", ()=>{ setRangeBg(); lblProg.textContent = `${rngProg.value}%`; });
-
-    // Color dinámico por estado
-    function paintEstado(){
-      const v = estadoSel.value || "";
-      estadoSel.classList.remove("estado--nuevo","estado--en_progreso","estado--bloqueado","estado--finalizado");
-      if (!v) return;
-      estadoSel.classList.add(`estado--${v}`);
-    }
-    estadoSel.addEventListener("change", paintEstado);
-
-    /********** Estado **********/
-    function getCloudElements(){ return [...document.querySelectorAll("[data-cloud]")]; }
-    function readEl(el){
-      if (el.tagName==="INPUT"){
-        const t=(el.type||"text").toLowerCase();
-        if (t==="checkbox") return !!el.checked;
-        if (t==="radio") return el.checked ? el.value : null;
-        return el.value;
-      }
-      if (el.tagName==="TEXTAREA"||el.tagName==="SELECT") return el.value;
-      return el.textContent;
-    }
-    function writeEl(el,val){
-      if (el.tagName==="INPUT"){
-        const t=(el.type||"text").toLowerCase();
-        if (t==="checkbox"){ el.checked=!!val; return; }
-        if (t==="radio"){ el.checked=(val===el.value); return; }
-        el.value=(val??"");
-        el.dispatchEvent(new Event("input",{bubbles:true}));
-        el.dispatchEvent(new Event("change",{bubbles:true}));
-        return;
-      }
-      if (el.tagName==="TEXTAREA"||el.tagName==="SELECT"){
-        el.value=(val??"");
-        el.dispatchEvent(new Event("input",{bubbles:true}));
-        el.dispatchEvent(new Event("change",{bubbles:true}));
-        return;
-      }
-      if (typeof val==="string") el.textContent=val;
-    }
-    function collectState(){
-      const s={}; getCloudElements().forEach((el,i)=>{ const k=el.id||el.name||`el_${i}`; const v=readEl(el); if(v!==null&&k) s[k]=v; });
-      preview.textContent = JSON.stringify(s,null,2);
-      return s;
-    }
-    function applyState(s){
-      if(!s||typeof s!=="object") return;
-      Object.keys(s).forEach(k=>{
-        const el=document.getElementById(k)||document.querySelector(`[name="${CSS.escape(k)}"]`);
-        if(el) writeEl(el,s[k]);
+    function renderLists(filter=""){
+      ["exclusivos","flop","visitas","formaciones"].forEach(sec=>{
+        const data = state[sec];
+        const ul = listEls[sec]; ul.innerHTML = "";
+        (data||[]).filter(it=>{
+          const txt = Object.values(it).join(" ").toLowerCase();
+          return txt.includes(filter.toLowerCase());
+        }).forEach(it=>{
+          const div=document.createElement("div");
+          div.className="item"+(selected.section===sec && selected.id===it.id ? " active":"");
+          const label = (sec==="visitas") ? (it.responsable || "(Sin responsable)") :
+                        (sec==="formaciones") ? (it.titulo || "(Sin título)") :
+                        (it.nombre || "(Sin nombre)");
+          div.innerHTML = `<span>${label}</span><span class="muted">#${it.id.slice(0,4)}</span>`;
+          div.onclick = ()=>{ selected={section:sec,id:it.id}; renderLists(filter); renderDetail(); };
+          ul.appendChild(div);
+        });
       });
-      // Ajustes visuales dependientes
-      if (s?.progreso !== undefined){ rngProg.value = s.progreso; setRangeBg(); lblProg.textContent = `${s.progreso}%`; }
-      paintEstado();
-      preview.textContent = JSON.stringify(s,null,2);
+      updatePreview();
     }
 
-    /********** Copia local **********/
-    const saveBackup = (state,pin)=>{ try{ localStorage.setItem(`${BK_KEY}:${pin}`, JSON.stringify({when:Date.now(), state})); }catch{} };
-    const loadBackup = (pin)=>{ try{ return JSON.parse(localStorage.getItem(`${BK_KEY}:${pin}`)||"null"); }catch{ return null; } };
+    function renderDetail(){
+      const {section,id} = selected;
+      if(!section){ detailTitle.textContent="Detalle"; detailForm.innerHTML=`<p class="muted">Selecciona una entrada o crea una nueva.</p>`; return; }
+      const arr = state[section];
+      const it  = arr.find(x=>x.id===id);
+      detailTitle.textContent = {
+        exclusivos:"Centro EXCLUSIVO",
+        flop:"Centro FLOP",
+        visitas:"Visita de AUDIO",
+        formaciones:"Formación / Mentoring"
+      }[section] + `  ·  #${id.slice(0,6)}`;
 
-    /********** Nube **********/
+      // Formulario de detalle según sección
+      if(section==="exclusivos" || section==="flop"){
+        detailForm.innerHTML = `
+          <div class="row">
+            <div class="col-6"><label>Nombre</label><input id="f_nombre" type="text" ${!editing?"disabled":""} value="${it.nombre||""}"/></div>
+            <div class="col-6"><label>Delegado</label><input id="f_delegado" type="text" ${!editing?"disabled":""} value="${it.delegado||""}"/></div>
+            <div class="col-6"><label>Audiólogo</label><input id="f_audiologo" type="text" ${!editing?"disabled":""} value="${it.audiologo||""}"/></div>
+            <div class="col-6"><label>Tipo</label>
+              <select id="f_tipo" ${!editing?"disabled":""}>
+                <option value="">—</option>
+                <option value="sucursal" ${it.tipo==="sucursal"?"selected":""}>Sucursal</option>
+                <option value="franquicia" ${it.tipo==="franquicia"?"selected":""}>Franquicia</option>
+              </select>
+            </div>
+          </div>
+        `;
+      } else if(section==="visitas"){
+        detailForm.innerHTML = `
+          <div class="row">
+            <div class="col-6"><label>Responsable</label><input id="f_responsable" type="text" ${!editing?"disabled":""} value="${it.responsable||""}"/></div>
+          </div>
+        `;
+      } else if(section==="formaciones"){
+        detailForm.innerHTML = `
+          <div class="row">
+            <div class="col-6"><label>Título</label><input id="f_titulo" type="text" ${!editing?"disabled":""} value="${it.titulo||""}"/></div>
+            <div class="col-3"><label>Mentor</label><input id="f_mentor" type="text" ${!editing?"disabled":""} value="${it.mentor||""}"/></div>
+            <div class="col-3"><label>Fecha</label><input id="f_fecha" type="text" placeholder="YYYY-MM-DD" ${!editing?"disabled":""} value="${it.fecha||""}"/></div>
+          </div>
+        `;
+      }
+      // Escuchar cambios si está desbloqueado
+      if(editing){
+        detailForm.querySelectorAll("input,select,textarea").forEach(inp=>{
+          inp.addEventListener("input", ()=>{
+            if(section==="exclusivos"||section==="flop"){
+              it.nombre   = $("#f_nombre").value;
+              it.delegado = $("#f_delegado").value;
+              it.audiologo= $("#f_audiologo").value;
+              it.tipo     = $("#f_tipo").value;
+            }else if(section==="visitas"){
+              it.responsable = $("#f_responsable").value;
+            }else if(section==="formaciones"){
+              it.titulo = $("#f_titulo").value;
+              it.mentor = $("#f_mentor").value;
+              it.fecha  = $("#f_fecha").value;
+            }
+            renderLists($("#search").value);
+          });
+        });
+      }
+    }
+
+    function addItem(section){
+      if(section==="exclusivos" && state.exclusivos.length>=10){ toast("Máximo 10 centros exclusivos"); return; }
+      const obj = (section==="visitas") ? {id:uid(), responsable:""} :
+                  (section==="formaciones") ? {id:uid(), titulo:"", mentor:"", fecha:""} :
+                  {id:uid(), nombre:"", delegado:"", audiologo:"", tipo:""};
+      state[section].push(obj);
+      selected={section,id:obj.id};
+      renderLists($("#search").value);
+      renderDetail();
+    }
+
+    /********** Búsqueda de secciones / items **********/
+    $("#search").addEventListener("input", e=>{
+      renderLists(e.target.value);
+    });
+
+    /********** Logo **********/
+    const logoInput = $("#logoInput"), logoPreview=$("#logoPreview");
+    logoInput.addEventListener("change", ()=>{
+      const file = logoInput.files?.[0];
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        state.logoDataUrl = String(reader.result||"");
+        logoPreview.src = state.logoDataUrl;
+        logoPreview.classList.remove("hidden");
+        updatePreview();
+      };
+      reader.readAsDataURL(file);
+    });
+
+    /********** Colapsables y añadir **********/
+    $$(".toggle").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const key = btn.dataset.toggle;
+        const list = listEls[key];
+        const open = !list.classList.contains("hidden");
+        if(open){ list.classList.add("hidden"); btn.textContent="►"; }
+        else{ list.classList.remove("hidden"); btn.textContent="▼"; }
+      });
+    });
+    $$(".add").forEach(btn=>btn.addEventListener("click", ()=>{
+      if(!editing){ toast("Pulsa ‘Editar’ e introduce el PIN para añadir"); return; }
+      addItem(btn.dataset.add);
+    }));
+
+    /********** Bloqueo por PIN **********/
+    const btnEdit=$("#btnEdit"), btnSave=$("#btnSave"), btnLoad=$("#btnLoad");
+    function setEditing(on){
+      editing = !!on;
+      btnSave.disabled = !editing;
+      btnLoad.disabled = !editing;
+      btnEdit.textContent = editing ? "🔓 Editando" : "🔒 Editar";
+      // Re-render detalle para habilitar/deshabilitar inputs
+      renderDetail();
+    }
+    btnEdit.addEventListener("click", ()=>{
+      if(editing){ setEditing(false); return; }
+      const pin = prompt("Introduce el PIN para editar:");
+      if(pin===PIN){ setEditing(true); toast("Edición desbloqueada"); }
+      else { alert("PIN incorrecto."); }
+    });
+
+    /********** Nube (sin tokens) **********/
     async function saveToCloud(){
       try{
-        const PIN = effectivePIN();
         setStatus("💾 Guardando…");
-        const ENDPOINT = getEndpoint();
-        const state = collectState();
         const res = await fetch(ENDPOINT,{
-          method:"POST",
-          headers:{"Content-Type":"application/json"},
-          body: JSON.stringify({ action:"save", pin: PIN, state })
+          method:"POST", headers:{"Content-Type":"application/json"},
+          body: JSON.stringify({action:"save", pin:PIN, state})
         });
         const json = await res.json().catch(()=>null);
-        if(!res.ok||!json?.ok) throw new Error(json?.error||("HTTP "+res.status));
-        setStatus("✅ Guardado"); setLast(json.updatedAt); toast("Guardado en la nube"); saveBackup(state,PIN);
-      }catch(e){ console.error(e); setStatus("❌ Error al guardar"); toast("Error al guardar"); }
+        if(!res.ok || !json?.ok) throw new Error(json?.error||("HTTP "+res.status));
+        setStatus("✅ Guardado"); setLast(json.updatedAt); toast("Guardado en la nube");
+      }catch(e){ console.error(e); setStatus("❌ Error al guardar"); alert("No se pudo guardar."); }
     }
     async function loadFromCloud(){
       try{
-        const PIN = effectivePIN();
         setStatus("⬇️ Cargando…");
-        const u=new URL(getEndpoint()); u.searchParams.set("action","load"); u.searchParams.set("pin", PIN);
-        const res=await fetch(u.toString(),{method:"GET"}); const json=await res.json().catch(()=>null);
-        if(!res.ok||!json?.ok) throw new Error(json?.error||("HTTP "+res.status));
-        applyState(json.state||{}); setStatus("✅ Actualizado"); setLast(json.updatedAt); toast("Datos cargados");
-      }catch(e){
-        console.error(e); setStatus("❌ Error al cargar");
-        const bk=loadBackup(effectivePIN()); if(bk?.state){ applyState(bk.state); toast("Restaurado desde copia local"); }
-      }
+        const u=new URL(ENDPOINT); u.searchParams.set("action","load"); u.searchParams.set("pin",PIN);
+        const res=await fetch(u.toString(),{method:"GET"});
+        const json=await res.json().catch(()=>null);
+        if(!res.ok || !json?.ok) throw new Error(json?.error||("HTTP "+res.status));
+        state = Object.assign({logoDataUrl:"",exclusivos:[],flop:[],visitas:[],formaciones:[]}, json.state||{});
+        // Logo preview
+        if(state.logoDataUrl){ logoPreview.src = state.logoDataUrl; logoPreview.classList.remove("hidden"); }
+        // Reset selección
+        selected={section:null,id:null};
+        renderLists($("#search").value);
+        renderDetail();
+        setStatus("✅ Actualizado"); setLast(json.updatedAt); toast("Datos cargados");
+      }catch(e){ console.error(e); setStatus("❌ Error al cargar"); alert("No se pudo cargar."); }
     }
-
-    /********** Auto-guardado + atajos **********/
-    let autosaveTimer=null;
-    function autoSaveTick(){ if(!$("#chkAuto").checked) return; clearTimeout(autosaveTimer); autosaveTimer=setTimeout(saveToCloud,800); }
-    function hookAutosave(){ getCloudElements().forEach(el=>["input","change","keyup","blur"].forEach(evt=>el.addEventListener(evt,autoSaveTick))); }
-    document.addEventListener("keydown", e=>{ if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="s"){ e.preventDefault(); saveToCloud(); } });
-    loInput.addEventListener("change", ()=>{ setLast("—"); loadFromCloud(); });
+    btnSave.addEventListener("click", saveToCloud);
+    btnLoad.addEventListener("click", loadFromCloud);
 
     /********** Arranque **********/
-    hookAutosave(); setRangeBg(); loadFromCloud();
+    setEditing(false);
+    renderLists();
+    renderDetail();
+    // Carga inicial de nube (solo lectura, aunque no hayas puesto PIN)
+    loadFromCloud();
   </script>
 </body>
 </html>
