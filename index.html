@@ -2,437 +2,649 @@
 <html lang="es">
 <head>
 <meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>AUDIOLOGIA-SEGUIMIENTO</title>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
 <style>
-  :root{
-    --brand:#e11d48; --ink:#0f172a; --muted:#64748b; --bg:#f1f5f9; --card:#ffffff; --ok:#16a34a; --warn:#f59e0b;
-  }
-  *{box-sizing:border-box} body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
-  .app{max-width:1220px;margin:24px auto;padding:0 16px}
-  .bar{display:flex;align-items:center;gap:12px;background:var(--card);border-radius:14px;padding:10px 14px;border:3px solid var(--brand)}
-  .logo{width:140px;height:44px;object-fit:contain;border-radius:8px;background:#f8fafc;display:block}
-  .title{font-weight:800;font-size:26px;letter-spacing:.5px}
-  .grow{flex:1}
-  .btn-ic{width:42px;height:42px;border-radius:12px;border:none;display:grid;place-items:center;background:#1f2937;color:#fff;cursor:pointer}
-  .btn-ic.red{background:#ef4444} .btn-ic.blue{background:#2563eb} .btn-ic.gray{background:#374151}
-  .btn{background:var(--brand);color:#fff;border:none;border-radius:10px;padding:9px 14px;font-weight:600;cursor:pointer}
-  .pill{display:inline-flex;align-items:center;gap:8px;background:#f8fafc;border:1px solid #e2e8f0;padding:8px 12px;border-radius:12px}
-  .wrap{display:grid;grid-template-columns:360px 1fr;gap:16px;margin-top:16px}
-  .card{background:var(--card);border-radius:14px;padding:14px;border:1px solid #e5e7eb}
-  .h{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-  .h h3{margin:0;font-size:18px}
-  .sec{margin-bottom:10px;border:1px solid #e5e7eb;border-radius:12px;padding:10px;background:#fcfcfd}
-  .sec-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
-  .mini{display:flex;align-items:center;gap:8px}
-  .tag{font-weight:700}
-  .sublist{display:grid;gap:8px}
-  .sub{display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px dashed #e5e7eb;border-radius:10px;padding:8px 10px}
-  .sub .meta{font-size:12px;color:var(--muted)}
-  .badge{font-size:12px;padding:2px 8px;border-radius:999px;border:1px solid #e5e7eb;background:#fff}
-  .b1{background:#eef2ff;border-color:#c7d2fe} .b2{background:#ecfeff;border-color:#a5f3fc}
-  .b3{background:#ecfccb;border-color:#bef264} .b4{background:#fee2e2;border-color:#fecaca}
-  .actions{display:flex;gap:6px}
-  .x{cursor:pointer;border:none;background:#fff;border-radius:8px;padding:6px}
-  .x:hover{background:#f1f5f9}
-  .proc-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
-  .proc-title{font-size:20px;font-weight:800}
-  .t{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb}
-  .t th,.t td{border-bottom:1px solid #e5e7eb;padding:10px;font-size:14px}
-  .t th{background:#0f172a;color:#fff;text-align:left}
-  input,select{border:1px solid #e5e7eb;border-radius:8px;padding:8px 10px;font:inherit;width:100%}
-  .foot{margin-top:10px;display:flex;gap:8px;justify-content:flex-end}
-  .muted{color:var(--muted);font-size:12px}
-  .note{font-size:12px;color:#475569;margin-top:8px}
-  @media(max-width:980px){.wrap{grid-template-columns:1fr}}
+  /* Evita zoom feo en móviles al usar inputs */
+  input, select, button { font-size: 16px; }
+  /* Scroll table */
+  .table-scroll { overflow-x:auto; }
+  /* Celda arrastrable */
+  .drag-dots{display:flex;flex-direction:column;gap:3px;align-items:center;}
+  .drag-dots span{width:3px;height:3px;border-radius:9999px;background:#9ca3af;display:block}
+  /* Logo */
+  #logoImg{max-height:48px;max-width:180px;object-fit:contain}
 </style>
 </head>
-<body>
-<div class="app">
-  <!-- TOP BAR -->
-  <div class="bar">
-    <img id="logo" class="logo" alt="Logo">
-    <div class="pill"><strong>Plataforma</strong> <span class="title">AUDIOLOGIA-SEGUIMIENTO</span></div>
-    <div class="grow"></div>
-    <button class="btn-ic gray" id="btnLogo" title="Subir logo">🖼️</button>
-    <button class="btn-ic gray" id="btnLock" title="Editar (PIN)">🔒</button>
-    <button class="btn-ic red"  id="btnSaveLocal" title="Guardar local">💾</button>
-    <button class="btn-ic blue" id="btnExport" title="Exportar JSON (subir al repo como data.json)">⬇️</button>
-    <button class="btn-ic gray" id="btnCloud" title="Actualizar de nube (leer data.json)">🔄</button>
-    <button class="btn-ic gray" id="btnCfg" title="Ajustes">⚙️</button>
-    <input id="fileLogo" type="file" accept="image/*" hidden>
-  </div>
-
-  <!-- SEARCH -->
-  <div class="card" style="margin-top:12px">
-    <input id="q" placeholder="Buscar en secciones, centros y datos…">
-  </div>
-
-  <div class="wrap">
-    <!-- LEFT: SECTIONS -->
-    <div class="card" id="left">
-      <div class="h">
-        <h3>Secciones</h3>
-        <button class="btn" id="addSection">+ Añadir sección</button>
+<body class="bg-gray-50 text-gray-800">
+<div id="app" class="max-w-7xl mx-auto p-4">
+  <!-- CABECERA -->
+  <div class="bg-white rounded-xl shadow border border-red-200 p-3 mb-4 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <img id="logoImg" alt="Logo" src="" class="cursor-pointer" title="Cambiar logo (requiere PIN)"/>
+      <div class="flex items-center gap-2">
+        <!-- Iconos cabecera -->
+        <button id="btnEdit" class="p-2 rounded-lg bg-gray-100 hover:bg-gray-200" title="Editar (PIN)">
+          ✎
+        </button>
+        <button id="btnBackup" class="p-2 rounded-lg bg-gray-100 hover:bg-gray-200" title="Descargar backup .json">
+          💾
+        </button>
+        <button id="btnImport" class="p-2 rounded-lg bg-gray-100 hover:bg-gray-200" title="Importar backup .json">
+          ⬆️
+        </button>
+        <button id="btnCloudUrl" class="p-2 rounded-lg bg-gray-100 hover:bg-gray-200" title="Configurar URL nube (data.json)">
+          ☁️🔧
+        </button>
+        <button id="btnCloudPull" class="p-2 rounded-lg bg-gray-100 hover:bg-gray-200" title="Actualizar de nube (leer)">
+          ☁️🔄
+        </button>
       </div>
+    </div>
+    <div class="text-right">
+      <div class="text-sm text-gray-500">Última carga nube: <span id="lastCloudTs">–</span></div>
+    </div>
+  </div>
 
-      <!-- Secciones fijas -->
-      <div id="sections"></div>
-      <div class="note">Consejo: pulsa el nombre de un centro para cargar sus procedimientos.</div>
+  <div class="grid grid-cols-12 gap-4">
+    <!-- LADO IZQUIERDO: SECCIONES -->
+    <div class="col-span-12 md:col-span-4">
+      <div class="bg-white rounded-xl shadow border border-gray-200 p-3">
+        <div class="flex items-center justify-between mb-2">
+          <h2 class="font-bold">Secciones</h2>
+          <button id="btnAddSection" class="px-2 py-1 bg-red-600 text-white rounded-lg text-sm" title="Añadir sección">+</button>
+        </div>
+
+        <div id="sections"></div>
+      </div>
     </div>
 
-    <!-- RIGHT: PROCEDIMIENTOS -->
-    <div class="card">
-      <div class="proc-head">
-        <div class="proc-title" id="procTitle">Procedimientos — </div>
-        <span class="badge" id="itemsCount">0 ítems</span>
-        <div class="grow"></div>
-        <button class="btn" id="addProc">+ Añadir</button>
-        <button class="btn" id="saveProc">Guardar</button>
-      </div>
+    <!-- DERECHA: PROCEDIMIENTOS -->
+    <div class="col-span-12 md:col-span-8">
+      <div class="bg-white rounded-xl shadow border border-gray-200 p-3">
+        <div class="flex items-center justify-between mb-3">
+          <div>
+            <h2 class="font-bold text-xl">Procedimientos</h2>
+            <div id="activeCentroBadge" class="text-sm text-gray-600"></div>
+          </div>
+          <button id="btnAddProc" class="px-3 py-1 bg-blue-600 text-white rounded-lg text-sm" title="Añadir procedimiento">+</button>
+        </div>
 
-      <!-- Acciones-Resultado -->
-      <div class="sec">
-        <div class="sec-h"><div class="mini"><span class="tag">Acciones – Resultado</span></div></div>
-        <div class="table-wrap">
-          <table class="t" id="tblAcc">
-            <thead><tr>
-              <th>#</th><th>Fecha</th><th>Acción</th><th>Derivación</th><th>Cita</th><th>Observaciones</th><th></th>
-            </tr></thead>
-            <tbody></tbody>
-          </table>
+        <!-- BLOQUES (colapsables) para Centros Exclusivos -->
+        <div class="space-y-4" id="procArea">
+          <!-- ACCIONES-RESULTADO -->
+          <details open class="border rounded-lg">
+            <summary class="cursor-pointer px-3 py-2 bg-gray-100 font-semibold">Acciones – Resultado</summary>
+            <div class="p-2 table-scroll">
+              <table class="min-w-full border bg-white rounded">
+                <thead>
+                  <tr class="bg-red-600 text-white text-sm">
+                    <th class="p-2 w-8">↕</th>
+                    <th class="p-2 w-10">#</th>
+                    <th class="p-2 w-36">Fecha</th>
+                    <th class="p-2 w-56">Acción</th>
+                    <th class="p-2 w-24">Derivación</th>
+                    <th class="p-2 w-24">Cita</th>
+                    <th class="p-2">Observaciones</th>
+                    <th class="p-2 w-12">❌</th>
+                  </tr>
+                </thead>
+                <tbody id="tbAcciones"></tbody>
+              </table>
+              <div class="mt-2 flex justify-end">
+                <button id="addAccion" class="px-3 py-1 bg-blue-600 text-white rounded">Añadir</button>
+              </div>
+            </div>
+          </details>
+
+          <!-- FORMACION CONTINUA -->
+          <details class="border rounded-lg">
+            <summary class="cursor-pointer px-3 py-2 bg-gray-100 font-semibold">Formación Continua</summary>
+            <div class="p-2 table-scroll">
+              <table class="min-w-full border bg-white rounded">
+                <thead>
+                  <tr class="bg-red-600 text-white text-sm">
+                    <th class="p-2 w-8">↕</th>
+                    <th class="p-2 w-10">#</th>
+                    <th class="p-2 w-36">Fecha</th>
+                    <th class="p-2 w-32">Asistencia</th>
+                    <th class="p-2">Título</th>
+                    <th class="p-2">Aplicación</th>
+                  </tr>
+                </thead>
+                <tbody id="tbFormacion"></tbody>
+              </table>
+            </div>
+          </details>
+
+          <!-- PROCESOS PERSONALIZADOS -->
+          <details class="border rounded-lg">
+            <summary class="cursor-pointer px-3 py-2 bg-gray-100 font-semibold">Procesos / Paquetes</summary>
+            <div class="p-2 table-scroll">
+              <table class="min-w-full border bg-white rounded">
+                <thead>
+                  <tr class="bg-red-600 text-white text-sm">
+                    <th class="p-2 w-8">↕</th>
+                    <th class="p-2 w-10">#</th>
+                    <th class="p-2 w-48">Nombre Paquete</th>
+                    <th class="p-2">Descripción</th>
+                    <th class="p-2 w-28">Puntuación</th>
+                    <th class="p-2">Observaciones</th>
+                    <th class="p-2 w-36">Fecha Visita</th>
+                    <th class="p-2 w-12">❌</th>
+                  </tr>
+                </thead>
+                <tbody id="tbProcesos"></tbody>
+              </table>
+              <div class="mt-2 flex justify-end">
+                <button id="addProceso" class="px-3 py-1 bg-blue-600 text-white rounded">Añadir</button>
+              </div>
+            </div>
+          </details>
+
         </div>
       </div>
-
-      <!-- Formación Continua -->
-      <div class="sec">
-        <div class="sec-h"><div class="mini"><span class="tag">Formación continua</span></div></div>
-        <table class="t" id="tblForm">
-          <thead><tr>
-            <th>#</th><th>Fecha</th><th>Asistencia (SI/NO)</th><th>Título</th><th>Aplicación</th><th></th>
-          </tr></thead>
-          <tbody></tbody>
-        </table>
-        <div class="foot"><button class="btn" id="saveForm">Guardar</button></div>
-      </div>
-
-      <!-- Procesos personalizados -->
-      <div class="sec">
-        <div class="sec-h"><div class="mini"><span class="tag">Procesos y paquetes personalizados</span></div></div>
-        <table class="t" id="tblProc">
-          <thead><tr>
-            <th>#</th><th>Nombre paquete</th><th>Descripción</th><th>Puntuación</th><th>Observaciones</th><th>Fecha visita</th><th></th>
-          </tr></thead>
-          <tbody></tbody>
-        </table>
-        <div class="foot"><button class="btn" id="savePP">Guardar</button></div>
-      </div>
     </div>
   </div>
-
-  <div class="muted" id="status"></div>
 </div>
 
-<script>
-/* ===== CONFIG NUBE LOCAL =====
-   URL del JSON en la nube (mismo repo). Sube/actualiza un archivo 'data.json' en la raíz.
-   Ejemplo de acceso: https://arrojasboris-byte.github.io/AudioSeguimiento/data.json
-*/
-const CLOUD_URL = location.origin + location.pathname.replace(/index\.html?$/,'') + 'data.json';
+<input type="file" id="fileImport" accept="application/json" class="hidden"/>
 
-// Estado principal
-let state = {
-  logo: "", company: "AUDIOLOGÍA",
-  pin: "AR4321", edit:false,
+<script>
+/* =========================
+   ESTADO + NUBE SENCILLA
+========================= */
+const STORAGE_KEY = "audioseguimiento_state_v1";
+const CLOUD_URL_KEY = "audioseguimiento_cloud_url";
+let STATE = null;
+let EDIT_MODE = false;
+const PIN = "AR4321"; // tu PIN
+
+// URL de nube (LEER). PON AQUÍ tu URL final cuando ya subas data.json a Pages
+// Ejemplo root:  https://TUUSUARIO.github.io/TU_REPO/data.json
+// Ejemplo /docs: https://TUUSUARIO.github.io/TU_REPO/docs/data.json
+let CLOUD_URL = localStorage.getItem(CLOUD_URL_KEY) || "";
+
+// Datos por defecto (para que nunca tengas 404)
+const DEFAULT_STATE = {
+  logo: "",
+  company: "AUDIOLOGÍA",
+  activeCentro: "c1",
   sections: [
-    { id:'exclusivos', title:'Centros exclusivos', subs:[
-      { id:'c1', name:'Reina Mercedes', delegado:'Ana Martínez', audiologo:'Dr. García', tipo:'Franquicia', color:'b1' },
-      { id:'c2', name:'Barcelona Centro', delegado:'Carlos Ruiz', audiologo:'Dra. López', tipo:'Sucursal', color:'b2' },
-    ]},
-    { id:'flop', title:'Centros flop', subs:[] },
-    { id:'form', title:'Formaciones – Mentoring', subs:[] },
-    { id:'visitas', title:'Visitas a centros', subs:[] },
+    {
+      id: "exclusivos",
+      title: "Centros Exclusivos",
+      color: "red",
+      subs: [
+        { id:"c1", name:"Centro Madrid Norte", delegado:"Ana Martínez", audiologo:"Dr. García", tipo:"Franquicia", color:"bg-blue-100 border-blue-400 text-blue-800" },
+        { id:"c2", name:"Centro Barcelona Centro", delegado:"Carlos Ruiz", audiologo:"Dra. López", tipo:"Sucursal", color:"bg-green-100 border-green-400 text-green-800" }
+      ]
+    },
+    { id:"flop", title:"Centros FLOP", color:"gray", subs:[] },
+    { id:"form", title:"Formaciones – Mentoring", color:"gray", subs:[] },
+    { id:"visitas", title:"Visitas a centros", color:"gray", subs:[] }
   ],
-  // Datos por centro exclusivo
-  dataByCentro:{
-    c1: sampleCentroData(),
-    c2: sampleCentroData()
-  },
-  activeCentro:'c1'
+  dataByCentro: {
+    "c1": {
+      acciones: [
+        { id:1, fecha:"", accion:"", derivacion:0, cita:0, obs:"" }
+      ],
+      formaciones: [
+        { id:1, fecha:"", asistencia:"", titulo:"", aplica:"" },
+        { id:2, fecha:"", asistencia:"", titulo:"", aplica:"" },
+        { id:3, fecha:"", asistencia:"", titulo:"", aplica:"" },
+        { id:4, fecha:"", asistencia:"", titulo:"", aplica:"" }
+      ],
+      procesos: [
+        { id:1, nombrePaquete:"", descripcion:"", puntuacion:"", obs:"", fecha:"" }
+      ]
+    },
+    "c2": {
+      acciones: [
+        { id:1, fecha:"", accion:"", derivacion:0, cita:0, obs:"" }
+      ],
+      formaciones: [
+        { id:1, fecha:"", asistencia:"", titulo:"", aplica:"" },
+        { id:2, fecha:"", asistencia:"", titulo:"", aplica:"" },
+        { id:3, fecha:"", asistencia:"", titulo:"", aplica:"" },
+        { id:4, fecha:"", asistencia:"", titulo:"", aplica:"" }
+      ],
+      procesos: [
+        { id:1, nombrePaquete:"", descripcion:"", puntuacion:"", obs:"", fecha:"" }
+      ]
+    }
+  }
 };
 
-function sampleCentroData(){
-  return {
-    acciones:[{id:1, fecha:'', accion:'', derivacion:0, cita:0, obs:''}],
-    formaciones:Array.from({length:10},(_,i)=>({id:i+1,fecha:'',asistencia:'',titulo:'',aplica:''})),
-    procesos:[{id:1,nombrePaquete:'',descripcion:'',puntuacion:'',obs:'',fecha:''}]
-  }
+/* =========================
+   UTILIDADES
+========================= */
+function saveLocal(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(STATE));
 }
 
-// Helpers
-const $ = s => document.querySelector(s);
-const $$ = s => document.querySelectorAll(s);
-function uid(){ return Math.random().toString(36).slice(2,9) }
-function setStatus(msg){ $('#status').textContent = msg }
-
-// Render
-function renderLogo(){
-  const el = $('#logo');
-  if(state.logo){ el.src = state.logo; el.alt='Logo' } else { el.removeAttribute('src'); el.alt='Logo' }
-}
-function renderSections(){
-  const box = $('#sections'); box.innerHTML='';
-  state.sections.forEach(sec=>{
-    const wrap = document.createElement('div'); wrap.className='sec';
-    const count = sec.subs.length;
-    wrap.innerHTML = `
-      <div class="sec-h">
-        <div class="mini"><span class="tag">${sec.title}</span> <span class="badge">${count}</span></div>
-        <div class="actions">
-          <button class="x" title="Añadir sub" data-act="addSub" data-sec="${sec.id}">➕</button>
-        </div>
-      </div>
-      <div class="sublist" id="list-${sec.id}"></div>
-    `;
-    box.appendChild(wrap);
-    const list = wrap.querySelector('.sublist');
-
-    sec.subs.forEach((s,i)=>{
-      const row = document.createElement('div'); row.className='sub';
-      row.innerHTML = `
-        <div style="display:flex;flex-direction:column;gap:2px;max-width:70%">
-          <div style="display:flex;align-items:center;gap:8px;cursor:pointer" data-act="selectCentro" data-id="${s.id}">
-            <strong>${s.name}</strong>
-            <span class="badge ${s.color||'b3'}">${s.tipo||'-'}</span>
-          </div>
-          <div class="meta">👤 ${s.delegado||'-'} · 🎧 ${s.audiologo||'-'}</div>
-        </div>
-        <div class="actions">
-          <button class="x" title="Editar" data-act="editSub" data-sec="${sec.id}" data-id="${s.id}">✏️</button>
-          <button class="x" title="Eliminar" data-act="delSub" data-sec="${sec.id}" data-id="${s.id}">🗑️</button>
-        </div>
-      `;
-      list.appendChild(row);
-    });
-  });
-}
-function activeCentroName(){
-  for(const sec of state.sections){
-    for(const s of sec.subs){ if(s.id===state.activeCentro) return s.name }
-  }
-  return '';
-}
-function ensureCentroData(id){
-  if(!state.dataByCentro[id]) state.dataByCentro[id]=sampleCentroData();
-  return state.dataByCentro[id];
-}
-function renderTablas(){
-  const centro = ensureCentroData(state.activeCentro);
-  $('#procTitle').textContent = 'Procedimientos — ' + (activeCentroName()||'');
-  // Acciones
-  const tbA = $('#tblAcc tbody'); tbA.innerHTML='';
-  centro.acciones.forEach((a,idx)=>{
-    const tr=document.createElement('tr');
-    tr.innerHTML = `
-      <td>${idx+1}</td>
-      <td><input type="date" value="${a.fecha||''}" data-k="fecha" data-t="acc" data-id="${a.id}"></td>
-      <td><input value="${a.accion||''}" data-k="accion" data-t="acc" data-id="${a.id}"></td>
-      <td><input type="number" min="0" value="${a.derivacion||0}" data-k="derivacion" data-t="acc" data-id="${a.id}"></td>
-      <td><input type="number" min="0" value="${a.cita||0}" data-k="cita" data-t="acc" data-id="${a.id}"></td>
-      <td><input value="${a.obs||''}" data-k="obs" data-t="acc" data-id="${a.id}"></td>
-      <td><button class="x" data-act="delAcc" data-id="${a.id}">✖</button></td>
-    `;
-    tbA.appendChild(tr);
-  });
-  // Formaciones
-  const tbF = $('#tblForm tbody'); tbF.innerHTML='';
-  centro.formaciones.forEach((f,idx)=>{
-    const tr=document.createElement('tr');
-    tr.innerHTML=`
-      <td>${idx+1}</td>
-      <td><input type="date" value="${f.fecha||''}" data-k="fecha" data-t="form" data-id="${f.id}"></td>
-      <td><input value="${f.asistencia||''}" placeholder="SI/NO" data-k="asistencia" data-t="form" data-id="${f.id}"></td>
-      <td><input value="${f.titulo||''}" data-k="titulo" data-t="form" data-id="${f.id}"></td>
-      <td><input value="${f.aplica||''}" data-k="aplica" data-t="form" data-id="${f.id}"></td>
-      <td><button class="x" data-act="clearForm" data-id="${f.id}" title="Limpiar">🧹</button></td>
-    `;
-    tbF.appendChild(tr);
-  });
-  // Procesos
-  const tbP = $('#tblProc tbody'); tbP.innerHTML='';
-  centro.procesos.forEach((p,idx)=>{
-    const tr=document.createElement('tr');
-    tr.innerHTML=`
-      <td>${idx+1}</td>
-      <td><input value="${p.nombrePaquete||''}" data-k="nombrePaquete" data-t="pp" data-id="${p.id}"></td>
-      <td><input value="${p.descripcion||''}" data-k="descripcion" data-t="pp" data-id="${p.id}"></td>
-      <td><input value="${p.puntuacion||''}" data-k="puntuacion" data-t="pp" data-id="${p.id}"></td>
-      <td><input value="${p.obs||''}" data-k="obs" data-t="pp" data-id="${p.id}"></td>
-      <td><input type="date" value="${p.fecha||''}" data-k="fecha" data-t="pp" data-id="${p.id}"></td>
-      <td><button class="x" data-act="delPP" data-id="${p.id}">✖</button></td>
-    `;
-    tbP.appendChild(tr);
-  });
-
-  $('#itemsCount').textContent = (centro.acciones.length + centro.formaciones.length + centro.procesos.length) + ' ítems';
+function loadLocal(){
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if(!raw) return null;
+  try { return JSON.parse(raw); } catch { return null; }
 }
 
-// Eventos globales
-document.addEventListener('click',e=>{
-  const act = e.target.dataset.act;
-  if(!act) return;
-  if(!state.edit && ['addSub','editSub','delSub','selectCentro','delAcc','delPP','clearForm'].includes(act)){
-    alert('Bloqueado. Pulsa el candado y usa el PIN AR4321.');
+function download(filename, text){
+  const blob = new Blob([text], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href=url; a.download=filename; a.click();
+  URL.revokeObjectURL(url);
+}
+
+async function pullCloud(){
+  if(!CLOUD_URL){
+    alert("Configura primero la URL de nube (☁️🔧). Debe apuntar a tu data.json en GitHub Pages.");
     return;
   }
-  if(act==='addSub'){
-    const secId = e.target.dataset.sec;
-    const name = prompt('Nombre del centro/subsección:'); if(!name) return;
-    const delegado = prompt('Delegado:')||''; const audiologo=prompt('Audiólogo:')||''; const tipo = prompt('Tipo (Franquicia/Sucursal):')||'';
-    const color = ['b1','b2','b3','b4'][Math.floor(Math.random()*4)];
-    const sub = {id:uid(),name,delegado,audiologo,tipo,color};
-    const sec = state.sections.find(s=>s.id===secId); sec.subs.push(sub);
-    if(secId==='exclusivos') state.dataByCentro[sub.id]=sampleCentroData();
-    saveLocal(); renderSections();
-  }
-  if(act==='editSub'){
-    const secId=e.target.dataset.sec, id=e.target.dataset.id;
-    const sec = state.sections.find(s=>s.id===secId); const s = sec.subs.find(x=>x.id===id);
-    const name = prompt('Nombre:',s.name); if(!name) return;
-    s.name=name; s.delegado=prompt('Delegado:',s.delegado||'')||''; s.audiologo=prompt('Audiólogo:',s.audiologo||'')||''; s.tipo=prompt('Tipo:',s.tipo||'')||'';
-    renderSections(); saveLocal();
-  }
-  if(act==='delSub'){
-    if(!confirm('¿Eliminar?')) return;
-    const secId=e.target.dataset.sec, id=e.target.dataset.id;
-    const sec = state.sections.find(s=>s.id===secId);
-    sec.subs = sec.subs.filter(x=>x.id!==id);
-    delete state.dataByCentro[id];
-    if(state.activeCentro===id) state.activeCentro='';
-    renderSections(); renderTablas(); saveLocal();
-  }
-  if(act==='selectCentro'){
-    state.activeCentro = e.target.closest('[data-id]').dataset.id;
-    renderTablas();
-  }
-  if(act==='delAcc'){
-    const id=e.target.dataset.id;
-    const c=ensureCentroData(state.activeCentro);
-    c.acciones=c.acciones.filter(x=>String(x.id)!==String(id));
-    renderTablas(); saveLocal();
-  }
-  if(act==='delPP'){
-    const id=e.target.dataset.id;
-    const c=ensureCentroData(state.activeCentro);
-    c.procesos=c.procesos.filter(x=>String(x.id)!==String(id));
-    renderTablas(); saveLocal();
-  }
-  if(act==='clearForm'){
-    const id=e.target.dataset.id;
-    const c=ensureCentroData(state.activeCentro);
-    const f=c.formaciones.find(x=>x.id==id); if(!f) return;
-    Object.assign(f,{fecha:'',asistencia:'',titulo:'',aplica:''});
-    renderTablas(); saveLocal();
-  }
-});
-
-document.addEventListener('input',e=>{
-  const t=e.target.dataset.t; if(!t) return;
-  const id=e.target.dataset.id, k=e.target.dataset.k, v=e.target.value;
-  const c=ensureCentroData(state.activeCentro);
-  if(t==='acc'){ const it=c.acciones.find(x=>x.id==id); it[k]= (k==='derivacion'||k==='cita') ? Number(v||0) : v; }
-  if(t==='form'){ const it=c.formaciones.find(x=>x.id==id); it[k]=v; }
-  if(t==='pp'){ const it=c.procesos.find(x=>x.id==id); it[k]=v; }
-  setStatus('Editando… (no olvides Guardar)'); 
-});
-
-$('#addProc').onclick=()=>{
-  const c=ensureCentroData(state.activeCentro);
-  const nid = Math.max(0,...c.acciones.map(x=>x.id))+1;
-  c.acciones.push({id:nid,fecha:'',accion:'',derivacion:0,cita:0,obs:''});
-  renderTablas();
-}
-$('#saveProc').onclick=()=>{ saveLocal(); setStatus('Acciones guardadas localmente. Exporta JSON para subir al repo.'); }
-$('#saveForm').onclick=()=>{ saveLocal(); setStatus('Formaciones guardadas localmente.'); }
-$('#savePP').onclick =()=>{ saveLocal(); setStatus('Procesos guardados localmente.'); }
-
-$('#btnLogo').onclick=()=>$('#fileLogo').click();
-$('#fileLogo').onchange=e=>{
-  const f=e.target.files[0]; if(!f) return;
-  const r=new FileReader(); r.onload=ev=>{ state.logo=ev.target.result; renderLogo(); saveLocal(); };
-  r.readAsDataURL(f);
-};
-
-$('#btnLock').onclick=()=>{
-  if(state.edit){ state.edit=false; $('#btnLock').textContent='🔒'; setStatus('Edición bloqueada.'); return; }
-  const pin=prompt('PIN:'); if(pin===state.pin){ state.edit=true; $('#btnLock').textContent='🔓'; setStatus('Edición habilitada.'); }
-  else alert('PIN incorrecto.');
-};
-
-function saveLocal(){
-  localStorage.setItem('audioseguimiento', JSON.stringify(state));
-}
-function loadLocal(){
-  const raw=localStorage.getItem('audioseguimiento'); if(!raw) return false;
-  try{ state=JSON.parse(raw); return true }catch{ return false }
-}
-function exportJSON(){
-  const blob = new Blob([JSON.stringify(state,null,2)],{type:'application/json;charset=utf-8'});
-  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='data.json'; a.click(); URL.revokeObjectURL(a.href);
-}
-$('#btnExport').onclick=exportJSON;
-$('#btnSaveLocal').onclick=()=>{ saveLocal(); setStatus('Guardado local OK. Ahora exporta y sube data.json al repo.'); };
-
-async function loadCloud(){
+  const url = CLOUD_URL + (CLOUD_URL.includes("?") ? "&" : "?") + "t=" + Date.now();
   try{
-    const url = CLOUD_URL + (CLOUD_URL.includes('?')?'&':'?') + 'ts=' + Date.now();
-    const res=await fetch(url,{cache:'no-store'}); 
-    if(!res.ok) throw 0;
-    const data=await res.json();
-    // preserva el PIN local y el modo edición; acepta logo remota si existe
-    const keepPin = state.pin, wasEdit = state.edit;
-    state = data; state.pin = keepPin; state.edit = wasEdit;
+    const r = await fetch(url);
+    if(!r.ok){ throw new Error("HTTP "+r.status); }
+    const json = await r.json();
+    STATE = json;
     saveLocal();
-    bootstrap();
-    setStatus('Datos actualizados desde la nube (data.json).');
-  }catch{
-    setStatus('No se encontró data.json en la nube o fallo de lectura.');
+    renderAll();
+    document.getElementById("lastCloudTs").textContent = new Date().toLocaleString();
+    alert("Actualizado desde nube ✔");
+  }catch(e){
+    alert("No se pudo leer de la nube: "+e.message);
   }
 }
-$('#btnCloud').onclick=loadCloud;
 
-$('#btnCfg').onclick=()=>alert(
-  'Nube local (sin tokens):\n\n1) Pulsa Exportar JSON para descargar data.json.\n2) En GitHub → tu repo → Add file → Upload files → sube/actualiza data.json (en la raíz).\n3) Espera el deploy de Pages.\n4) En cualquier equipo pulsa 🔄 Actualizar de nube.\n\nTodos verán el último data.json del repositorio.'
-);
+function setCloudUrl(){
+  const val = prompt("Pega aquí la URL completa de tu data.json (GitHub Pages).", CLOUD_URL || "https://TUUSUARIO.github.io/TU_REPO/data.json");
+  if(val){
+    CLOUD_URL = val.trim();
+    localStorage.setItem(CLOUD_URL_KEY, CLOUD_URL);
+    alert("URL de nube guardada.");
+  }
+}
 
-// Buscador simple
-$('#q').addEventListener('input',e=>{
-  const q=e.target.value.toLowerCase();
-  $$('#sections .sub').forEach(row=>{
-    const txt=row.textContent.toLowerCase();
-    row.style.display = txt.includes(q)?'flex':'none';
-  });
-});
+/* =========================
+   RENDER
+========================= */
+function renderAll(){
+  // Logo
+  const logo = STATE.logo || "";
+  const logoImg = document.getElementById("logoImg");
+  logoImg.src = logo || "https://dummyimage.com/200x48/ffffff/aaaaaa&text=AUDIOLOGIA";
+  logoImg.onclick = ()=>{
+    if(!EDIT_MODE){ return; }
+    const input = document.createElement("input");
+    input.type="file"; input.accept="image/*";
+    input.onchange = e=>{
+      const file = e.target.files?.[0];
+      if(!file) return;
+      const fr = new FileReader();
+      fr.onload = ()=>{
+        STATE.logo = fr.result;
+        saveLocal();
+        renderAll();
+      };
+      fr.readAsDataURL(file);
+    };
+    input.click();
+  };
 
-// Inicialización
-function bootstrap(){
-  renderLogo();
   renderSections();
-  if(!state.activeCentro){
-    const ex = state.sections.find(s=>s.id==='exclusivos');
-    if(ex && ex.subs[0]) state.activeCentro = ex.subs[0].id;
-  }
-  renderTablas();
+  renderProcedures();
 }
 
+function renderSections(){
+  const wrap = document.getElementById("sections");
+  wrap.innerHTML = "";
+
+  STATE.sections.forEach(section=>{
+    const secBox = document.createElement("div");
+    secBox.className = "mb-2 border rounded-lg";
+
+    const header = document.createElement("div");
+    header.className = "flex items-center justify-between px-3 py-2 bg-gray-100 rounded-t-lg";
+    const title = document.createElement("div");
+    title.className = "font-semibold";
+    title.textContent = section.title;
+
+    const right = document.createElement("div");
+    right.className = "flex items-center gap-2";
+    const btnAddSub = document.createElement("button");
+    btnAddSub.className = "px-2 py-1 bg-red-600 text-white rounded text-sm";
+    btnAddSub.textContent = "+";
+    btnAddSub.title = "Añadir subcategoría";
+    btnAddSub.onclick = ()=>{
+      if(!EDIT_MODE) return;
+      const name = prompt("Nombre del centro / subcategoría:");
+      if(!name) return;
+      const id = "s"+Date.now();
+      const colorClasses = pickCentroColor(section.subs.length);
+      section.subs.push({
+        id, name, delegado:"", audiologo:"", tipo:"", color: colorClasses
+      });
+      if(section.id==="exclusivos" && !STATE.dataByCentro[id]){
+        STATE.dataByCentro[id] = JSON.parse(JSON.stringify(STATE.dataByCentro[STATE.activeCentro] || {acciones:[],formaciones:[],procesos:[]}));
+      }
+      if(!STATE.activeCentro && section.id==="exclusivos") STATE.activeCentro=id;
+      saveLocal();
+      renderAll();
+    };
+
+    const btnEditSec = document.createElement("button");
+    btnEditSec.className = "px-2 py-1 bg-gray-200 rounded text-sm";
+    btnEditSec.textContent = "✎";
+    btnEditSec.title = "Renombrar sección";
+    btnEditSec.onclick = ()=>{
+      if(!EDIT_MODE) return;
+      const nv = prompt("Nuevo nombre de la sección:", section.title);
+      if(!nv) return;
+      section.title = nv.trim();
+      saveLocal(); renderAll();
+    };
+
+    right.appendChild(btnAddSub);
+    right.appendChild(btnEditSec);
+    header.appendChild(title);
+    header.appendChild(right);
+    secBox.appendChild(header);
+
+    // Lista de subs con desplegable + editar/eliminar
+    const list = document.createElement("div");
+    list.className="p-2 space-y-2";
+
+    section.subs.forEach((sub, idx)=>{
+      const row = document.createElement("div");
+      row.className="flex items-center gap-2";
+
+      const btnSel = document.createElement("button");
+      btnSel.className = "flex-1 text-left border px-2 py-2 rounded hover:bg-gray-50";
+      btnSel.innerHTML = `
+        <div class="font-semibold">${sub.name}</div>
+        <div class="text-xs text-gray-600">👤 ${sub.delegado||"-"} | 🎧 ${sub.audiologo||"-"} | 📍 ${sub.tipo||"-"}</div>
+      `;
+      btnSel.onclick = ()=>{
+        if(section.id==="exclusivos"){
+          STATE.activeCentro = sub.id;
+          saveLocal(); renderProcedures();
+        }
+      };
+
+      const btnEdit = document.createElement("button");
+      btnEdit.className = "px-2 py-1 bg-blue-600 text-white rounded text-sm";
+      btnEdit.textContent = "Editar";
+      btnEdit.onclick = ()=>{
+        if(!EDIT_MODE) return;
+        const name = prompt("Nombre:", sub.name) || sub.name;
+        const del = prompt("Delegado:", sub.delegado||"") || sub.delegado;
+        const aud = prompt("Audiólogo:", sub.audiologo||"") || sub.audiologo;
+        const tipo = prompt("Tipo (Franquicia/Sucursal):", sub.tipo||"") || sub.tipo;
+        sub.name=name; sub.delegado=del; sub.audiologo=aud; sub.tipo=tipo;
+        saveLocal(); renderAll();
+      };
+
+      const btnDel = document.createElement("button");
+      btnDel.className = "px-2 py-1 bg-red-600 text-white rounded text-sm";
+      btnDel.textContent = "Eliminar";
+      btnDel.onclick = ()=>{
+        if(!EDIT_MODE) return;
+        if(!confirm("¿Eliminar subcategoría?")) return;
+        section.subs.splice(idx,1);
+        if(section.id==="exclusivos"){
+          if(STATE.activeCentro===sub.id) STATE.activeCentro = section.subs[0]?.id || "";
+          delete STATE.dataByCentro[sub.id];
+        }
+        saveLocal(); renderAll();
+      };
+
+      row.appendChild(btnSel);
+      row.appendChild(btnEdit);
+      row.appendChild(btnDel);
+      list.appendChild(row);
+    });
+
+    secBox.appendChild(list);
+    wrap.appendChild(secBox);
+  });
+}
+
+function renderProcedures(){
+  const centroId = STATE.activeCentro || "";
+  const badge = document.getElementById("activeCentroBadge");
+  const centroObj = findCentroById(centroId);
+  badge.textContent = centroObj ? ("Centro activo: "+centroObj.name) : "Selecciona un centro…";
+
+  const dataset = centroId ? (STATE.dataByCentro[centroId] || (STATE.dataByCentro[centroId]={acciones:[],formaciones:[],procesos:[]})) : null;
+
+  // Acciones
+  const tbA = document.getElementById("tbAcciones");
+  tbA.innerHTML="";
+  (dataset?.acciones||[]).forEach((a, i)=>{
+    const tr = document.createElement("tr");
+    tr.className="border-b";
+
+    const drag = document.createElement("td");
+    drag.className="p-2 text-center align-top";
+    drag.innerHTML='<div class="drag-dots"><span></span><span></span><span></span></div>';
+
+    const idx = document.createElement("td");
+    idx.className="p-2 text-center align-top";
+    idx.innerHTML = `<span class="inline-flex items-center justify-center w-6 h-6 bg-red-600 text-white rounded-full text-xs font-bold">${i+1}</span>`;
+
+    const tdFecha = document.createElement("td");
+    tdFecha.className="p-1";
+    tdFecha.innerHTML = `<input type="date" class="w-full border rounded px-2 py-1" ${!EDIT_MODE?"disabled":""} value="${a.fecha||""}">`;
+    tdFecha.querySelector("input").oninput = e=>{ a.fecha=e.target.value; saveLocal(); };
+
+    const tdAccion = document.createElement("td");
+    tdAccion.className="p-1";
+    tdAccion.innerHTML = `<input type="text" class="w-full border rounded px-2 py-1" ${!EDIT_MODE?"disabled":""} placeholder="Descripción..." value="${a.accion||""}">`;
+    tdAccion.querySelector("input").oninput = e=>{ a.accion=e.target.value; saveLocal(); };
+
+    const tdDer = document.createElement("td");
+    tdDer.className="p-1";
+    tdDer.innerHTML = `<input type="number" min="0" class="w-full border rounded px-2 py-1 text-center" ${!EDIT_MODE?"disabled":""} value="${a.derivacion||0}">`;
+    tdDer.querySelector("input").oninput = e=>{ a.derivacion = parseInt(e.target.value||0); saveLocal(); };
+
+    const tdCita = document.createElement("td");
+    tdCita.className="p-1";
+    tdCita.innerHTML = `<input type="number" min="0" class="w-full border rounded px-2 py-1 text-center" ${!EDIT_MODE?"disabled":""} value="${a.cita||0}">`;
+    tdCita.querySelector("input").oninput = e=>{ a.cita = parseInt(e.target.value||0); saveLocal(); };
+
+    const tdObs = document.createElement("td");
+    tdObs.className="p-1";
+    tdObs.innerHTML = `<input type="text" class="w-full border rounded px-2 py-1" ${!EDIT_MODE?"disabled":""} placeholder="Observaciones..." value="${a.obs||""}">`;
+    tdObs.querySelector("input").oninput = e=>{ a.obs=e.target.value; saveLocal(); };
+
+    const tdDel = document.createElement("td");
+    tdDel.className="p-1 text-center";
+    const delBtn = document.createElement("button");
+    delBtn.className = "px-2 py-1 bg-red-100 text-red-700 rounded";
+    delBtn.textContent = "✕";
+    delBtn.disabled = !EDIT_MODE || (dataset.acciones.length<=1);
+    delBtn.onclick = ()=>{
+      if(!EDIT_MODE) return;
+      if(dataset.acciones.length<=1) return;
+      dataset.acciones.splice(i,1);
+      saveLocal(); renderProcedures();
+    };
+    tdDel.appendChild(delBtn);
+
+    tr.appendChild(drag); tr.appendChild(idx); tr.appendChild(tdFecha);
+    tr.appendChild(tdAccion); tr.appendChild(tdDer); tr.appendChild(tdCita);
+    tr.appendChild(tdObs); tr.appendChild(tdDel);
+    // color fila si hay derivación y cita
+    if((a.derivacion||0)>0 && (a.cita||0)>0){ tr.classList.add("bg-green-50"); }
+    tbA.appendChild(tr);
+  });
+
+  // Formación
+  const tbF = document.getElementById("tbFormacion");
+  tbF.innerHTML="";
+  (dataset?.formaciones||[]).forEach((f,i)=>{
+    const tr=document.createElement("tr"); tr.className="border-b";
+    const tds=[
+      `<td class="p-2 text-center align-top"><div class="drag-dots"><span></span><span></span><span></span></div></td>`,
+      `<td class="p-2 text-center align-top"><span class="inline-flex items-center justify-center w-6 h-6 bg-red-600 text-white rounded-full text-xs font-bold">${i+1}</span></td>`
+    ].join("");
+    const tdFecha = `<td class="p-1"><input type="date" class="w-full border rounded px-2 py-1" ${!EDIT_MODE?"disabled":""} value="${f.fecha||""}"></td>`;
+    const tdAsis = `<td class="p-1"><select class="w-full border rounded px-2 py-1" ${!EDIT_MODE?"disabled":""}>
+      <option value="" ${f.asistencia===""?"selected":""}>-</option>
+      <option value="SI" ${f.asistencia==="SI"?"selected":""}>SI</option>
+      <option value="NO" ${f.asistencia==="NO"?"selected":""}>NO</option>
+      <option value="Pendiente" ${f.asistencia==="Pendiente"?"selected":""}>Pendiente</option>
+    </select></td>`;
+    const tdTit = `<td class="p-1"><input type="text" class="w-full border rounded px-2 py-1" ${!EDIT_MODE?"disabled":""} value="${f.titulo||""}" placeholder="Nombre del curso..."></td>`;
+    const tdApl = `<td class="p-1"><input type="text" class="w-full border rounded px-2 py-1" ${!EDIT_MODE?"disabled":""} value="${f.aplica||""}" placeholder="¿Cómo se aplicará? o SI/NO"></td>`;
+    tr.innerHTML = tds + tdFecha + tdAsis + tdTit + tdApl;
+
+    const inputs = tr.querySelectorAll("input,select");
+    inputs[0].oninput = e=>{ f.fecha=e.target.value; saveLocal(); }
+    inputs[1].oninput = e=>{ f.asistencia=e.target.value; saveLocal(); }
+    inputs[2].oninput = e=>{ f.titulo=e.target.value; saveLocal(); }
+    inputs[3].oninput = e=>{ f.aplica=e.target.value; saveLocal(); }
+
+    // Colores
+    const asiste = (f.asistencia||"").toLowerCase();
+    const aplica = (f.aplica||"").toLowerCase();
+    if(asiste==="si" && (aplica==="si" || aplica==="sí" || (f.aplica||"").trim().length>2)){
+      tr.classList.add("bg-green-50");
+    }else if(asiste==="si"){
+      tr.classList.add("bg-orange-50");
+    }
+
+    tbF.appendChild(tr);
+  });
+
+  // Procesos
+  const tbP = document.getElementById("tbProcesos");
+  tbP.innerHTML="";
+  (dataset?.procesos||[]).forEach((p,i)=>{
+    const tr = document.createElement("tr"); tr.className="border-b";
+    const drag = `<td class="p-2 text-center align-top"><div class="drag-dots"><span></span><span></span><span></span></div></td>`;
+    const idx = `<td class="p-2 text-center align-top"><span class="inline-flex items-center justify-center w-6 h-6 bg-red-600 text-white rounded-full text-xs font-bold">${i+1}</span></td>`;
+    const tdNom = `<td class="p-1"><input type="text" class="w-full border rounded px-2 py-1 font-semibold" ${!EDIT_MODE?"disabled":""} placeholder="Nombre del paquete..." value="${p.nombrePaquete||""}"></td>`;
+    const tdDesc = `<td class="p-1"><input type="text" class="w-full border rounded px-2 py-1" ${!EDIT_MODE?"disabled":""} placeholder="Descripción..." value="${p.descripcion||""}"></td>`;
+    const tdPunt = `<td class="p-1"><input type="text" class="w-full border rounded px-2 py-1 text-center" ${!EDIT_MODE?"disabled":""} placeholder="8/10" value="${p.puntuacion||""}"></td>`;
+    const tdObs  = `<td class="p-1"><input type="text" class="w-full border rounded px-2 py-1" ${!EDIT_MODE?"disabled":""} placeholder="Observaciones..." value="${p.obs||""}"></td>`;
+    const tdFecha= `<td class="p-1"><input type="date" class="w-full border rounded px-2 py-1" ${!EDIT_MODE?"disabled":""} value="${p.fecha||""}"></td>`;
+    const tdDel  = document.createElement("td"); tdDel.className="p-1 text-center";
+    const delBtn = document.createElement("button");
+    delBtn.className="px-2 py-1 bg-red-100 text-red-700 rounded";
+    delBtn.textContent="✕"; delBtn.disabled=!EDIT_MODE || (STATE.dataByCentro[centroId].procesos.length<=1);
+    delBtn.onclick = ()=>{
+      if(!EDIT_MODE) return;
+      if(STATE.dataByCentro[centroId].procesos.length<=1) return;
+      STATE.dataByCentro[centroId].procesos.splice(i,1);
+      saveLocal(); renderProcedures();
+    };
+    tdDel.appendChild(delBtn);
+
+    tr.innerHTML = drag+idx+tdNom+tdDesc+tdPunt+tdObs+tdFecha;
+    tr.appendChild(tdDel);
+
+    const inputs = tr.querySelectorAll("input");
+    inputs[0].oninput = e=>{ p.nombrePaquete=e.target.value; saveLocal(); };
+    inputs[1].oninput = e=>{ p.descripcion=e.target.value; saveLocal(); };
+    inputs[2].oninput = e=>{ p.puntuacion=e.target.value; saveLocal(); };
+    inputs[3].oninput = e=>{ p.obs=e.target.value; saveLocal(); };
+    inputs[4].oninput = e=>{ p.fecha=e.target.value; saveLocal(); };
+
+    tbP.appendChild(tr);
+  });
+}
+
+function findCentroById(id){
+  for(const s of STATE.sections){
+    for(const sub of s.subs){
+      if(sub.id===id) return sub;
+    }
+  }
+  return null;
+}
+function pickCentroColor(n){
+  const arr = [
+    'bg-blue-100 border-blue-400 text-blue-800',
+    'bg-green-100 border-green-400 text-green-800',
+    'bg-purple-100 border-purple-400 text-purple-800',
+    'bg-orange-100 border-orange-400 text-orange-800',
+    'bg-pink-100 border-pink-400 text-pink-800',
+    'bg-indigo-100 border-indigo-400 text-indigo-800',
+    'bg-yellow-100 border-yellow-400 text-yellow-800',
+    'bg-red-100 border-red-400 text-red-800',
+    'bg-teal-100 border-teal-400 text-teal-800',
+    'bg-cyan-100 border-cyan-400 text-cyan-800',
+    'bg-lime-100 border-lime-400 text-lime-800',
+    'bg-rose-100 border-rose-400 text-rose-800'
+  ];
+  return arr[n % arr.length];
+}
+
+/* =========================
+   HANDLERS UI
+========================= */
+document.getElementById("btnEdit").onclick = ()=>{
+  if(!EDIT_MODE){
+    const p = prompt("Introduce PIN:");
+    if(p===PIN){ EDIT_MODE=true; alert("Edición activada."); renderAll(); }
+    else { alert("PIN incorrecto."); }
+  }else{
+    EDIT_MODE=false; alert("Edición desactivada."); renderAll();
+  }
+};
+
+document.getElementById("btnBackup").onclick = ()=>{
+  const payload = JSON.stringify(STATE, null, 2);
+  download("data.json", payload);
+};
+
+document.getElementById("btnImport").onclick = ()=> document.getElementById("fileImport").click();
+document.getElementById("fileImport").onchange = (e)=>{
+  const f = e.target.files?.[0];
+  if(!f) return;
+  const fr = new FileReader();
+  fr.onload = ()=>{
+    try{
+      const json = JSON.parse(fr.result);
+      STATE = json; saveLocal(); renderAll();
+      alert("Importado correctamente.");
+    }catch(e){
+      alert("JSON inválido.");
+    }
+  };
+  fr.readAsText(f);
+};
+
+document.getElementById("btnCloudUrl").onclick = setCloudUrl;
+document.getElementById("btnCloudPull").onclick = pullCloud;
+
+document.getElementById("btnAddSection").onclick = ()=>{
+  if(!EDIT_MODE) return;
+  const name = prompt("Nombre de sección:");
+  if(!name) return;
+  STATE.sections.push({ id: "sec"+Date.now(), title: name.trim(), color:"gray", subs: [] });
+  saveLocal(); renderAll();
+};
+
+document.getElementById("btnAddProc").onclick = ()=>{
+  if(!EDIT_MODE) return;
+  const cid = STATE.activeCentro; if(!cid){ alert("Selecciona un centro en ‘Centros Exclusivos’."); return; }
+  const d = STATE.dataByCentro[cid];
+  // Por defecto añadimos una fila a acciones
+  const newId = Math.max(0, ...(d.acciones.map(x=>x.id))) + 1;
+  d.acciones.push({ id:newId, fecha:"", accion:"", derivacion:0, cita:0, obs:"" });
+  saveLocal(); renderProcedures();
+};
+
+/* =========================
+   INICIO
+========================= */
 (function init(){
-  const had = loadLocal();
-  bootstrap();
-  // Cargar de nube al entrar, si existe data.json (no bloquea UI)
-  loadCloud();
-  setStatus(had ? 'Cargado desde local. Intentando nube…' : 'Bienvenido. Crea/Exporta data.json para la nube.');
+  STATE = loadLocal() || JSON.parse(JSON.stringify(DEFAULT_STATE));
+  renderAll();
 })();
 </script>
 </body>
