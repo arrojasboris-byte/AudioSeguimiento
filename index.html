@@ -67,7 +67,8 @@
     background:#fff;border:1px solid #eee;border-radius:12px;padding:.7rem .8rem;margin:.55rem 0;cursor:pointer;
   }
   .item:hover{background:#fafafa}
-  .item .name{font-weight:700}
+  .item .name{font-weight:800}
+  .item small{display:block;opacity:.65}
   .item .acts{display:flex;gap:.35rem}
   .ico{font-size:18px;opacity:.75}
   .muted{opacity:.65}
@@ -78,16 +79,17 @@
   .detail .hint{opacity:.7;margin:.2rem 0 1rem}
   .field{display:grid;gap:.35rem;margin:.7rem 0}
   .field label{font-weight:700;opacity:.9}
-  .field input,.field textarea{
-    border:1px solid #ddd;border-radius:12px;padding:.65rem .7rem;font-size:1rem;background:#fff;outline:none;
+  .field input,.field select,.field textarea{
+    border:1px solid #ddd;border-radius:12px;padding:.6rem .7rem;font-size:1rem;background:#fff;outline:none;
   }
-  .field textarea{min-height:140px;resize:vertical}
-  .bar-right{display:flex;justify-content:flex-end}
+  .field textarea{min-height:120px;resize:vertical}
+  .bar-right{display:flex;justify-content:flex-end;gap:.6rem}
   .btn-ghost{background:#fff;border:1px solid #ddd;color:#444}
   .badge{display:inline-block;padding:.25rem .5rem;border-radius:999px;background:#00000010;font-size:.85rem}
-  .row{display:flex;gap:1rem;align-items:center;flex-wrap:wrap}
+  .row{display:flex;gap:1rem;align-items:flex-end;flex-wrap:wrap}
+  .row .field{flex:1;min-width:220px}
 
-  /* Pastel helpers to “pintar” secciones y detalle */
+  /* Pastel helpers para “pintar” secciones y detalle */
   .bg-exclusivos{ background:var(--col-exclusivos);}
   .bg-flop{ background:var(--col-flop);}
   .bg-visitas{ background:var(--col-visitas);}
@@ -96,6 +98,29 @@
   .tone{border-color:#00000010}
   .tone .item{border-color:#00000010;background:#ffffffcc}
 
+  /* Tablas tipo Excel */
+  .panel{margin:1rem 0 1.2rem;background:#ffffffd0;border:1px solid #e7e7ef;border-radius:14px;box-shadow:var(--shadow)}
+  .panel .ph{display:flex;align-items:center;justify-content:space-between;padding:.8rem 1rem;border-bottom:1px solid #eee;font-weight:900}
+  .panel .pl{padding:.8rem}
+  .grid{display:grid;gap:.5rem}
+  .grid .hdr{font-weight:800;opacity:.75}
+  .grid input[type="text"], .grid input[type="number"], .grid input[type="date"], .grid textarea, .grid select {
+    width:100%;padding:.45rem .55rem;border:1px solid #ddd;border-radius:10px;background:#fff
+  }
+  .grid .rowx{display:grid;gap:.5rem;align-items:center}
+  .rowx .del{justify-self:end}
+  .row-tools{margin-top:.6rem;display:flex;gap:.5rem}
+  .file-list{display:flex;flex-direction:column;gap:.35rem;margin-top:.5rem}
+  .file-pill{display:flex;align-items:center;gap:.5rem;background:#00000008;border:1px solid #00000012;border-radius:999px;padding:.25rem .55rem}
+
+  /* Columnas por panel */
+  .grid-acciones{grid-template-columns: 140px 1fr 120px 80px 80px 38px;}
+  .grid-forma   {grid-template-columns: 1.2fr .7fr .7fr 1.6fr 38px;}
+  .grid-proc    {grid-template-columns: 180px 120px 160px 38px;}
+
+  @media (max-width:1080px){
+    .grid-acciones{grid-template-columns: 120px 1fr 110px 70px 70px 38px;}
+  }
   @media (max-width:980px){
     .wrap{grid-template-columns:1fr;gap:1rem}
   }
@@ -183,34 +208,99 @@
     <!-- RIGHT -->
     <section class="col">
       <div id="detail" class="detail card">
-        <div class="row">
+        <div class="row" style="align-items:center">
           <h2 id="detTitle">Detalle</h2>
           <span id="detTag" class="badge">—</span>
         </div>
         <div class="hint" id="detHint">Selecciona un item a la izquierda o crea uno con ＋.</div>
 
-        <div id="detForm" style="display:none">
+        <!-- Form genérico (para otras secciones) -->
+        <div id="detFormGeneric" style="display:none">
           <div class="field">
-            <label for="fNombre">Nombre</label>
-            <input id="fNombre" type="text" placeholder="Ej.: Reina Mercedes" />
+            <label for="gNombre">Nombre</label>
+            <input id="gNombre" type="text" placeholder="Nombre" />
           </div>
           <div class="row">
-            <div class="field" style="min-width:220px;flex:1">
-              <label for="fFecha">Fecha</label>
-              <input id="fFecha" type="date" />
-            </div>
-            <div class="field" style="min-width:220px;flex:1">
-              <label for="fEstado">Estado</label>
-              <input id="fEstado" type="text" placeholder="Ej.: En curso / Objetivo / Riesgo" />
-            </div>
+            <div class="field"><label for="gFecha">Fecha</label><input id="gFecha" type="date" /></div>
+            <div class="field"><label for="gEstado">Estado</label><input id="gEstado" type="text" placeholder="Estado" /></div>
           </div>
           <div class="field">
-            <label for="fNotas">Notas</label>
-            <textarea id="fNotas" placeholder="Observaciones, próximos pasos, KPIs…"></textarea>
+            <label for="gNotas">Notas</label>
+            <textarea id="gNotas" placeholder="Observaciones…"></textarea>
           </div>
           <div class="bar-right">
-            <button class="btn btn-ghost" id="btnCancel">Cancelar</button>
-            <button class="btn btn-save" id="btnSave">💾 Guardar cambios</button>
+            <button class="btn btn-ghost" id="btnCancelG">Cancelar</button>
+            <button class="btn btn-save" id="btnSaveG">💾 Guardar cambios</button>
+          </div>
+        </div>
+
+        <!-- Form específico Centro Exclusivo -->
+        <div id="detFormExclusivo" style="display:none">
+          <div class="row">
+            <div class="field"><label>Nombre</label><input id="cNombre" type="text" placeholder="Ej.: Reina Mercedes"></div>
+            <div class="field"><label>Delegado</label><input id="cDelegado" type="text" placeholder="Nombre del delegado"></div>
+          </div>
+          <div class="row">
+            <div class="field"><label>Audiólogo</label><input id="cAudiologo" type="text" placeholder="Nombre del audiólogo"></div>
+            <div class="field"><label>Franquicia o Sucursal</label>
+              <select id="cTipo">
+                <option value="Franquicia">Franquicia</option>
+                <option value="Sucursal">Sucursal</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Panel ACCIONES -->
+          <div class="panel" id="pAcciones">
+            <div class="ph">ACCIONES
+              <div class="row-tools">
+                <button class="btn btn-ghost" id="addAccion">＋ Añadir fila</button>
+              </div>
+            </div>
+            <div class="pl">
+              <div class="grid grid-acciones hdr">
+                <div>Fecha</div><div>Tipo de acción</div><div>Derivación</div><div>Cita</div><div>Venta</div><div></div>
+              </div>
+              <div id="accionesRows"></div>
+            </div>
+          </div>
+
+          <!-- Panel FORMACIONES RELEVANTES -->
+          <div class="panel" id="pFormaciones">
+            <div class="ph">FORMACIONES RELEVANTES
+              <div class="row-tools">
+                <button class="btn btn-ghost" id="addFormacion">＋ Añadir fila</button>
+              </div>
+            </div>
+            <div class="pl">
+              <div class="grid grid-forma hdr">
+                <div>Curso</div><div>Realizado</div><div>Aplica</div><div>Observaciones</div><div></div>
+              </div>
+              <div id="formacionesRows"></div>
+            </div>
+          </div>
+
+          <!-- Panel CONTROL DE PROCESOS -->
+          <div class="panel" id="pProcesos">
+            <div class="ph">CONTROL DE PROCESOS
+              <div class="row-tools">
+                <button class="btn btn-ghost" id="addProceso">＋ Añadir fila</button>
+                <input type="file" id="fileExcel" style="display:none" accept=".xlsx,.xls,.csv" multiple />
+                <button class="btn btn-ghost" id="btnExcel">Adjuntar Excel</button>
+              </div>
+            </div>
+            <div class="pl">
+              <div class="grid grid-proc hdr">
+                <div>Puntuación checklist (0–100)</div><div>HIT</div><div>Colaboraciones</div><div></div>
+              </div>
+              <div id="procesosRows"></div>
+              <div class="file-list" id="filesList"></div>
+            </div>
+          </div>
+
+          <div class="bar-right">
+            <button class="btn btn-ghost" id="btnCancelC">Cancelar</button>
+            <button class="btn btn-save" id="btnSaveC">💾 Guardar centro</button>
           </div>
         </div>
       </div>
@@ -219,7 +309,7 @@
 
 <script>
 /* ======= Estado & Datos ======= */
-const STORAGE_KEY = 'audioseguimiento_v2';
+const STORAGE_KEY = 'audioseguimiento_v3';
 
 const SECTION_ORDER = [
   "CENTROS EXCLUSIVOS",
@@ -251,7 +341,16 @@ let state = {
 };
 
 let data = load() || {
-  "CENTROS EXCLUSIVOS":[{nombre:"Reina Mercedes", fecha:"", estado:"", notas:""}],
+  "CENTROS EXCLUSIVOS":[{
+    nombre:"Reina Mercedes",
+    delegado:"",
+    audiologo:"",
+    tipo:"Franquicia",
+    acciones:[],
+    formaciones:[],
+    procesos:[],
+    adjuntos:[]
+  }],
   "CENTROS FLOP":[],
   "VISITAS AUDIO":[],
   "FORMACIONES Y MENTORING":[],
@@ -292,12 +391,21 @@ function renderAll(){
       const el = document.createElement('div');
       el.className='item';
       el.dataset.section=sec; el.dataset.index=idx;
-      el.innerHTML = `
-        <div class="name">${it.nombre||'—'}</div>
-        <div class="acts">
-          <span class="ico" title="Editar">✏️</span>
-          <span class="ico" title="Eliminar">🗑️</span>
-        </div>`;
+      if(sec==="CENTROS EXCLUSIVOS"){
+        el.innerHTML = `
+          <div>
+            <div class="name">${it.nombre||'—'}</div>
+            <small>${it.delegado?('Delegado: '+it.delegado):''} ${it.audiologo?(' · Audiólogo: '+it.audiologo):''}</small>
+          </div>
+          <div class="acts">
+            <span class="ico" title="Editar">✏️</span>
+            <span class="ico" title="Eliminar">🗑️</span>
+          </div>`;
+      }else{
+        el.innerHTML = `
+          <div class="name">${it.nombre||'—'}</div>
+          <div class="acts"><span class="ico">✏️</span><span class="ico">🗑️</span></div>`;
+      }
       wrap.appendChild(el);
     });
   });
@@ -306,30 +414,125 @@ function renderAll(){
   q('#lock').textContent = state.editing? '🔓 Editando' : '🔒 Bloqueado';
   q('#btnSaveTop').disabled = !state.editing;
   qa('.sec-btn,[data-act="add"],.item').forEach(el=>{
-    el.disabled = !state.editing;
+    if('disabled' in el) el.disabled = !state.editing;
   });
 
   // detalle
-  if(state.selected.section!=null){
-    const sec = state.selected.section;
-    const idx = state.selected.index;
-    const item = data[sec][idx];
+  const sec = state.selected.section;
+  if(sec){
+    setDetailTone(SECTION_TONE[sec]);
+    q('#detHint').style.display='none';
     q('#detTitle').textContent = 'Detalle';
     q('#detTag').textContent = sec;
-    q('#detHint').style.display='none';
-    q('#detForm').style.display='block';
-    q('#fNombre').value = item.nombre||'';
-    q('#fFecha').value = item.fecha||'';
-    q('#fEstado').value = item.estado||'';
-    q('#fNotas').value = item.notas||'';
-    setDetailTone(SECTION_TONE[sec]);
+
+    if(sec==="CENTROS EXCLUSIVOS"){
+      q('#detFormGeneric').style.display='none';
+      q('#detFormExclusivo').style.display='block';
+      fillCentroForm();
+      renderAcciones();
+      renderFormaciones();
+      renderProcesos();
+      renderAdjuntos();
+    }else{
+      q('#detFormExclusivo').style.display='none';
+      q('#detFormGeneric').style.display='block';
+      fillGenericForm();
+    }
   }else{
+    q('#detFormExclusivo').style.display='none';
+    q('#detFormGeneric').style.display='none';
+    q('#detHint').style.display='block';
     q('#detTitle').textContent = 'Detalle';
     q('#detTag').textContent = '—';
-    q('#detHint').style.display='block';
-    q('#detForm').style.display='none';
     setDetailTone(null);
   }
+}
+
+/* ======= Rellenar formularios ======= */
+function currentItem(){
+  const {section,index} = state.selected;
+  if(section==null) return null;
+  return data[section][index];
+}
+
+/* --- Genérico --- */
+function fillGenericForm(){
+  const it = currentItem(); if(!it) return;
+  q('#gNombre').value = it.nombre||'';
+  q('#gFecha').value = it.fecha||'';
+  q('#gEstado').value = it.estado||'';
+  q('#gNotas').value = it.notas||'';
+}
+
+/* --- Centro exclusivo --- */
+function fillCentroForm(){
+  const it = currentItem(); if(!it) return;
+  q('#cNombre').value = it.nombre||'';
+  q('#cDelegado').value = it.delegado||'';
+  q('#cAudiologo').value = it.audiologo||'';
+  q('#cTipo').value = it.tipo||'Franquicia';
+}
+
+/* ======= Render de paneles ======= */
+function renderRows(containerSel, rows, buildRow, gridClass){
+  const cont = q(containerSel);
+  cont.innerHTML='';
+  rows.forEach((r,idx)=>{
+    const row = document.createElement('div');
+    row.className = 'grid rowx '+gridClass;
+    row.dataset.index = idx;
+    row.innerHTML = buildRow(r, idx);
+    cont.appendChild(row);
+  });
+}
+
+function renderAcciones(){
+  const it = currentItem(); if(!it) return;
+  if(!Array.isArray(it.acciones)) it.acciones = [];
+  renderRows('#accionesRows', it.acciones, (r,idx)=>`
+    <input type="date" data-k="fecha" value="${r.fecha||''}">
+    <input type="text" data-k="tipo" placeholder="Tipo (llamada, visita…)" value="${r.tipo||''}">
+    <input type="number" min="0" step="1" data-k="derivacion" value="${r.derivacion??''}">
+    <input type="checkbox" data-k="cita" ${r.cita?'checked':''}>
+    <input type="checkbox" data-k="venta" ${r.venta?'checked':''}>
+    <button class="sec-btn del" title="Eliminar">🗑️</button>
+  `,'grid-acciones');
+}
+
+function renderFormaciones(){
+  const it = currentItem(); if(!it) return;
+  if(!Array.isArray(it.formaciones)) it.formaciones = [];
+  renderRows('#formacionesRows', it.formaciones, (r,idx)=>`
+    <input type="text" data-k="curso" placeholder="Curso" value="${r.curso||''}">
+    <input type="checkbox" data-k="realizado" ${r.realizado?'checked':''}>
+    <input type="checkbox" data-k="aplica" ${r.aplica?'checked':''}>
+    <input type="text" data-k="obs" placeholder="Observaciones" value="${r.obs||''}">
+    <button class="sec-btn del" title="Eliminar">🗑️</button>
+  `,'grid-forma');
+}
+
+function renderProcesos(){
+  const it = currentItem(); if(!it) return;
+  if(!Array.isArray(it.procesos)) it.procesos = [];
+  renderRows('#procesosRows', it.procesos, (r,idx)=>`
+    <input type="number" min="0" max="100" step="1" data-k="puntuacion" value="${r.puntuacion??''}">
+    <input type="checkbox" data-k="hit" ${r.hit?'checked':''}>
+    <input type="checkbox" data-k="colaboraciones" ${r.colaboraciones?'checked':''}>
+    <button class="sec-btn del" title="Eliminar">🗑️</button>
+  `,'grid-proc');
+}
+
+function renderAdjuntos(){
+  const it = currentItem(); if(!it) return;
+  if(!Array.isArray(it.adjuntos)) it.adjuntos = [];
+  const list = q('#filesList');
+  list.innerHTML='';
+  it.adjuntos.forEach((f,idx)=>{
+    const node = document.createElement('div');
+    node.className='file-pill';
+    node.innerHTML = `📎 <span title="${f.name}">${f.name}</span> <small class="muted">(${Math.round((f.size||0)/1024)} KB)</small> <button class="sec-btn" data-delfile="${idx}" title="Quitar">🗑️</button>`;
+    list.appendChild(node);
+  });
 }
 
 /* ======= Eventos globales ======= */
@@ -349,7 +552,7 @@ q('#btnAR').addEventListener('click',()=>{
   alert('Atajo AR listo ✅');
 });
 
-/* ======= Delegación: secciones ======= */
+/* ======= Delegación: secciones (lista izquierda) ======= */
 qa('.section').forEach(secEl=>{
   const secName = secEl.dataset.section;
 
@@ -365,7 +568,12 @@ qa('.section').forEach(secEl=>{
       alert('Máximo 10 en CENTROS EXCLUSIVOS');
       return;
     }
-    const nuevo = { nombre:'(nuevo)', fecha:'', estado:'', notas:'' };
+    let nuevo;
+    if(secName === 'CENTROS EXCLUSIVOS'){
+      nuevo = { nombre:'(nuevo centro)', delegado:'', audiologo:'', tipo:'Franquicia', acciones:[], formaciones:[], procesos:[], adjuntos:[] };
+    }else{
+      nuevo = { nombre:'(nuevo)', fecha:'', estado:'', notas:'' };
+    }
     data[secName] = data[secName] || [];
     data[secName].push(nuevo);
     state.selected = { section:secName, index:data[secName].length-1 };
@@ -392,20 +600,104 @@ qa('.section').forEach(secEl=>{
   });
 });
 
-/* ======= Detalle (form) ======= */
-q('#btnSave').addEventListener('click',()=>{
-  if(state.selected.section==null) return;
-  const {section,index} = state.selected;
-  const it = data[section][index];
-  it.nombre = q('#fNombre').value.trim();
-  it.fecha = q('#fFecha').value;
-  it.estado = q('#fEstado').value.trim();
-  it.notas = q('#fNotas').value.trim();
+/* ======= Interacción: formularios ======= */
+/* Genérico */
+q('#btnSaveG').addEventListener('click',()=>{
+  const it = currentItem(); if(!it) return;
+  it.nombre = q('#gNombre').value.trim();
+  it.fecha = q('#gFecha').value;
+  it.estado = q('#gEstado').value.trim();
+  it.notas = q('#gNotas').value.trim();
   save(); renderAll();
 });
-q('#btnCancel').addEventListener('click',()=>{
-  state.selected = {section:null,index:null};
-  renderAll();
+q('#btnCancelG').addEventListener('click',()=>{ state.selected={section:null,index:null}; renderAll(); });
+
+/* Centro exclusivo: guardar/cancelar */
+q('#btnSaveC').addEventListener('click',()=>{
+  const it = currentItem(); if(!it) return;
+  it.nombre = q('#cNombre').value.trim();
+  it.delegado = q('#cDelegado').value.trim();
+  it.audiologo = q('#cAudiologo').value.trim();
+  it.tipo = q('#cTipo').value;
+  save(); renderAll();
+});
+q('#btnCancelC').addEventListener('click',()=>{ state.selected={section:null,index:null}; renderAll(); });
+
+/* Paneles: añadir filas */
+q('#addAccion').addEventListener('click',()=>{
+  const it = currentItem(); if(!it) return;
+  it.acciones.push({fecha:'', tipo:'', derivacion:null, cita:false, venta:false});
+  renderAcciones(); save();
+});
+q('#addFormacion').addEventListener('click',()=>{
+  const it = currentItem(); if(!it) return;
+  it.formaciones.push({curso:'', realizado:false, aplica:false, obs:''});
+  renderFormaciones(); save();
+});
+q('#addProceso').addEventListener('click',()=>{
+  const it = currentItem(); if(!it) return;
+  it.procesos.push({puntuacion:null, hit:false, colaboraciones:false});
+  renderProcesos(); save();
+});
+
+/* Delegación de cambios en celdas y borrado de fila */
+q('#detail').addEventListener('input',(ev)=>{
+  const row = ev.target.closest('.rowx'); if(!row) return;
+  const k = ev.target.dataset.k; if(!k) return;
+  const idx = +row.dataset.index;
+  const it = currentItem(); if(!it) return;
+
+  if(row.parentElement.id==='accionesRows'){
+    const obj = it.acciones[idx];
+    if(ev.target.type==='checkbox'){ obj[k] = ev.target.checked; }
+    else if(ev.target.type==='number'){ obj[k] = ev.target.value===''?null:Number(ev.target.value); }
+    else { obj[k] = ev.target.value; }
+  }
+  if(row.parentElement.id==='formacionesRows'){
+    const obj = it.formaciones[idx];
+    if(ev.target.type==='checkbox'){ obj[k] = ev.target.checked; }
+    else { obj[k] = ev.target.value; }
+  }
+  if(row.parentElement.id==='procesosRows'){
+    const obj = it.procesos[idx];
+    if(ev.target.type==='checkbox'){ obj[k] = ev.target.checked; }
+    else if(ev.target.type==='number'){ obj[k] = ev.target.value===''?null:Number(ev.target.value); }
+    else { obj[k] = ev.target.value; }
+  }
+  save();
+});
+
+q('#detail').addEventListener('click',(ev)=>{
+  // borrar fila
+  if(ev.target.classList.contains('del')){
+    const row = ev.target.closest('.rowx'); if(!row) return;
+    const idx = +row.dataset.index;
+    const it = currentItem(); if(!it) return;
+    if(row.parentElement.id==='accionesRows'){ it.acciones.splice(idx,1); renderAcciones(); }
+    if(row.parentElement.id==='formacionesRows'){ it.formaciones.splice(idx,1); renderFormaciones(); }
+    if(row.parentElement.id==='procesosRows'){ it.procesos.splice(idx,1); renderProcesos(); }
+    save();
+  }
+  // quitar adjunto
+  if(ev.target.dataset.delfile){
+    const i = +ev.target.dataset.delfile;
+    const it = currentItem(); if(!it) return;
+    it.adjuntos.splice(i,1);
+    renderAdjuntos(); save();
+  }
+});
+
+/* Adjuntar Excel (solo metadatos, no contenido) */
+q('#btnExcel').addEventListener('click',()=> q('#fileExcel').click());
+q('#fileExcel').addEventListener('change',(ev)=>{
+  const files = Array.from(ev.target.files||[]);
+  const it = currentItem(); if(!it) return;
+  it.adjuntos = it.adjuntos || [];
+  files.forEach(f=>{
+    it.adjuntos.push({name:f.name, size:f.size, lastModified:f.lastModified});
+  });
+  ev.target.value=''; // reset
+  renderAdjuntos(); save();
 });
 
 /* ======= Init ======= */
