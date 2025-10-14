@@ -21,7 +21,7 @@
   html,body{height:100%}
   body{margin:0;background:var(--bg);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;color:#222}
 
-  /* Topbar alineada con el contenido (mismo ancho visual) */
+  /* Topbar alineada con el contenido */
   .topbar{position:sticky;top:0;left:0;right:0;width:100%;z-index:50;background:linear-gradient(180deg,var(--rojo),var(--rojo-osc));color:#fff;box-shadow:var(--shadow)}
   .bar-inner{max-width:var(--contentW);margin:0 auto;display:flex;align-items:center;gap:.75rem;padding:.8rem 1rem}
   .brand{font-weight:900;letter-spacing:.35px}
@@ -69,10 +69,10 @@
   .bar-right{display:flex;gap:.5rem;justify-content:flex-end}
   .bar-split{display:flex;justify-content:space-between;align-items:center;margin:.4rem 0}
 
-  /* Tablas: scroll horizontal robusto */
+  /* Tablas: scroll horizontal robusto (barra inferior visible) */
   .table-wrap{border:1px solid var(--line);border-radius:12px;background:#fff;box-shadow:var(--shadow);padding:.5rem}
-  .xscroll{overflow-x:auto;overflow-y:hidden}
-  .table-inner{display:block;width:max-content;min-width:1700px} /* fuerza scroll X */
+  .xscroll{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;padding-bottom:14px} /* <- deja espacio para la barra */
+  .table-inner{display:block;width:max-content;min-width:1800px} /* fuerza scroll X (en móviles también) */
   .scroll{max-height:58vh;overflow:auto;padding-right:.3rem}
 
   /* Grids por módulo */
@@ -158,16 +158,17 @@
         <div class="sec-list"></div>
       </section>
 
-      <section class="section bg-equip" data-section="EQUIPOS SEDE AUDIO">
+      <!-- NUEVO BLOQUE -->
+      <section class="section bg-equip" data-section="EQUIPOS">
         <div class="sec-head">
-          <div>🧰 EQUIPOS SEDE AUDIO</div>
+          <div>🧰 EQUIPOS</div>
           <div><button class="sec-btn" data-act="toggle">▾</button> <button class="sec-btn" data-act="add">＋</button></div>
         </div>
         <div class="sec-list"></div>
       </section>
     </aside>
 
-    <!-- DERECHA (DETALLE) -->
+    <!-- DERECHA -->
     <section class="detail card" id="detail">
       <div class="row" style="align-items:center">
         <h2 id="detTitle">Detalle</h2>
@@ -176,7 +177,7 @@
       </div>
       <div class="hint" id="detHint">Selecciona un item a la izquierda o crea uno con ＋.</div>
 
-      <!-- ========== CENTROS ========== -->
+      <!-- CENTROS -->
       <div id="detFormCentro" style="display:none">
         <div class="bar-split">
           <strong>Centro</strong>
@@ -185,7 +186,6 @@
             <button class="btn btn-save" id="btnSaveCTop" title="Guardar cambios del centro">💾 Guardar centro</button>
           </div>
         </div>
-
         <div class="row">
           <div class="field"><label>Nombre</label><input id="cNombre" type="text"></div>
           <div class="field"><label>Delegado</label><input id="cDelegado" type="text"></div>
@@ -195,6 +195,7 @@
           <div class="field"><label>Franquicia o Sucursal</label><select id="cTipo"><option>Franquicia</option><option>Sucursal</option></select></div>
         </div>
 
+        <!-- ACCIONES -->
         <div class="table-wrap">
           <div class="xscroll">
             <div class="table-inner">
@@ -206,6 +207,7 @@
           </div>
         </div>
 
+        <!-- FORMACIONES RELEVANTES -->
         <div class="table-wrap">
           <div class="xscroll">
             <div class="table-inner">
@@ -217,6 +219,7 @@
           </div>
         </div>
 
+        <!-- PROCESOS -->
         <div class="table-wrap">
           <div class="xscroll">
             <div class="table-inner">
@@ -234,7 +237,7 @@
         </div>
       </div>
 
-      <!-- ========== VISITAS ========== -->
+      <!-- VISITAS -->
       <div id="detFormVisitas" style="display:none">
         <div class="bar-split">
           <strong>Visitas audio</strong>
@@ -243,13 +246,11 @@
             <button class="btn btn-save" id="btnSaveVATop" title="Guardar visitas">💾 Guardar visitas</button>
           </div>
         </div>
-
         <div class="row">
           <div class="field"><label>Rol</label><select id="vaRol"><option>Delegado audio</option><option>Responsable AAR</option></select></div>
           <div class="field"><label>Nombre</label><input id="vaResp" type="text" placeholder="Nombre"></div>
           <div class="field"><label>Buscar centro</label><input id="vaSearchTop" type="text" placeholder="Filtrar…"></div>
         </div>
-
         <div class="tabs" id="vaTabs"></div>
 
         <div class="table-wrap">
@@ -269,7 +270,7 @@
         </div>
       </div>
 
-      <!-- ========== FORMACIONES ========== -->
+      <!-- FORMACIONES -->
       <div id="detFormMentoring" style="display:none">
         <div class="bar-split">
           <strong>Formaciones y Mentoring</strong>
@@ -278,7 +279,6 @@
             <button class="btn btn-save" id="btnSaveFMTop" title="Guardar formaciones">💾 Guardar</button>
           </div>
         </div>
-
         <div class="row">
           <div class="field"><label>Delegado regional</label><input id="fmDelegado" type="text"></div>
           <div class="field"><label>Buscar</label><input id="fmSearchTop" type="text" placeholder="Filtrar…"></div>
@@ -303,7 +303,7 @@
         </div>
       </div>
 
-      <!-- ========== TELE ========== -->
+      <!-- TELEAUDIOLOGÍA -->
       <div id="detFormTele" style="display:none">
         <div class="bar-split">
           <strong>Teleaudiología</strong>
@@ -312,7 +312,6 @@
             <button class="btn btn-save" id="btnSaveTATop" title="Guardar tele">💾 Guardar tele</button>
           </div>
         </div>
-
         <div class="row">
           <div class="field"><label>Buscar</label><input id="taSearchTop" type="text" placeholder="Centro o persona…"></div>
           <div class="field"><label>Persona</label><select id="taPersonSelect"><option value="">Todos</option></select></div>
@@ -335,10 +334,10 @@
         </div>
       </div>
 
-      <!-- ========== EQUIPOS SEDE AUDIO ========== -->
+      <!-- EQUIPOS -->
       <div id="detFormEquipos" style="display:none">
         <div class="bar-split">
-          <strong>Equipos sede audio</strong>
+          <strong>Equipos</strong>
           <div class="bar-right">
             <button class="btn" id="btnAddParCols" title="Añadir un par de columnas Centro/Sede">＋ Añadir par</button>
             <button class="btn" id="btnCancelEQTop">Cancelar</button>
@@ -348,14 +347,12 @@
 
         <div class="row">
           <div class="field"><label>Buscar</label><input id="eqSearchTop" type="text" placeholder="Equipo, serie, centro o persona…"></div>
-          <div class="field"><label>&nbsp;</label><button class="btn" id="btnAddFila" title="Añadir una fila">＋ Añadir fila</button></div>
+          <div class="field"><label>&nbsp;</label><button class="btn" id="btnAddFila" title="Añadir una fila (25 iniciales)">＋ Añadir fila</button></div>
         </div>
 
         <div class="table-wrap">
           <div class="xscroll">
-            <div class="table-inner" id="eqTable">
-              <!-- cabecera y filas las pinta JS -->
-            </div>
+            <div class="table-inner" id="eqTable"></div>
           </div>
         </div>
 
@@ -383,15 +380,15 @@ const firebaseConfig = {
   messagingSenderId: "TUSENDERID",
   appId: "TU_APP_ID"
 };
-const DB_PATH='audioseguimiento/v5g';
+/* ======= RUTA de datos y lock ======= */
+const DB_PATH='audioseguimiento/v5h';
 const LOCK_PATH=DB_PATH+'/__lock__';
 const LOCK_TIMEOUT_MS=5*60*1000;
 /* ================================== */
 
 let cloud={ready:false,ref:null,db:null};
 let state={selected:{section:null,index:null},vaSheet:0,vaFilter:'',fmFilter:'',taFilter:'',taPerson:'',eqFilter:'',canEdit:false,myLock:false};
-let sessionId=localStorage.getItem('aas_session')||('S'+Math.random().toString(36).slice(2));
-localStorage.setItem('aas_session',sessionId);
+let sessionId=localStorage.getItem('aas_session')||('S'+Math.random().toString(36).slice(2)); localStorage.setItem('aas_session',sessionId);
 let editorName=localStorage.getItem('aas_name')||'';
 
 let data={
@@ -400,24 +397,23 @@ let data={
   "VISITAS AUDIO":[{ rol:"Delegado audio", responsable:"", hojas:[ makeSheetVA("Visita 1") ] }],
   "FORMACIONES Y MENTORING":[{ delegado:"", filas: makeRowsFM() }],
   "TELEAUDIOLOGIA":[{ hojas:[ makeSheetTA("Tele 1") ] }],
-  "EQUIPOS SEDE AUDIO":[ makeEquipos() ]
+  "EQUIPOS":[ makeEquipos() ]
 };
 
-/* ===== Utils ===== */
+/* ===== util ===== */
 const $=(s,r=document)=>r.querySelector(s); const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
 const esc=s=>(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const now=()=>new Date().toLocaleString();
+
 function makeSheetVA(n){const rows=Array.from({length:300},()=>({centro:'',delegado:'',audiologo:'',tipo:'Sucursal',fecha:'',puntuacion:null,hit:false,conv_prueba:null,conv_venta:null}));return{nombre:n,rows};}
 function makeRowsFM(){return Array.from({length:300},()=>({fecha:'',tema:'',audiologo:'',duracion:1,p_ini:null,v_ini:null,p_3m:null,v_3m:null}));}
 function makeSheetTA(n){const rows=Array.from({length:300},()=>({centro:'',delegado:'',rol:'Audiólogo',persona:'',formacion:false,practicas:false,certificado:false,pruebas_reales:null,ventas:null}));return{nombre:n,rows};}
-function makeEquipos(){
-  const rows=Array.from({length:25},()=>({equipo:'',serie:'',persona:'',fecha:'',pares:[{centro:'',sede:''},{centro:'',sede:''},{centro:'',sede:''}]}));
-  return { columnas:3, filas: rows };
-}
-function setDetailTone(s){const d=$('#detail');d.style.background = s==="CENTROS EXCLUSIVOS"?'var(--col-exclusivos)':s==="CENTROS FLOP"?'var(--col-flop)':s==="VISITAS AUDIO"?'var(--col-visitas)':s==="FORMACIONES Y MENTORING"?'var(--col-formaciones)':s==="TELEAUDIOLOGIA"?'var(--col-tele)':s==="EQUIPOS SEDE AUDIO"?'var(--col-equip)':'#fff';}
+function makeEquipos(){ const rows=Array.from({length:25},()=>({equipo:'',serie:'',persona:'',fecha:'',pares:[{centro:'',sede:''},{centro:'',sede:''},{centro:'',sede:''}]})); return { columnas:3, filas: rows }; }
+
+function setDetailTone(s){const d=$('#detail');d.style.background = s==="CENTROS EXCLUSIVOS"?'var(--col-exclusivos)':s==="CENTROS FLOP"?'var(--col-flop)':s==="VISITAS AUDIO"?'var(--col-visitas)':s==="FORMACIONES Y MENTORING"?'var(--col-formaciones)':s==="TELEAUDIOLOGIA"?'var(--col-tele)':s==="EQUIPOS"?'var(--col-equip)':'#fff';}
 function currentItem(){return data[state.selected.section]?.[state.selected.index];}
 
-/* ===== Firebase + Lock ===== */
+/* ===== Firebase + lock ===== */
 function initFirebase(){
   try{firebase.initializeApp(firebaseConfig);}catch(e){}
   cloud.db=firebase.database();
@@ -458,10 +454,7 @@ function watchLock(){
   });
 }
 function requestEdit(){
-  if(!editorName){
-    const n=prompt('Tu nombre para mostrar (ej.: Sergio)')||'';
-    if(n){editorName=n;localStorage.setItem('aas_name',n);}
-  }
+  if(!editorName){ const n=prompt('Tu nombre para mostrar (ej.: Sergio)')||''; if(n){editorName=n;localStorage.setItem('aas_name',n);} }
   const lref=cloud.db.ref(LOCK_PATH);
   lref.transaction(curr=>{
     const t=Date.now();
@@ -474,9 +467,7 @@ function requestEdit(){
       state.canEdit=true; state.myLock=true;
       $('#viewMode').style.display='none'; $('#lockInfo').style.display='inline-flex'; $('#lockInfo').textContent='🔓 Edición habilitada';
       keepAlive(); window.addEventListener('beforeunload',releaseLock); toggleEditability();
-    }else{
-      alert(`En uso por ${lock?.name||'otro usuario'}.`);
-    }
+    }else{ alert(`En uso por ${lock?.name||'otro usuario'}.`); }
   });
 }
 let hb=null;
@@ -487,15 +478,15 @@ function toggleEditability(){
   $$("input,select,textarea").forEach(el=>el.disabled=dis);
   $$("button").forEach(b=>{
     const id=b.id||'';
-    const always=['btnEdit','btnRefresh','btnCancelC','btnCancelCTop','btnCancelVA','btnCancelVATop','btnCancelFM','btnCancelFMTop','btnCancelTA','btnCancelTATop','btnCancelEQ','btnCancelEQTop'];
+    const always=['btnEdit','btnRefresh','btnCancelC','btnCancelCTop','btnCancelVA','btnCancelVATop','btnCancelFM','btnCancelFMTop','btnCancelTA','btnCancelTATop','btnCancelEQ','btnCancelEQTop','btnAddParCols','btnAddFila'];
     if(always.includes(id)){ b.disabled=false; return; }
     if(id.startsWith('btnSave')){ b.disabled=dis; return; }
     if(!id) b.disabled=dis;
   });
 }
 
-/* ===== Render IZQ ===== */
-const SECTIONS=["CENTROS EXCLUSIVOS","CENTROS FLOP","VISITAS AUDIO","FORMACIONES Y MENTORING","TELEAUDIOLOGIA","EQUIPOS SEDE AUDIO"];
+/* ===== IZQUIERDA ===== */
+const SECTIONS=["CENTROS EXCLUSIVOS","CENTROS FLOP","VISITAS AUDIO","FORMACIONES Y MENTORING","TELEAUDIOLOGIA","EQUIPOS"];
 function renderLeft(){
   SECTIONS.forEach(name=>{
     const cont=document.querySelector(`.section[data-section="${name}"] .sec-list`); cont.innerHTML='';
@@ -550,16 +541,16 @@ function renderDetail(){ $('#detHint').style.display='none'; $('#collapseDetail'
   $('#detFormVisitas').style.display= s==='VISITAS AUDIO'?'block':'none';
   $('#detFormMentoring').style.display= s==='FORMACIONES Y MENTORING'?'block':'none';
   $('#detFormTele').style.display= s==='TELEAUDIOLOGIA'?'block':'none';
-  $('#detFormEquipos').style.display= s==='EQUIPOS SEDE AUDIO'?'block':'none';
+  $('#detFormEquipos').style.display= s==='EQUIPOS'?'block':'none';
   if(s.includes('CENTROS')) fillCentro();
   if(s==='VISITAS AUDIO') fillVisitas();
   if(s==='FORMACIONES Y MENTORING') fillFM();
   if(s==='TELEAUDIOLOGIA') fillTele();
-  if(s==='EQUIPOS SEDE AUDIO') fillEquipos();
+  if(s==='EQUIPOS') fillEquipos();
 }
 $('#collapseDetail').onclick=()=>{ state.selected={section:null,index:null}; renderDetailBlank(); };
 
-/* ===== CENTROS ===== (igual que versión anterior) */
+/* ===== CENTROS ===== */
 function fillCentro(){const it=currentItem(); if(!it) return;
   $('#cNombre').value=it.nombre||''; $('#cDelegado').value=it.delegado||''; $('#cAudiologo').value=it.audiologo||''; $('#cTipo').value=it.tipo||'Franquicia';
   renderAcciones(); renderFormaciones(); renderProcesos(); toggleEditability();
@@ -610,10 +601,10 @@ function renderVA(){const it=currentItem(); const hoja=it.hojas[state.vaSheet]||
   hoja.rows.forEach((r,i)=>{if(f && !(r.centro||'').toLowerCase().includes(f)) return; const row=document.createElement('div'); row.className='va-row va-cols';
     row.innerHTML=`<div>${i+1}</div><input data-i="${i}" data-k="centro" value="${esc(r.centro||'')}"><input data-i="${i}" data-k="delegado" value="${esc(r.delegado||'')}"><input data-i="${i}" data-k="audiologo" value="${esc(r.audiologo||'')}"><select data-i="${i}" data-k="tipo"><option ${r.tipo==='Sucursal'?'selected':''}>Sucursal</option><option ${r.tipo==='Franquicia'?'selected':''}>Franquicia</option></select><input type="date" data-i="${i}" data-k="fecha" value="${r.fecha||''}"><input class="pscore ${vScore85(r.puntuacion)}" type="number" min="0" max="100" step="1" data-i="${i}" data-k="puntuacion" value="${r.puntuacion??''}"><input type="checkbox" data-i="${i}" data-k="hit" ${r.hit?'checked':''}><input class="conv ${vClass80(r.conv_prueba)}" type="number" min="0" max="100" step="1" data-i="${i}" data-k="conv_prueba" value="${r.conv_prueba??''}"><input class="conv ${vClass80(r.conv_venta)}" type="number" min="0" max="100" step="1" data-i="${i}" data-k="conv_venta" value="${r.conv_venta??''}">`; cont.appendChild(row);});
 }
-$('#vaRows').addEventListener('input',e=>{if(!state.canEdit){e.preventDefault();return;}const h=currentItem().hojas[state.vaSheet]; const i=+e.target.dataset.i; const k=e.target.dataset.k; if(!k) return; if(e.target.type==='checkbox') h.rows[i][k]=e.target.checked; else if(e.target.type==='number') h.rows[i][k]=e.target.value===''?null:Number(e.target.value); else h.rows[i][k]=e.target.value; save(); if(k==='puntuacion') e.target.className='pscore '+(Number(h.rows[i][k])>=85?'good':'bad'); if(k==='conv_prueba'||k==='conv_venta') e.target.className='conv '+(Number(h.rows[i][k])>=80?'good':'bad');});
+$('#vaRows').addEventListener('input',e=>{if(!state.canEdit){e.preventDefault();return;}const h=currentItem().hojas[state.vaSheet]; const i=+e.target.dataset.i; const k=e.target.dataset.k; if(!k) return; if(e.target.type==='checkbox') h.rows[i][k]=e.target.checked; else if(e.target.type==='number') h.rows[i][k]=e.target.value===''?null:Number(e.target.value); else h.rows[i][k]=e.target.value; save();});
 $('#btnSaveVA').onclick=save; $('#btnSaveVATop').onclick=save; $('#btnCancelVA').onclick=()=>{state.selected={section:null,index:null};renderDetailBlank();}; $('#btnCancelVATop').onclick=()=>{state.selected={section:null,index:null};renderDetailBlank();};
 
-/* ===== FM ===== */
+/* ===== FORMACIONES ===== */
 function fillFM(){const it=currentItem(); if(!it) return; $('#fmDelegado').value=it.delegado||''; $('#fmSearchTop').value=state.fmFilter||''; renderFM(); toggleEditability();}
 $('#fmSearchTop').oninput=e=>{state.fmFilter=e.target.value.trim(); renderFM();};
 function renderFM(){const it=currentItem(); it.filas=it.filas||makeRowsFM(); const f=(state.fmFilter||'').toLowerCase(); const cont=$('#fmRows'); cont.innerHTML='';
@@ -644,18 +635,15 @@ function renderEquipos(){
   const f=(state.eqFilter||'').toLowerCase();
   const root=$('#eqTable'); root.innerHTML='';
 
-  // grid template: #, Equipo, Nº Serie, Persona, Fecha, (Centro/Sede)*n
   const template = ['52px','220px','160px','180px','130px'].concat(
     Array.from({length:cols},()=>['180px','140px']).flat()
   ).join(' ');
 
-  // CABECERA
   const head=document.createElement('div'); head.className='va-head'; head.style.gridTemplateColumns=template;
   head.innerHTML = `<div>#</div><div>Equipo</div><div>Nº serie</div><div>Persona que envía</div><div>Fecha</div>` +
     Array.from({length:cols},(_,i)=>`<div>Centro ${i+1}</div><div>Sede ${i+1}</div>`).join('');
   root.appendChild(head);
 
-  // CONTENEDOR FILAS (scroll)
   const body=document.createElement('div'); body.className='scroll';
   root.appendChild(body);
 
@@ -688,7 +676,7 @@ $('#btnSaveEQ').onclick=save; $('#btnSaveEQTop').onclick=save;
 $('#btnCancelEQ').onclick=()=>{state.selected={section:null,index:null};renderDetailBlank();};
 $('#btnCancelEQTop').onclick=()=>{state.selected={section:null,index:null};renderDetailBlank();};
 
-/* ===== UI topbar ===== */
+/* ===== Topbar ===== */
 $('#btnEdit').onclick=requestEdit;
 $('#btnRefresh').onclick=()=>{ if(!cloud.ready) return; cloud.ref.once('value').then(s=>{ const v=s.val(); if(v) data=v; $('#stamp').textContent='Actualizado: '+now(); renderAll();}); };
 $('#btnSaveTop').onclick=save;
