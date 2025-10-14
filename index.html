@@ -13,29 +13,30 @@
   :root{
     --rojo:#c82727; --rojo-osc:#a71f1f;
     --bg:#f6f7fb; --card:#ffffff; --shadow:0 8px 22px rgba(0,0,0,.08);
-    --col-exclusivos:#fde2e4; --col-flop:#e2f0cb; --col-visitas:#cde7f0; --col-formaciones:#f9e5c9; --col-tele:#eadcf8;
+    --col-exclusivos:#fde2e4; --col-flop:#e2f0cb; --col-visitas:#cde7f0; --col-formaciones:#f9e5c9; --col-tele:#eadcf8; --col-equip:#e8f1ff;
     --line:#e6e7ee;
+    --contentW: 1380px;
   }
   *{box-sizing:border-box}
   html,body{height:100%}
   body{margin:0;background:var(--bg);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;color:#222}
 
-  /* Topbar a 100% del documento */
+  /* Topbar alineada con el contenido (mismo ancho visual) */
   .topbar{position:sticky;top:0;left:0;right:0;width:100%;z-index:50;background:linear-gradient(180deg,var(--rojo),var(--rojo-osc));color:#fff;box-shadow:var(--shadow)}
-  .bar-inner{max-width:1380px;margin:0 auto;display:flex;align-items:center;gap:.75rem;padding:.8rem 1rem}
+  .bar-inner{max-width:var(--contentW);margin:0 auto;display:flex;align-items:center;gap:.75rem;padding:.8rem 1rem}
   .brand{font-weight:900;letter-spacing:.35px}
   .spacer{flex:1}
   .btn{border:0;border-radius:12px;padding:.55rem .9rem;cursor:pointer;box-shadow:var(--shadow);font-weight:700}
   .btn-lite{background:#fff;color:#9b1010}
   .btn-save{background:#fff;color:#7e0e0e}
   .btn:disabled{opacity:.55;cursor:not-allowed}
-  .pill{display:inline-flex;align-items:center;gap:.4rem;padding:.35rem .6rem;border-radius:999px;border:1px solid #ffffff3d;background:#ffffff17}
+  .pill{display:inline-flex;align-items:center;gap:.4rem;padding:.35rem .6rem;border-radius:999px;border:1px solid #ffffff3d;background:#ffffff17;white-space:nowrap}
   .pill.ok{background:#28c76f2a;border-color:#28c76f66}
   .pill.warn{background:#ffd1662e;border-color:#ffd16666}
   .ar{min-width:32px;height:32px;border-radius:9px;background:#fff;color:#b30000;font-weight:900;border:0;box-shadow:var(--shadow);cursor:pointer}
 
   /* Layout */
-  .app{max-width:1380px;margin:0 auto}
+  .app{max-width:var(--contentW);margin:0 auto}
   .wrap{display:grid;grid-template-columns:320px 1fr;gap:1rem;padding:1rem}
   .card{background:var(--card);border-radius:16px;box-shadow:var(--shadow)}
   .title{font-weight:900;font-size:1.05rem;padding:.8rem 1rem;border-bottom:1px solid var(--line)}
@@ -55,6 +56,7 @@
   .bg-visitas{background:var(--col-visitas)}
   .bg-formaciones{background:var(--col-formaciones)}
   .bg-tele{background:var(--col-tele)}
+  .bg-equip{background:var(--col-equip)}
 
   .detail{padding:1rem 1.1rem 1.2rem;min-height:520px;border-radius:18px;border:1px solid var(--line);background:#fff}
   .detail h2{margin:0 0 .4rem 0}
@@ -73,7 +75,7 @@
   .table-inner{display:block;width:max-content;min-width:1700px} /* fuerza scroll X */
   .scroll{max-height:58vh;overflow:auto;padding-right:.3rem}
 
-  /* Grids por módulo (mismo ancho para header y filas) */
+  /* Grids por módulo */
   .va-head,.va-row{display:grid;gap:.35rem;align-items:center;margin:.2rem .1rem}
   .va-cols{grid-template-columns:52px 1.1fr 140px 140px 160px 130px 120px 70px 170px 170px}
   .fm-head,.fm-row{display:grid;gap:.35rem;align-items:center;margin:.2rem .1rem;grid-template-columns:52px 120px 220px 160px 140px 140px 140px 140px 140px 120px 120px}
@@ -102,7 +104,7 @@
     <span id="lockInfo" class="pill warn" style="display:none">🔒 En uso…</span>
 
     <button class="btn btn-lite" id="btnEdit" title="Pedir bloqueo y habilitar edición">Editar</button>
-    <button class="btn btn-lite" id="btnRefresh" title="Leer última versión desde la nube (no guarda)">Actualizar</button>
+    <button class="btn btn-lite" id="btnRefresh" title="Leer la última versión desde la nube (no guarda)">Actualizar</button>
     <button class="btn btn-save" id="btnSaveTop" title="Guardar cambios en la nube" disabled>Guardar</button>
 
     <span class="pill ok" id="pillOk" style="display:none">✓ Guardado</span>
@@ -155,6 +157,14 @@
         </div>
         <div class="sec-list"></div>
       </section>
+
+      <section class="section bg-equip" data-section="EQUIPOS SEDE AUDIO">
+        <div class="sec-head">
+          <div>🧰 EQUIPOS SEDE AUDIO</div>
+          <div><button class="sec-btn" data-act="toggle">▾</button> <button class="sec-btn" data-act="add">＋</button></div>
+        </div>
+        <div class="sec-list"></div>
+      </section>
     </aside>
 
     <!-- DERECHA (DETALLE) -->
@@ -166,12 +176,16 @@
       </div>
       <div class="hint" id="detHint">Selecciona un item a la izquierda o crea uno con ＋.</div>
 
-      <!-- CENTROS -->
+      <!-- ========== CENTROS ========== -->
       <div id="detFormCentro" style="display:none">
         <div class="bar-split">
           <strong>Centro</strong>
-          <div class="bar-right"><button class="btn" id="btnCancelCTop">Cancelar</button><button class="btn btn-save" id="btnSaveCTop">💾 Guardar centro</button></div>
+          <div class="bar-right">
+            <button class="btn" id="btnCancelCTop">Cancelar</button>
+            <button class="btn btn-save" id="btnSaveCTop" title="Guardar cambios del centro">💾 Guardar centro</button>
+          </div>
         </div>
+
         <div class="row">
           <div class="field"><label>Nombre</label><input id="cNombre" type="text"></div>
           <div class="field"><label>Delegado</label><input id="cDelegado" type="text"></div>
@@ -214,20 +228,28 @@
           </div>
         </div>
 
-        <div class="bar-right"><button class="btn" id="btnCancelC">Cancelar</button><button class="btn btn-save" id="btnSaveC">💾 Guardar centro</button></div>
+        <div class="bar-right">
+          <button class="btn" id="btnCancelC">Cancelar</button>
+          <button class="btn btn-save" id="btnSaveC" title="Guardar cambios del centro">💾 Guardar centro</button>
+        </div>
       </div>
 
-      <!-- VISITAS -->
+      <!-- ========== VISITAS ========== -->
       <div id="detFormVisitas" style="display:none">
         <div class="bar-split">
           <strong>Visitas audio</strong>
-          <div class="bar-right"><button class="btn" id="btnCancelVATop">Cancelar</button><button class="btn btn-save" id="btnSaveVATop">💾 Guardar visitas</button></div>
+          <div class="bar-right">
+            <button class="btn" id="btnCancelVATop">Cancelar</button>
+            <button class="btn btn-save" id="btnSaveVATop" title="Guardar visitas">💾 Guardar visitas</button>
+          </div>
         </div>
+
         <div class="row">
           <div class="field"><label>Rol</label><select id="vaRol"><option>Delegado audio</option><option>Responsable AAR</option></select></div>
           <div class="field"><label>Nombre</label><input id="vaResp" type="text" placeholder="Nombre"></div>
           <div class="field"><label>Buscar centro</label><input id="vaSearchTop" type="text" placeholder="Filtrar…"></div>
         </div>
+
         <div class="tabs" id="vaTabs"></div>
 
         <div class="table-wrap">
@@ -241,12 +263,22 @@
           </div>
         </div>
 
-        <div class="bar-right" style="margin-top:.7rem"><button class="btn" id="btnCancelVA">Cancelar</button><button class="btn btn-save" id="btnSaveVA">💾 Guardar visitas</button></div>
+        <div class="bar-right" style="margin-top:.7rem">
+          <button class="btn" id="btnCancelVA">Cancelar</button>
+          <button class="btn btn-save" id="btnSaveVA" title="Guardar visitas">💾 Guardar visitas</button>
+        </div>
       </div>
 
-      <!-- FORMACIONES -->
+      <!-- ========== FORMACIONES ========== -->
       <div id="detFormMentoring" style="display:none">
-        <div class="bar-split"><strong>Formaciones y Mentoring</strong><div class="bar-right"><button class="btn" id="btnCancelFMTop">Cancelar</button><button class="btn btn-save" id="btnSaveFMTop">💾 Guardar</button></div></div>
+        <div class="bar-split">
+          <strong>Formaciones y Mentoring</strong>
+          <div class="bar-right">
+            <button class="btn" id="btnCancelFMTop">Cancelar</button>
+            <button class="btn btn-save" id="btnSaveFMTop" title="Guardar formaciones">💾 Guardar</button>
+          </div>
+        </div>
+
         <div class="row">
           <div class="field"><label>Delegado regional</label><input id="fmDelegado" type="text"></div>
           <div class="field"><label>Buscar</label><input id="fmSearchTop" type="text" placeholder="Filtrar…"></div>
@@ -256,19 +288,31 @@
           <div class="xscroll">
             <div class="table-inner">
               <div class="fm-head">
-                <div>#</div><div>Fecha</div><div>Tema</div><div>Audiólogo</div><div>Duración (semanas)</div><div>% Prueba inicial</div><div>% Venta inicial</div><div>% Prueba 3m</div><div>% Venta 3m</div><div>Evo. prueba</div><div>Evo. venta</div>
+                <div>#</div><div>Fecha</div><div>Tema</div><div>Audiólogo</div>
+                <div>Duración (semanas)</div><div>% Prueba inicial</div><div>% Venta inicial</div>
+                <div>% Prueba 3m</div><div>% Venta 3m</div><div>Evo. prueba</div><div>Evo. venta</div>
               </div>
               <div id="fmRows" class="scroll"></div>
             </div>
           </div>
         </div>
 
-        <div class="bar-right" style="margin-top:.7rem"><button class="btn" id="btnCancelFM">Cancelar</button><button class="btn btn-save" id="btnSaveFM">💾 Guardar</button></div>
+        <div class="bar-right" style="margin-top:.7rem">
+          <button class="btn" id="btnCancelFM">Cancelar</button>
+          <button class="btn btn-save" id="btnSaveFM" title="Guardar formaciones">💾 Guardar</button>
+        </div>
       </div>
 
-      <!-- TELE -->
+      <!-- ========== TELE ========== -->
       <div id="detFormTele" style="display:none">
-        <div class="bar-split"><strong>Teleaudiología</strong><div class="bar-right"><button class="btn" id="btnCancelTATop">Cancelar</button><button class="btn btn-save" id="btnSaveTATop">💾 Guardar tele</button></div></div>
+        <div class="bar-split">
+          <strong>Teleaudiología</strong>
+          <div class="bar-right">
+            <button class="btn" id="btnCancelTATop">Cancelar</button>
+            <button class="btn btn-save" id="btnSaveTATop" title="Guardar tele">💾 Guardar tele</button>
+          </div>
+        </div>
+
         <div class="row">
           <div class="field"><label>Buscar</label><input id="taSearchTop" type="text" placeholder="Centro o persona…"></div>
           <div class="field"><label>Persona</label><select id="taPersonSelect"><option value="">Todos</option></select></div>
@@ -285,7 +329,40 @@
           </div>
         </div>
 
-        <div class="bar-right" style="margin-top:.7rem"><button class="btn" id="btnCancelTA">Cancelar</button><button class="btn btn-save" id="btnSaveTA">💾 Guardar tele</button></div>
+        <div class="bar-right" style="margin-top:.7rem">
+          <button class="btn" id="btnCancelTA">Cancelar</button>
+          <button class="btn btn-save" id="btnSaveTA" title="Guardar tele">💾 Guardar tele</button>
+        </div>
+      </div>
+
+      <!-- ========== EQUIPOS SEDE AUDIO ========== -->
+      <div id="detFormEquipos" style="display:none">
+        <div class="bar-split">
+          <strong>Equipos sede audio</strong>
+          <div class="bar-right">
+            <button class="btn" id="btnAddParCols" title="Añadir un par de columnas Centro/Sede">＋ Añadir par</button>
+            <button class="btn" id="btnCancelEQTop">Cancelar</button>
+            <button class="btn btn-save" id="btnSaveEQTop" title="Guardar inventario">💾 Guardar equipos</button>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="field"><label>Buscar</label><input id="eqSearchTop" type="text" placeholder="Equipo, serie, centro o persona…"></div>
+          <div class="field"><label>&nbsp;</label><button class="btn" id="btnAddFila" title="Añadir una fila">＋ Añadir fila</button></div>
+        </div>
+
+        <div class="table-wrap">
+          <div class="xscroll">
+            <div class="table-inner" id="eqTable">
+              <!-- cabecera y filas las pinta JS -->
+            </div>
+          </div>
+        </div>
+
+        <div class="bar-right" style="margin-top:.7rem">
+          <button class="btn" id="btnCancelEQ">Cancelar</button>
+          <button class="btn btn-save" id="btnSaveEQ" title="Guardar inventario">💾 Guardar equipos</button>
+        </div>
       </div>
 
     </section>
@@ -306,13 +383,13 @@ const firebaseConfig = {
   messagingSenderId: "TUSENDERID",
   appId: "TU_APP_ID"
 };
-const DB_PATH='audioseguimiento/v5f';
+const DB_PATH='audioseguimiento/v5g';
 const LOCK_PATH=DB_PATH+'/__lock__';
 const LOCK_TIMEOUT_MS=5*60*1000;
 /* ================================== */
 
 let cloud={ready:false,ref:null,db:null};
-let state={selected:{section:null,index:null},vaSheet:0,vaFilter:'',fmFilter:'',taFilter:'',taPerson:'',canEdit:false,myLock:false};
+let state={selected:{section:null,index:null},vaSheet:0,vaFilter:'',fmFilter:'',taFilter:'',taPerson:'',eqFilter:'',canEdit:false,myLock:false};
 let sessionId=localStorage.getItem('aas_session')||('S'+Math.random().toString(36).slice(2));
 localStorage.setItem('aas_session',sessionId);
 let editorName=localStorage.getItem('aas_name')||'';
@@ -322,16 +399,22 @@ let data={
   "CENTROS FLOP":[],
   "VISITAS AUDIO":[{ rol:"Delegado audio", responsable:"", hojas:[ makeSheetVA("Visita 1") ] }],
   "FORMACIONES Y MENTORING":[{ delegado:"", filas: makeRowsFM() }],
-  "TELEAUDIOLOGIA":[{ hojas:[ makeSheetTA("Tele 1") ] }]
+  "TELEAUDIOLOGIA":[{ hojas:[ makeSheetTA("Tele 1") ] }],
+  "EQUIPOS SEDE AUDIO":[ makeEquipos() ]
 };
 
+/* ===== Utils ===== */
 const $=(s,r=document)=>r.querySelector(s); const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
 const esc=s=>(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-
+const now=()=>new Date().toLocaleString();
 function makeSheetVA(n){const rows=Array.from({length:300},()=>({centro:'',delegado:'',audiologo:'',tipo:'Sucursal',fecha:'',puntuacion:null,hit:false,conv_prueba:null,conv_venta:null}));return{nombre:n,rows};}
 function makeRowsFM(){return Array.from({length:300},()=>({fecha:'',tema:'',audiologo:'',duracion:1,p_ini:null,v_ini:null,p_3m:null,v_3m:null}));}
 function makeSheetTA(n){const rows=Array.from({length:300},()=>({centro:'',delegado:'',rol:'Audiólogo',persona:'',formacion:false,practicas:false,certificado:false,pruebas_reales:null,ventas:null}));return{nombre:n,rows};}
-function setDetailTone(s){const d=$('#detail');d.style.background = s==="CENTROS EXCLUSIVOS"?'var(--col-exclusivos)':s==="CENTROS FLOP"?'var(--col-flop)':s==="VISITAS AUDIO"?'var(--col-visitas)':s==="FORMACIONES Y MENTORING"?'var(--col-formaciones)':s==="TELEAUDIOLOGIA"?'var(--col-tele)':'#fff';}
+function makeEquipos(){
+  const rows=Array.from({length:25},()=>({equipo:'',serie:'',persona:'',fecha:'',pares:[{centro:'',sede:''},{centro:'',sede:''},{centro:'',sede:''}]}));
+  return { columnas:3, filas: rows };
+}
+function setDetailTone(s){const d=$('#detail');d.style.background = s==="CENTROS EXCLUSIVOS"?'var(--col-exclusivos)':s==="CENTROS FLOP"?'var(--col-flop)':s==="VISITAS AUDIO"?'var(--col-visitas)':s==="FORMACIONES Y MENTORING"?'var(--col-formaciones)':s==="TELEAUDIOLOGIA"?'var(--col-tele)':s==="EQUIPOS SEDE AUDIO"?'var(--col-equip)':'#fff';}
 function currentItem(){return data[state.selected.section]?.[state.selected.index];}
 
 /* ===== Firebase + Lock ===== */
@@ -340,41 +423,56 @@ function initFirebase(){
   cloud.db=firebase.database();
   firebase.auth().signInAnonymously().then(()=>{
     cloud.ref=cloud.db.ref(DB_PATH);
-    cloud.ref.on('value',snap=>{const v=snap.val(); if(v) data=v; cloud.ready=true; $('#btnSaveTop').disabled=false; $('#stamp').textContent='Conectado'; renderAll();});
+    cloud.ref.on('value',snap=>{
+      const v=snap.val(); if(v) data=v;
+      cloud.ready=true; $('#btnSaveTop').disabled=false;
+      $('#stamp').textContent='Actualizado: '+now();
+      renderAll();
+    });
     watchLock();
   });
 }
-function save(){if(!cloud.ready)return; if(!state.canEdit){alert('Solo lectura. Pulsa Editar.');return;}
-  cloud.ref.set(data).then(()=>{$('#pillOk').style.display='inline-flex';setTimeout(()=>$('#pillOk').style.display='none',1800);});
+function save(){
+  if(!cloud.ready) return;
+  if(!state.canEdit){ alert('Solo lectura. Pulsa Editar.'); return; }
+  cloud.ref.set(data).then(()=>{
+    $('#pillOk').style.display='inline-flex';
+    setTimeout(()=>$('#pillOk').style.display='none',1800);
+    $('#stamp').textContent='Guardado: '+now();
+  });
 }
 function watchLock(){
   const lref=cloud.db.ref(LOCK_PATH);
   lref.on('value',snap=>{
-    const lock=snap.val(); const now=Date.now(); const activo=lock && (now-lock.at)<=LOCK_TIMEOUT_MS;
-    if(activo && lock.by!==sessionId){
+    const lock=snap.val(); const n=Date.now(); const active=lock&&(n-lock.at)<=LOCK_TIMEOUT_MS;
+    if(active && lock.by!==sessionId){
       state.canEdit=false; state.myLock=false;
       $('#viewMode').style.display='inline-flex';
       $('#lockInfo').style.display='inline-flex';
       $('#lockInfo').textContent=`🔒 En uso por ${lock.name||'otro usuario'}`;
     }else{
       $('#lockInfo').style.display='none';
-      if(!state.myLock) $('#viewMode').style.display='inline-flex';  // hasta que pulse Editar
+      if(!state.myLock) $('#viewMode').style.display='inline-flex';
     }
     toggleEditability();
   });
 }
 function requestEdit(){
-  if(!editorName){const n=prompt('Tu nombre para mostrar (ej.: Sergio)')||''; if(n){editorName=n;localStorage.setItem('aas_name',n);}}
+  if(!editorName){
+    const n=prompt('Tu nombre para mostrar (ej.: Sergio)')||'';
+    if(n){editorName=n;localStorage.setItem('aas_name',n);}
+  }
   const lref=cloud.db.ref(LOCK_PATH);
   lref.transaction(curr=>{
-    const now=Date.now();
-    if(!curr || (now-curr.at)>LOCK_TIMEOUT_MS || curr.by===sessionId){return {by:sessionId,name:editorName||'Usuario',at:now};}
-    return; // otro lo tiene
+    const t=Date.now();
+    if(!curr || (t-curr.at)>LOCK_TIMEOUT_MS || curr.by===sessionId){ return {by:sessionId,name:editorName||'Usuario',at:t}; }
+    return;
   },(err,ok,snap)=>{
     if(err){alert('Error al pedir edición.');return;}
     const lock=snap.val();
     if(ok && lock.by===sessionId){
-      state.canEdit=true; state.myLock=true; $('#viewMode').style.display='none'; $('#lockInfo').style.display='inline-flex'; $('#lockInfo').textContent='🔓 Edición habilitada';
+      state.canEdit=true; state.myLock=true;
+      $('#viewMode').style.display='none'; $('#lockInfo').style.display='inline-flex'; $('#lockInfo').textContent='🔓 Edición habilitada';
       keepAlive(); window.addEventListener('beforeunload',releaseLock); toggleEditability();
     }else{
       alert(`En uso por ${lock?.name||'otro usuario'}.`);
@@ -382,22 +480,22 @@ function requestEdit(){
   });
 }
 let hb=null;
-function keepAlive(){clearInterval(hb); hb=setInterval(()=>{if(!state.myLock) return; cloud.db.ref(LOCK_PATH).update({by:sessionId,name:editorName||'Usuario',at:Date.now()});},30*1000);}
-function releaseLock(){if(!state.myLock) return; cloud.db.ref(LOCK_PATH).remove(); state.myLock=false; state.canEdit=false; $('#viewMode').style.display='inline-flex'; toggleEditability();}
+function keepAlive(){ clearInterval(hb); hb=setInterval(()=>{ if(!state.myLock) return; cloud.db.ref(LOCK_PATH).update({by:sessionId,name:editorName||'Usuario',at:Date.now()}); }, 30*1000); }
+function releaseLock(){ if(!state.myLock) return; cloud.db.ref(LOCK_PATH).remove(); state.myLock=false; state.canEdit=false; $('#viewMode').style.display='inline-flex'; toggleEditability(); }
 function toggleEditability(){
   const dis=!state.canEdit;
   $$("input,select,textarea").forEach(el=>el.disabled=dis);
-  // Permite pulsar Cancelar y Editar siempre
   $$("button").forEach(b=>{
     const id=b.id||'';
-    if(['btnEdit','btnRefresh','btnCancelC','btnCancelCTop','btnCancelVA','btnCancelVATop','btnCancelFM','btnCancelFMTop','btnCancelTA','btnCancelTATop'].includes(id)){b.disabled=false;return;}
-    if(id.startsWith('btnSave')){b.disabled=dis;return;}
+    const always=['btnEdit','btnRefresh','btnCancelC','btnCancelCTop','btnCancelVA','btnCancelVATop','btnCancelFM','btnCancelFMTop','btnCancelTA','btnCancelTATop','btnCancelEQ','btnCancelEQTop'];
+    if(always.includes(id)){ b.disabled=false; return; }
+    if(id.startsWith('btnSave')){ b.disabled=dis; return; }
     if(!id) b.disabled=dis;
   });
 }
 
 /* ===== Render IZQ ===== */
-const SECTIONS=["CENTROS EXCLUSIVOS","CENTROS FLOP","VISITAS AUDIO","FORMACIONES Y MENTORING","TELEAUDIOLOGIA"];
+const SECTIONS=["CENTROS EXCLUSIVOS","CENTROS FLOP","VISITAS AUDIO","FORMACIONES Y MENTORING","TELEAUDIOLOGIA","EQUIPOS SEDE AUDIO"];
 function renderLeft(){
   SECTIONS.forEach(name=>{
     const cont=document.querySelector(`.section[data-section="${name}"] .sec-list`); cont.innerHTML='';
@@ -412,9 +510,12 @@ function renderLeft(){
       }else if(name==="FORMACIONES Y MENTORING"){
         div.innerHTML=`<div><div class="name">${esc(it.delegado||'(Delegado regional)')}</div></div>
         <div class="acts"><button class="ico-btn btn-edit" title="Editar">✏️</button><button class="ico-btn btn-del" title="Eliminar">🗑️</button></div>`;
-      }else{
+      }else if(name==="TELEAUDIOLOGIA"){
         div.innerHTML=`<div><div class="name">Teleaudiología</div></div>
         <div class="acts"><button class="ico-btn btn-edit" title="Editar">✏️</button><button class="ico-btn btn-del" title="Eliminar">🗑️</button></div>`;
+      }else{ // EQUIPOS
+        div.innerHTML=`<div><div class="name">Inventario de equipos</div></div>
+        <div class="acts"><button class="ico-btn btn-edit" title="Editar">✏️</button></div>`;
       }
       cont.appendChild(div);
     });
@@ -427,7 +528,8 @@ function renderLeft(){
       if(name.includes('CENTROS')) nuevo={nombre:'(nuevo centro)',delegado:'',audiologo:'',tipo:'Franquicia',acciones:[],formaciones:[],procesos:[]};
       else if(name==="VISITAS AUDIO") nuevo={rol:'Delegado audio',responsable:'',hojas:[makeSheetVA('Visita 1')]};
       else if(name==="FORMACIONES Y MENTORING") nuevo={delegado:'(delegado regional)',filas:makeRowsFM()};
-      else nuevo={hojas:[makeSheetTA('Tele 1')]};
+      else if(name==="TELEAUDIOLOGIA") nuevo={hojas:[makeSheetTA('Tele 1')]};
+      else nuevo=makeEquipos();
       data[name].push(nuevo); save(); renderAll();
     };
 
@@ -441,22 +543,23 @@ function renderLeft(){
 
 /* ===== Detalle switch ===== */
 function renderDetailBlank(){ $('#detHint').style.display='block'; $('#collapseDetail').style.display='none'; setDetailTone(null);
-  $('#detFormCentro,#detFormVisitas,#detFormMentoring,#detFormTele').forEach?null:0; // noop
-  $('#detFormCentro').style.display='none'; $('#detFormVisitas').style.display='none'; $('#detFormMentoring').style.display='none'; $('#detFormTele').style.display='none'; $('#detTag').textContent='—'; }
+  $('#detFormCentro').style.display='none'; $('#detFormVisitas').style.display='none'; $('#detFormMentoring').style.display='none'; $('#detFormTele').style.display='none'; $('#detFormEquipos').style.display='none'; $('#detTag').textContent='—'; }
 function renderDetail(){ $('#detHint').style.display='none'; $('#collapseDetail').style.display='inline-flex'; $('#detTag').textContent=state.selected.section; setDetailTone(state.selected.section);
   const s=state.selected.section;
   $('#detFormCentro').style.display= s.includes('CENTROS')?'block':'none';
   $('#detFormVisitas').style.display= s==='VISITAS AUDIO'?'block':'none';
   $('#detFormMentoring').style.display= s==='FORMACIONES Y MENTORING'?'block':'none';
   $('#detFormTele').style.display= s==='TELEAUDIOLOGIA'?'block':'none';
+  $('#detFormEquipos').style.display= s==='EQUIPOS SEDE AUDIO'?'block':'none';
   if(s.includes('CENTROS')) fillCentro();
   if(s==='VISITAS AUDIO') fillVisitas();
   if(s==='FORMACIONES Y MENTORING') fillFM();
   if(s==='TELEAUDIOLOGIA') fillTele();
+  if(s==='EQUIPOS SEDE AUDIO') fillEquipos();
 }
 $('#collapseDetail').onclick=()=>{ state.selected={section:null,index:null}; renderDetailBlank(); };
 
-/* ===== CENTROS ===== */
+/* ===== CENTROS ===== (igual que versión anterior) */
 function fillCentro(){const it=currentItem(); if(!it) return;
   $('#cNombre').value=it.nombre||''; $('#cDelegado').value=it.delegado||''; $('#cAudiologo').value=it.audiologo||''; $('#cTipo').value=it.tipo||'Franquicia';
   renderAcciones(); renderFormaciones(); renderProcesos(); toggleEditability();
@@ -508,7 +611,7 @@ function renderVA(){const it=currentItem(); const hoja=it.hojas[state.vaSheet]||
     row.innerHTML=`<div>${i+1}</div><input data-i="${i}" data-k="centro" value="${esc(r.centro||'')}"><input data-i="${i}" data-k="delegado" value="${esc(r.delegado||'')}"><input data-i="${i}" data-k="audiologo" value="${esc(r.audiologo||'')}"><select data-i="${i}" data-k="tipo"><option ${r.tipo==='Sucursal'?'selected':''}>Sucursal</option><option ${r.tipo==='Franquicia'?'selected':''}>Franquicia</option></select><input type="date" data-i="${i}" data-k="fecha" value="${r.fecha||''}"><input class="pscore ${vScore85(r.puntuacion)}" type="number" min="0" max="100" step="1" data-i="${i}" data-k="puntuacion" value="${r.puntuacion??''}"><input type="checkbox" data-i="${i}" data-k="hit" ${r.hit?'checked':''}><input class="conv ${vClass80(r.conv_prueba)}" type="number" min="0" max="100" step="1" data-i="${i}" data-k="conv_prueba" value="${r.conv_prueba??''}"><input class="conv ${vClass80(r.conv_venta)}" type="number" min="0" max="100" step="1" data-i="${i}" data-k="conv_venta" value="${r.conv_venta??''}">`; cont.appendChild(row);});
 }
 $('#vaRows').addEventListener('input',e=>{if(!state.canEdit){e.preventDefault();return;}const h=currentItem().hojas[state.vaSheet]; const i=+e.target.dataset.i; const k=e.target.dataset.k; if(!k) return; if(e.target.type==='checkbox') h.rows[i][k]=e.target.checked; else if(e.target.type==='number') h.rows[i][k]=e.target.value===''?null:Number(e.target.value); else h.rows[i][k]=e.target.value; save(); if(k==='puntuacion') e.target.className='pscore '+(Number(h.rows[i][k])>=85?'good':'bad'); if(k==='conv_prueba'||k==='conv_venta') e.target.className='conv '+(Number(h.rows[i][k])>=80?'good':'bad');});
-function saveVA(){save();} $('#btnSaveVA').onclick=saveVA; $('#btnSaveVATop').onclick=saveVA; $('#btnCancelVA').onclick=()=>{state.selected={section:null,index:null};renderDetailBlank();}; $('#btnCancelVATop').onclick=()=>{state.selected={section:null,index:null};renderDetailBlank();};
+$('#btnSaveVA').onclick=save; $('#btnSaveVATop').onclick=save; $('#btnCancelVA').onclick=()=>{state.selected={section:null,index:null};renderDetailBlank();}; $('#btnCancelVATop').onclick=()=>{state.selected={section:null,index:null};renderDetailBlank();};
 
 /* ===== FM ===== */
 function fillFM(){const it=currentItem(); if(!it) return; $('#fmDelegado').value=it.delegado||''; $('#fmSearchTop').value=state.fmFilter||''; renderFM(); toggleEditability();}
@@ -518,7 +621,7 @@ function renderFM(){const it=currentItem(); it.filas=it.filas||makeRowsFM(); con
     row.innerHTML=`<div>${i+1}</div><input type="date" data-i="${i}" data-k="fecha" value="${r.fecha||''}"><input data-i="${i}" data-k="tema" value="${esc(r.tema||'')}"><input data-i="${i}" data-k="audiologo" value="${esc(r.audiologo||'')}"><select data-i="${i}" data-k="duracion">${[1,2,3,4].map(n=>`<option ${Number(r.duracion)===n?'selected':''}>${n}</option>`).join('')}</select><input class="conv ${(Number(r.p_ini)>=80)?'good':'bad'}" type="number" min="0" max="100" step="1" data-i="${i}" data-k="p_ini" value="${r.p_ini??''}"><input class="conv ${(Number(r.v_ini)>=80)?'good':'bad'}" type="number" min="0" max="100" step="1" data-i="${i}" data-k="v_ini" value="${r.v_ini??''}"><input class="conv ${(Number(r.p_3m)>=80)?'good':'bad'}" type="number" min="0" max="100" step="1" data-i="${i}" data-k="p_3m" value="${r.p_3m??''}"><input class="conv ${(Number(r.v_3m)>=80)?'good':'bad'}" type="number" min="0" max="100" step="1" data-i="${i}" data-k="v_3m" value="${r.v_3m??''}"><div style="text-align:center;font-weight:700">${evoP==null?'—':(evoP>0?'↑ ':'')+(evoP<0?'↓ ':'')+Math.abs(Math.round(evoP))}</div><div style="text-align:center;font-weight:700">${evoV==null?'—':(evoV>0?'↑ ':'')+(evoV<0?'↓ ':'')+Math.abs(Math.round(evoV))}</div>`; cont.appendChild(row);});
 }
 $('#fmRows').addEventListener('input',e=>{if(!state.canEdit){e.preventDefault();return;}const it=currentItem(); const i=+e.target.dataset.i; const k=e.target.dataset.k; if(!k) return; if(e.target.type==='number') it.filas[i][k]=e.target.value===''?null:Number(e.target.value); else if(e.target.tagName==='SELECT') it.filas[i][k]=Number(e.target.value); else it.filas[i][k]=e.target.value; save();});
-function saveFM(){save();} $('#btnSaveFM').onclick=saveFM; $('#btnSaveFMTop').onclick=saveFM; $('#btnCancelFM').onclick=()=>{state.selected={section:null,index:null};renderDetailBlank();}; $('#btnCancelFMTop').onclick=()=>{state.selected={section:null,index:null};renderDetailBlank();};
+$('#btnSaveFM').onclick=save; $('#btnSaveFMTop').onclick=save; $('#btnCancelFM').onclick=()=>{state.selected={section:null,index:null};renderDetailBlank();}; $('#btnCancelFMTop').onclick=()=>{state.selected={section:null,index:null};renderDetailBlank();};
 
 /* ===== TELE ===== */
 function fillTele(){ $('#taSearchTop').value=state.taFilter||''; populateTaPersonSelect(); renderTA(); toggleEditability(); }
@@ -528,10 +631,66 @@ function renderTA(){ const it=currentItem(); const hoja=it.hojas[0]; const f=(st
     row.innerHTML=`<div>${i+1}</div><input data-i="${i}" data-k="centro" value="${esc(r.centro||'')}"><input data-i="${i}" data-k="delegado" value="${esc(r.delegado||'')}"><select data-i="${i}" data-k="rol"><option ${r.rol!=='Técnico'?'selected':''}>Audiólogo</option><option ${r.rol==='Técnico'?'selected':''}>Técnico</option></select><input data-i="${i}" data-k="persona" value="${esc(r.persona||'')}" placeholder="Nombre"><input type="checkbox" data-i="${i}" data-k="formacion" ${r.formacion?'checked':''}><input type="checkbox" data-i="${i}" data-k="practicas" ${r.practicas?'checked':''}><input type="checkbox" data-i="${i}" data-k="certificado" ${r.certificado?'checked':''}><input type="number" min="0" step="1" data-i="${i}" data-k="pruebas_reales" value="${r.pruebas_reales??''}"><input type="number" min="0" step="1" data-i="${i}" data-k="ventas" value="${r.ventas??''}">`; cont.appendChild(row); });
 }
 $('#taRows').addEventListener('input',e=>{ if(!state.canEdit){e.preventDefault();return;} const it=currentItem(); const h=it.hojas[0]; const i=+e.target.dataset.i; const k=e.target.dataset.k; if(!k) return; if(e.target.type==='checkbox') h.rows[i][k]=e.target.checked; else if(e.target.type==='number') h.rows[i][k]=e.target.value===''?null:Number(e.target.value); else h.rows[i][k]=e.target.value; save(); });
+$('#btnSaveTA').onclick=save; $('#btnSaveTATop').onclick=save; $('#btnCancelTA').onclick=()=>{state.selected={section:null,index:null};renderDetailBlank();}; $('#btnCancelTATop').onclick=()=>{state.selected={section:null,index:null};renderDetailBlank();};
+
+/* ===== EQUIPOS ===== */
+function fillEquipos(){ const it=currentItem(); if(!it) return; $('#eqSearchTop').value=state.eqFilter||''; renderEquipos(); toggleEditability(); }
+$('#eqSearchTop')?.addEventListener('input',e=>{state.eqFilter=e.target.value.trim(); renderEquipos();});
+$('#btnAddFila').onclick=()=>{ if(!state.canEdit){alert('Solo lectura.');return;} const it=currentItem(); it.filas.push({equipo:'',serie:'',persona:'',fecha:'',pares:Array.from({length:it.columnas},()=>({centro:'',sede:''}))}); renderEquipos(); save(); };
+$('#btnAddParCols').onclick=()=>{ if(!state.canEdit){alert('Solo lectura.');return;} const it=currentItem(); it.columnas=(it.columnas||3)+1; it.filas.forEach(r=>r.pares.push({centro:'',sede:''})); renderEquipos(); save(); };
+
+function renderEquipos(){
+  const it=currentItem(); const cols=Math.max(1, it.columnas||3);
+  const f=(state.eqFilter||'').toLowerCase();
+  const root=$('#eqTable'); root.innerHTML='';
+
+  // grid template: #, Equipo, Nº Serie, Persona, Fecha, (Centro/Sede)*n
+  const template = ['52px','220px','160px','180px','130px'].concat(
+    Array.from({length:cols},()=>['180px','140px']).flat()
+  ).join(' ');
+
+  // CABECERA
+  const head=document.createElement('div'); head.className='va-head'; head.style.gridTemplateColumns=template;
+  head.innerHTML = `<div>#</div><div>Equipo</div><div>Nº serie</div><div>Persona que envía</div><div>Fecha</div>` +
+    Array.from({length:cols},(_,i)=>`<div>Centro ${i+1}</div><div>Sede ${i+1}</div>`).join('');
+  root.appendChild(head);
+
+  // CONTENEDOR FILAS (scroll)
+  const body=document.createElement('div'); body.className='scroll';
+  root.appendChild(body);
+
+  it.filas.forEach((r,i)=>{
+    const txt = (r.equipo||'')+' '+(r.serie||'')+' '+(r.persona||' ')+' '+(r.pares||[]).map(p=>(p.centro||'')+' '+(p.sede||'')).join(' ');
+    if(f && !txt.toLowerCase().includes(f)) return;
+
+    const row=document.createElement('div'); row.className='va-row'; row.style.gridTemplateColumns=template;
+    row.innerHTML = `<div>${i+1}</div>
+      <input data-i="${i}" data-k="equipo" value="${esc(r.equipo||'')}">
+      <input data-i="${i}" data-k="serie" value="${esc(r.serie||'')}">
+      <input data-i="${i}" data-k="persona" value="${esc(r.persona||'')}">
+      <input type="date" data-i="${i}" data-k="fecha" value="${r.fecha||''}">` +
+      Array.from({length:cols},(_,c)=>`
+        <input data-i="${i}" data-k="centro" data-c="${c}" value="${esc(r.pares?.[c]?.centro||'')}">
+        <input data-i="${i}" data-k="sede" data-c="${c}" value="${esc(r.pares?.[c]?.sede||'')}">
+      `).join('');
+    body.appendChild(row);
+  });
+
+  body.addEventListener('input',e=>{
+    if(!state.canEdit){ e.preventDefault(); return; }
+    const i=+e.target.dataset.i; const k=e.target.dataset.k;
+    if(k==='centro'||k==='sede'){ const c=+e.target.dataset.c; it.filas[i].pares[c][k]=e.target.value; }
+    else it.filas[i][k]=e.target.value;
+    save();
+  });
+}
+$('#btnSaveEQ').onclick=save; $('#btnSaveEQTop').onclick=save;
+$('#btnCancelEQ').onclick=()=>{state.selected={section:null,index:null};renderDetailBlank();};
+$('#btnCancelEQTop').onclick=()=>{state.selected={section:null,index:null};renderDetailBlank();};
 
 /* ===== UI topbar ===== */
 $('#btnEdit').onclick=requestEdit;
-$('#btnRefresh').onclick=()=>{ if(!cloud.ready) return; cloud.ref.once('value').then(s=>{ const v=s.val(); if(v) data=v; renderAll();}); };
+$('#btnRefresh').onclick=()=>{ if(!cloud.ready) return; cloud.ref.once('value').then(s=>{ const v=s.val(); if(v) data=v; $('#stamp').textContent='Actualizado: '+now(); renderAll();}); };
 $('#btnSaveTop').onclick=save;
 
 /* ===== Boot ===== */
