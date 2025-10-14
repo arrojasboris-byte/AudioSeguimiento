@@ -8,69 +8,82 @@
 <style>
 :root{
   --rojo:#c82727; --rojo-osc:#a71f1f;
-  --bg:#f6f7fb; --card:#fff; --line:#e6e7ee; --shadow:0 8px 22px rgba(0,0,0,.08);
-  --contentW:1380px;
+  --bg:#f6f7fb; --card:#fff; --line:#e6e7ee; --shadow:0 6px 16px rgba(0,0,0,.06);
   --col-ex:#fde2e4; --col-fl:#e2f0cb; --col-va:#cde7f0; --col-fm:#f9e5c9; --col-ta:#eadcf8; --col-eq:#e8f1ff;
+  --fs:12.5px; --fs-sm:11px; --fs-xs:10.5px;
 }
 *{box-sizing:border-box}
 html,body{height:100%}
-body{margin:0;background:var(--bg);font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;color:#222}
+body{
+  margin:0;background:var(--bg);
+  font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;color:#222;
+  font-size:var(--fs); line-height:1.28; overflow-x:auto;
+}
 
-/* Topbar */
-.topbar{position:sticky;top:0;z-index:50;width:100%;
+/* Bloqueo global hasta PIN */
+body.locked header, body.locked main { pointer-events:none; user-select:none; filter:blur(.9px) }
+body.locked #gate { pointer-events:auto; filter:none }
+
+/* Topbar compacta */
+.topbar{position:sticky;top:0;z-index:80;width:100%;
   background:linear-gradient(180deg,var(--rojo),var(--rojo-osc));color:#fff;box-shadow:var(--shadow)}
-.bar-inner{max-width:var(--contentW);margin:0 auto;padding:.85rem 1rem;display:flex;align-items:center;gap:.6rem}
-.brand{font-weight:900;letter-spacing:.35px}
+.bar-inner{margin:0;padding:.5rem 8px;display:flex;align-items:center;gap:.4rem}
+.brand{font-weight:900;letter-spacing:.3px;font-size:12.5px}
 .spacer{flex:1}
-.btn{border:0;border-radius:12px;padding:.55rem .9rem;cursor:pointer;box-shadow:var(--shadow);font-weight:800}
+.btn{border:0;border-radius:9px;padding:.35rem .55rem;cursor:pointer;box-shadow:var(--shadow);font-weight:800;font-size:11.5px}
 .btn-lite{background:#fff;color:#861212}
 .btn-save{background:#fff;color:#7b0e0e}
 .btn-ghost{background:transparent;border:1px solid #ffffff66;color:#fff}
-.pill{display:inline-flex;gap:.45rem;align-items:center;border:1px solid #ffffff2f;background:#ffffff1c;padding:.35rem .6rem;border-radius:999px;white-space:nowrap}
+.pill{display:inline-flex;gap:.3rem;align-items:center;border:1px solid #ffffff2f;background:#ffffff1c;padding:.18rem .45rem;border-radius:999px;white-space:nowrap;font-size:11px}
 
-/* Layout */
-.app{max-width:var(--contentW);margin:0 auto}
-.wrap{display:grid;grid-template-columns:320px 1fr;gap:1rem;padding:1rem}
-.card{background:var(--card);border-radius:16px;box-shadow:var(--shadow)}
-.title{font-weight:900;font-size:1.05rem;padding:.8rem 1rem;border-bottom:1px solid var(--line)}
-.section{margin:12px;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:#fff}
-.sec-head{display:flex;justify-content:space-between;align-items:center;padding:.75rem .9rem;font-weight:900}
-.sec-list{padding:.5rem .6rem 1rem}
-.sec-btn{width:36px;height:32px;border-radius:9px;border:1px solid var(--line);background:#fff;cursor:pointer}
-.item{display:flex;justify-content:space-between;gap:.6rem;align-items:center;background:#fff;border:1px solid var(--line);border-radius:12px;padding:.6rem .7rem;margin:.5rem 0;cursor:pointer}
-.item .name{font-weight:750}
-.acts{display:flex;gap:.25rem}
-.ico-btn{min-width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:#fff;cursor:pointer}
+/* Layout izquierda–derecha compacto */
+.main{display:grid;grid-template-columns:220px minmax(0,1fr);gap:8px;padding:8px}
+@media (max-width:1100px){ .main{grid-template-columns:1fr} }
+
+/* Sidebar compacta */
+.sidebar{display:flex;flex-direction:column;gap:8px;min-height:64vh}
+.side-card{border:1px solid var(--line);border-radius:12px;background:#fff;box-shadow:var(--shadow);display:flex;flex-direction:column;min-height:108px}
+.side-head{display:flex;justify-content:space-between;align-items:center;padding:.42rem .5rem;font-weight:900;border-bottom:1px solid var(--line);font-size:12px}
+.side-list{padding:.35rem .4rem .5rem;overflow:auto;max-height:190px}
+.side-btn{width:28px;height:24px;border-radius:7px;border:1px solid var(--line);background:#fff;cursor:pointer;font-size:11px}
+.item{display:flex;justify-content:space-between;gap:.45rem;align-items:center;background:#fff;border:1px solid var(--line);border-radius:9px;padding:.32rem .4rem;margin:.26rem 0;user-select:none}
+.item .name{font-weight:750;font-size:12px}
+.item small{font-size:10.8px;opacity:.82}
+.item.selected{outline:2px solid #a1c4fd}
+.acts{display:flex;gap:.18rem}
+.ico-btn{min-width:22px;height:22px;border-radius:6px;border:1px solid #e3e3ea;background:#fff;cursor:pointer;font-size:11px}
 .ico-btn:hover{background:#fafafa}
 
-/* Colores */
+/* Colores cabeceras */
 .bg-ex{background:var(--col-ex)} .bg-fl{background:var(--col-fl)} .bg-va{background:var(--col-va)}
 .bg-fm{background:var(--col-fm)} .bg-ta{background:var(--col-ta)} .bg-eq{background:var(--col-eq)}
 
-/* Detalle */
-.detail{padding:1rem 1.1rem 1.2rem;border-radius:18px;border:1px solid var(--line);background:#fff}
-.detail h2{margin:.1rem 0 .4rem 0}
-.badge{padding:.15rem .5rem;border-radius:999px;background:#00000010}
-.save-band{display:flex;justify-content:center;margin:.2rem 0 .8rem}
-.save-big{font-size:1.05rem;padding:.7rem 1.2rem;border-radius:999px;background:#1f6feb;color:#fff;border:0;box-shadow:var(--shadow);cursor:pointer}
+/* Detalle (derecha) MUY compacto */
+.detail{padding:.5rem .55rem .6rem;border-radius:12px;border:1px solid var(--line);background:#fff;min-height:66vh;box-shadow:var(--shadow)}
+.detail h2{margin:.02rem 0 .22rem 0;font-size:14px}
+.badge{padding:.08rem .38rem;border-radius:999px;background:#00000010;font-size:10.8px}
+.save-band{display:flex;justify-content:center;margin:.12rem 0 .45rem}
+.save-band.bottom{margin:.45rem 0 .12rem}
+.save-big{font-size:11.5px;padding:.42rem .7rem;border-radius:999px;background:#1f6feb;color:#fff;border:0;box-shadow:var(--shadow);cursor:pointer}
 
-.row{display:flex;gap:.8rem;flex-wrap:wrap;align-items:flex-end}
-.field{display:grid;gap:.3rem;min-width:200px;flex:1;margin:.4rem 0}
-.field label{font-weight:700;opacity:.9}
-.field input,.field select{border:1px solid var(--line);border-radius:10px;padding:.5rem .6rem;font-size:1rem;background:#fff;outline:none}
+/* Formularios / filas */
+.row{display:flex;gap:.45rem;flex-wrap:wrap;align-items:flex-end}
+.field{display:grid;gap:.18rem;min-width:150px;flex:1;margin:.22rem 0}
+.field label{font-weight:700;opacity:.9;font-size:11.2px}
+.field input,.field select{border:1px solid var(--line);border-radius:8px;padding:.24rem .38rem;font-size:var(--fs-sm);background:#fff;outline:none}
 
-/* Tablas + densidad tipo Excel */
-.table-wrap{border:1px solid var(--line);border-radius:12px;background:#fff;box-shadow:var(--shadow);padding:.5rem}
-.xscroll{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;padding-bottom:14px}
-.table-inner{display:block;width:max-content;min-width:1600px}
-.table-inner input,.table-inner select{padding:.35rem .45rem;font-size:.95rem}
-.va-head,.va-row{display:grid;gap:.25rem;align-items:center;margin:.1rem .1rem} /* más densidad */
-.scroll{max-height:58vh;overflow:auto;padding-right:.3rem}
+/* Tablas densas + scroll horizontal (súper compactas) */
+.table-wrap{border:1px solid var(--line);border-radius:9px;background:#fff;box-shadow:var(--shadow);padding:.28rem}
+.xscroll{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;padding-bottom:6px;min-height:16px}
+.table-inner{display:block;width:max-content;min-width:940px}
+.table-inner input,.table-inner select{padding:.2rem .3rem;font-size:var(--fs-sm)}
+.va-head,.va-row{display:grid;gap:.15rem;align-items:center;margin:.05rem .05rem}
+.scroll{max-height:60vh;overflow:auto;padding-right:.2rem}
 
-/* Columnas (grid templates) */
-.va-cols{grid-template-columns:52px 1.1fr 140px 140px 160px 130px 120px 90px 170px 170px}
-.fm-head,.fm-row{grid-template-columns:52px 110px 220px 150px 110px 120px 120px 120px 120px 110px 110px}
-.ta-head,.ta-row{grid-template-columns:52px 1.2fr 150px 140px 170px 110px 110px 120px 130px 130px}
+/* Grids (anchos más estrechos) */
+.va-cols{grid-template-columns:42px .9fr 105px 105px 118px 105px 85px 56px 118px 118px}
+.fm-head,.fm-row{grid-template-columns:42px 88px 180px 118px 86px 98px 98px 98px 98px 86px 86px}
+.ta-head,.ta-row{grid-template-columns:42px 1fr 116px 108px 132px 92px 92px 100px 98px 98px}
 
 /* Score / conversión */
 .pscore{border:2px solid transparent}
@@ -80,24 +93,30 @@ body{margin:0;background:var(--bg);font-family:Inter,system-ui,Segoe UI,Roboto,A
 .conv.good{background:#eaf9f0;border-color:rgba(46,204,113,.6)}
 .conv.bad{background:#fff4e1;border-color:rgba(243,156,18,.7)}
 
-/* HIT rojo/verde (celda) */
-.hitcell{background:#ffe5e5;border:1px solid #f5c2c2;border-radius:8px;display:flex;justify-content:center;align-items:center;padding:.2rem}
+/* HIT rojo/verde */
+.hitcell{background:#ffe5e5;border:1px solid #f5c2c2;border-radius:6px;display:flex;justify-content:center;align-items:center;padding:.1rem}
 .hitcell.on{background:#e6f6ed;border-color:#bfe7cc}
 
-.summary{display:flex;align-items:center;gap:1rem;margin:.3rem 0 .6rem 0}
-.progress{flex:1;height:10px;background:#e9ecef;border-radius:999px;overflow:hidden}
+/* Resumen Visitas */
+.summary{display:flex;align-items:center;gap:.6rem;margin:.2rem 0 .4rem 0;font-size:11.5px}
+.progress{flex:1;height:6px;background:#e9ecef;border-radius:999px;overflow:hidden}
 .progress>div{height:100%;background:#1f6feb;width:0%}
 
-@media (max-width:1200px){.wrap{grid-template-columns:1fr}.scroll{max-height:52vh}}
-/* Overlay PIN: negro */
+/* PIN overlay negro */
 .gate{position:fixed;inset:0;background:#000;display:flex;align-items:center;justify-content:center;z-index:1000}
-.gate-card{background:#111;color:#fff;border-radius:16px;box-shadow:var(--shadow);padding:24px 22px;min-width:320px;border:1px solid #2a2a2a}
-.gate-card h3{margin:.25rem 0 1rem 0}
-.pin{letter-spacing:.45rem;font-size:1.25rem;text-align:center;background:#000;color:#fff;border:1px solid #444;border-radius:10px;padding:.6rem}
-.subtle{opacity:.8;font-size:.9rem}
+.gate-card{background:#111;color:#fff;border-radius:12px;box-shadow:var(--shadow);padding:18px 16px;min-width:280px;border:1px solid #2a2a2a}
+.gate-card h3{margin:.15rem 0 .6rem 0}
+.pin{letter-spacing:.35rem;font-size:1rem;text-align:center;background:#000;color:#fff;border:1px solid #444;border-radius:8px;padding:.45rem}
+.subtle{opacity:.8;font-size:.86rem}
+
+/* Readonly visual */
+.readonly .detail input,
+.readonly .detail select,
+.readonly .detail .ico-btn,
+.readonly .detail .save-big { pointer-events:none; opacity:.6 }
 </style>
 </head>
-<body>
+<body class="locked">
 
 <header class="topbar">
   <div class="bar-inner">
@@ -106,100 +125,95 @@ body{margin:0;background:var(--bg);font-family:Inter,system-ui,Segoe UI,Roboto,A
     <button id="btnFetch" class="btn btn-lite" title="Leer de la nube o local (no guarda)">Actualizar (nube)</button>
     <button id="btnSaveTop" class="btn btn-save" title="Guardar en la nube o local">Guardar (nube)</button>
     <button id="btnReset" class="btn btn-ghost" title="Descartar cambios locales y volver al último leído">Resetear</button>
-    <span id="stamp" class="pill">Conectando…</span>
+    <span id="stamp" class="pill">v7.9-Micro · Cargando…</span>
   </div>
 </header>
 
-<main class="app">
-  <section class="wrap">
-    <!-- IZQUIERDA -->
-    <aside class="card">
-      <div class="title">SEGUIMIENTO</div>
-
-      <section class="section bg-ex" data-section="CENTROS EXCLUSIVOS">
-        <div class="sec-head"><div>📒 CENTROS EXCLUSIVOS <span class="badge">(máx. 10)</span></div>
-          <div><button class="sec-btn" data-act="toggle">▾</button><button class="sec-btn" data-act="add">＋</button></div>
-        </div><div class="sec-list"></div>
-      </section>
-
-      <section class="section bg-fl" data-section="CENTROS FLOP">
-        <div class="sec-head"><div>📒 CENTROS FLOP</div>
-          <div><button class="sec-btn" data-act="toggle">▾</button><button class="sec-btn" data-act="add">＋</button></div>
-        </div><div class="sec-list"></div>
-      </section>
-
-      <section class="section bg-va" data-section="VISITAS AUDIO">
-        <div class="sec-head"><div>📋 VISITAS AUDIO</div>
-          <div><button class="sec-btn" data-act="toggle">▾</button><button class="sec-btn" data-act="add">＋</button></div>
-        </div><div class="sec-list"></div>
-      </section>
-
-      <section class="section bg-fm" data-section="FORMACIONES Y MENTORING">
-        <div class="sec-head"><div>🎓 FORMACIONES Y MENTORING</div>
-          <div><button class="sec-btn" data-act="toggle">▾</button><button class="sec-btn" data-act="add">＋</button></div>
-        </div><div class="sec-list"></div>
-      </section>
-
-      <section class="section bg-ta" data-section="TELEAUDIOLOGIA">
-        <div class="sec-head"><div>📡 TELEAUDIOLOGIA</div>
-          <div><button class="sec-btn" data-act="toggle">▾</button><button class="sec-btn" data-act="add">＋</button></div>
-        </div><div class="sec-list"></div>
-      </section>
-
-      <section class="section bg-eq" data-section="EQUIPOS">
-        <div class="sec-head"><div>🧰 EQUIPOS</div>
-          <div><button class="sec-btn" data-act="toggle">▾</button><button class="sec-btn" data-act="add">＋</button></div>
-        </div><div class="sec-list"></div>
-      </section>
+<main>
+  <section class="main">
+    <!-- ====== SIDEBAR ====== -->
+    <aside class="sidebar">
+      <div class="side-card bg-ex" data-section="CENTROS EXCLUSIVOS">
+        <div class="side-head"><div>📒 CENTROS EXCLUSIVOS</div>
+          <div><button class="side-btn" data-act="toggle" title="Mostrar/ocultar">▾</button><button class="side-btn" data-act="add" title="Añadir">＋</button></div>
+        </div><div class="side-list"></div>
+      </div>
+      <div class="side-card bg-fl" data-section="CENTROS FLOP">
+        <div class="side-head"><div>📒 CENTROS FLOP</div>
+          <div><button class="side-btn" data-act="toggle" title="Mostrar/ocultar">▾</button><button class="side-btn" data-act="add" title="Añadir">＋</button></div>
+        </div><div class="side-list"></div>
+      </div>
+      <div class="side-card bg-va" data-section="VISITAS AUDIO">
+        <div class="side-head"><div>📋 VISITAS AUDIO</div>
+          <div><button class="side-btn" data-act="toggle" title="Mostrar/ocultar">▾</button><button class="side-btn" data-act="add" title="Añadir">＋</button></div>
+        </div><div class="side-list"></div>
+      </div>
+      <div class="side-card bg-fm" data-section="FORMACIONES Y MENTORING">
+        <div class="side-head"><div>🎓 FORMACIONES Y MENTORING</div>
+          <div><button class="side-btn" data-act="toggle" title="Mostrar/ocultar">▾</button><button class="side-btn" data-act="add" title="Añadir">＋</button></div>
+        </div><div class="side-list"></div>
+      </div>
+      <div class="side-card bg-ta" data-section="TELEAUDIOLOGIA">
+        <div class="side-head"><div>📡 TELEAUDIOLOGIA</div>
+          <div><button class="side-btn" data-act="toggle" title="Mostrar/ocultar">▾</button><button class="side-btn" data-act="add" title="Añadir">＋</button></div>
+        </div><div class="side-list"></div>
+      </div>
+      <div class="side-card bg-eq" data-section="EQUIPOS">
+        <div class="side-head"><div>🧰 EQUIPOS</div>
+          <div><button class="side-btn" data-act="toggle" title="Mostrar/ocultar">▾</button><button class="side-btn" data-act="add" title="Añadir">＋</button></div>
+        </div><div class="side-list"></div>
+      </div>
     </aside>
 
-    <!-- DERECHA -->
+    <!-- ====== DETALLE ====== -->
     <section class="detail card" id="detail">
-      <div style="display:flex;align-items:center;gap:.6rem">
+      <div style="display:flex;align-items:center;gap:.4rem">
         <h2 id="detTitle">Detalle</h2><span id="detTag" class="badge">—</span>
       </div>
-      <p id="detHint" style="opacity:.7">Selecciona un item a la izquierda o crea uno con ＋.</p>
+      <p id="detHint" style="opacity:.7">Selecciona en la izquierda (doble clic o ✏️) o crea con ＋.</p>
 
       <!-- CENTROS -->
       <div id="detCentro" style="display:none">
-        <div class="save-band"><button id="saveCentroTop" class="save-big">💾 GUARDAR CENTRO</button></div>
+        <div class="save-band"><button id="saveCentroTop" class="save-big" title="Guardar cambios del centro">💾 GUARDAR CENTRO</button></div>
         <div class="row">
           <div class="field"><label>Nombre</label><input id="cNombre"></div>
           <div class="field"><label>Delegado</label><input id="cDelegado"></div>
-        </div>
-        <div class="row">
           <div class="field"><label>Audiólogo</label><input id="cAudiologo"></div>
           <div class="field"><label>Franquicia o Sucursal</label><select id="cTipo"><option>Franquicia</option><option>Sucursal</option></select></div>
         </div>
 
+        <!-- Acciones -->
         <div class="table-wrap">
           <div class="xscroll"><div class="table-inner">
-            <div class="va-head" style="grid-template-columns:52px 130px 1fr 110px 110px 110px 150px 52px">
+            <div class="va-head" style="grid-template-columns:42px 96px 1fr 86px 86px 86px 108px 40px">
               <div>#</div><div>Fecha</div><div>Tipo de acción</div><div>Paquete</div><div>Derivación</div><div>Citas</div><div>Venta</div><div></div>
             </div><div id="accionesRows"></div>
           </div></div>
         </div>
 
+        <!-- Formaciones -->
         <div class="table-wrap">
           <div class="xscroll"><div class="table-inner">
-            <div class="va-head" style="grid-template-columns:52px 1.2fr .7fr .7fr 1.4fr 52px">
+            <div class="va-head" style="grid-template-columns:42px 1.05fr .58fr .58fr 1.1fr 40px">
               <div>#</div><div>Curso</div><div>Realizado</div><div>Aplica</div><div>Observaciones</div><div></div>
             </div><div id="formacionesRows"></div>
           </div></div>
         </div>
 
+        <!-- Procesos -->
         <div class="table-wrap">
           <div class="xscroll"><div class="table-inner">
-            <div class="va-head" style="grid-template-columns:52px 220px 120px 160px 52px">
+            <div class="va-head" style="grid-template-columns:42px 168px 86px 120px 40px">
               <div>#</div><div>Puntuación checklist (0–100 %)</div><div>HIT</div><div>Colaboraciones</div><div></div>
             </div><div id="procesosRows"></div>
           </div></div>
         </div>
+        <div class="save-band bottom"><button id="saveCentroBottom" class="save-big" title="Guardar cambios del centro">💾 GUARDAR CENTRO</button></div>
       </div>
 
       <!-- VISITAS -->
       <div id="detVisitas" style="display:none">
-        <div class="save-band"><button id="saveVisitasTop" class="save-big">💾 GUARDAR VISITAS</button></div>
+        <div class="save-band"><button id="saveVisitasTop" class="save-big" title="Guardar tabla de visitas">💾 GUARDAR VISITAS</button></div>
 
         <div class="summary">
           <div id="vaSummaryTxt">Centros visitados: 0 / 0</div>
@@ -211,7 +225,8 @@ body{margin:0;background:var(--bg);font-family:Inter,system-ui,Segoe UI,Roboto,A
           <div class="field"><label>Nombre</label><input id="vaResp" placeholder="Nombre"></div>
           <div class="field"><label>Buscar centro</label><input id="vaSearch" placeholder="Filtrar…"></div>
         </div>
-        <div id="vaTabs" style="margin:.2rem 0 .5rem 0"></div>
+        <div id="vaTabs" style="margin:.12rem 0 .32rem 0"></div>
+
         <div class="table-wrap">
           <div class="xscroll"><div class="table-inner">
             <div class="va-head va-cols">
@@ -219,15 +234,17 @@ body{margin:0;background:var(--bg);font-family:Inter,system-ui,Segoe UI,Roboto,A
             </div><div id="vaRows" class="scroll"></div>
           </div></div>
         </div>
+        <div class="save-band bottom"><button id="saveVisitasBottom" class="save-big" title="Guardar tabla de visitas">💾 GUARDAR VISITAS</button></div>
       </div>
 
       <!-- FORMACIONES -->
       <div id="detFormaciones" style="display:none">
-        <div class="save-band"><button id="saveFMTop" class="save-big">💾 GUARDAR FORMACIONES</button></div>
+        <div class="save-band"><button id="saveFMTop" class="save-big" title="Guardar tabla de formaciones">💾 GUARDAR FORMACIONES</button></div>
         <div class="row">
           <div class="field"><label>Delegado regional</label><input id="fmDelegado"></div>
           <div class="field"><label>Buscar</label><input id="fmSearch" placeholder="Filtrar…"></div>
         </div>
+
         <div class="table-wrap">
           <div class="xscroll"><div class="table-inner">
             <div class="va-head fm-head">
@@ -237,11 +254,12 @@ body{margin:0;background:var(--bg);font-family:Inter,system-ui,Segoe UI,Roboto,A
             </div><div id="fmRows" class="scroll"></div>
           </div></div>
         </div>
+        <div class="save-band bottom"><button id="saveFMBottom" class="save-big" title="Guardar tabla de formaciones">💾 GUARDAR FORMACIONES</button></div>
       </div>
 
-      <!-- TELE -->
+      <!-- TELEAUDIOLOGIA -->
       <div id="detTele" style="display:none">
-        <div class="save-band"><button id="saveTATop" class="save-big">💾 GUARDAR TELE</button></div>
+        <div class="save-band"><button id="saveTATop" class="save-big" title="Guardar tabla de teleaudiología">💾 GUARDAR TELE</button></div>
         <div class="row">
           <div class="field"><label>Buscar</label><input id="taSearch" placeholder="Centro o persona…"></div>
           <div class="field"><label>Persona</label><select id="taPerson"><option value="">Todos</option></select></div>
@@ -253,60 +271,61 @@ body{margin:0;background:var(--bg);font-family:Inter,system-ui,Segoe UI,Roboto,A
             </div><div id="taRows" class="scroll"></div>
           </div></div>
         </div>
+        <div class="save-band bottom"><button id="saveTABottom" class="save-big" title="Guardar tabla de teleaudiología">💾 GUARDAR TELE</button></div>
       </div>
 
       <!-- EQUIPOS -->
       <div id="detEquipos" style="display:none">
-        <div class="save-band"><button id="saveEQTop" class="save-big">💾 GUARDAR EQUIPOS</button></div>
+        <div class="save-band"><button id="saveEQTop" class="save-big" title="Guardar inventario de equipos">💾 GUARDAR EQUIPOS</button></div>
         <div class="row">
           <div class="field"><label>Buscar</label><input id="eqSearch" placeholder="Equipo, serie, centro o persona…"></div>
           <div class="field"><label>&nbsp;</label>
-            <div style="display:flex;gap:.5rem"><button id="btnAddParCols" class="btn">＋ Añadir par</button><button id="btnAddFila" class="btn">＋ Añadir fila</button></div>
+            <div style="display:flex;gap:.35rem"><button id="btnAddParCols" class="btn" title="Añadir columnas Centro/Sede">＋ Añadir par</button><button id="btnAddFila" class="btn" title="Añadir fila">＋ Añadir fila</button></div>
           </div>
         </div>
         <div class="table-wrap"><div class="xscroll"><div id="eqTable" class="table-inner"></div></div></div>
+        <div class="save-band bottom"><button id="saveEQBottom" class="save-big" title="Guardar inventario de equipos">💾 GUARDAR EQUIPOS</button></div>
       </div>
 
     </section>
   </section>
 </main>
 
-<!-- Overlay PIN -->
-<div id="gate" class="gate">
+<!-- PIN overlay -->
+<div id="gate" class="gate" aria-modal="true" role="dialog">
   <div class="gate-card">
     <h3>Acceso</h3>
     <p class="subtle">Introduce el PIN para editar:</p>
     <input id="pin" class="pin" type="password" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="••••"/>
-    <div style="display:flex;gap:.5rem;margin-top:12px">
-      <button id="enter" class="btn btn-lite" style="flex:1">Entrar</button>
-      <button id="cancelPin" class="btn btn-ghost" style="flex:.8">Cancelar</button>
+    <div style="display:flex;gap:.45rem;margin-top:10px">
+      <button id="enter" class="btn btn-lite" style="flex:1" title="Desbloquear edición">Entrar</button>
+      <button id="cancelPin" class="btn btn-ghost" style="flex:.8" title="Limpiar campo">Limpiar</button>
     </div>
-    <p id="pinMsg" class="subtle" style="color:#ff7b7b;margin:.7rem 0 0 0;display:none">PIN incorrecto</p>
+    <p id="pinMsg" class="subtle" style="color:#ff7b7b;margin:.5rem 0 0 0;display:none">PIN incorrecto</p>
   </div>
 </div>
 
-<!-- (Firebase opcional) -->
+<!-- Firebase opcional -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script>
 /* ======= CONFIG ======= */
+const APP_VERSION='v7.9-Micro';
 const REQUIRE_PIN = true;
-const PIN_CODE = '4321';                // PIN obligatorio
-const DB_PATH  = 'audioseguimiento/v7'; // rama de datos
-
-// Rellena para usar Realtime Database; si lo dejas vacío, usa LocalStorage.
+/* SHA-256('4321') */
+const PIN_SHA256='fe2592b42a727e977f055947385b709cc82b16b9a87f88c6abf3900d65d0cdc3';
+const DB_PATH  = 'audioseguimiento/v7';
 const firebaseConfig = { apiKey:"", authDomain:"", databaseURL:"", projectId:"", storageBucket:"", messagingSenderId:"", appId:"" };
 
-/* ======= Utiles ======= */
+/* ======= Utils ======= */
 const $=(s,r=document)=>r.querySelector(s); const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
 const esc=s=>(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const now=()=>new Date().toLocaleString();
+function toast(msg){ const t=document.createElement('div'); t.textContent=msg; Object.assign(t.style,{position:'fixed',bottom:'12px',left:'50%',transform:'translateX(-50%)',background:'#111',color:'#fff',padding:'7px 10px',borderRadius:'8px',zIndex:90,opacity:'0.95',fontSize:'12px'}); document.body.appendChild(t); setTimeout(()=>t.remove(),1400); }
 
 /* ======= Estado/Datos ======= */
-let cloud={enabled:false,db:null,ref:null,ready:false};
-let lastCloud=null;
-
+let cloud={enabled:false,db:null,ref:null,ready:false}, lastCloud=null;
 let state={selected:{section:null,index:null},vaSheet:0,vaFilter:'',fmFilter:'',taFilter:'',taPerson:'',eqFilter:''};
 
 function sheetVA(n){const rows=Array.from({length:300},()=>({centro:'',delegado:'',audiologo:'',tipo:'Sucursal',fecha:'',puntuacion:null,hit:false,conv_prueba:null,conv_venta:null}));return{nombre:n,rows};}
@@ -323,48 +342,42 @@ let data={
   "EQUIPOS":[equiposInit()]
 };
 
-/* ======= Persistencia (Nube/Local) ======= */
+/* ======= Persistencia ======= */
 const LOCAL_KEY='audioseguimiento_local_v7';
 function localLoad(){ try{const raw=localStorage.getItem(LOCAL_KEY); if(raw){data=JSON.parse(raw);} }catch(e){} }
 function localSave(){ try{localStorage.setItem(LOCAL_KEY,JSON.stringify(data));}catch(e){} }
 
 function initFirebase(){
-  if(!firebaseConfig || !firebaseConfig.apiKey) return; // sin claves -> local
+  if(!firebaseConfig || !firebaseConfig.apiKey) return;
   try{firebase.initializeApp(firebaseConfig);}catch(e){}
-  cloud.enabled=true;
-  cloud.db=firebase.database();
+  cloud.enabled=true; cloud.db=firebase.database();
   firebase.auth().signInAnonymously().then(()=>{
     cloud.ref=cloud.db.ref(DB_PATH);
     cloud.ref.on('value',snap=>{
       const v=snap.val(); if(v){data=v; lastCloud=JSON.parse(JSON.stringify(v)); localSave();}
-      cloud.ready=true;
-      $('#stamp').textContent='Actualizado: '+now();
-      renderAll();
+      cloud.ready=true; stamp('Actualizado: '+now()); renderAll();
     });
   }).catch(()=>{cloud.enabled=false;});
 }
 function saveCloudOrLocal(){
   if(cloud.enabled && cloud.ready){
-    cloud.ref.set(data).then(()=>{ lastCloud=JSON.parse(JSON.stringify(data)); $('#stamp').textContent='Guardado (nube): '+now(); });
-  }else{ localSave(); $('#stamp').textContent='Guardado (local): '+now(); }
+    cloud.ref.set(data).then(()=>{ lastCloud=JSON.parse(JSON.stringify(data)); stamp('Guardado (nube): '+now()); toast('Guardado en nube'); });
+  }else{ localSave(); stamp('Guardado (local): '+now()); toast('Guardado local'); }
 }
 function fetchCloudOrLocal(){
   if(cloud.enabled && cloud.ready){
-    cloud.ref.once('value').then(s=>{const v=s.val(); if(v){data=v; lastCloud=JSON.parse(JSON.stringify(v)); localSave(); renderAll(); $('#stamp').textContent='Actualizado (nube): '+now();}});
-  }else{ localLoad(); renderAll(); $('#stamp').textContent='Actualizado (local): '+now(); }
+    cloud.ref.once('value').then(s=>{const v=s.val(); if(v){data=v; lastCloud=JSON.parse(JSON.stringify(v)); localSave(); renderAll(); stamp('Actualizado (nube): '+now()); toast('Actualizado desde nube');}});
+  }else{ localLoad(); renderAll(); stamp('Actualizado (local): '+now()); toast('Actualizado local'); }
 }
-function resetLocalView(){
-  if(cloud.enabled && lastCloud){ data=JSON.parse(JSON.stringify(lastCloud)); }
-  else localLoad();
-  renderAll();
-}
+function resetLocalView(){ if(cloud.enabled && lastCloud){ data=JSON.parse(JSON.stringify(lastCloud)); toast('Vista: última nube'); } else { localLoad(); toast('Vista: local'); } renderAll(); }
+function stamp(txt){ $('#stamp').textContent='v7.9-Micro · '+txt; }
 
-/* ======= UI izquierda ======= */
+/* ======= Sidebar ======= */
 const SECTIONS=["CENTROS EXCLUSIVOS","CENTROS FLOP","VISITAS AUDIO","FORMACIONES Y MENTORING","TELEAUDIOLOGIA","EQUIPOS"];
 function renderLeft(){
   SECTIONS.forEach(name=>{
-    const sec=document.querySelector(`.section[data-section="${name}"]`);
-    const list=sec.querySelector('.sec-list'); list.innerHTML='';
+    const box=document.querySelector(`.side-card[data-section="${name}"]`);
+    const list=box.querySelector('.side-list'); list.innerHTML='';
     (data[name]||[]).forEach((it,i)=>{
       const div=document.createElement('div'); div.className='item'; div.dataset.index=i;
       let inner='', acts=true;
@@ -378,22 +391,21 @@ function renderLeft(){
         inner=`<div><div class="name">Teleaudiología</div></div>`;
       }else{ inner=`<div><div class="name">Inventario de equipos</div></div>`; acts=false; }
       div.innerHTML=inner+(acts?`<div class="acts"><button class="ico-btn" data-role="edit" title="Editar">✏️</button><button class="ico-btn" data-role="del" title="Eliminar">🗑️</button></div>`:'');
+      div.addEventListener('click',()=>{ $$('.item',list).forEach(x=>x.classList.remove('selected')); div.classList.add('selected'); });
+      div.addEventListener('dblclick',()=>{ state.selected={section:name,index:i}; renderDetail(); });
+      div.querySelector('[data-role="edit"]')?.addEventListener('click',e=>{ e.stopPropagation(); state.selected={section:name,index:i}; renderDetail(); });
+      div.querySelector('[data-role="del"]')?.addEventListener('click',e=>{ e.stopPropagation(); if(confirm('¿Eliminar este item?')){ data[name].splice(i,1); renderAll(); saveCloudOrLocal(); }});
       list.appendChild(div);
     });
-    sec.querySelector('[data-act="toggle"]').onclick=()=>{list.style.display=list.style.display==='none'?'':'none'; if(list.style.display==='none'&&name.includes('CENTROS')){state.selected={section:null,index:null}; renderDetailBlank();}};
-    sec.querySelector('[data-act="add"]').onclick=()=>{
-      let nuevo; if(name.includes('CENTROS')) nuevo={nombre:'(nuevo centro)',delegado:'',audiologo:'',tipo:'Franquicia',acciones:[],formaciones:[],procesos:[]};
+    box.querySelector('[data-act="toggle"]').onclick=()=>{ list.style.display=list.style.display==='none'?'':'none'; if(list.style.display==='none'&&name.includes('CENTROS')){state.selected={section:null,index:null}; renderDetailBlank();}};
+    box.querySelector('[data-act="add"]').onclick=()=>{
+      let nuevo;
+      if(name.includes('CENTROS')) nuevo={nombre:'(nuevo centro)',delegado:'',audiologo:'',tipo:'Franquicia',acciones:[],formaciones:[],procesos:[]};
       else if(name==="VISITAS AUDIO") nuevo={rol:'Delegado audio',responsable:'',hojas:[sheetVA('Visita 1')]};
       else if(name==="FORMACIONES Y MENTORING") nuevo={delegado:'(Delegado regional)',filas:rowsFM()};
       else if(name==="TELEAUDIOLOGIA") nuevo={hojas:[sheetTA('Tele 1')]};
       else nuevo=equiposInit();
       data[name].push(nuevo); renderAll(); saveCloudOrLocal();
-    };
-    list.onclick=(e)=>{
-      const role=e.target.dataset.role; const item=e.target.closest('.item'); if(!item) return;
-      const idx=+item.dataset.index;
-      if(role==='del'){ if(confirm('¿Eliminar este item?')){ data[name].splice(idx,1); renderAll(); saveCloudOrLocal(); } return; }
-      state.selected={section:name,index:idx}; renderDetail();
     };
   });
 }
@@ -424,38 +436,37 @@ function fillCentro(){ const it=cur(); if(!it) return;
   renderAcciones(); renderFormaciones(); renderProcesos();
 }
 function saveCentro(){ const it=cur(); if(!it) return; it.nombre=$('#cNombre').value.trim(); it.delegado=$('#cDelegado').value.trim(); it.audiologo=$('#cAudiologo').value.trim(); it.tipo=$('#cTipo').value; saveCloudOrLocal(); renderLeft(); }
-$('#saveCentroTop').onclick=saveCentro;
+$('#saveCentroTop').onclick=saveCentro; $('#saveCentroBottom').onclick=saveCentro;
 
 function renderAcciones(){ const it=cur(); it.acciones=it.acciones||[]; const cont=$('#accionesRows'); cont.innerHTML='';
-  it.acciones.forEach((r,i)=>{const row=document.createElement('div'); row.className='va-row'; row.style.gridTemplateColumns='52px 130px 1fr 110px 110px 110px 150px 52px';
+  it.acciones.forEach((r,i)=>{const row=document.createElement('div'); row.className='va-row'; row.style.gridTemplateColumns='42px 96px 1fr 86px 86px 86px 108px 40px';
     row.innerHTML=`<div>${i+1}</div><input type="date" data-i="${i}" data-k="fecha" value="${r.fecha||''}">
     <input data-i="${i}" data-k="tipo" value="${esc(r.tipo||'')}">
     <select data-i="${i}" data-k="paquete"><option ${r.paquete==='1'?'selected':''}>1</option><option ${r.paquete==='2'?'selected':''}>2</option><option ${r.paquete==='3'?'selected':''}>3</option></select>
     <input type="number" min="0" step="1" data-i="${i}" data-k="derivacion" value="${r.derivacion??''}">
     <input type="number" min="0" step="1" data-i="${i}" data-k="citas" value="${r.citas??''}">
     <input type="number" min="0" step="1" data-i="${i}" data-k="venta" value="${r.venta??''}">
-    <button class="ico-btn" data-del="${i}">🗑️</button>`; cont.appendChild(row);});
-  const add=document.createElement('div'); add.className='va-row'; add.style.gridTemplateColumns='52px 130px 1fr 110px 110px 110px 150px 52px';
+    <button class="ico-btn" data-del="${i}" title="Eliminar fila">🗑️</button>`; cont.appendChild(row);});
+  const add=document.createElement('div'); add.className='va-row'; add.style.gridTemplateColumns='42px 96px 1fr 86px 86px 86px 108px 40px';
   add.innerHTML=`<div>${it.acciones.length+1}</div><input type="date" data-new="1" data-k="fecha"><input data-new="1" data-k="tipo">
   <select data-new="1" data-k="paquete"><option>1</option><option>2</option><option>3</option></select>
   <input type="number" data-new="1" data-k="derivacion"><input type="number" data-new="1" data-k="citas"><input type="number" data-new="1" data-k="venta"><span></span>`;
   cont.appendChild(add);
 }
-$('#accionesRows').addEventListener('click',e=>{const i=e.target.dataset.del; if(i!=null){cur().acciones.splice(+i,1); renderAcciones(); saveCloudOrLocal();}});
+$('#accionesRows').addEventListener('click',e=>{const i=e.target.dataset.del; if(i!=null){ if(confirm('¿Eliminar fila?')){cur().acciones.splice(+i,1); renderAcciones(); saveCloudOrLocal();}}});
 $('#accionesRows').addEventListener('input',e=>{
-  const i=e.target.dataset.i, k=e.target.dataset.k, isNew=e.target.dataset.new;
-  if(!k) return;
+  const i=e.target.dataset.i, k=e.target.dataset.k, isNew=e.target.dataset.new; if(!k) return;
   if(isNew){ const r={fecha:'',tipo:'',paquete:'1',derivacion:null,citas:null,venta:null}; r[k]=e.target.type==='number'?(e.target.value===''?null:Number(e.target.value)):e.target.value; cur().acciones.push(r); renderAcciones(); saveCloudOrLocal(); return; }
   const r=cur().acciones[+i]; r[k]=e.target.type==='number'?(e.target.value===''?null:Number(e.target.value)):e.target.value; saveCloudOrLocal();
 });
 
 function renderFormaciones(){ const it=cur(); it.formaciones=it.formaciones||[]; const cont=$('#formacionesRows'); cont.innerHTML='';
-  it.formaciones.forEach((r,i)=>{const row=document.createElement('div'); row.className='va-row'; row.style.gridTemplateColumns='52px 1.2fr .7fr .7fr 1.4fr 52px';
-    row.innerHTML=`<div>${i+1}</div><input data-i="${i}" data-k="curso" value="${esc(r.curso||'')}"><input type="checkbox" data-i="${i}" data-k="realizado" ${r.realizado?'checked':''}><input type="checkbox" data-i="${i}" data-k="aplica" ${r.aplica?'checked':''}><input data-i="${i}" data-k="obs" value="${esc(r.obs||'')}"><button class="ico-btn" data-delf="${i}">🗑️</button>`; cont.appendChild(row);});
-  const add=document.createElement('div'); add.className='va-row'; add.style.gridTemplateColumns='52px 1.2fr .7fr .7fr 1.4fr 52px';
+  it.formaciones.forEach((r,i)=>{const row=document.createElement('div'); row.className='va-row'; row.style.gridTemplateColumns='42px 1.05fr .58fr .58fr 1.1fr 40px';
+    row.innerHTML=`<div>${i+1}</div><input data-i="${i}" data-k="curso" value="${esc(r.curso||'')}"><input type="checkbox" data-i="${i}" data-k="realizado" ${r.realizado?'checked':''}><input type="checkbox" data-i="${i}" data-k="aplica" ${r.aplica?'checked':''}><input data-i="${i}" data-k="obs" value="${esc(r.obs||'')}"><button class="ico-btn" data-delf="${i}" title="Eliminar fila">🗑️</button>`; cont.appendChild(row);});
+  const add=document.createElement('div'); add.className='va-row'; add.style.gridTemplateColumns='42px 1.05fr .58fr .58fr 1.1fr 40px';
   add.innerHTML=`<div>${it.formaciones.length+1}</div><input data-new="1" data-k="curso"><input type="checkbox" data-new="1" data-k="realizado"><input type="checkbox" data-new="1" data-k="aplica"><input data-new="1" data-k="obs"><span></span>`; cont.appendChild(add);
 }
-$('#formacionesRows').addEventListener('click',e=>{const i=e.target.dataset.delf; if(i!=null){cur().formaciones.splice(+i,1); renderFormaciones(); saveCloudOrLocal();}});
+$('#formacionesRows').addEventListener('click',e=>{const i=e.target.dataset.delf; if(i!=null){ if(confirm('¿Eliminar fila?')){cur().formaciones.splice(+i,1); renderFormaciones(); saveCloudOrLocal();}}});
 $('#formacionesRows').addEventListener('input',e=>{
   const i=e.target.dataset.i,k=e.target.dataset.k,isNew=e.target.dataset.new;if(!k)return;
   if(isNew){const r={curso:'',realizado:false,aplica:false,obs:''};r[k]=e.target.type==='checkbox'?e.target.checked:e.target.value;cur().formaciones.push(r);renderFormaciones();saveCloudOrLocal();return;}
@@ -464,12 +475,12 @@ $('#formacionesRows').addEventListener('input',e=>{
 
 function renderProcesos(){ const it=cur(); it.procesos=it.procesos||[]; const cont=$('#procesosRows'); cont.innerHTML='';
   const color=v=>{const n=Number(v); if(!Number.isFinite(n)) return ''; return n>=95?'good':(n>=85?'':'bad');}
-  it.procesos.forEach((r,i)=>{const row=document.createElement('div'); row.className='va-row'; row.style.gridTemplateColumns='52px 220px 120px 160px 52px';
-    row.innerHTML=`<div>${i+1}</div><input class="pscore ${color(r.puntuacion)}" type="number" min="0" max="100" step="1" data-i="${i}" data-k="puntuacion" value="${r.puntuacion??''}"><input type="checkbox" data-i="${i}" data-k="hit" ${r.hit?'checked':''}><input type="checkbox" data-i="${i}" data-k="colaboraciones" ${r.colaboraciones?'checked':''}><button class="ico-btn" data-delp="${i}">🗑️</button>`; cont.appendChild(row);});
-  const add=document.createElement('div'); add.className='va-row'; add.style.gridTemplateColumns='52px 220px 120px 160px 52px';
+  it.procesos.forEach((r,i)=>{const row=document.createElement('div'); row.className='va-row'; row.style.gridTemplateColumns='42px 168px 86px 120px 40px';
+    row.innerHTML=`<div>${i+1}</div><input class="pscore ${color(r.puntuacion)}" type="number" min="0" max="100" step="1" data-i="${i}" data-k="puntuacion" value="${r.puntuacion??''}"><input type="checkbox" data-i="${i}" data-k="hit" ${r.hit?'checked':''}><input type="checkbox" data-i="${i}" data-k="colaboraciones" ${r.colaboraciones?'checked':''}><button class="ico-btn" data-delp="${i}" title="Eliminar fila">🗑️</button>`; cont.appendChild(row);});
+  const add=document.createElement('div'); add.className='va-row'; add.style.gridTemplateColumns='42px 168px 86px 120px 40px';
   add.innerHTML=`<div>${it.procesos.length+1}</div><input class="pscore" type="number" min="0" max="100" step="1" data-new="1" data-k="puntuacion"><input type="checkbox" data-new="1" data-k="hit"><input type="checkbox" data-new="1" data-k="colaboraciones"><span></span>`; cont.appendChild(add);
 }
-$('#procesosRows').addEventListener('click',e=>{const i=e.target.dataset.delp; if(i!=null){cur().procesos.splice(+i,1); renderProcesos(); saveCloudOrLocal();}});
+$('#procesosRows').addEventListener('click',e=>{const i=e.target.dataset.delp; if(i!=null){ if(confirm('¿Eliminar fila?')){cur().procesos.splice(+i,1); renderProcesos(); saveCloudOrLocal();}}});
 $('#procesosRows').addEventListener('input',e=>{
   const i=e.target.dataset.i,k=e.target.dataset.k,isNew=e.target.dataset.new;if(!k)return;
   if(isNew){const r={puntuacion:null,hit:false,colaboraciones:false}; r[k]=e.target.type==='checkbox'?e.target.checked:(e.target.value===''?null:Number(e.target.value)); cur().procesos.push(r); renderProcesos(); saveCloudOrLocal(); return;}
@@ -482,13 +493,12 @@ $('#vaRol').onchange=e=>{cur().rol=e.target.value; saveCloudOrLocal(); renderLef
 $('#vaResp').oninput=e=>{cur().responsable=e.target.value; saveCloudOrLocal(); renderLeft();};
 $('#vaSearch').oninput=e=>{state.vaFilter=e.target.value.trim(); renderVA();};
 function renderVaTabs(){const it=cur(); const tabs=$('#vaTabs'); tabs.innerHTML=''; it.hojas=it.hojas||[sheetVA('Visita 1')];
-  it.hojas.forEach((h,idx)=>{const b=document.createElement('button'); b.className='sec-btn'; b.textContent=h.nombre||('Visita '+(idx+1)); if(idx===state.vaSheet) b.style.background='#f1f1f1'; b.onclick=()=>{state.vaSheet=idx; renderVA();}; tabs.appendChild(b);});
-  const add=document.createElement('button'); add.className='sec-btn'; add.textContent='＋'; add.title='Añadir visita'; add.onclick=()=>{it.hojas.push(sheetVA('Visita '+(it.hojas.length+1))); state.vaSheet=it.hojas.length-1; saveCloudOrLocal(); renderVaTabs(); renderVA();}; tabs.appendChild(add);
+  it.hojas.forEach((h,idx)=>{const b=document.createElement('button'); b.className='side-btn'; b.textContent=h.nombre||('Visita '+(idx+1)); if(idx===state.vaSheet){b.style.background='#f1f1f1';} b.onclick=()=>{state.vaSheet=idx; renderVA();}; tabs.appendChild(b);});
+  const add=document.createElement('button'); add.className='side-btn'; add.textContent='＋'; add.title='Añadir visita'; add.onclick=()=>{it.hojas.push(sheetVA('Visita '+(it.hojas.length+1))); state.vaSheet=it.hojas.length-1; saveCloudOrLocal(); renderVaTabs(); renderVA();}; tabs.appendChild(add);
 }
 function vClass80(v){const n=Number(v); if(!Number.isFinite(n)) return ''; return n>=80?'good':'bad';}
 function vScore85(v){const n=Number(v); if(!Number.isFinite(n)) return ''; return n>=85?'good':'bad';}
 function updateVaSummary(h){
-  // visitado = fila con fecha no vacía; únicos = centros distintos con fecha
   const visited = h.rows.filter(r=> (r.fecha||'').trim()!=='' );
   const unique = new Set( visited.map(r=>(r.centro||'').trim()).filter(Boolean) );
   $('#vaSummaryTxt').textContent = `Centros visitados: ${unique.size}  ·  Registros: ${visited.length} / ${h.rows.length}`;
@@ -520,7 +530,7 @@ $('#vaRows').addEventListener('input',e=>{
   else h.rows[i][k]=e.target.value;
   saveCloudOrLocal(); updateVaSummary(h);
 });
-$('#saveVisitasTop').onclick=saveCloudOrLocal;
+$('#saveVisitasTop').onclick=saveCloudOrLocal; $('#saveVisitasBottom').onclick=saveCloudOrLocal;
 
 /* ======= FORMACIONES ======= */
 function fillFM(){const it=cur(); if(!it) return; $('#fmDelegado').value=it.delegado||''; $('#fmSearch').value=state.fmFilter||''; renderFM();}
@@ -540,7 +550,7 @@ $('#fmRows').addEventListener('input',e=>{
   else if(e.target.tagName==='SELECT') it.filas[i][k]=Number(e.target.value);
   else it.filas[i][k]=e.target.value; saveCloudOrLocal();
 });
-$('#saveFMTop').onclick=saveCloudOrLocal;
+$('#saveFMTop').onclick=saveCloudOrLocal; $('#saveFMBottom').onclick=saveCloudOrLocal;
 
 /* ======= TELE ======= */
 function fillTA(){ $('#taSearch').value=state.taFilter||''; populateTASelect(); renderTA(); }
@@ -552,7 +562,7 @@ $('#taSearch').oninput=e=>{state.taFilter=e.target.value.trim(); renderTA();};
 $('#taPerson').onchange=e=>{state.taPerson=e.target.value; renderTA();};
 function renderTA(){ const it=cur(); const h=it.hojas[0]; const f=(state.taFilter||'').toLowerCase(); const per=state.taPerson||''; const cont=$('#taRows'); cont.innerHTML='';
   h.rows.forEach((r,i)=>{ if((f && !(r.centro||'').toLowerCase().includes(f) && !(r.persona||'').toLowerCase().includes(f)) || (per && (r.persona||'')!==per)) return;
-    const row=document.createElement('div'); row.className='ta-row'; row.style.gridTemplateColumns='52px 1.2fr 150px 140px 170px 110px 110px 120px 130px 130px';
+    const row=document.createElement('div'); row.className='ta-row';
     row.innerHTML=`<div>${i+1}</div><input data-i="${i}" data-k="centro" value="${esc(r.centro||'')}"><input data-i="${i}" data-k="delegado" value="${esc(r.delegado||'')}"><select data-i="${i}" data-k="rol"><option ${r.rol!=='Técnico'?'selected':''}>Audiólogo</option><option ${r.rol==='Técnico'?'selected':''}>Técnico</option></select><input data-i="${i}" data-k="persona" value="${esc(r.persona||'')}" placeholder="Nombre"><input type="checkbox" data-i="${i}" data-k="formacion" ${r.formacion?'checked':''}><input type="checkbox" data-i="${i}" data-k="practicas" ${r.practicas?'checked':''}><input type="checkbox" data-i="${i}" data-k="certificado" ${r.certificado?'checked':''}><input type="number" min="0" step="1" data-i="${i}" data-k="pruebas_reales" value="${r.pruebas_reales??''}"><input type="number" min="0" step="1" data-i="${i}" data-k="ventas" value="${r.ventas??''}">`; cont.appendChild(row);
   });
 }
@@ -562,7 +572,7 @@ $('#taRows').addEventListener('input',e=>{
   else if(e.target.type==='number') h.rows[i][k]=e.target.value===''?null:Number(e.target.value);
   else h.rows[i][k]=e.target.value; saveCloudOrLocal();
 });
-$('#saveTATop').onclick=saveCloudOrLocal;
+$('#saveTATop').onclick=saveCloudOrLocal; $('#saveTABottom').onclick=saveCloudOrLocal;
 
 /* ======= EQUIPOS ======= */
 function fillEQ(){ $('#eqSearch').value=state.eqFilter||''; renderEQ(); }
@@ -572,8 +582,7 @@ $('#btnAddParCols').onclick=()=>{ const it=cur(); it.columnas=(it.columnas||3)+1
 
 function renderEQ(){
   const it=cur(); const cols=Math.max(1,it.columnas||3); const f=(state.eqFilter||'').toLowerCase(); const root=$('#eqTable'); root.innerHTML='';
-  /* columnas más compactas tipo Excel */
-  const template=['52px','170px','130px','150px','120px'].concat(Array.from({length:cols},()=>['150px','90px']).flat()).join(' ');
+  const template=['42px','138px','110px','120px','100px'].concat(Array.from({length:cols},()=>['120px','64px']).flat()).join(' ');
   const head=document.createElement('div'); head.className='va-head'; head.style.gridTemplateColumns=template;
   head.innerHTML=`<div>#</div><div>Equipo</div><div>Nº serie</div><div>Persona que envía</div><div>Fecha</div>`+Array.from({length:cols},(_,i)=>`<div>Centro ${i+1}</div><div>Sede ${i+1}</div>`).join(''); root.appendChild(head);
   const body=document.createElement('div'); body.className='scroll'; root.appendChild(body);
@@ -599,30 +608,39 @@ function renderEQ(){
     saveCloudOrLocal();
   });
 }
-$('#saveEQTop').onclick=saveCloudOrLocal;
+$('#saveEQTop').onclick=saveCloudOrLocal; $('#saveEQBottom').onclick=saveCloudOrLocal;
 
-/* ======= Topbar ======= */
-$('#btnSaveTop').onclick=saveCloudOrLocal; $('#btnFetch').onclick=fetchCloudOrLocal; $('#btnReset').onclick=resetLocalView;
+/* Topbar acciones */
+$('#btnSaveTop').onclick=()=>{ saveCloudOrLocal(); };
+$('#btnFetch').onclick=()=>{ fetchCloudOrLocal(); };
+$('#btnReset').onclick=()=>{ resetLocalView(); };
 
-/* ======= PIN (siempre) ======= */
-function tryEnter(){
-  const val=(($('#pin').value)||'').trim();
-  const ok = val.toLowerCase() === (PIN_CODE||'').toLowerCase();
-  if(ok){ document.getElementById('gate').style.display='none'; }
-  else { document.getElementById('pinMsg').style.display='block'; }
+/* ======= PIN (hash) ======= */
+async function sha256Hex(str){
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+async function checkPin(val){
+  let s=(val||'').trim(); if(/^AR/i.test(s)) s=s.slice(2);
+  if(!s) return false;
+  try{ return (await sha256Hex(s))===PIN_SHA256; }catch(_){ return false; }
+}
+function unlock(){ document.body.classList.remove('locked'); $('#gate').style.display='none'; }
+function lock(){ document.body.classList.add('locked'); $('#gate').style.display='flex'; $('#pin').focus(); }
+async function tryEnter(){
+  $('#pinMsg').style.display='none';
+  const ok = await checkPin($('#pin').value);
+  if(ok){ unlock(); toast('Edición activada'); } else { $('#pinMsg').style.display='block'; }
 }
 $('#enter').onclick=tryEnter;
 $('#pin').addEventListener('keydown',e=>{ if(e.key==='Enter') tryEnter(); });
 $('#cancelPin').onclick=()=>{ $('#pin').value=''; $('#pinMsg').style.display='none'; };
 
-/* ======= Init ======= */
+/* Init */
 function renderAll(){ renderLeft(); if(state.selected.section) renderDetail(); else renderDetailBlank(); }
+window.addEventListener('DOMContentLoaded',()=>{ if(REQUIRE_PIN){ lock(); } });
 window.addEventListener('load',()=>{
-  localLoad();
-  initFirebase();        // si no hay claves → permanece en local
-  renderAll();
-  $('#stamp').textContent='Listo: '+now();
-  if(REQUIRE_PIN){ $('#gate').style.display='flex'; $('#pin').focus(); }
+  localLoad(); initFirebase(); renderAll(); stamp('Listo: '+now());
 });
 </script>
 </body>
