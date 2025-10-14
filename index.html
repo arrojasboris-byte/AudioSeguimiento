@@ -9,17 +9,16 @@
 :root{
   --rojo:#c82727; --rojo-osc:#a71f1f;
   --bg:#f6f7fb; --card:#fff; --line:#e6e7ee; --shadow:0 8px 22px rgba(0,0,0,.08);
-  --maxW:1280px;
   --col-ex:#fde2e4; --col-fl:#e2f0cb; --col-va:#cde7f0; --col-fm:#f9e5c9; --col-ta:#eadcf8; --col-eq:#e8f1ff;
 }
 *{box-sizing:border-box}
 html,body{height:100%}
 body{margin:0;background:var(--bg);font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;color:#222;overflow-x:hidden}
 
-/* Topbar */
+/* Topbar 100% */
 .topbar{position:sticky;top:0;z-index:50;width:100%;
   background:linear-gradient(180deg,var(--rojo),var(--rojo-osc));color:#fff;box-shadow:var(--shadow)}
-.bar-inner{max-width:min(calc(100vw - 24px), var(--maxW));margin:0 auto;padding:.85rem 1rem;display:flex;align-items:center;gap:.6rem}
+.bar-inner{width:100%;margin:0;padding:.85rem 12px;display:flex;align-items:center;gap:.6rem}
 .brand{font-weight:900;letter-spacing:.35px}
 .spacer{flex:1}
 .btn{border:0;border-radius:12px;padding:.55rem .9rem;cursor:pointer;box-shadow:var(--shadow);font-weight:800}
@@ -28,10 +27,12 @@ body{margin:0;background:var(--bg);font-family:Inter,system-ui,Segoe UI,Roboto,A
 .btn-ghost{background:transparent;border:1px solid #ffffff66;color:#fff}
 .pill{display:inline-flex;gap:.45rem;align-items:center;border:1px solid #ffffff2f;background:#ffffff1c;padding:.35rem .6rem;border-radius:999px;white-space:nowrap}
 
-/* Nuevo layout: cinta arriba + detalle abajo */
-.app{max-width:min(calc(100vw - 24px), var(--maxW));margin:0 auto}
-.wrapV{display:grid;grid-template-rows:auto 1fr;gap:14px;padding:14px}
-.ribbon.card{padding:10px}
+/* Layout a 100%: cinta arriba + detalle abajo */
+.app{width:100%;margin:0}
+.wrapV{display:grid;grid-template-rows:auto 1fr;gap:14px;padding:14px 12px 16px}
+
+/* Cinta superior */
+.ribbon.card{padding:10px;background:var(--card);border-radius:16px;box-shadow:var(--shadow)}
 .ribbon-inner{display:flex;gap:12px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:8px}
 .section{border:1px solid var(--line);border-radius:14px;background:#fff;min-width:280px;max-width:320px;height:230px;display:flex;flex-direction:column;box-shadow:var(--shadow)}
 .sec-head{display:flex;justify-content:space-between;align-items:center;padding:.65rem .8rem;font-weight:900}
@@ -47,7 +48,7 @@ body{margin:0;background:var(--bg);font-family:Inter,system-ui,Segoe UI,Roboto,A
 .bg-ex{background:var(--col-ex)} .bg-fl{background:var(--col-fl)} .bg-va{background:var(--col-va)}
 .bg-fm{background:var(--col-fm)} .bg-ta{background:var(--col-ta)} .bg-eq{background:var(--col-eq)}
 
-/* Detalle abajo, ceñido al viewport */
+/* Detalle abajo, ocupando ancho completo */
 .detail{padding:1rem 1.1rem 1.2rem;border-radius:18px;border:1px solid var(--line);background:#fff;min-height:62vh;box-shadow:var(--shadow)}
 .detail h2{margin:.1rem 0 .4rem 0}
 .badge{padding:.15rem .5rem;border-radius:999px;background:#00000010}
@@ -94,7 +95,7 @@ body{margin:0;background:var(--bg);font-family:Inter,system-ui,Segoe UI,Roboto,A
   .table-inner{min-width:1100px}
 }
 
-/* PIN */
+/* PIN negro */
 .gate{position:fixed;inset:0;background:#000;display:flex;align-items:center;justify-content:center;z-index:1000}
 .gate-card{background:#111;color:#fff;border-radius:16px;box-shadow:var(--shadow);padding:24px 22px;min-width:320px;border:1px solid #2a2a2a}
 .gate-card h3{margin:.25rem 0 1rem 0}
@@ -111,7 +112,7 @@ body{margin:0;background:var(--bg);font-family:Inter,system-ui,Segoe UI,Roboto,A
     <button id="btnFetch" class="btn btn-lite" title="Leer de la nube o local (no guarda)">Actualizar (nube)</button>
     <button id="btnSaveTop" class="btn btn-save" title="Guardar en la nube o local">Guardar (nube)</button>
     <button id="btnReset" class="btn btn-ghost" title="Descartar cambios locales y volver al último leído">Resetear</button>
-    <span id="stamp" class="pill">v7.1 · Cargando…</span>
+    <span id="stamp" class="pill">v7.2 · Cargando…</span>
   </div>
 </header>
 
@@ -154,7 +155,7 @@ body{margin:0;background:var(--bg);font-family:Inter,system-ui,Segoe UI,Roboto,A
       </div>
     </div>
 
-    <!-- DETALLE ABAJO -->
+    <!-- DETALLE -->
     <section class="detail card" id="detail">
       <div style="display:flex;align-items:center;gap:.6rem">
         <h2 id="detTitle">Detalle</h2><span id="detTag" class="badge">—</span>
@@ -256,7 +257,7 @@ body{margin:0;background:var(--bg);font-family:Inter,system-ui,Segoe UI,Roboto,A
         </div>
       </div>
 
-      <!-- EQUI POS -->
+      <!-- EQUIPOS -->
       <div id="detEquipos" style="display:none">
         <div class="save-band"><button id="saveEQTop" class="save-big">💾 GUARDAR EQUIPOS</button></div>
         <div class="row">
@@ -292,7 +293,7 @@ body{margin:0;background:var(--bg);font-family:Inter,system-ui,Segoe UI,Roboto,A
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script>
 /* ======= CONFIG ======= */
-const APP_VERSION='v7.1';
+const APP_VERSION='v7.2';
 const REQUIRE_PIN = true;
 const PIN_CODE = '4321';
 const DB_PATH  = 'audioseguimiento/v7';
@@ -373,7 +374,8 @@ function renderLeft(){
     });
     sec.querySelector('[data-act="toggle"]').onclick=()=>{list.style.display=list.style.display==='none'?'':'none'; if(list.style.display==='none'&&name.includes('CENTROS')){state.selected={section:null,index:null}; renderDetailBlank();}};
     sec.querySelector('[data-act="add"]').onclick=()=>{
-      let nuevo; if(name.includes('CENTROS')) nuevo={nombre:'(nuevo centro)',delegado:'',audiologo:'',tipo:'Franquicia',acciones:[],formaciones:[],procesos[]};
+      let nuevo;
+      if(name.includes('CENTROS')) nuevo={nombre:'(nuevo centro)',delegado:'',audiologo:'',tipo:'Franquicia',acciones:[],formaciones:[],procesos:[]}; /* ← corregido procesos:[] */
       else if(name==="VISITAS AUDIO") nuevo={rol:'Delegado audio',responsable:'',hojas:[sheetVA('Visita 1')]};
       else if(name==="FORMACIONES Y MENTORING") nuevo={delegado:'(Delegado regional)',filas:rowsFM()};
       else if(name==="TELEAUDIOLOGIA") nuevo={hojas:[sheetTA('Tele 1')]};
