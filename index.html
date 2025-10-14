@@ -16,11 +16,11 @@ html,body{height:100%}
 body{margin:0;background:var(--bg);font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;color:#222;overflow-x:hidden}
 
 /* Bloqueo global hasta PIN */
-body.locked header, body.locked main { pointer-events:none; user-select:none; filter:blur(1.5px); }
+body.locked header, body.locked main { pointer-events:none; user-select:none; filter:blur(1.3px); }
 body.locked #gate { pointer-events:auto; filter:none }
 
 /* Topbar 100% */
-.topbar{position:sticky;top:0;z-index:50;width:100%;
+.topbar{position:sticky;top:0;z-index:60;width:100%;
   background:linear-gradient(180deg,var(--rojo),var(--rojo-osc));color:#fff;box-shadow:var(--shadow)}
 .bar-inner{width:100%;margin:0;padding:.85rem 12px;display:flex;align-items:center;gap:.6rem}
 .brand{font-weight:900;letter-spacing:.35px}
@@ -30,6 +30,10 @@ body.locked #gate { pointer-events:auto; filter:none }
 .btn-save{background:#fff;color:#7b0e0e}
 .btn-ghost{background:transparent;border:1px solid #ffffff66;color:#fff}
 .pill{display:inline-flex;gap:.45rem;align-items:center;border:1px solid #ffffff2f;background:#ffffff1c;padding:.35rem .6rem;border-radius:999px;white-space:nowrap}
+
+/* Banner de bloqueo remoto */
+.lock-banner{display:none;align-items:center;gap:.6rem;background:#fff3cd;color:#7a5c00;border-bottom:1px solid #f6e3a5;padding:.6rem 12px}
+.lock-banner.show{display:flex}
 
 /* Layout 100%: cinta arriba + detalle abajo */
 .app{width:100%;margin:0}
@@ -42,8 +46,9 @@ body.locked #gate { pointer-events:auto; filter:none }
 .sec-head{display:flex;justify-content:space-between;align-items:center;padding:.65rem .8rem;font-weight:900}
 .sec-list{padding:.4rem .6rem .7rem;flex:1;overflow:auto}
 .sec-btn{width:36px;height:32px;border-radius:9px;border:1px solid var(--line);background:#fff;cursor:pointer}
-.item{display:flex;justify-content:space-between;gap:.6rem;align-items:center;background:#fff;border:1px solid var(--line);border-radius:12px;padding:.5rem .6rem;margin:.35rem 0;cursor:pointer}
+.item{display:flex;justify-content:space-between;gap:.6rem;align-items:center;background:#fff;border:1px solid var(--line);border-radius:12px;padding:.5rem .6rem;margin:.35rem 0;user-select:none}
 .item .name{font-weight:750}
+.item.selected{outline:2px solid #a1c4fd}
 .acts{display:flex;gap:.25rem}
 .ico-btn{min-width:30px;height:30px;border-radius:8px;border:1px solid #e3e3ea;background:#fff;cursor:pointer}
 .ico-btn:hover{background:#fafafa}
@@ -57,6 +62,7 @@ body.locked #gate { pointer-events:auto; filter:none }
 .detail h2{margin:.1rem 0 .4rem 0}
 .badge{padding:.15rem .5rem;border-radius:999px;background:#00000010}
 .save-band{display:flex;justify-content:center;margin:.2rem 0 .8rem}
+.save-band.bottom{margin:.8rem 0 .2rem}
 .save-big{font-size:1.05rem;padding:.7rem 1.2rem;border-radius:999px;background:#1f6feb;color:#fff;border:0;box-shadow:var(--shadow);cursor:pointer}
 
 /* Formularios / filas */
@@ -68,7 +74,7 @@ body.locked #gate { pointer-events:auto; filter:none }
 /* Tablas densas + scroll */
 .table-wrap{border:1px solid var(--line);border-radius:12px;background:#fff;box-shadow:var(--shadow);padding:.5rem}
 .xscroll{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;padding-bottom:14px;min-height:24px}
-.table-inner{display:block;width:max-content;min-width:1800px}
+.table-inner{display:block;width:max-content;min-width:1800px} /* hace visible la barra horizontal */
 .table-inner input,.table-inner select{padding:.35rem .45rem;font-size:.95rem}
 .va-head,.va-row{display:grid;gap:.25rem;align-items:center;margin:.1rem .1rem}
 .scroll{max-height:58vh;overflow:auto;padding-right:.3rem}
@@ -105,6 +111,12 @@ body.locked #gate { pointer-events:auto; filter:none }
 .gate-card h3{margin:.25rem 0 1rem 0}
 .pin{letter-spacing:.45rem;font-size:1.25rem;text-align:center;background:#000;color:#fff;border:1px solid #444;border-radius:10px;padding:.6rem}
 .subtle{opacity:.8;font-size:.9rem}
+
+/* Modo solo lectura si hay bloqueo remoto */
+.readonly .detail input,
+.readonly .detail select,
+.readonly .detail .ico-btn,
+.readonly .detail .save-big { pointer-events:none; opacity:.6 }
 </style>
 </head>
 <body class="locked">
@@ -116,8 +128,9 @@ body.locked #gate { pointer-events:auto; filter:none }
     <button id="btnFetch" class="btn btn-lite" title="Leer de la nube o local (no guarda)">Actualizar (nube)</button>
     <button id="btnSaveTop" class="btn btn-save" title="Guardar en la nube o local">Guardar (nube)</button>
     <button id="btnReset" class="btn btn-ghost" title="Descartar cambios locales y volver al último leído">Resetear</button>
-    <span id="stamp" class="pill">v7.5 · Cargando…</span>
+    <span id="stamp" class="pill">v7.6 · Cargando…</span>
   </div>
+  <div id="lockBanner" class="lock-banner">⚠️ <b>En uso</b> por otra sesión. Modo lectura hasta que libere.</div>
 </header>
 
 <main class="app">
@@ -127,32 +140,32 @@ body.locked #gate { pointer-events:auto; filter:none }
       <div class="ribbon-inner">
         <section class="section bg-ex" data-section="CENTROS EXCLUSIVOS">
           <div class="sec-head"><div>📒 CENTROS EXCLUSIVOS <span class="badge">(máx. 10)</span></div>
-            <div><button class="sec-btn" data-act="toggle">▾</button><button class="sec-btn" data-act="add">＋</button></div>
+            <div><button class="sec-btn" data-act="toggle" title="Mostrar/ocultar">▾</button><button class="sec-btn" data-act="add" title="Añadir">＋</button></div>
           </div><div class="sec-list"></div>
         </section>
         <section class="section bg-fl" data-section="CENTROS FLOP">
           <div class="sec-head"><div>📒 CENTROS FLOP</div>
-            <div><button class="sec-btn" data-act="toggle">▾</button><button class="sec-btn" data-act="add">＋</button></div>
+            <div><button class="sec-btn" data-act="toggle" title="Mostrar/ocultar">▾</button><button class="sec-btn" data-act="add" title="Añadir">＋</button></div>
           </div><div class="sec-list"></div>
         </section>
         <section class="section bg-va" data-section="VISITAS AUDIO">
           <div class="sec-head"><div>📋 VISITAS AUDIO</div>
-            <div><button class="sec-btn" data-act="toggle">▾</button><button class="sec-btn" data-act="add">＋</button></div>
+            <div><button class="sec-btn" data-act="toggle" title="Mostrar/ocultar">▾</button><button class="sec-btn" data-act="add" title="Añadir">＋</button></div>
           </div><div class="sec-list"></div>
         </section>
         <section class="section bg-fm" data-section="FORMACIONES Y MENTORING">
           <div class="sec-head"><div>🎓 FORMACIONES Y MENTORING</div>
-            <div><button class="sec-btn" data-act="toggle">▾</button><button class="sec-btn" data-act="add">＋</button></div>
+            <div><button class="sec-btn" data-act="toggle" title="Mostrar/ocultar">▾</button><button class="sec-btn" data-act="add" title="Añadir">＋</button></div>
           </div><div class="sec-list"></div>
         </section>
         <section class="section bg-ta" data-section="TELEAUDIOLOGIA">
           <div class="sec-head"><div>📡 TELEAUDIOLOGIA</div>
-            <div><button class="sec-btn" data-act="toggle">▾</button><button class="sec-btn" data-act="add">＋</button></div>
+            <div><button class="sec-btn" data-act="toggle" title="Mostrar/ocultar">▾</button><button class="sec-btn" data-act="add" title="Añadir">＋</button></div>
           </div><div class="sec-list"></div>
         </section>
         <section class="section bg-eq" data-section="EQUIPOS">
-          <div class="sec-head"><div>🧰 EQUIPOS</div>
-            <div><button class="sec-btn" data-act="toggle">▾</button><button class="sec-btn" data-act="add">＋</button></div>
+          <div class="sec-head"><div>🧰 EQUI﻿POS</div>
+            <div><button class="sec-btn" data-act="toggle" title="Mostrar/ocultar">▾</button><button class="sec-btn" data-act="add" title="Añadir">＋</button></div>
           </div><div class="sec-list"></div>
         </section>
       </div>
@@ -163,7 +176,7 @@ body.locked #gate { pointer-events:auto; filter:none }
       <div style="display:flex;align-items:center;gap:.6rem">
         <h2 id="detTitle">Detalle</h2><span id="detTag" class="badge">—</span>
       </div>
-      <p id="detHint" style="opacity:.7">Selecciona un item en la cinta superior o crea uno con ＋.</p>
+      <p id="detHint" style="opacity:.7">Selecciona un item (doble clic o ✏️) o crea uno con ＋.</p>
 
       <!-- CENTROS -->
       <div id="detCentro" style="display:none">
@@ -177,6 +190,7 @@ body.locked #gate { pointer-events:auto; filter:none }
           <div class="field"><label>Franquicia o Sucursal</label><select id="cTipo"><option>Franquicia</option><option>Sucursal</option></select></div>
         </div>
 
+        <!-- Acciones -->
         <div class="table-wrap">
           <div class="xscroll"><div class="table-inner">
             <div class="va-head" style="grid-template-columns:52px 130px 1fr 110px 110px 110px 150px 52px">
@@ -185,6 +199,7 @@ body.locked #gate { pointer-events:auto; filter:none }
           </div></div>
         </div>
 
+        <!-- Formaciones -->
         <div class="table-wrap">
           <div class="xscroll"><div class="table-inner">
             <div class="va-head" style="grid-template-columns:52px 1.2fr .7fr .7fr 1.4fr 52px">
@@ -193,6 +208,7 @@ body.locked #gate { pointer-events:auto; filter:none }
           </div></div>
         </div>
 
+        <!-- Procesos -->
         <div class="table-wrap">
           <div class="xscroll"><div class="table-inner">
             <div class="va-head" style="grid-template-columns:52px 220px 120px 160px 52px">
@@ -200,6 +216,7 @@ body.locked #gate { pointer-events:auto; filter:none }
             </div><div id="procesosRows"></div>
           </div></div>
         </div>
+        <div class="save-band bottom"><button id="saveCentroBottom" class="save-big" title="Guardar cambios del centro">💾 GUARDAR CENTRO</button></div>
       </div>
 
       <!-- VISITAS -->
@@ -224,6 +241,7 @@ body.locked #gate { pointer-events:auto; filter:none }
             </div><div id="vaRows" class="scroll"></div>
           </div></div>
         </div>
+        <div class="save-band bottom"><button id="saveVisitasBottom" class="save-big" title="Guardar tabla de visitas">💾 GUARDAR VISITAS</button></div>
       </div>
 
       <!-- FORMACIONES -->
@@ -242,6 +260,7 @@ body.locked #gate { pointer-events:auto; filter:none }
             </div><div id="fmRows" class="scroll"></div>
           </div></div>
         </div>
+        <div class="save-band bottom"><button id="saveFMBottom" class="save-big" title="Guardar tabla de formaciones">💾 GUARDAR FORMACIONES</button></div>
       </div>
 
       <!-- TELEAUDIOLOGIA -->
@@ -258,6 +277,7 @@ body.locked #gate { pointer-events:auto; filter:none }
             </div><div id="taRows" class="scroll"></div>
           </div></div>
         </div>
+        <div class="save-band bottom"><button id="saveTABottom" class="save-big" title="Guardar tabla de teleaudiología">💾 GUARDAR TELE</button></div>
       </div>
 
       <!-- EQUIPOS -->
@@ -270,6 +290,7 @@ body.locked #gate { pointer-events:auto; filter:none }
           </div>
         </div>
         <div class="table-wrap"><div class="xscroll"><div id="eqTable" class="table-inner"></div></div></div>
+        <div class="save-band bottom"><button id="saveEQBottom" class="save-big" title="Guardar inventario de equipos">💾 GUARDAR EQUIPOS</button></div>
       </div>
 
     </section>
@@ -296,7 +317,7 @@ body.locked #gate { pointer-events:auto; filter:none }
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script>
 /* ======= CONFIG ======= */
-const APP_VERSION='v7.5';
+const APP_VERSION='v7.6';
 const REQUIRE_PIN = true;
 /* SHA-256('4321'): fe2592b42a727e977f055947385b709cc82b16b9a87f88c6abf3900d65d0cdc3 */
 const PIN_SHA256='fe2592b42a727e977f055947385b709cc82b16b9a87f88c6abf3900d65d0cdc3';
@@ -307,6 +328,7 @@ const firebaseConfig = { apiKey:"", authDomain:"", databaseURL:"", projectId:"",
 const $=(s,r=document)=>r.querySelector(s); const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
 const esc=s=>(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const now=()=>new Date().toLocaleString();
+function toast(msg){ const t=document.createElement('div'); t.textContent=msg; Object.assign(t.style,{position:'fixed',bottom:'16px',left:'50%',transform:'translateX(-50%)',background:'#111',color:'#fff',padding:'10px 14px',borderRadius:'10px',zIndex:80,opacity:'0.95'}); document.body.appendChild(t); setTimeout(()=>t.remove(),1800); }
 
 /* ======= Estado/Datos ======= */
 let cloud={enabled:false,db:null,ref:null,ready:false}, lastCloud=null;
@@ -331,6 +353,7 @@ const LOCAL_KEY='audioseguimiento_local_v7';
 function localLoad(){ try{const raw=localStorage.getItem(LOCAL_KEY); if(raw){data=JSON.parse(raw);} }catch(e){} }
 function localSave(){ try{localStorage.setItem(LOCAL_KEY,JSON.stringify(data));}catch(e){} }
 
+/* ======= Firebase (si hay claves) ======= */
 function initFirebase(){
   if(!firebaseConfig || !firebaseConfig.apiKey) return; // sin claves → LocalStorage
   try{firebase.initializeApp(firebaseConfig);}catch(e){}
@@ -345,17 +368,55 @@ function initFirebase(){
 }
 function saveCloudOrLocal(){
   if(cloud.enabled && cloud.ready){
-    cloud.ref.set(data).then(()=>{ lastCloud=JSON.parse(JSON.stringify(data)); $('#stamp').textContent=APP_VERSION+' · Guardado (nube): '+now(); });
-  }else{ localSave(); $('#stamp').textContent=APP_VERSION+' · Guardado (local): '+now(); }
+    cloud.ref.set(data).then(()=>{ lastCloud=JSON.parse(JSON.stringify(data)); $('#stamp').textContent=APP_VERSION+' · Guardado (nube): '+now(); toast('Guardado en nube'); });
+  }else{ localSave(); $('#stamp').textContent=APP_VERSION+' · Guardado (local): '+now(); toast('Guardado local'); }
 }
 function fetchCloudOrLocal(){
   if(cloud.enabled && cloud.ready){
-    cloud.ref.once('value').then(s=>{const v=s.val(); if(v){data=v; lastCloud=JSON.parse(JSON.stringify(v)); localSave(); renderAll(); $('#stamp').textContent=APP_VERSION+' · Actualizado (nube): '+now();}});
-  }else{ localLoad(); renderAll(); $('#stamp').textContent=APP_VERSION+' · Actualizado (local): '+now(); }
+    cloud.ref.once('value').then(s=>{const v=s.val(); if(v){data=v; lastCloud=JSON.parse(JSON.stringify(v)); localSave(); renderAll(); $('#stamp').textContent=APP_VERSION+' · Actualizado (nube): '+now(); toast('Actualizado desde nube');}});
+  }else{ localLoad(); renderAll(); $('#stamp').textContent=APP_VERSION+' · Actualizado (local): '+now(); toast('Actualizado local'); }
 }
-function resetLocalView(){ if(cloud.enabled && lastCloud){ data=JSON.parse(JSON.stringify(lastCloud)); } else localLoad(); renderAll(); }
+function resetLocalView(){ if(cloud.enabled && lastCloud){ data=JSON.parse(JSON.stringify(lastCloud)); toast('Vista reseteada a última nube'); } else { localLoad(); toast('Vista reseteada a local'); } renderAll(); }
 
-/* ======= Cinta superior ======= */
+/* ======= Bloqueo “En uso” ======= */
+const TAB_ID = Math.random().toString(36).slice(2);
+let lockMode='none', lockRef=null, lockTimer=null;
+function setReadonly(on){ document.body.classList.toggle('readonly',on); $('#lockBanner').classList.toggle('show',on); }
+function startLocalLock(){
+  lockMode='local';
+  const KEY='audioseguimiento_edit_lock';
+  function claim(){
+    const raw=localStorage.getItem(KEY);
+    let obj=raw?JSON.parse(raw):null, nowT=Date.now();
+    if(obj && obj.id!==TAB_ID && (nowT-obj.ts)<180000){ // 3 min
+      setReadonly(true); return false;
+    }
+    localStorage.setItem(KEY, JSON.stringify({id:TAB_ID, ts:nowT}));
+    setReadonly(false); return true;
+  }
+  claim(); // primer intento
+  lockTimer=setInterval(()=>{ if(document.hidden) return; const raw=localStorage.getItem(KEY); let obj=raw?JSON.parse(raw):null; if(!obj || obj.id===TAB_ID){ localStorage.setItem(KEY, JSON.stringify({id:TAB_ID, ts:Date.now()})); setReadonly(false);} }, 30000);
+  window.addEventListener('storage',e=>{ if(e.key!==KEY) return; const raw=e.newValue; let obj=raw?JSON.parse(raw):null; if(obj && obj.id!==TAB_ID){ setReadonly(true);} else { setReadonly(false);} });
+}
+function startFirebaseLock(){
+  if(!cloud.enabled) return false;
+  try{
+    lockRef = cloud.db.ref(DB_PATH+'/-lock');
+    const my = { id:TAB_ID, ts:firebase.database.ServerValue.TIMESTAMP };
+    lockRef.transaction(current=>{
+      const nowT=Date.now();
+      if(current && current.id && (nowT - (current.ts||0))<180000){ return; } // ocupado
+      return my;
+    }, (err, committed, snap)=>{
+      if(!committed){ setReadonly(true); } else { setReadonly(false); lockRef.onDisconnect().remove(); }
+    });
+    // Heartbeat
+    lockTimer=setInterval(()=>{ lockRef.update({ts:Date.now()}); }, 30000);
+    return true;
+  }catch(_){ return false; }
+}
+
+/* ======= Cinta superior (menos sensible) ======= */
 const SECTIONS=["CENTROS EXCLUSIVOS","CENTROS FLOP","VISITAS AUDIO","FORMACIONES Y MENTORING","TELEAUDIOLOGIA","EQUIPOS"];
 function renderLeft(){
   SECTIONS.forEach(name=>{
@@ -374,6 +435,12 @@ function renderLeft(){
         inner=`<div><div class="name">Teleaudiología</div></div>`;
       }else{ inner=`<div><div class="name">Inventario de equipos</div></div>`; acts=false; }
       div.innerHTML=inner+(acts?`<div class="acts"><button class="ico-btn" data-role="edit" title="Editar">✏️</button><button class="ico-btn" data-role="del" title="Eliminar">🗑️</button></div>`:'');
+      // selección visual con un clic
+      div.addEventListener('click',e=>{ $$('.item',list).forEach(x=>x.classList.remove('selected')); div.classList.add('selected'); });
+      // abrir detalle solo con Doble clic o botón ✏️
+      div.addEventListener('dblclick',()=>{ state.selected={section:name,index:i}; renderDetail(); });
+      div.querySelector('[data-role="edit"]')?.addEventListener('click',e=>{ e.stopPropagation(); state.selected={section:name,index:i}; renderDetail(); });
+      div.querySelector('[data-role="del"]')?.addEventListener('click',e=>{ e.stopPropagation(); if(confirm('¿Eliminar este item?')){ data[name].splice(i,1); renderAll(); saveCloudOrLocal(); }});
       list.appendChild(div);
     });
     sec.querySelector('[data-act="toggle"]').onclick=()=>{list.style.display=list.style.display==='none'?'':'none'; if(list.style.display==='none'&&name.includes('CENTROS')){state.selected={section:null,index:null}; renderDetailBlank();}};
@@ -386,12 +453,6 @@ function renderLeft(){
       else nuevo=equiposInit();
       data[name].push(nuevo); renderAll(); saveCloudOrLocal();
     };
-    list.onclick=(e)=>{
-      const role=e.target.dataset.role; const item=e.target.closest('.item'); if(!item) return;
-      const idx=+item.dataset.index;
-      if(role==='del'){ if(confirm('¿Eliminar este item?')){ data[name].splice(idx,1); renderAll(); saveCloudOrLocal(); } return; }
-      state.selected={section:name,index:idx}; renderDetail();
-    });
   });
 }
 
@@ -421,7 +482,7 @@ function fillCentro(){ const it=cur(); if(!it) return;
   renderAcciones(); renderFormaciones(); renderProcesos();
 }
 function saveCentro(){ const it=cur(); if(!it) return; it.nombre=$('#cNombre').value.trim(); it.delegado=$('#cDelegado').value.trim(); it.audiologo=$('#cAudiologo').value.trim(); it.tipo=$('#cTipo').value; saveCloudOrLocal(); renderLeft(); }
-$('#saveCentroTop').onclick=saveCentro;
+$('#saveCentroTop').onclick=saveCentro; $('#saveCentroBottom').onclick=saveCentro;
 
 function renderAcciones(){ const it=cur(); it.acciones=it.acciones||[]; const cont=$('#accionesRows'); cont.innerHTML='';
   it.acciones.forEach((r,i)=>{const row=document.createElement('div'); row.className='va-row'; row.style.gridTemplateColumns='52px 130px 1fr 110px 110px 110px 150px 52px';
@@ -431,28 +492,27 @@ function renderAcciones(){ const it=cur(); it.acciones=it.acciones||[]; const co
     <input type="number" min="0" step="1" data-i="${i}" data-k="derivacion" value="${r.derivacion??''}">
     <input type="number" min="0" step="1" data-i="${i}" data-k="citas" value="${r.citas??''}">
     <input type="number" min="0" step="1" data-i="${i}" data-k="venta" value="${r.venta??''}">
-    <button class="ico-btn" data-del="${i}">🗑️</button>`; cont.appendChild(row);});
+    <button class="ico-btn" data-del="${i}" title="Eliminar fila">🗑️</button>`; cont.appendChild(row);});
   const add=document.createElement('div'); add.className='va-row'; add.style.gridTemplateColumns='52px 130px 1fr 110px 110px 110px 150px 52px';
   add.innerHTML=`<div>${it.acciones.length+1}</div><input type="date" data-new="1" data-k="fecha"><input data-new="1" data-k="tipo">
   <select data-new="1" data-k="paquete"><option>1</option><option>2</option><option>3</option></select>
   <input type="number" data-new="1" data-k="derivacion"><input type="number" data-new="1" data-k="citas"><input type="number" data-new="1" data-k="venta"><span></span>`;
   cont.appendChild(add);
 }
-$('#accionesRows').addEventListener('click',e=>{const i=e.target.dataset.del; if(i!=null){cur().acciones.splice(+i,1); renderAcciones(); saveCloudOrLocal();}});
+$('#accionesRows').addEventListener('click',e=>{const i=e.target.dataset.del; if(i!=null){ if(confirm('¿Eliminar fila?')){cur().acciones.splice(+i,1); renderAcciones(); saveCloudOrLocal();}}});
 $('#accionesRows').addEventListener('input',e=>{
-  const i=e.target.dataset.i, k=e.target.dataset.k, isNew=e.target.dataset.new;
-  if(!k) return;
+  const i=e.target.dataset.i, k=e.target.dataset.k, isNew=e.target.dataset.new; if(!k) return;
   if(isNew){ const r={fecha:'',tipo:'',paquete:'1',derivacion:null,citas:null,venta:null}; r[k]=e.target.type==='number'?(e.target.value===''?null:Number(e.target.value)):e.target.value; cur().acciones.push(r); renderAcciones(); saveCloudOrLocal(); return; }
   const r=cur().acciones[+i]; r[k]=e.target.type==='number'?(e.target.value===''?null:Number(e.target.value)):e.target.value; saveCloudOrLocal();
 });
 
 function renderFormaciones(){ const it=cur(); it.formaciones=it.formaciones||[]; const cont=$('#formacionesRows'); cont.innerHTML='';
   it.formaciones.forEach((r,i)=>{const row=document.createElement('div'); row.className='va-row'; row.style.gridTemplateColumns='52px 1.2fr .7fr .7fr 1.4fr 52px';
-    row.innerHTML=`<div>${i+1}</div><input data-i="${i}" data-k="curso" value="${esc(r.curso||'')}"><input type="checkbox" data-i="${i}" data-k="realizado" ${r.realizado?'checked':''}><input type="checkbox" data-i="${i}" data-k="aplica" ${r.aplica?'checked':''}><input data-i="${i}" data-k="obs" value="${esc(r.obs||'')}"><button class="ico-btn" data-delf="${i}">🗑️</button>`; cont.appendChild(row);});
+    row.innerHTML=`<div>${i+1}</div><input data-i="${i}" data-k="curso" value="${esc(r.curso||'')}"><input type="checkbox" data-i="${i}" data-k="realizado" ${r.realizado?'checked':''}><input type="checkbox" data-i="${i}" data-k="aplica" ${r.aplica?'checked':''}><input data-i="${i}" data-k="obs" value="${esc(r.obs||'')}"><button class="ico-btn" data-delf="${i}" title="Eliminar fila">🗑️</button>`; cont.appendChild(row);});
   const add=document.createElement('div'); add.className='va-row'; add.style.gridTemplateColumns='52px 1.2fr .7fr .7fr 1.4fr 52px';
   add.innerHTML=`<div>${it.formaciones.length+1}</div><input data-new="1" data-k="curso"><input type="checkbox" data-new="1" data-k="realizado"><input type="checkbox" data-new="1" data-k="aplica"><input data-new="1" data-k="obs"><span></span>`; cont.appendChild(add);
 }
-$('#formacionesRows').addEventListener('click',e=>{const i=e.target.dataset.delf; if(i!=null){cur().formaciones.splice(+i,1); renderFormaciones(); saveCloudOrLocal();}});
+$('#formacionesRows').addEventListener('click',e=>{const i=e.target.dataset.delf; if(i!=null){ if(confirm('¿Eliminar fila?')){cur().formaciones.splice(+i,1); renderFormaciones(); saveCloudOrLocal();}}});
 $('#formacionesRows').addEventListener('input',e=>{
   const i=e.target.dataset.i,k=e.target.dataset.k,isNew=e.target.dataset.new;if(!k)return;
   if(isNew){const r={curso:'',realizado:false,aplica:false,obs:''};r[k]=e.target.type==='checkbox'?e.target.checked:e.target.value;cur().formaciones.push(r);renderFormaciones();saveCloudOrLocal();return;}
@@ -462,11 +522,11 @@ $('#formacionesRows').addEventListener('input',e=>{
 function renderProcesos(){ const it=cur(); it.procesos=it.procesos||[]; const cont=$('#procesosRows'); cont.innerHTML='';
   const color=v=>{const n=Number(v); if(!Number.isFinite(n)) return ''; return n>=95?'good':(n>=85?'':'bad');}
   it.procesos.forEach((r,i)=>{const row=document.createElement('div'); row.className='va-row'; row.style.gridTemplateColumns='52px 220px 120px 160px 52px';
-    row.innerHTML=`<div>${i+1}</div><input class="pscore ${color(r.puntuacion)}" type="number" min="0" max="100" step="1" data-i="${i}" data-k="puntuacion" value="${r.puntuacion??''}"><input type="checkbox" data-i="${i}" data-k="hit" ${r.hit?'checked':''}><input type="checkbox" data-i="${i}" data-k="colaboraciones" ${r.colaboraciones?'checked':''}><button class="ico-btn" data-delp="${i}">🗑️</button>`; cont.appendChild(row);});
+    row.innerHTML=`<div>${i+1}</div><input class="pscore ${color(r.puntuacion)}" type="number" min="0" max="100" step="1" data-i="${i}" data-k="puntuacion" value="${r.puntuacion??''}"><input type="checkbox" data-i="${i}" data-k="hit" ${r.hit?'checked':''}><input type="checkbox" data-i="${i}" data-k="colaboraciones" ${r.colaboraciones?'checked':''}><button class="ico-btn" data-delp="${i}" title="Eliminar fila">🗑️</button>`; cont.appendChild(row);});
   const add=document.createElement('div'); add.className='va-row'; add.style.gridTemplateColumns='52px 220px 120px 160px 52px';
   add.innerHTML=`<div>${it.procesos.length+1}</div><input class="pscore" type="number" min="0" max="100" step="1" data-new="1" data-k="puntuacion"><input type="checkbox" data-new="1" data-k="hit"><input type="checkbox" data-new="1" data-k="colaboraciones"><span></span>`; cont.appendChild(add);
 }
-$('#procesosRows').addEventListener('click',e=>{const i=e.target.dataset.delp; if(i!=null){cur().procesos.splice(+i,1); renderProcesos(); saveCloudOrLocal();}});
+$('#procesosRows').addEventListener('click',e=>{const i=e.target.dataset.delp; if(i!=null){ if(confirm('¿Eliminar fila?')){cur().procesos.splice(+i,1); renderProcesos(); saveCloudOrLocal();}}});
 $('#procesosRows').addEventListener('input',e=>{
   const i=e.target.dataset.i,k=e.target.dataset.k,isNew=e.target.dataset.new;if(!k)return;
   if(isNew){const r={puntuacion:null,hit:false,colaboraciones:false}; r[k]=e.target.type==='checkbox'?e.target.checked:(e.target.value===''?null:Number(e.target.value)); cur().procesos.push(r); renderProcesos(); saveCloudOrLocal(); return;}
@@ -516,7 +576,7 @@ $('#vaRows').addEventListener('input',e=>{
   else h.rows[i][k]=e.target.value;
   saveCloudOrLocal(); updateVaSummary(h);
 });
-$('#saveVisitasTop').onclick=saveCloudOrLocal;
+$('#saveVisitasTop').onclick=saveCloudOrLocal; $('#saveVisitasBottom').onclick=saveCloudOrLocal;
 
 /* ======= FORMACIONES ======= */
 function fillFM(){const it=cur(); if(!it) return; $('#fmDelegado').value=it.delegado||''; $('#fmSearch').value=state.fmFilter||''; renderFM();}
@@ -536,7 +596,7 @@ $('#fmRows').addEventListener('input',e=>{
   else if(e.target.tagName==='SELECT') it.filas[i][k]=Number(e.target.value);
   else it.filas[i][k]=e.target.value; saveCloudOrLocal();
 });
-$('#saveFMTop').onclick=saveCloudOrLocal;
+$('#saveFMTop').onclick=saveCloudOrLocal; $('#saveFMBottom').onclick=saveCloudOrLocal;
 
 /* ======= TELE ======= */
 function fillTA(){ $('#taSearch').value=state.taFilter||''; populateTASelect(); renderTA(); }
@@ -558,7 +618,7 @@ $('#taRows').addEventListener('input',e=>{
   else if(e.target.type==='number') h.rows[i][k]=e.target.value===''?null:Number(e.target.value);
   else h.rows[i][k]=e.target.value; saveCloudOrLocal();
 });
-$('#saveTATop').onclick=saveCloudOrLocal;
+$('#saveTATop').onclick=saveCloudOrLocal; $('#saveTABottom').onclick=saveCloudOrLocal;
 
 /* ======= EQUIPOS ======= */
 function fillEQ(){ $('#eqSearch').value=state.eqFilter||''; renderEQ(); }
@@ -594,12 +654,14 @@ function renderEQ(){
     saveCloudOrLocal();
   });
 }
-$('#saveEQTop').onclick=saveCloudOrLocal;
+$('#saveEQTop').onclick=saveCloudOrLocal; $('#saveEQBottom').onclick=saveCloudOrLocal;
 
-/* Topbar */
-$('#btnSaveTop').onclick=saveCloudOrLocal; $('#btnFetch').onclick=fetchCloudOrLocal; $('#btnReset').onclick=resetLocalView;
+/* Topbar acciones */
+$('#btnSaveTop').onclick=()=>{ saveCloudOrLocal(); };
+$('#btnFetch').onclick=()=>{ fetchCloudOrLocal(); };
+$('#btnReset').onclick=()=>{ resetLocalView(); };
 
-/* ======= PIN SEGURO (hash) ======= */
+/* ======= PIN (hash) ======= */
 async function sha256Hex(str){
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
   return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
@@ -615,7 +677,7 @@ function lock(){ document.body.classList.add('locked'); $('#gate').style.display
 async function tryEnter(){
   $('#pinMsg').style.display='none';
   const ok = await checkPin($('#pin').value);
-  if(ok){ unlock(); } else { $('#pinMsg').style.display='block'; }
+  if(ok){ unlock(); toast('Edición activada'); } else { $('#pinMsg').style.display='block'; }
 }
 $('#enter').onclick=tryEnter;
 $('#pin').addEventListener('keydown',e=>{ if(e.key==='Enter') tryEnter(); });
@@ -625,7 +687,11 @@ $('#cancelPin').onclick=()=>{ $('#pin').value=''; $('#pinMsg').style.display='no
 function renderAll(){ renderLeft(); if(state.selected.section) renderDetail(); else renderDetailBlank(); }
 window.addEventListener('DOMContentLoaded',()=>{ if(REQUIRE_PIN){ lock(); } });
 window.addEventListener('load',()=>{
-  localLoad(); initFirebase(); renderAll();
+  localLoad(); initFirebase();
+  // Lock remoto (si hay Firebase) o local (si no)
+  const okFb = startFirebaseLock();
+  if(!okFb) startLocalLock();
+  renderAll();
   $('#stamp').textContent=APP_VERSION+' · Listo: '+now();
 });
 </script>
