@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>SEGUIMIENTO AUDIO • Cloud v5d</title>
+<title>SEGUIMIENTO AUDIO • Cloud v5e</title>
 
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23c82727'/%3E%3Ctext x='50%' y='54%' font-family='Arial,Helvetica,sans-serif' font-size='36' font-weight='900' text-anchor='middle' fill='white'%3EAR%3C/text%3E%3C/svg%3E">
@@ -19,16 +19,17 @@
   }
   *{box-sizing:border-box}
   html,body{height:100%}
-  body{margin:0;background:var(--bg);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;color:#222;overflow-x:hidden}
+  body{margin:0;background:var(--bg);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;color:#222}
 
-  /* Top bar full-width */
+  /* Top bar full-width sin 100vw */
   .topbar{
-    position:sticky; top:0; left:0; right:0; width:100vw;
+    position:sticky; top:0; left:0; right:0; width:100%;
     z-index:50; display:flex; align-items:center; gap:.75rem;
-    padding:.8rem 1rem; margin:0;
+    padding:.8rem 0; margin:0;
     background:linear-gradient(180deg,var(--rojo),var(--rojo-osc)); color:#fff;
     box-shadow:var(--shadow)
   }
+  .bar-inner{max-width:1380px;margin:0 auto;display:flex;align-items:center;gap:.75rem;padding:0 1rem;width:100%}
   .brand{font-weight:800;letter-spacing:.4px;font-size:1.05rem}
   .spacer{flex:1}
   .btn{border:0;border-radius:12px;padding:.5rem .85rem;cursor:pointer;box-shadow:var(--shadow);font-weight:650}
@@ -81,10 +82,13 @@
   .panel .ph{display:flex;align-items:center;justify-content:space-between;padding:.7rem .9rem;border-bottom:1px solid var(--line);font-weight:900}
   .panel .pl{padding:.7rem .9rem}
 
+  /* tablas con scroll horizontal */
   .table-wrap{border:1px solid var(--line);border-radius:12px;background:#fff;box-shadow:var(--shadow);padding:.5rem .5rem .7rem}
+  .xscroll{overflow-x:auto}
+  .table-inner{min-width:1700px}  /* asegura scroll lateral en pantallas estrechas */
   .scroll{max-height:58vh;overflow:auto;padding-right:.3rem}
 
-  /* VISITAS - columnas alineadas */
+  /* VISITAS */
   .va-head, .va-row {display:grid;gap:.35rem;align-items:center;margin:.2rem .1rem}
   .va-cols {grid-template-columns: 52px 1.1fr 140px 140px 160px 130px 120px 70px 170px 170px;}
   .va-head{font-weight:800;opacity:.75}
@@ -104,9 +108,6 @@
   /* FM */
   .fm-head, .fm-row{display:grid;gap:.35rem;align-items:center;margin:.2rem .1rem}
   .fm-head, .fm-row{grid-template-columns: 52px 120px 220px 160px 140px 140px 140px 140px 140px 120px 120px}
-  .evo{font-weight:700;border-radius:10px;border:1px solid var(--line);padding:.25rem .45rem;text-align:center}
-  .evo.good{background:#eaf9f0;border-color:#2ecc71aa}
-  .evo.bad{background:#ffe8e8;border-color:#e74c3caa}
 
   /* TELE */
   .ta-head, .ta-row{display:grid;gap:.35rem;align-items:center;margin:.2rem .1rem}
@@ -119,7 +120,7 @@
 
 <!-- TOPBAR a todo lo ancho -->
 <header class="topbar">
-  <div class="app" style="display:flex;align-items:center;gap:.75rem">
+  <div class="bar-inner">
     <button class="ar" title="AR" id="btnAR">AR</button>
     <div class="brand">SEGUIMIENTO AUDIO • Cloud</div>
     <div class="spacer"></div>
@@ -207,30 +208,42 @@
         <div class="panel">
           <div class="ph">ACCIONES <div class="bar-right"><button class="btn" id="addAccion">＋ Añadir fila</button></div></div>
           <div class="pl">
-            <div class="va-head" style="grid-template-columns:52px 130px 1fr 110px 110px 110px 150px 52px">
-              <div>#</div><div>Fecha</div><div>Tipo de acción</div><div>Paquete</div><div>Derivación</div><div>Citas</div><div>Venta</div><div></div>
+            <div class="xscroll">
+              <div class="table-inner">
+                <div class="va-head" style="grid-template-columns:52px 130px 1fr 110px 110px 110px 150px 52px">
+                  <div>#</div><div>Fecha</div><div>Tipo de acción</div><div>Paquete</div><div>Derivación</div><div>Citas</div><div>Venta</div><div></div>
+                </div>
+                <div id="accionesRows"></div>
+              </div>
             </div>
-            <div id="accionesRows"></div>
           </div>
         </div>
 
         <div class="panel">
           <div class="ph">FORMACIONES RELEVANTES <div class="bar-right"><button class="btn" id="addFormacion">＋ Añadir fila</button></div></div>
           <div class="pl">
-            <div class="va-head" style="grid-template-columns:52px 1.2fr .7fr .7fr 1.4fr 52px">
-              <div>#</div><div>Curso</div><div>Realizado</div><div>Aplica</div><div>Observaciones</div><div></div>
+            <div class="xscroll">
+              <div class="table-inner">
+                <div class="va-head" style="grid-template-columns:52px 1.2fr .7fr .7fr 1.4fr 52px">
+                  <div>#</div><div>Curso</div><div>Realizado</div><div>Aplica</div><div>Observaciones</div><div></div>
+                </div>
+                <div id="formacionesRows"></div>
+              </div>
             </div>
-            <div id="formacionesRows"></div>
           </div>
         </div>
 
         <div class="panel">
           <div class="ph">CONTROL DE PROCESOS <div class="bar-right"><button class="btn" id="addProceso">＋ Añadir fila</button></div></div>
           <div class="pl">
-            <div class="va-head" style="grid-template-columns:52px 220px 120px 160px 52px">
-              <div>#</div><div>Puntuación checklist (0–100 %)</div><div>HIT</div><div>Colaboraciones</div><div></div>
+            <div class="xscroll">
+              <div class="table-inner">
+                <div class="va-head" style="grid-template-columns:52px 220px 120px 160px 52px">
+                  <div>#</div><div>Puntuación checklist (0–100 %)</div><div>HIT</div><div>Colaboraciones</div><div></div>
+                </div>
+                <div id="procesosRows"></div>
+              </div>
             </div>
-            <div id="procesosRows"></div>
           </div>
         </div>
 
@@ -250,11 +263,15 @@
         </div>
         <div class="tabs" id="vaTabs"></div>
         <div class="table-wrap">
-          <div class="va-head va-cols">
-            <div>#</div><div>Centro</div><div>Delegado</div><div>Audiólogo</div>
-            <div>Sucursal/Franquicia</div><div>Fecha visita</div><div>Puntuación (%)</div><div>HIT</div><div>% Conversión prueba</div><div>% Conversión venta</div>
+          <div class="xscroll">
+            <div class="table-inner">
+              <div class="va-head va-cols">
+                <div>#</div><div>Centro</div><div>Delegado</div><div>Audiólogo</div>
+                <div>Sucursal/Franquicia</div><div>Fecha visita</div><div>Puntuación (%)</div><div>HIT</div><div>% Conversión prueba</div><div>% Conversión venta</div>
+              </div>
+              <div id="vaRows" class="scroll"></div>
+            </div>
           </div>
-          <div id="vaRows" class="scroll"></div>
         </div>
         <div class="bar-right" style="margin-top:.7rem"><button class="btn" id="btnCancelVA">Cancelar</button><button class="btn btn-save" id="btnSaveVA">💾 Guardar visitas</button></div>
       </div>
@@ -267,10 +284,14 @@
           <div class="field"><label>Buscar</label><input id="fmSearchTop" type="text" placeholder="Filtrar…"></div>
         </div>
         <div class="table-wrap">
-          <div class="fm-head">
-            <div>#</div><div>Fecha</div><div>Tema</div><div>Audiólogo</div><div>Duración (semanas)</div><div>% Prueba inicial</div><div>% Venta inicial</div><div>% Prueba 3m</div><div>% Venta 3m</div><div>Evo. prueba</div><div>Evo. venta</div>
+          <div class="xscroll">
+            <div class="table-inner">
+              <div class="fm-head">
+                <div>#</div><div>Fecha</div><div>Tema</div><div>Audiólogo</div><div>Duración (semanas)</div><div>% Prueba inicial</div><div>% Venta inicial</div><div>% Prueba 3m</div><div>% Venta 3m</div><div>Evo. prueba</div><div>Evo. venta</div>
+              </div>
+              <div id="fmRows" class="scroll"></div>
+            </div>
           </div>
-          <div id="fmRows" class="scroll"></div>
         </div>
         <div class="bar-right" style="margin-top:.7rem"><button class="btn" id="btnCancelFM">Cancelar</button><button class="btn btn-save" id="btnSaveFM">💾 Guardar</button></div>
       </div>
@@ -283,10 +304,14 @@
           <div class="field"><label>Persona</label><select id="taPersonSelect"><option value="">Todos</option></select></div>
         </div>
         <div class="table-wrap">
-          <div class="ta-head" style="font-weight:800;opacity:.75;margin:.2rem .1rem;display:grid;gap:.35rem;grid-template-columns:52px 1.2fr 160px 150px 180px 110px 110px 130px 130px 140px">
-            <div>#</div><div>Centro</div><div>Delegado</div><div>Rol</div><div>Persona</div><div>Formación</div><div>Prácticas</div><div>Certificado</div><div>Pruebas reales</div><div>Ventas</div>
+          <div class="xscroll">
+            <div class="table-inner">
+              <div class="ta-head" style="font-weight:800;opacity:.75;margin:.2rem .1rem;display:grid;gap:.35rem;grid-template-columns:52px 1.2fr 160px 150px 180px 110px 110px 130px 130px 140px">
+                <div>#</div><div>Centro</div><div>Delegado</div><div>Rol</div><div>Persona</div><div>Formación</div><div>Prácticas</div><div>Certificado</div><div>Pruebas reales</div><div>Ventas</div>
+              </div>
+              <div id="taRows" class="scroll"></div>
+            </div>
           </div>
-          <div id="taRows" class="scroll"></div>
         </div>
         <div class="bar-right" style="margin-top:.7rem"><button class="btn" id="btnCancelTA">Cancelar</button><button class="btn btn-save" id="btnSaveTA">💾 Guardar tele</button></div>
       </div>
@@ -312,13 +337,13 @@ const firebaseConfig = {
   messagingSenderId: "TUSENDERID",
   appId: "TU_APP_ID"
 };
-const DB_PATH = 'audioseguimiento/v5d';
+const DB_PATH = 'audioseguimiento/v5e';
 const LOCK_PATH = DB_PATH + '/__lock__';
 const LOCK_TIMEOUT_MS = 5 * 60 * 1000; // 5 min
 /* ================================================================ */
 
 let cloud = { ready:false, ref:null, db:null };
-let state = { selected:{section:null,index:null}, vaSheet:0, vaFilter:'', fmFilter:'', taFilter:'', taPerson:'', canEdit:false, myLock:false };
+let state = { selected:{section:null,index:null}, vaSheet:0, vaFilter:'', fmFilter:'', taFilter:'', taPerson:'', canEdit:true, myLock:false };
 let sessionId = localStorage.getItem('aas_session') || ('S'+Math.random().toString(36).slice(2));
 localStorage.setItem('aas_session', sessionId);
 let editorName = localStorage.getItem('aas_name') || '';
@@ -361,17 +386,18 @@ function watchLock(){
   lref.on('value', snap=>{
     const lock = snap.val();
     const now = Date.now();
-    const stale = lock && (now - lock.at) > LOCK_TIMEOUT_MS;
-    if(!lock || stale){
-      $('#lockInfo').style.display='none';
-      state.canEdit = true;
+    const active = lock && (now - lock.at) <= LOCK_TIMEOUT_MS;
+    if(active && lock.by !== sessionId){
+      state.canEdit = false;
       state.myLock = false;
-    }else{
-      const mine = lock.by === sessionId;
-      state.canEdit = mine;
-      state.myLock = mine;
-      $('#lockInfo').textContent = mine ? '🔓 Tienes el bloqueo de edición' : `🔒 En uso por ${lock.name||'otro usuario'}`;
+      $('#lockInfo').textContent = `🔒 En uso por ${lock.name||'otro usuario'}`;
       $('#lockInfo').style.display='inline-flex';
+    }else{
+      // libre o mío
+      state.canEdit = true;
+      state.myLock = !!(active && lock.by===sessionId);
+      $('#lockInfo').style.display = state.myLock ? 'inline-flex' : 'none';
+      if(state.myLock) $('#lockInfo').textContent='🔓 Tienes el bloqueo de edición';
     }
     toggleInputsByEdit();
   });
@@ -380,13 +406,9 @@ function toggleInputsByEdit(){
   const disable = !state.canEdit;
   $$("input,select,textarea,button").forEach(el=>{
     const id = el.id || '';
-    // Nunca desactivar navegación/actualizar
     if(['btnRefresh','btnEdit','btnAR'].includes(id)) return;
-    // Permitir cancelar aunque esté bloqueado
     if(id.startsWith('btnCancel')) return;
-    // Guardar solo cuando puedes editar
     if(id.startsWith('btnSave')){ el.disabled = disable; return; }
-    // En listas izquierda dejamos clic para ver (pero no borrar si bloqueo ajeno)
     if(el.classList.contains('btn-del')){ el.disabled = disable; return; }
     if(['checkbox','text','number','date'].includes(el.type) || el.tagName==='SELECT' || el.tagName==='TEXTAREA'){
       el.disabled = disable;
@@ -404,17 +426,14 @@ function requestEdit(){
     if(!curr || (now - curr.at) > LOCK_TIMEOUT_MS || curr.by===sessionId){
       return { by: sessionId, name: editorName || 'Usuario', at: now };
     }
-    return; // no cambia => otro tiene el lock
+    return; // otro lo tiene
   }, (err, committed, snap)=>{
     if(err){ alert('Error al solicitar edición.'); return; }
     const lock = snap.val();
     if(committed && lock.by===sessionId){
       state.canEdit = true; state.myLock = true; $('#lockInfo').textContent='🔓 Tienes el bloqueo de edición'; $('#lockInfo').style.display='inline-flex';
       toggleInputsByEdit();
-      // Mantener lock vivo
-      keepAliveLock();
-      // Liberar al salir
-      onReleaseLock();
+      keepAliveLock(); onReleaseLock();
     }else{
       alert(`En uso por ${lock?.name||'otro usuario'}. Queda en solo lectura.`);
       state.canEdit = false; state.myLock = false; toggleInputsByEdit();
@@ -432,13 +451,13 @@ function keepAliveLock(){
 function releaseLock(){
   if(!state.myLock) return;
   cloud.db.ref(LOCK_PATH).remove();
-  state.myLock=false; state.canEdit=false;
+  state.myLock=false; state.canEdit=true;
 }
 function onReleaseLock(){
   window.addEventListener('beforeunload', releaseLock);
 }
 
-/* ======= Render izquierda (seguro) ======= */
+/* ======= Render izquierda ======= */
 const SECTIONS=["CENTROS EXCLUSIVOS","CENTROS FLOP","VISITAS AUDIO","FORMACIONES Y MENTORING","TELEAUDIOLOGIA"];
 function renderLeft(){
   SECTIONS.forEach(name=>{
@@ -571,72 +590,5 @@ function renderVA(){ const it=currentItem(); const hoja=it.hojas[state.vaSheet]|
       <input data-i="${i}" data-k="audiologo" value="${esc(r.audiologo||'')}">
       <select data-i="${i}" data-k="tipo"><option ${r.tipo==='Sucursal'?'selected':''}>Sucursal</option><option ${r.tipo==='Franquicia'?'selected':''}>Franquicia</option></select>
       <input type="date" data-i="${i}" data-k="fecha" value="${r.fecha||''}">
-      <input class="pscore ${pScoreClass(r.puntuacion)}" type="number" min="0" max="100" step="1" data-i="${i}" data-k="puntuacion" value="${r.puntuacion ?? ''}">
-      <input type="checkbox" data-i="${i}" data-k="hit" ${r.hit?'checked':''}>
-      <input class="conv ${vClassPct(r.conv_prueba)}" type="number" min="0" max="100" step="1" data-i="${i}" data-k="conv_prueba" value="${r.conv_prueba ?? ''}">
-      <input class="conv ${vClassPct(r.conv_venta)}" type="number" min="0" max="100" step="1" data-i="${i}" data-k="conv_venta" value="${r.conv_venta ?? ''}">`; cont.appendChild(row); });
-  toggleInputsByEdit();
-}
-$('#vaRows').addEventListener('input',ev=>{ if(!state.canEdit){ ev.preventDefault(); return; } const it=currentItem(); const h=it.hojas[state.vaSheet]; const i=+ev.target.dataset.i; const k=ev.target.dataset.k; if(!k) return;
-  if(ev.target.type==='checkbox') h.rows[i][k]=ev.target.checked; else if(ev.target.type==='number') h.rows[i][k]=ev.target.value===''?null:Number(ev.target.value); else h.rows[i][k]=ev.target.value; save();
-  if(k==='puntuacion'){ ev.target.className='pscore '+pScoreClass(h.rows[i][k]); } if(k==='conv_prueba'||k==='conv_venta'){ ev.target.className='conv '+vClassPct(h.rows[i][k]); }
-});
-function saveVA(){ save(); } $('#btnSaveVA').onclick=saveVA; $('#btnSaveVATop').onclick=saveVA; $('#btnCancelVA').onclick=()=>{state.selected={section:null,index:null};renderDetailBlank();}; $('#btnCancelVATop').onclick=()=>{state.selected={section:null,index:null};renderDetailBlank();};
-
-/* ======= FM ======= */
-function fillFM(){ const it=currentItem(); if(!it) return; $('#fmDelegado').value=it.delegado||''; $('#fmSearchTop').value=state.fmFilter||''; renderFM(); toggleInputsByEdit(); }
-$('#fmSearchTop').oninput=e=>{ state.fmFilter=e.target.value.trim(); renderFM(); };
-function renderFM(){ const it=currentItem(); it.filas=it.filas||makeRowsFM(); const f=(state.fmFilter||'').toLowerCase(); const cont=$('#fmRows'); cont.innerHTML='';
-  it.filas.forEach((r,i)=>{ const ok=!f || (r.tema||'').toLowerCase().includes(f) || (r.audiologo||'').toLowerCase().includes(f); if(!ok) return;
-    const evoP=(Number.isFinite(+r.p_ini) && Number.isFinite(+r.p_3m))?(Number(r.p_3m)-Number(r.p_ini)):null;
-    const evoV=(Number.isFinite(+r.v_ini) && Number.isFinite(+r.v_3m))?(Number(r.v_3m)-Number(r.v_ini)):null;
-    const row=document.createElement('div'); row.className='fm-row';
-    row.innerHTML=`<div>${i+1}</div><input type="date" data-i="${i}" data-k="fecha" value="${r.fecha||''}"><input data-i="${i}" data-k="tema" value="${esc(r.tema||'')}"><input data-i="${i}" data-k="audiologo" value="${esc(r.audiologo||'')}">
-    <select data-i="${i}" data-k="duracion">${[1,2,3,4].map(n=>`<option ${Number(r.duracion)===n?'selected':''}>${n}</option>`).join('')}</select>
-    <input class="conv ${vClassPct(r.p_ini)}" type="number" min="0" max="100" step="1" data-i="${i}" data-k="p_ini" value="${r.p_ini ?? ''}">
-    <input class="conv ${vClassPct(r.v_ini)}" type="number" min="0" max="100" step="1" data-i="${i}" data-k="v_ini" value="${r.v_ini ?? ''}">
-    <input class="conv ${vClassPct(r.p_3m)}" type="number" min="0" max="100" step="1" data-i="${i}" data-k="p_3m" value="${r.p_3m ?? ''}">
-    <input class="conv ${vClassPct(r.v_3m)}" type="number" min="0" max="100" step="1" data-i="${i}" data-k="v_3m" value="${r.v_3m ?? ''}">
-    <div class="evo ${evoP>0?'good':(evoP<0?'bad':'')}">${evoP==null?'—':(evoP>0?'↑ +':'')+(evoP<0?'↓ ':'')+Math.abs(Math.round(evoP))}</div>
-    <div class="evo ${evoV>0?'good':(evoV<0?'bad':'')}">${evoV==null?'—':(evoV>0?'↑ +':'')+(evoV<0?'↓ ':'')+Math.abs(Math.round(evoV))}</div>`; cont.appendChild(row);
-  });
-  toggleInputsByEdit();
-}
-$('#fmRows').addEventListener('input',ev=>{ if(!state.canEdit){ ev.preventDefault(); return; } const it=currentItem(); const i=+ev.target.dataset.i; const k=ev.target.dataset.k; if(!k) return;
-  if(ev.target.type==='number') it.filas[i][k]=ev.target.value===''?null:Number(ev.target.value);
-  else if(ev.target.tagName==='SELECT') it.filas[i][k]=Number(ev.target.value);
-  else it.filas[i][k]=ev.target.value; save();
-});
-function saveFM(){ save(); } $('#btnSaveFM').onclick=saveFM; $('#btnSaveFMTop').onclick=saveFM; $('#btnCancelFM').onclick=()=>{state.selected={section:null,index:null};renderDetailBlank();}; $('#btnCancelFMTop').onclick=()=>{state.selected={section:null,index:null};renderDetailBlank();};
-
-/* ======= Tele ======= */
-function fillTele(){ $('#taSearchTop').value=state.taFilter||''; populateTaPersonSelect(); renderTA(); toggleInputsByEdit(); }
-function populateTaPersonSelect(){ const it=currentItem(); const hoja=(it.hojas&&it.hojas[0])||makeSheetTA('Tele 1'); it.hojas=it.hojas||[hoja];
-  const names=Array.from(new Set(hoja.rows.map(r=>(r.persona||'').trim()).filter(Boolean))).sort((a,b)=>a.localeCompare(b));
-  const sel=$('#taPersonSelect'); const prev=state.taPerson||''; sel.innerHTML='<option value=\"\">Todos</option>'+names.map(n=>`<option ${n===prev?'selected':''}>${esc(n)}</option>`).join('');
-}
-$('#taSearchTop').oninput=e=>{ state.taFilter=e.target.value.trim(); renderTA(); }; $('#taPersonSelect').onchange=e=>{ state.taPerson=e.target.value; renderTA(); };
-function renderTA(){ const it=currentItem(); const hoja=it.hojas[0]; const f=(state.taFilter||'').toLowerCase(); const per=state.taPerson||''; const cont=$('#taRows'); cont.innerHTML='';
-  hoja.rows.forEach((r,i)=>{ const okTxt=!f|| (r.centro||'').toLowerCase().includes(f) || (r.persona||'').toLowerCase().includes(f); const okPer=!per || (r.persona||'')===per; if(!okTxt||!okPer) return;
-    const row=document.createElement('div'); row.className='ta-row'; row.style.display='grid'; row.style.gap='.35rem'; row.style.gridTemplateColumns='52px 1.2fr 160px 150px 180px 110px 110px 130px 130px 140px';
-    row.innerHTML=`<div>${i+1}</div><input data-i="${i}" data-k="centro" value="${esc(r.centro||'')}"><input data-i="${i}" data-k="delegado" value="${esc(r.delegado||'')}">
-    <select data-i="${i}" data-k="rol"><option ${r.rol!=='Técnico'?'selected':''}>Audiólogo</option><option ${r.rol==='Técnico'?'selected':''}>Técnico</option></select>
-    <input data-i="${i}" data-k="persona" value="${esc(r.persona||'')}" placeholder="Nombre"><input type="checkbox" data-i="${i}" data-k="formacion" ${r.formacion?'checked':''}><input type="checkbox" data-i="${i}" data-k="practicas" ${r.practicas?'checked':''}><input type="checkbox" data-i="${i}" data-k="certificado" ${r.certificado?'checked':''}><input type="number" min="0" step="1" data-i="${i}" data-k="pruebas_reales" value="${r.pruebas_reales ?? ''}"><input type="number" min="0" step="1" data-i="${i}" data-k="ventas" value="${r.ventas ?? ''}">`; cont.appendChild(row);
-  });
-}
-$('#taRows').addEventListener('input',ev=>{ if(!state.canEdit){ ev.preventDefault(); return; } const it=currentItem(); const h=it.hojas[0]; const i=+ev.target.dataset.i; const k=ev.target.dataset.k; if(!k) return;
-  if(ev.target.type==='checkbox') h.rows[i][k]=ev.target.checked; else if(ev.target.type==='number') h.rows[i][k]=ev.target.value===''?null:Number(ev.target.value); else h.rows[i][k]=ev.target.value; save();
-});
-
-/* ======= Topbar ======= */
-$('#btnSaveTop').onclick=save;
-$('#btnRefresh').onclick=()=>$('#stamp').textContent='Actualizado: '+nowISO();
-$('#btnAR').onclick=()=>alert('AR • AudioSeguimiento');
-$('#btnEdit').onclick=requestEdit;
-
-/* ======= Init ======= */
-function renderAll(){ renderLeft(); if(state.selected.section) renderDetail(); else renderDetailBlank(); toggleInputsByEdit(); }
-window.addEventListener('load',()=>{ if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js').catch(console.warn); } initFirebase(); renderAll(); });
-</script>
-</body>
-</html>
+      <input class="pscore ${pScoreClass(r.puntuacion)}" type="number" min="0" max="100" step="analysis"
+::contentReference[oaicite:0]{index=0}
