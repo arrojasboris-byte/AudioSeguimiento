@@ -20,24 +20,17 @@
     --col-tele:#eadcf8;         /* lila claro */
   }
   html,body{height:100%;}
-  body{
-    margin:0;background:var(--bg);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;color:#222;
-  }
+  body{margin:0;background:var(--bg);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;color:#222;}
 
   /* Header */
-  .topbar{
-    position:sticky;top:0;z-index:3;
-    display:flex;align-items:center;gap:.75rem;
-    padding:.9rem 1rem;background:linear-gradient(180deg,var(--rojo),var(--rojo-osc));
-    color:#fff;box-shadow:var(--shadow);
-  }
+  .topbar{position:sticky;top:0;z-index:3;display:flex;align-items:center;gap:.75rem;padding:.9rem 1rem;background:linear-gradient(180deg,var(--rojo),var(--rojo-osc));color:#fff;box-shadow:var(--shadow)}
   .brand{font-weight:800;letter-spacing:.5px;font-size:1.1rem}
   .spacer{flex:1}
   .btn{border:0;border-radius:999px;padding:.55rem .9rem;cursor:pointer;box-shadow:var(--shadow);font-weight:650}
   .btn:disabled{opacity:.6;cursor:not-allowed}
-  .btn-lite{background:#fff;color:var(--rojo); }
+  .btn-lite{background:#fff;color:var(--rojo)}
   .btn-save{background:#fff;color:#a31212}
-  .pill{display:inline-flex;align-items:center;gap:.45rem;background:#fff1; padding:.45rem .7rem;border-radius:999px;border:1px solid #fff3;font-weight:600}
+  .pill{display:inline-flex;align-items:center;gap:.45rem;background:#fff1;padding:.45rem .7rem;border-radius:999px;border:1px solid #fff3;font-weight:600}
   .pill.ok{background:#1fcc7b22;border-color:#1fcc7b55}
   .pill.lock{background:#ffd16622;border-color:#ffd16655}
   .ar{min-width:36px;height:36px;border-radius:10px;background:#fff;color:#b30000;font-weight:900;border:0;box-shadow:var(--shadow);cursor:pointer}
@@ -46,26 +39,16 @@
   /* Layout */
   .wrap{display:grid;grid-template-columns:330px 1fr;gap:1.25rem;padding:1.25rem;max-width:1400px;margin:0 auto}
   .col{background:transparent}
-  .card{background:var(--card);border-radius:18px;box-shadow:var(--shadow);}
+  .card{background:var(--card);border-radius:18px;box-shadow:var(--shadow)}
 
   /* Left column */
-  .left .title{
-    font-weight:900;font-size:1.15rem;padding:1rem 1.1rem;border-bottom:1px solid #eee;
-  }
-  .section{
-    margin:1rem;border-radius:18px;overflow:hidden;border:1px solid #e9e9ef;background:#fff;
-  }
-  .sec-head{
-    display:flex;align-items:center;justify-content:space-between;gap:.5rem;
-    padding:.85rem 1rem;font-weight:900
-  }
+  .left .title{font-weight:900;font-size:1.15rem;padding:1rem 1.1rem;border-bottom:1px solid #eee}
+  .section{margin:1rem;border-radius:18px;overflow:hidden;border:1px solid #e9e9ef;background:#fff}
+  .sec-head{display:flex;align-items:center;justify-content:space-between;gap:.5rem;padding:.85rem 1rem;font-weight:900}
   .sec-head .tools{display:flex;gap:.4rem}
   .sec-btn{display:inline-flex;align-items:center;justify-content:center;width:38px;height:34px;border-radius:10px;border:0;box-shadow:var(--shadow);background:#fff;cursor:pointer}
   .sec-list{padding:.25rem .6rem .8rem .6rem}
-  .item{
-    display:flex;align-items:center;justify-content:space-between;gap:.6rem;
-    background:#fff;border:1px solid #eee;border-radius:12px;padding:.7rem .8rem;margin:.55rem 0;cursor:pointer;
-  }
+  .item{display:flex;align-items:center;justify-content:space-between;gap:.6rem;background:#fff;border:1px solid #eee;border-radius:12px;padding:.7rem .8rem;margin:.55rem 0;cursor:pointer}
   .item:hover{background:#fafafa}
   .item .name{font-weight:800}
   .item small{display:block;opacity:.65}
@@ -79,9 +62,7 @@
   .detail .hint{opacity:.7;margin:.2rem 0 1rem}
   .field{display:grid;gap:.35rem;margin:.7rem 0}
   .field label{font-weight:700;opacity:.9}
-  .field input,.field select,.field textarea{
-    border:1px solid #ddd;border-radius:12px;padding:.6rem .7rem;font-size:1rem;background:#fff;outline:none;
-  }
+  .field input,.field select,.field textarea{border:1px solid #ddd;border-radius:12px;padding:.6rem .7rem;font-size:1rem;background:#fff;outline:none}
   .field textarea{min-height:120px;resize:vertical}
   .bar-right{display:flex;justify-content:flex-end;gap:.6rem}
   .btn-ghost{background:#fff;border:1px solid #ddd;color:#444}
@@ -89,24 +70,22 @@
   .row{display:flex;gap:1rem;align-items:flex-end;flex-wrap:wrap}
   .row .field{flex:1;min-width:220px}
 
-  /* Pastel helpers para “pintar” secciones y detalle */
-  .bg-exclusivos{ background:var(--col-exclusivos);}
-  .bg-flop{ background:var(--col-flop);}
-  .bg-visitas{ background:var(--col-visitas);}
-  .bg-formaciones{ background:var(--col-formaciones);}
-  .bg-tele{ background:var(--col-tele);}
+  /* Pastel helpers */
+  .bg-exclusivos{ background:var(--col-exclusivos)}
+  .bg-flop{ background:var(--col-flop)}
+  .bg-visitas{ background:var(--col-visitas)}
+  .bg-formaciones{ background:var(--col-formaciones)}
+  .bg-tele{ background:var(--col-tele)}
   .tone{border-color:#00000010}
   .tone .item{border-color:#00000010;background:#ffffffcc}
 
-  /* Tablas tipo Excel */
+  /* Paneles y rejillas tipo Excel */
   .panel{margin:1rem 0 1.2rem;background:#ffffffd0;border:1px solid #e7e7ef;border-radius:14px;box-shadow:var(--shadow)}
   .panel .ph{display:flex;align-items:center;justify-content:space-between;padding:.8rem 1rem;border-bottom:1px solid #eee;font-weight:900}
   .panel .pl{padding:.8rem}
   .grid{display:grid;gap:.5rem}
   .grid .hdr{font-weight:800;opacity:.75}
-  .grid input[type="text"], .grid input[type="number"], .grid input[type="date"], .grid textarea, .grid select {
-    width:100%;padding:.45rem .55rem;border:1px solid #ddd;border-radius:10px;background:#fff
-  }
+  .grid input[type="text"], .grid input[type="number"], .grid input[type="date"], .grid textarea, .grid select {width:100%;padding:.45rem .55rem;border:1px solid #ddd;border-radius:10px;background:#fff}
   .grid .rowx{display:grid;gap:.5rem;align-items:center}
   .rowx .del{justify-self:end}
   .row-tools{margin-top:.6rem;display:flex;gap:.5rem}
@@ -114,12 +93,18 @@
   .file-pill{display:flex;align-items:center;gap:.5rem;background:#00000008;border:1px solid #00000012;border-radius:999px;padding:.25rem .55rem}
 
   /* Columnas por panel */
-  .grid-acciones{grid-template-columns: 140px 1fr 120px 80px 80px 38px;}
-  .grid-forma   {grid-template-columns: 1.2fr .7fr .7fr 1.6fr 38px;}
-  .grid-proc    {grid-template-columns: 180px 120px 160px 38px;}
+  .grid-acciones{grid-template-columns: 140px 1fr 120px 100px 100px 38px}
+  .grid-forma   {grid-template-columns: 1.2fr .7fr .7fr 1.6fr 38px}
+  .grid-proc    {grid-template-columns: 220px 120px 160px 38px}
+
+  /* Colores de puntuación */
+  .score{border:2px solid transparent}
+  .score.good{background:#eaf9f0;border-color:#2ecc71aa}
+  .score.mid{background:#fff5e6;border-color:#f39c12aa}
+  .score.bad{background:#ffe8e8;border-color:#e74c3caa}
 
   @media (max-width:1080px){
-    .grid-acciones{grid-template-columns: 120px 1fr 110px 70px 70px 38px;}
+    .grid-acciones{grid-template-columns: 120px 1fr 110px 90px 90px 38px}
   }
   @media (max-width:980px){
     .wrap{grid-template-columns:1fr;gap:1rem}
@@ -259,7 +244,7 @@
             </div>
             <div class="pl">
               <div class="grid grid-acciones hdr">
-                <div>Fecha</div><div>Tipo de acción</div><div>Derivación</div><div>Cita</div><div>Venta</div><div></div>
+                <div>Fecha</div><div>Tipo de acción</div><div>Derivación</div><div>Citas</div><div>Venta</div><div></div>
               </div>
               <div id="accionesRows"></div>
             </div>
@@ -291,7 +276,7 @@
             </div>
             <div class="pl">
               <div class="grid grid-proc hdr">
-                <div>Puntuación checklist (0–100)</div><div>HIT</div><div>Colaboraciones</div><div></div>
+                <div>Puntuación checklist (0–100 %)</div><div>HIT</div><div>Colaboraciones</div><div></div>
               </div>
               <div id="procesosRows"></div>
               <div class="file-list" id="filesList"></div>
@@ -309,7 +294,7 @@
 
 <script>
 /* ======= Estado & Datos ======= */
-const STORAGE_KEY = 'audioseguimiento_v3';
+const STORAGE_KEY = 'audioseguimiento_v3b';
 
 const SECTION_ORDER = [
   "CENTROS EXCLUSIVOS",
@@ -335,10 +320,7 @@ const TONE_BG = {
   tele: 'var(--col-tele)'
 };
 
-let state = {
-  editing:true,
-  selected:{ section:null, index:null }
-};
+let state = { editing:true, selected:{ section:null, index:null } };
 
 let data = load() || {
   "CENTROS EXCLUSIVOS":[{
@@ -361,25 +343,12 @@ let data = load() || {
 function q(sel,root=document){ return root.querySelector(sel); }
 function qa(sel,root=document){ return Array.from(root.querySelectorAll(sel)); }
 function nowISO(){ return new Date().toISOString(); }
-function save(){
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  q('#pillOk').style.display='inline-flex';
-  q('#stamp').textContent = 'Actualizado: ' + nowISO();
-}
-function load(){
-  try{
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw? JSON.parse(raw): null;
-  }catch(e){ return null; }
-}
+function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); q('#pillOk').style.display='inline-flex'; q('#stamp').textContent = 'Actualizado: ' + nowISO(); }
+function load(){ try{ const raw = localStorage.getItem(STORAGE_KEY); return raw? JSON.parse(raw): null; }catch(e){ return null; } }
 function setDetailTone(tone){
   const det = q('#detail');
-  det.style.background = '#fff';
-  det.style.borderColor = '#ececf5';
-  if(tone && TONE_BG[tone]){
-    det.style.background = TONE_BG[tone];
-    det.style.borderColor = '#00000015';
-  }
+  det.style.background = '#fff'; det.style.borderColor = '#ececf5';
+  if(tone && TONE_BG[tone]){ det.style.background = TONE_BG[tone]; det.style.borderColor = '#00000015'; }
 }
 function renderAll(){
   // render listas
@@ -389,22 +358,16 @@ function renderAll(){
     const items = data[sec]||[];
     items.forEach((it,idx)=>{
       const el = document.createElement('div');
-      el.className='item';
-      el.dataset.section=sec; el.dataset.index=idx;
+      el.className='item'; el.dataset.section=sec; el.dataset.index=idx;
       if(sec==="CENTROS EXCLUSIVOS"){
         el.innerHTML = `
           <div>
             <div class="name">${it.nombre||'—'}</div>
             <small>${it.delegado?('Delegado: '+it.delegado):''} ${it.audiologo?(' · Audiólogo: '+it.audiologo):''}</small>
           </div>
-          <div class="acts">
-            <span class="ico" title="Editar">✏️</span>
-            <span class="ico" title="Eliminar">🗑️</span>
-          </div>`;
+          <div class="acts"><span class="ico" title="Editar">✏️</span><span class="ico" title="Eliminar">🗑️</span></div>`;
       }else{
-        el.innerHTML = `
-          <div class="name">${it.nombre||'—'}</div>
-          <div class="acts"><span class="ico">✏️</span><span class="ico">🗑️</span></div>`;
+        el.innerHTML = `<div class="name">${it.nombre||'—'}</div><div class="acts"><span class="ico">✏️</span><span class="ico">🗑️</span></div>`;
       }
       wrap.appendChild(el);
     });
@@ -413,9 +376,7 @@ function renderAll(){
   // estado topbar
   q('#lock').textContent = state.editing? '🔓 Editando' : '🔒 Bloqueado';
   q('#btnSaveTop').disabled = !state.editing;
-  qa('.sec-btn,[data-act="add"],.item').forEach(el=>{
-    if('disabled' in el) el.disabled = !state.editing;
-  });
+  qa('.sec-btn,[data-act="add"],.item').forEach(el=>{ if('disabled' in el) el.disabled = !state.editing; });
 
   // detalle
   const sec = state.selected.section;
@@ -448,39 +409,27 @@ function renderAll(){
   }
 }
 
-/* ======= Rellenar formularios ======= */
-function currentItem(){
-  const {section,index} = state.selected;
-  if(section==null) return null;
-  return data[section][index];
-}
+/* ======= Formularios ======= */
+function currentItem(){ const {section,index} = state.selected; if(section==null) return null; return data[section][index]; }
 
-/* --- Genérico --- */
+/* Genérico */
 function fillGenericForm(){
   const it = currentItem(); if(!it) return;
-  q('#gNombre').value = it.nombre||'';
-  q('#gFecha').value = it.fecha||'';
-  q('#gEstado').value = it.estado||'';
-  q('#gNotas').value = it.notas||'';
+  q('#gNombre').value = it.nombre||''; q('#gFecha').value = it.fecha||''; q('#gEstado').value = it.estado||''; q('#gNotas').value = it.notas||'';
 }
 
-/* --- Centro exclusivo --- */
+/* Centro exclusivo */
 function fillCentroForm(){
   const it = currentItem(); if(!it) return;
-  q('#cNombre').value = it.nombre||'';
-  q('#cDelegado').value = it.delegado||'';
-  q('#cAudiologo').value = it.audiologo||'';
-  q('#cTipo').value = it.tipo||'Franquicia';
+  q('#cNombre').value = it.nombre||''; q('#cDelegado').value = it.delegado||''; q('#cAudiologo').value = it.audiologo||''; q('#cTipo').value = it.tipo||'Franquicia';
 }
 
 /* ======= Render de paneles ======= */
 function renderRows(containerSel, rows, buildRow, gridClass){
-  const cont = q(containerSel);
-  cont.innerHTML='';
+  const cont = q(containerSel); cont.innerHTML='';
   rows.forEach((r,idx)=>{
     const row = document.createElement('div');
-    row.className = 'grid rowx '+gridClass;
-    row.dataset.index = idx;
+    row.className = 'grid rowx '+gridClass; row.dataset.index = idx;
     row.innerHTML = buildRow(r, idx);
     cont.appendChild(row);
   });
@@ -489,12 +438,12 @@ function renderRows(containerSel, rows, buildRow, gridClass){
 function renderAcciones(){
   const it = currentItem(); if(!it) return;
   if(!Array.isArray(it.acciones)) it.acciones = [];
-  renderRows('#accionesRows', it.acciones, (r,idx)=>`
+  renderRows('#accionesRows', it.acciones, (r)=>`
     <input type="date" data-k="fecha" value="${r.fecha||''}">
     <input type="text" data-k="tipo" placeholder="Tipo (llamada, visita…)" value="${r.tipo||''}">
-    <input type="number" min="0" step="1" data-k="derivacion" value="${r.derivacion??''}">
-    <input type="checkbox" data-k="cita" ${r.cita?'checked':''}>
-    <input type="checkbox" data-k="venta" ${r.venta?'checked':''}>
+    <input type="number" min="0" step="1" data-k="derivacion" value="${r.derivacion ?? ''}">
+    <input type="number" min="0" step="1" data-k="citas" value="${r.citas ?? ''}">
+    <input type="number" min="0" step="1" data-k="venta" value="${r.venta ?? ''}">
     <button class="sec-btn del" title="Eliminar">🗑️</button>
   `,'grid-acciones');
 }
@@ -502,7 +451,7 @@ function renderAcciones(){
 function renderFormaciones(){
   const it = currentItem(); if(!it) return;
   if(!Array.isArray(it.formaciones)) it.formaciones = [];
-  renderRows('#formacionesRows', it.formaciones, (r,idx)=>`
+  renderRows('#formacionesRows', it.formaciones, (r)=>`
     <input type="text" data-k="curso" placeholder="Curso" value="${r.curso||''}">
     <input type="checkbox" data-k="realizado" ${r.realizado?'checked':''}>
     <input type="checkbox" data-k="aplica" ${r.aplica?'checked':''}>
@@ -511,22 +460,35 @@ function renderFormaciones(){
   `,'grid-forma');
 }
 
+function scoreClass(v){
+  if(isNaN(v)) return '';
+  if(v>=95) return 'good';
+  if(v>=85) return 'mid';
+  return 'bad';
+}
+function colorizeScores(){
+  qa('#procesosRows input[data-k="puntuacion"]').forEach(inp=>{
+    const v = Number(inp.value);
+    inp.classList.remove('good','mid','bad'); inp.classList.add('score');
+    const cls = scoreClass(v); if(cls) inp.classList.add(cls);
+  });
+}
 function renderProcesos(){
   const it = currentItem(); if(!it) return;
   if(!Array.isArray(it.procesos)) it.procesos = [];
-  renderRows('#procesosRows', it.procesos, (r,idx)=>`
-    <input type="number" min="0" max="100" step="1" data-k="puntuacion" value="${r.puntuacion??''}">
+  renderRows('#procesosRows', it.procesos, (r)=>`
+    <input type="number" min="0" max="100" step="1" data-k="puntuacion" value="${r.puntuacion ?? ''}">
     <input type="checkbox" data-k="hit" ${r.hit?'checked':''}>
     <input type="checkbox" data-k="colaboraciones" ${r.colaboraciones?'checked':''}>
     <button class="sec-btn del" title="Eliminar">🗑️</button>
   `,'grid-proc');
+  colorizeScores();
 }
 
 function renderAdjuntos(){
   const it = currentItem(); if(!it) return;
   if(!Array.isArray(it.adjuntos)) it.adjuntos = [];
-  const list = q('#filesList');
-  list.innerHTML='';
+  const list = q('#filesList'); list.innerHTML='';
   it.adjuntos.forEach((f,idx)=>{
     const node = document.createElement('div');
     node.className='file-pill';
@@ -536,65 +498,41 @@ function renderAdjuntos(){
 }
 
 /* ======= Eventos globales ======= */
-q('#btnEdit').addEventListener('click',()=>{
-  state.editing = !state.editing;
-  renderAll();
-});
-q('#btnRefresh').addEventListener('click',()=>{
-  data = load() || data;
-  q('#pillOk').style.display='inline-flex';
-  q('#stamp').textContent = 'Actualizado: ' + nowISO();
-  renderAll();
-});
-q('#btnSaveTop').addEventListener('click',()=>{ save(); });
+q('#btnEdit').addEventListener('click',()=>{ state.editing = !state.editing; renderAll(); });
+q('#btnRefresh').addEventListener('click',()=>{ data = load() || data; q('#pillOk').style.display='inline-flex'; q('#stamp').textContent = 'Actualizado: ' + nowISO(); renderAll(); });
+q('#btnSaveTop').addEventListener('click',()=> save());
+q('#btnAR').addEventListener('click',()=> alert('Atajo AR listo ✅'));
 
-q('#btnAR').addEventListener('click',()=>{
-  alert('Atajo AR listo ✅');
-});
-
-/* ======= Delegación: secciones (lista izquierda) ======= */
+/* Secciones (lista izquierda) */
 qa('.section').forEach(secEl=>{
   const secName = secEl.dataset.section;
 
-  // Toggle mostrar/ocultar
   q('[data-act="toggle"]',secEl).addEventListener('click',()=>{
     const lst = q('.sec-list',secEl);
     lst.style.display = (lst.style.display==='none') ? '' : 'none';
   });
 
-  // Añadir
   q('[data-act="add"]',secEl).addEventListener('click',()=>{
-    if(secName === 'CENTROS EXCLUSIVOS' && (data[secName]?.length||0) >= 10){
-      alert('Máximo 10 en CENTROS EXCLUSIVOS');
-      return;
-    }
+    if(secName === 'CENTROS EXCLUSIVOS' && (data[secName]?.length||0) >= 10){ alert('Máximo 10 en CENTROS EXCLUSIVOS'); return; }
     let nuevo;
     if(secName === 'CENTROS EXCLUSIVOS'){
       nuevo = { nombre:'(nuevo centro)', delegado:'', audiologo:'', tipo:'Franquicia', acciones:[], formaciones:[], procesos:[], adjuntos:[] };
     }else{
       nuevo = { nombre:'(nuevo)', fecha:'', estado:'', notas:'' };
     }
-    data[secName] = data[secName] || [];
-    data[secName].push(nuevo);
+    data[secName] = data[secName] || []; data[secName].push(nuevo);
     state.selected = { section:secName, index:data[secName].length-1 };
     save(); renderAll();
   });
 
-  // Click en lista (editar/eliminar)
   q('.sec-list',secEl).addEventListener('click',(ev)=>{
-    const itemEl = ev.target.closest('.item');
-    if(!itemEl) return;
+    const itemEl = ev.target.closest('.item'); if(!itemEl) return;
     const idx = +itemEl.dataset.index;
 
     if(ev.target.textContent.includes('🗑️')){
-      if(confirm('¿Eliminar este item?')){
-        data[secName].splice(idx,1);
-        state.selected = {section:null,index:null};
-        save(); renderAll();
-      }
+      if(confirm('¿Eliminar este item?')){ data[secName].splice(idx,1); state.selected = {section:null,index:null}; save(); renderAll(); }
       return;
     }
-    // seleccionar para editar
     state.selected = { section:secName, index:idx };
     renderAll();
   });
@@ -604,15 +542,12 @@ qa('.section').forEach(secEl=>{
 /* Genérico */
 q('#btnSaveG').addEventListener('click',()=>{
   const it = currentItem(); if(!it) return;
-  it.nombre = q('#gNombre').value.trim();
-  it.fecha = q('#gFecha').value;
-  it.estado = q('#gEstado').value.trim();
-  it.notas = q('#gNotas').value.trim();
+  it.nombre = q('#gNombre').value.trim(); it.fecha = q('#gFecha').value; it.estado = q('#gEstado').value.trim(); it.notas = q('#gNotas').value.trim();
   save(); renderAll();
 });
 q('#btnCancelG').addEventListener('click',()=>{ state.selected={section:null,index:null}; renderAll(); });
 
-/* Centro exclusivo: guardar/cancelar */
+/* Centro exclusivo */
 q('#btnSaveC').addEventListener('click',()=>{
   const it = currentItem(); if(!it) return;
   it.nombre = q('#cNombre').value.trim();
@@ -626,7 +561,7 @@ q('#btnCancelC').addEventListener('click',()=>{ state.selected={section:null,ind
 /* Paneles: añadir filas */
 q('#addAccion').addEventListener('click',()=>{
   const it = currentItem(); if(!it) return;
-  it.acciones.push({fecha:'', tipo:'', derivacion:null, cita:false, venta:false});
+  it.acciones.push({fecha:'', tipo:'', derivacion:null, citas:null, venta:null});
   renderAcciones(); save();
 });
 q('#addFormacion').addEventListener('click',()=>{
@@ -640,35 +575,35 @@ q('#addProceso').addEventListener('click',()=>{
   renderProcesos(); save();
 });
 
-/* Delegación de cambios en celdas y borrado de fila */
+/* Cambios en celdas y borrado de fila */
 q('#detail').addEventListener('input',(ev)=>{
   const row = ev.target.closest('.rowx'); if(!row) return;
   const k = ev.target.dataset.k; if(!k) return;
   const idx = +row.dataset.index;
   const it = currentItem(); if(!it) return;
 
-  if(row.parentElement.id==='accionesRows'){
+  const parentId = row.parentElement.id;
+
+  if(parentId==='accionesRows'){
     const obj = it.acciones[idx];
-    if(ev.target.type==='checkbox'){ obj[k] = ev.target.checked; }
-    else if(ev.target.type==='number'){ obj[k] = ev.target.value===''?null:Number(ev.target.value); }
+    if(ev.target.type==='number'){ obj[k] = ev.target.value===''?null:Number(ev.target.value); }
     else { obj[k] = ev.target.value; }
   }
-  if(row.parentElement.id==='formacionesRows'){
+  if(parentId==='formacionesRows'){
     const obj = it.formaciones[idx];
     if(ev.target.type==='checkbox'){ obj[k] = ev.target.checked; }
     else { obj[k] = ev.target.value; }
   }
-  if(row.parentElement.id==='procesosRows'){
+  if(parentId==='procesosRows'){
     const obj = it.procesos[idx];
     if(ev.target.type==='checkbox'){ obj[k] = ev.target.checked; }
     else if(ev.target.type==='number'){ obj[k] = ev.target.value===''?null:Number(ev.target.value); }
-    else { obj[k] = ev.target.value; }
+    colorizeScores();
   }
   save();
 });
 
 q('#detail').addEventListener('click',(ev)=>{
-  // borrar fila
   if(ev.target.classList.contains('del')){
     const row = ev.target.closest('.rowx'); if(!row) return;
     const idx = +row.dataset.index;
@@ -678,7 +613,6 @@ q('#detail').addEventListener('click',(ev)=>{
     if(row.parentElement.id==='procesosRows'){ it.procesos.splice(idx,1); renderProcesos(); }
     save();
   }
-  // quitar adjunto
   if(ev.target.dataset.delfile){
     const i = +ev.target.dataset.delfile;
     const it = currentItem(); if(!it) return;
@@ -687,24 +621,18 @@ q('#detail').addEventListener('click',(ev)=>{
   }
 });
 
-/* Adjuntar Excel (solo metadatos, no contenido) */
+/* Adjuntar Excel (metadatos) */
 q('#btnExcel').addEventListener('click',()=> q('#fileExcel').click());
 q('#fileExcel').addEventListener('change',(ev)=>{
   const files = Array.from(ev.target.files||[]);
   const it = currentItem(); if(!it) return;
   it.adjuntos = it.adjuntos || [];
-  files.forEach(f=>{
-    it.adjuntos.push({name:f.name, size:f.size, lastModified:f.lastModified});
-  });
-  ev.target.value=''; // reset
-  renderAdjuntos(); save();
+  files.forEach(f=>{ it.adjuntos.push({name:f.name, size:f.size, lastModified:f.lastModified}); });
+  ev.target.value=''; renderAdjuntos(); save();
 });
 
 /* ======= Init ======= */
-(function init(){
-  q('#stamp').textContent = 'Actualizado: ' + nowISO();
-  renderAll();
-})();
+(function init(){ q('#stamp').textContent = 'Actualizado: ' + nowISO(); renderAll(); })();
 </script>
 </body>
 </html>
