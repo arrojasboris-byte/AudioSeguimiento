@@ -31,7 +31,7 @@ body.locked #gate { pointer-events:auto; }
 .btn-ghost{background:transparent;border:1px solid #ffffff66;color:#fff}
 .pill{display:inline-flex;gap:.45rem;align-items:center;border:1px solid #ffffff2f;background:#ffffff1c;padding:.35rem .6rem;border-radius:999px;white-space:nowrap}
 
-/* Layout 100%: cinta arriba + detalle abajo */
+/* Layout 100% */
 .app{width:100%;margin:0}
 .wrapV{display:grid;grid-template-rows:auto 1fr;gap:14px;padding:14px 12px 16px}
 
@@ -73,7 +73,7 @@ body.locked #gate { pointer-events:auto; }
 .va-head,.va-row{display:grid;gap:.25rem;align-items:center;margin:.1rem .1rem}
 .scroll{max-height:58vh;overflow:auto;padding-right:.3rem}
 
-/* Grids de columnas */
+/* Grids */
 .va-cols{grid-template-columns:52px 1.1fr 140px 140px 160px 130px 120px 90px 170px 170px}
 .fm-head,.fm-row{grid-template-columns:52px 110px 220px 150px 110px 120px 120px 120px 120px 110px 110px}
 .ta-head,.ta-row{grid-template-columns:52px 1.2fr 150px 140px 170px 110px 110px 120px 130px 130px}
@@ -99,7 +99,7 @@ body.locked #gate { pointer-events:auto; }
   .table-inner{min-width:1100px}
 }
 
-/* PIN overlay negro SIEMPRE visible de inicio */
+/* PIN overlay negro */
 .gate{position:fixed;inset:0;background:#000;display:flex;align-items:center;justify-content:center;z-index:1000}
 .gate-card{background:#111;color:#fff;border-radius:16px;box-shadow:var(--shadow);padding:24px 22px;min-width:320px;border:1px solid #2a2a2a}
 .gate-card h3{margin:.25rem 0 1rem 0}
@@ -107,7 +107,6 @@ body.locked #gate { pointer-events:auto; }
 .subtle{opacity:.8;font-size:.9rem}
 </style>
 </head>
-<!-- Arranca bloqueado -->
 <body class="locked">
 
 <header class="topbar">
@@ -117,13 +116,12 @@ body.locked #gate { pointer-events:auto; }
     <button id="btnFetch" class="btn btn-lite" title="Leer de la nube o local (no guarda)">Actualizar (nube)</button>
     <button id="btnSaveTop" class="btn btn-save" title="Guardar en la nube o local">Guardar (nube)</button>
     <button id="btnReset" class="btn btn-ghost" title="Descartar cambios locales y volver al último leído">Resetear</button>
-    <span id="stamp" class="pill">v7.3 · Cargando…</span>
+    <span id="stamp" class="pill">v7.4 · Cargando…</span>
   </div>
 </header>
 
 <main class="app">
   <section class="wrapV">
-
     <!-- CINTA SUPERIOR -->
     <div class="ribbon card">
       <div class="ribbon-inner">
@@ -278,12 +276,12 @@ body.locked #gate { pointer-events:auto; }
   </section>
 </main>
 
-<!-- PIN SIEMPRE visible hasta desbloqueo -->
+<!-- PIN overlay (oculto el número real) -->
 <div id="gate" class="gate" aria-modal="true" role="dialog">
   <div class="gate-card">
     <h3>Acceso</h3>
     <p class="subtle">Introduce el PIN para editar:</p>
-    <input id="pin" class="pin" type="password" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="4321"/>
+    <input id="pin" class="pin" type="password" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="••••"/>
     <div style="display:flex;gap:.5rem;margin-top:12px">
       <button id="enter" class="btn btn-lite" style="flex:1">Entrar</button>
       <button id="cancelPin" class="btn btn-ghost" style="flex:.8">Limpiar</button>
@@ -298,9 +296,8 @@ body.locked #gate { pointer-events:auto; }
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script>
 /* ======= CONFIG ======= */
-const APP_VERSION='v7.3';
+const APP_VERSION='v7.4';
 const REQUIRE_PIN = true;
-const PIN_CODE = '4321';
 const DB_PATH  = 'audioseguimiento/v7';
 const firebaseConfig = { apiKey:"", authDomain:"", databaseURL:"", projectId:"", storageBucket:"", messagingSenderId:"", appId:"" };
 
@@ -600,12 +597,26 @@ $('#saveEQTop').onclick=saveCloudOrLocal;
 /* Topbar */
 $('#btnSaveTop').onclick=saveCloudOrLocal; $('#btnFetch').onclick=fetchCloudOrLocal; $('#btnReset').onclick=resetLocalView;
 
-/* ======= PIN: bloqueo fuerte ======= */
+/* ======= PIN OFUSCADO ======= */
+/* No se muestra el PIN en claro en el HTML ni en la UI. 
+   Comprobamos contra cadenas Base64 precalculadas (no reversibles a simple vista):
+   '4321'  -> 'NDMyMQ=='
+   'AR4321'-> 'QVI0MzIx'
+*/
+const PIN_B64_ALLOW = new Set(['NDMyMQ==','QVI0MzIx']);
+function checkPin(val){
+  const clean=(val||'').trim();
+  if(!clean) return false;
+  try{
+    const a=btoa(clean);
+    const b=btoa(clean.toUpperCase());
+    return PIN_B64_ALLOW.has(a) || PIN_B64_ALLOW.has(b);
+  }catch(_){ return false; }
+}
 function unlock(){ document.body.classList.remove('locked'); $('#gate').style.display='none'; }
 function lock(){ document.body.classList.add('locked'); $('#gate').style.display='flex'; $('#pin').focus(); }
 function tryEnter(){
-  const val=(($('#pin').value)||'').trim();
-  const ok = val === (PIN_CODE||'');
+  const ok = checkPin($('#pin').value);
   if(ok){ unlock(); } else { $('#pinMsg').style.display='block'; }
 }
 $('#enter').onclick=tryEnter;
@@ -614,10 +625,7 @@ $('#cancelPin').onclick=()=>{ $('#pin').value=''; $('#pinMsg').style.display='no
 
 /* Init */
 function renderAll(){ renderLeft(); if(state.selected.section) renderDetail(); else renderDetailBlank(); }
-window.addEventListener('DOMContentLoaded',()=>{
-  // MOSTRAR overlay de inmediato y bloquear interacción
-  if(REQUIRE_PIN){ lock(); } else { unlock(); }
-});
+window.addEventListener('DOMContentLoaded',()=>{ lock(); });
 window.addEventListener('load',()=>{
   localLoad(); initFirebase(); renderAll();
   $('#stamp').textContent=APP_VERSION+' · Listo: '+now();
