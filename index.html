@@ -1,437 +1,418 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>SEGUIMIENTO AUDIO</title>
 <style>
-  :root{--primary:#d32f2f;--primary2:#b71c1c;--bg:#f7f8fc;--card:#fff;--text:#111827;--ring:rgba(211,47,47,.25);color-scheme:light dark}
-  *{box-sizing:border-box} html,body{margin:0}
-  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,sans-serif;background:var(--bg);color:var(--text);line-height:1.35}
-  header{position:sticky;top:0;z-index:50;background:linear-gradient(90deg,var(--primary2),var(--primary));color:#fff;padding:10px 14px;box-shadow:0 10px 24px rgba(0,0,0,.28)}
-  .bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-  .title{font-weight:900;letter-spacing:.3px;font-size:1.05rem;margin-right:6px}
-  .btn{display:inline-flex;align-items:center;gap:.5rem;cursor:pointer;border:0;border-radius:999px;padding:8px 12px;font-weight:800;background:#fff;color:var(--primary2);box-shadow:0 8px 18px rgba(0,0,0,.28)}
-  .btn.secondary{background:#f7f7f9;color:#1f2937} .btn.small{padding:6px 10px}
-  .chip{display:inline-flex;align-items:center;gap:.5rem;background:#ffffff22;padding:8px 12px;border-radius:999px;font-weight:700}
-  .status{font-weight:800}.last{opacity:.92}
-  .search{min-width:260px;border:0;outline:none;border-radius:999px;padding:9px 12px;background:#fff;color:#1f2937}
-  .logoWrap{display:flex;align-items:center;gap:8px}
-  .logoBadge{background:#fff;border-radius:10px;padding:4px 8px;box-shadow:0 4px 12px rgba(0,0,0,.25)}
-  .logo{height:34px;width:auto;display:block}
+  :root{
+    --rojo:#c82727;
+    --rojo-osc:#a71f1f;
+    --bg:#f6f7fb;
+    --card:#ffffff;
+    --shadow:0 8px 22px rgba(0,0,0,.08);
 
-  .layout{display:grid;grid-template-columns:340px 1fr;gap:18px;max-width:1300px;margin:18px auto;padding:0 16px}
-  aside{background:var(--card);border-radius:16px;box-shadow:0 14px 34px rgba(30,41,59,.08);padding:12px}
-  main{display:grid;gap:16px}
-  .card{background:var(--card);border-radius:16px;box-shadow:0 14px 34px rgba(30,41,59,.08);padding:16px}
-  .card h2{margin:0 0 6px;font-size:1.05rem}
-  .subtle{font-size:.85rem;opacity:.75;margin:0 0 12px}
-  .muted{opacity:.7;font-size:.9rem}
+    /* Colores pastel por sección */
+    --col-exclusivos:#fde2e4;   /* rosa claro */
+    --col-flop:#e2f0cb;         /* verde claro */
+    --col-visitas:#cde7f0;      /* azul claro */
+    --col-formaciones:#f9e5c9;  /* naranja claro */
+    --col-tele:#eadcf8;         /* lila claro */
+  }
+  html,body{height:100%;}
+  body{
+    margin:0;background:var(--bg);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;color:#222;
+  }
 
-  .sec{border:1px solid #0001;border-radius:12px;margin:10px 0;overflow:hidden}
-  .sec header{all:unset;display:flex;align-items:center;justify-content:space-between;background:#f3f4f6;color:#111;padding:10px 12px;font-weight:800}
-  .sec header button{border:0;background:#fff;color:#1f2937;border-radius:8px;padding:6px 10px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.12)}
-  .sec .list{padding:8px 8px 10px;max-height:340px;overflow:auto}
-  .item{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:8px;border-radius:10px;cursor:pointer}
-  .item:hover{background:#f5f6fb} .item.active{background:#e9ecff}
-  .actions{display:flex;gap:6px} .iconbtn{border:0;background:#fff;border-radius:8px;padding:5px 8px;cursor:pointer;box-shadow:0 3px 9px rgba(0,0,0,.12)}
+  /* Header */
+  .topbar{
+    position:sticky;top:0;z-index:3;
+    display:flex;align-items:center;gap:.75rem;
+    padding:.9rem 1rem;background:linear-gradient(180deg,var(--rojo),var(--rojo-osc));
+    color:#fff;box-shadow:var(--shadow);
+  }
+  .brand{font-weight:800;letter-spacing:.5px;font-size:1.1rem}
+  .spacer{flex:1}
+  .btn{border:0;border-radius:999px;padding:.55rem .9rem;cursor:pointer;box-shadow:var(--shadow);font-weight:650}
+  .btn:disabled{opacity:.6;cursor:not-allowed}
+  .btn-lite{background:#fff;color:var(--rojo); }
+  .btn-save{background:#fff;color:#a31212}
+  .pill{display:inline-flex;align-items:center;gap:.45rem;background:#fff1; padding:.45rem .7rem;border-radius:999px;border:1px solid #fff3;font-weight:600}
+  .pill.ok{background:#1fcc7b22;border-color:#1fcc7b55}
+  .pill.lock{background:#ffd16622;border-color:#ffd16655}
+  .ar{min-width:36px;height:36px;border-radius:10px;background:#fff;color:#b30000;font-weight:900;border:0;box-shadow:var(--shadow);cursor:pointer}
+  .ts{opacity:.9;font-size:.9rem}
 
-  label{display:block;font-size:.92rem;margin-bottom:6px}
-  input[type="text"],select,textarea,input[type="number"],input[type="date"]{width:100%;border:1px solid #cfd3dc;border-radius:10px;padding:10px 12px;font:inherit;background:#fff;outline:none}
-  input:focus,select:focus,textarea:focus{border-color:var(--primary);box-shadow:0 0 0 4px var(--ring)}
-  .row{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
-  .col-6{grid-column:span 6}.col-4{grid-column:span 4}.col-3{grid-column:span 3}
+  /* Layout */
+  .wrap{display:grid;grid-template-columns:330px 1fr;gap:1.25rem;padding:1.25rem;max-width:1400px;margin:0 auto}
+  .col{background:transparent}
+  .card{background:var(--card);border-radius:18px;box-shadow:var(--shadow);}
 
-  /* tablas cuadrícula */
-  .table{width:100%;border-collapse:collapse;border-radius:12px;overflow:hidden;table-layout:fixed}
-  .table th,.table td{border:1px solid #dfe3eb;padding:8px 10px;text-align:left;background:#fff}
-  .table th{background:#f3f4f6}
-  .table input{width:100%;border:0;outline:none;background:transparent;padding:6px}
-  .cell-act{display:flex;align-items:center;gap:6px}
-  .pick{border:0;background:#fff;border-radius:8px;padding:3px 8px;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.12)}
-  .tbar{display:flex;justify-content:space-between;align-items:center;margin:6px 0 10px}
-  .tbar .addrow{border:0;background:#fff;border-radius:10px;padding:6px 10px;cursor:pointer;box-shadow:0 3px 9px rgba(0,0,0,.12)}
+  /* Left column */
+  .left .title{
+    font-weight:900;font-size:1.15rem;padding:1rem 1.1rem;border-bottom:1px solid #eee;
+  }
+  .section{
+    margin:1rem;border-radius:18px;overflow:hidden;border:1px solid #e9e9ef;background:#fff;
+  }
+  .sec-head{
+    display:flex;align-items:center;justify-content:space-between;gap:.5rem;
+    padding:.85rem 1rem;font-weight:900
+  }
+  .sec-head .tools{display:flex;gap:.4rem}
+  .sec-btn{display:inline-flex;align-items:center;justify-content:center;width:38px;height:34px;border-radius:10px;border:0;box-shadow:var(--shadow);background:#fff;cursor:pointer}
+  .sec-list{padding:.25rem .6rem .8rem .6rem}
+  .item{
+    display:flex;align-items:center;justify-content:space-between;gap:.6rem;
+    background:#fff;border:1px solid #eee;border-radius:12px;padding:.7rem .8rem;margin:.55rem 0;cursor:pointer;
+  }
+  .item:hover{background:#fafafa}
+  .item .name{font-weight:700}
+  .item .acts{display:flex;gap:.35rem}
+  .ico{font-size:18px;opacity:.75}
+  .muted{opacity:.65}
 
-  .saveStrip{display:flex;gap:10px;align-items:center;justify-content:flex-end;margin-top:12px}
-  .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:20px;background:#111;color:#fff;padding:10px 14px;border-radius:12px;box-shadow:0 14px 30px rgba(0,0,0,.25);z-index:9999;opacity:.98}
+  /* Right column (detalle) */
+  .detail{padding:1.2rem 1.3rem 2rem 1.3rem;min-height:520px;border-radius:22px;border:1px solid #ececf5;background:#fff}
+  .detail h2{margin:.2rem 0 0 0;font-size:1.2rem}
+  .detail .hint{opacity:.7;margin:.2rem 0 1rem}
+  .field{display:grid;gap:.35rem;margin:.7rem 0}
+  .field label{font-weight:700;opacity:.9}
+  .field input,.field textarea{
+    border:1px solid #ddd;border-radius:12px;padding:.65rem .7rem;font-size:1rem;background:#fff;outline:none;
+  }
+  .field textarea{min-height:140px;resize:vertical}
+  .bar-right{display:flex;justify-content:flex-end}
+  .btn-ghost{background:#fff;border:1px solid #ddd;color:#444}
+  .badge{display:inline-block;padding:.25rem .5rem;border-radius:999px;background:#00000010;font-size:.85rem}
+  .row{display:flex;gap:1rem;align-items:center;flex-wrap:wrap}
 
-  @media (prefers-color-scheme:dark){:root{--bg:#0e1116;--card:#171a21;--text:#e5e7eb}
-    aside,.card{box-shadow:0 14px 34px rgba(0,0,0,.25)} .sec header{background:#111827;color:#e5e7eb}
-    .item:hover{background:#1f2430}.item.active{background:#1b2b57}
-    input,select,textarea{background:#0f1217;color:#e5e7eb;border-color:#2b2f3a}
-    .search{background:#ffffffcc} .btn{background:#ffe2e2;color:#7f1212}.btn.secondary{background:#f0f0f0;color:#1f2937}
-    .table th,.table td{border-color:#2b2f3a;background:#0f1217}.table th{background:#161a22}
-    .logoBadge{background:#fff}
+  /* Pastel helpers to “pintar” secciones y detalle */
+  .bg-exclusivos{ background:var(--col-exclusivos);}
+  .bg-flop{ background:var(--col-flop);}
+  .bg-visitas{ background:var(--col-visitas);}
+  .bg-formaciones{ background:var(--col-formaciones);}
+  .bg-tele{ background:var(--col-tele);}
+  .tone{border-color:#00000010}
+  .tone .item{border-color:#00000010;background:#ffffffcc}
+
+  @media (max-width:980px){
+    .wrap{grid-template-columns:1fr;gap:1rem}
   }
 </style>
 </head>
 <body>
-  <header>
-    <div class="bar">
-      <span class="title">SEGUIMIENTO AUDIO</span>
-      <div class="logoWrap">
-        <div class="logoBadge"><img id="logoPreview" class="logo" alt="Logo"/></div>
-      </div>
-      <input id="search" class="search" type="search" placeholder="Buscar: secciones / centros / delegado / audiólogo…"/>
-      <span class="chip status" id="status">⏳</span>
-      <span class="chip last" id="last">—</span>
-      <span class="chip">🔒 <strong id="editState">Bloqueado</strong></span>
-      <button id="btnEdit" class="btn secondary">Editar</button>
-      <button id="btnLoad" class="btn secondary">🔄 Actualizar</button>
-      <button id="btnSave" class="btn">💾 Guardar</button>
-    </div>
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <button class="ar" title="AR" id="btnAR">AR</button>
+    <div class="brand">SEGUIMIENTO AUDIO</div>
+    <div class="spacer"></div>
+
+    <button class="btn btn-lite" id="btnEdit">Editar</button>
+    <button class="btn btn-lite" id="btnRefresh">Actualizar</button>
+    <button class="btn btn-save" id="btnSaveTop">Guardar</button>
+
+    <span class="pill ok" id="pillOk">✓ Actualizado</span>
+    <span class="pill ts" id="stamp">Actualizado: —</span>
+    <span class="pill lock" id="lock">🔓 Editando</span>
   </header>
 
-  <div class="layout">
-    <!-- IZQUIERDA -->
-    <aside id="aside">
-      <section class="sec" data-sec="exclusivos">
-        <header><div>🏥 <strong>CENTROS EXCLUSIVOS</strong> <span class="muted">(máx. 10)</span></div>
-          <div><button class="toggle" data-toggle="exclusivos">▼</button><button class="add" data-add="exclusivos">＋</button></div></header>
-        <div class="list" id="list-exclusivos"></div>
-      </section>
-      <section class="sec" data-sec="flop">
-        <header><div>🏥 <strong>CENTROS FLOP</strong></div>
-          <div><button class="toggle" data-toggle="flop">▼</button><button class="add" data-add="flop">＋</button></div></header>
-        <div class="list" id="list-flop"></div>
-      </section>
-      <section class="sec" data-sec="visitas">
-        <header><div>📋 <strong>VISITAS AUDIO</strong></div>
-          <div><button class="toggle" data-toggle="visitas">▼</button><button class="add" data-add="visitas">＋</button></div></header>
-        <div class="list" id="list-visitas"></div>
-      </section>
-      <section class="sec" data-sec="formaciones">
-        <header><div>🎓 <strong>FORMACIONES Y MENTORING</strong></div>
-          <div><button class="toggle" data-toggle="formaciones">▼</button><button class="add" data-add="formaciones">＋</button></div></header>
-        <div class="list" id="list-formaciones"></div>
-      </section>
+  <main class="wrap">
+    <!-- LEFT -->
+    <aside class="col left">
+      <div class="card">
+        <div class="title">SEGUIMIENTO</div>
+
+        <section class="section bg-exclusivos tone" data-section="CENTROS EXCLUSIVOS" data-tone="exclusivos">
+          <div class="sec-head">
+            <div>📒 CENTROS EXCLUSIVOS <span class="badge muted">(máx. 10)</span></div>
+            <div class="tools">
+              <button class="sec-btn" data-act="toggle" title="Mostrar/Ocultar">▾</button>
+              <button class="sec-btn" data-act="add" title="Añadir">＋</button>
+            </div>
+          </div>
+          <div class="sec-list" role="list"></div>
+        </section>
+
+        <section class="section bg-flop tone" data-section="CENTROS FLOP" data-tone="flop">
+          <div class="sec-head">
+            <div>📒 CENTROS FLOP</div>
+            <div class="tools">
+              <button class="sec-btn" data-act="toggle" title="Mostrar/Ocultar">▾</button>
+              <button class="sec-btn" data-act="add" title="Añadir">＋</button>
+            </div>
+          </div>
+          <div class="sec-list" role="list"></div>
+        </section>
+
+        <section class="section bg-visitas tone" data-section="VISITAS AUDIO" data-tone="visitas">
+          <div class="sec-head">
+            <div>📋 VISITAS AUDIO</div>
+            <div class="tools">
+              <button class="sec-btn" data-act="toggle" title="Mostrar/Ocultar">▾</button>
+              <button class="sec-btn" data-act="add" title="Añadir">＋</button>
+            </div>
+          </div>
+          <div class="sec-list" role="list"></div>
+        </section>
+
+        <section class="section bg-formaciones tone" data-section="FORMACIONES Y MENTORING" data-tone="formaciones">
+          <div class="sec-head">
+            <div>🎓 FORMACIONES Y MENTORING</div>
+            <div class="tools">
+              <button class="sec-btn" data-act="toggle" title="Mostrar/Ocultar">▾</button>
+              <button class="sec-btn" data-act="add" title="Añadir">＋</button>
+            </div>
+          </div>
+          <div class="sec-list" role="list"></div>
+        </section>
+
+        <section class="section bg-tele tone" data-section="TELEAUDIOLOGIA" data-tone="tele">
+          <div class="sec-head">
+            <div>📡 TELEAUDIOLOGIA</div>
+            <div class="tools">
+              <button class="sec-btn" data-act="toggle" title="Mostrar/Ocultar">▾</button>
+              <button class="sec-btn" data-act="add" title="Añadir">＋</button>
+            </div>
+          </div>
+          <div class="sec-list" role="list"></div>
+        </section>
+      </div>
     </aside>
 
-    <!-- DERECHA -->
-    <main>
-      <section class="card">
-        <h2 id="detail-title">Detalle</h2>
-        <p class="subtle" id="panelSub">—</p>
-        <div id="detail-form"><p class="muted">Selecciona un item a la izquierda o crea uno con ＋.</p></div>
-        <div class="saveStrip">
-          <span class="muted" id="dirtyHint">—</span>
-          <button class="btn" id="btnSaveDetail">💾 Guardar cambios</button>
+    <!-- RIGHT -->
+    <section class="col">
+      <div id="detail" class="detail card">
+        <div class="row">
+          <h2 id="detTitle">Detalle</h2>
+          <span id="detTag" class="badge">—</span>
         </div>
-      </section>
-    </main>
-  </div>
+        <div class="hint" id="detHint">Selecciona un item a la izquierda o crea uno con ＋.</div>
 
-<script type="module">
-/* ===== config ===== */
-const PIN="AR4321";
-const ENDPOINT=new URLSearchParams(location.search).get("endpoint")||"https://script.google.com/macros/s/AKfycby5vh1Ja0XllWFB98ypWmDcUfUItwEciVimUd5L6Esi1wfPJbcc2dap6G0lciRf51VR/exec";
+        <div id="detForm" style="display:none">
+          <div class="field">
+            <label for="fNombre">Nombre</label>
+            <input id="fNombre" type="text" placeholder="Ej.: Reina Mercedes" />
+          </div>
+          <div class="row">
+            <div class="field" style="min-width:220px;flex:1">
+              <label for="fFecha">Fecha</label>
+              <input id="fFecha" type="date" />
+            </div>
+            <div class="field" style="min-width:220px;flex:1">
+              <label for="fEstado">Estado</label>
+              <input id="fEstado" type="text" placeholder="Ej.: En curso / Objetivo / Riesgo" />
+            </div>
+          </div>
+          <div class="field">
+            <label for="fNotas">Notas</label>
+            <textarea id="fNotas" placeholder="Observaciones, próximos pasos, KPIs…"></textarea>
+          </div>
+          <div class="bar-right">
+            <button class="btn btn-ghost" id="btnCancel">Cancelar</button>
+            <button class="btn btn-save" id="btnSave">💾 Guardar cambios</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
 
-/* ===== state ===== */
-let canEdit=false; // solo afecta cabecera; las tablas SON SIEMPRE editables
-let state={logoDataUrl:"",exclusivos:[],flop:[],visitas:[],formaciones:[]};
-let selected={section:null,id:null};
-let dirty=false;
+<script>
+/* ======= Estado & Datos ======= */
+const STORAGE_KEY = 'audioseguimiento_v2';
 
-/* ===== helpers ===== */
-const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
-const statusEl=$("#status"), lastEl=$("#last"), editLbl=$("#editState");
-const detailTitle=$("#detail-title"), detailForm=$("#detail-form"), panelSub=$("#panelSub"), dirtyHint=$("#dirtyHint");
-const setStatus=t=>statusEl.textContent=t, setLast=t=>lastEl.textContent=t?`Actualizado: ${t}`:"—";
-const toast=m=>{const x=document.createElement("div");x.className="toast";x.textContent=m;document.body.appendChild(x);setTimeout(()=>x.remove(),1800);};
-const uid=()=>Math.random().toString(36).slice(2,10);
-const setDirty=v=>{dirty=v; dirtyHint.textContent=v?"• Tienes cambios sin guardar":"—";};
+const SECTION_ORDER = [
+  "CENTROS EXCLUSIVOS",
+  "CENTROS FLOP",
+  "VISITAS AUDIO",
+  "FORMACIONES Y MENTORING",
+  "TELEAUDIOLOGIA"
+];
 
-/* ===== left lists ===== */
-const lists={exclusivos:$("#list-exclusivos"), flop:$("#list-flop"), visitas:$("#list-visitas"), formaciones:$("#list-formaciones")};
-const sectionsDom={"exclusivos":document.querySelector('[data-sec="exclusivos"]'),"flop":document.querySelector('[data-sec="flop"]'),"visitas":document.querySelector('[data-sec="visitas"]'),"formaciones":document.querySelector('[data-sec="formaciones"]')};
+const SECTION_TONE = {
+  "CENTROS EXCLUSIVOS":"exclusivos",
+  "CENTROS FLOP":"flop",
+  "VISITAS AUDIO":"visitas",
+  "FORMACIONES Y MENTORING":"formaciones",
+  "TELEAUDIOLOGIA":"tele"
+};
 
-function renderLists(filter=""){
-  const f=filter.trim().toLowerCase();
-  Object.keys(lists).forEach(sec=>{
-    const data=state[sec]||[];
-    const results=f?data.filter(it=>JSON.stringify(it).toLowerCase().includes(f)):data;
-    sectionsDom[sec].style.display=(f && results.length===0)?"none":"";
-    const ul=lists[sec]; ul.innerHTML="";
-    results.forEach(it=>{
-      const div=document.createElement("div");
-      div.className="item"+(selected.section===sec&&selected.id===it.id?" active":"");
-      const label=sec==="visitas"?(it.responsable||"(Responsable)"):sec==="formaciones"?(it.titulo||"(Formación)"):(it.nombre||"(Centro)");
-      div.innerHTML=`<span>${label}</span>
-        <span class="actions">
-          <button class="iconbtn edit" title="Editar">✏️</button>
-          <button class="iconbtn del" title="Eliminar">🗑️</button>
-        </span>`;
-      div.addEventListener("click",e=>{
-        if(!(e.target.classList.contains("edit")||e.target.classList.contains("del"))){
-          selected={section:sec,id:it.id}; renderLists(filter); renderDetail();
-        }
-      });
-      div.querySelector(".edit").onclick=()=>{selected={section:sec,id:it.id}; renderDetail();};
-      div.querySelector(".del").onclick=()=>{ if(!confirm("¿Eliminar este elemento?"))return;
-        state[sec]=state[sec].filter(x=>x.id!==it.id); selected={section:null,id:null}; renderLists($("#search").value); renderDetail(); setDirty(true);
-      };
-      ul.appendChild(div);
+const TONE_BG = {
+  exclusivos: 'var(--col-exclusivos)',
+  flop: 'var(--col-flop)',
+  visitas: 'var(--col-visitas)',
+  formaciones: 'var(--col-formaciones)',
+  tele: 'var(--col-tele)'
+};
+
+let state = {
+  editing:true,
+  selected:{ section:null, index:null }
+};
+
+let data = load() || {
+  "CENTROS EXCLUSIVOS":[{nombre:"Reina Mercedes", fecha:"", estado:"", notas:""}],
+  "CENTROS FLOP":[],
+  "VISITAS AUDIO":[],
+  "FORMACIONES Y MENTORING":[],
+  "TELEAUDIOLOGIA":[]
+};
+
+/* ======= Util ======= */
+function q(sel,root=document){ return root.querySelector(sel); }
+function qa(sel,root=document){ return Array.from(root.querySelectorAll(sel)); }
+function nowISO(){ return new Date().toISOString(); }
+function save(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  q('#pillOk').style.display='inline-flex';
+  q('#stamp').textContent = 'Actualizado: ' + nowISO();
+}
+function load(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw? JSON.parse(raw): null;
+  }catch(e){ return null; }
+}
+function setDetailTone(tone){
+  const det = q('#detail');
+  det.style.background = '#fff';
+  det.style.borderColor = '#ececf5';
+  if(tone && TONE_BG[tone]){
+    det.style.background = TONE_BG[tone];
+    det.style.borderColor = '#00000015';
+  }
+}
+function renderAll(){
+  // render listas
+  SECTION_ORDER.forEach(sec=>{
+    const wrap = q(`.section[data-section="${sec}"] .sec-list`);
+    wrap.innerHTML='';
+    const items = data[sec]||[];
+    items.forEach((it,idx)=>{
+      const el = document.createElement('div');
+      el.className='item';
+      el.dataset.section=sec; el.dataset.index=idx;
+      el.innerHTML = `
+        <div class="name">${it.nombre||'—'}</div>
+        <div class="acts">
+          <span class="ico" title="Editar">✏️</span>
+          <span class="ico" title="Eliminar">🗑️</span>
+        </div>`;
+      wrap.appendChild(el);
     });
   });
-}
-$("#search").addEventListener("input",e=>renderLists(e.target.value));
 
-/* ===== context label ===== */
-function setPanelSub(){
-  if(!selected.section){ panelSub.textContent="—"; return; }
-  const it=(state[selected.section]||[]).find(x=>x.id===selected.id);
-  const name=selected.section==="visitas"?(it?.responsable||"—"):selected.section==="formaciones"?(it?.titulo||"—"):(it?.nombre||"—");
-  panelSub.textContent=`Centro: ${name}`;
-}
+  // estado topbar
+  q('#lock').textContent = state.editing? '🔓 Editando' : '🔒 Bloqueado';
+  q('#btnSaveTop').disabled = !state.editing;
+  qa('.sec-btn,[data-act="add"],.item').forEach(el=>{
+    el.disabled = !state.editing;
+  });
 
-/* ===== detail + tables ===== */
-function renderDetail(){
-  setPanelSub();
-  const {section,id}=selected;
-  if(!section){ detailTitle.textContent="Detalle"; detailForm.innerHTML='<p class="muted">Selecciona un item a la izquierda o crea uno con ＋.</p>'; return; }
-  const arr=state[section]; const it=arr.find(x=>x.id===id); if(!it) return;
-
-  detailTitle.textContent = section==="exclusivos"?"Centro EXCLUSIVO"
-    : section==="flop"?"Centro FLOP"
-    : section==="visitas"?"Visita de AUDIO":"Formación / Mentoring";
-
-  if(section==="exclusivos"||section==="flop"){
-    if(!it.historial) it.historial=[];
-    if(!it.formaciones) it.formaciones=[];
-    if(!it.evaluaciones) it.evaluaciones=[];
-
-    detailForm.innerHTML=`
-      <div class="row">
-        <div class="col-6"><label>Nombre</label><input id="f_nombre" type="text" value="${it.nombre||""}" ${!canEdit?"disabled":""}></div>
-        <div class="col-6"><label>Delegado</label><input id="f_delegado" type="text" value="${it.delegado||""}" ${!canEdit?"disabled":""}></div>
-        <div class="col-6"><label>Audiólogo</label><input id="f_audiologo" type="text" value="${it.audiologo||""}" ${!canEdit?"disabled":""}></div>
-        <div class="col-6"><label>Tipo</label>
-          <select id="f_tipo" ${!canEdit?"disabled":""}>
-            <option value="">—</option>
-            <option value="sucursal" ${it.tipo==="sucursal"?"selected":""}>Sucursal</option>
-            <option value="franquicia" ${it.tipo==="franquicia"?"selected":""}>Franquicia</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- ACCIONES -->
-      <div class="tbar" style="margin-top:10px">
-        <h3 style="margin:12px 0 6px">Acciones</h3>
-        <button class="addrow" id="addRowAcc">＋ Añadir fila</button>
-      </div>
-      <div style="overflow:auto">
-        <table class="table" id="tblAcc">
-          <thead><tr>
-            <th>Fecha</th>
-            <th>Acción</th>
-            <th>Derivación</th>
-            <th>Citas</th>
-            <th>Ventas</th>
-            <th>% Conversión</th>
-            <th>Paquete</th>
-            <th>Adjuntar archivo</th>
-            <th></th>
-          </tr></thead><tbody></tbody>
-        </table>
-      </div>
-
-      <!-- FORMACIONES -->
-      <div class="tbar" style="margin-top:18px">
-        <h3 style="margin:12px 0 6px">Formaciones</h3>
-        <button class="addrow" id="addRowForm">＋ Añadir fila</button>
-      </div>
-      <p class="muted" style="margin-top:-6px">Espacio para 12 formaciones</p>
-      <div style="overflow:auto">
-        <table class="table" id="tblForm">
-          <thead><tr>
-            <th>Tema de curso / Mentoring</th>
-            <th>Realizado</th>
-            <th>Aplica</th>
-            <th></th>
-          </tr></thead><tbody></tbody>
-        </table>
-      </div>
-
-      <!-- EVALUACIONES -->
-      <div class="tbar" style="margin-top:18px">
-        <h3 style="margin:12px 0 6px">Evaluaciones de procesos y visitas</h3>
-        <button class="addrow" id="addRowEval">＋ Añadir fila</button>
-      </div>
-      <div style="overflow:auto">
-        <table class="table" id="tblEval">
-          <thead><tr>
-            <th>Fecha de visita</th>
-            <th>Puntuación</th>
-            <th>Áreas de mejora</th>
-            <th>Adjuntar Excel</th>
-            <th></th>
-          </tr></thead><tbody></tbody>
-        </table>
-      </div>
-    `;
-
-    /* cabecera (opcionalmente bloqueable por PIN) */
-    if(canEdit){
-      $("#f_nombre").oninput =()=>{it.nombre=$("#f_nombre").value; renderLists($("#search").value); setDirty(true);};
-      $("#f_delegado").oninput=()=>{it.delegado=$("#f_delegado").value; renderLists($("#search").value); setDirty(true);};
-      $("#f_audiologo").oninput=()=>{it.audiologo=$("#f_audiologo").value; setDirty(true);};
-      $("#f_tipo").onchange  =()=>{it.tipo=$("#f_tipo").value; setDirty(true);};
-    }
-
-    /* ===== ACCIONES ===== */
-    const tbA=detailForm.querySelector("#tblAcc tbody");
-    function rowAccHTML(r,i){
-      const conv=(Number(r.citas)||0)?(((Number(r.ventas)||0)/(Number(r.citas)||1))*100).toFixed(1):"0.0";
-      const fileLabel = r.archivoName ? `📎 ${r.archivoName}` : "Adjuntar .xls/.xlsx/.csv";
-      return `<tr data-i="${i}">
-        <td class="cell-act">
-          <input type="date" value="${r.fecha||""}">
-          <button class="pick" data-pick="date">📅</button>
-        </td>
-        <td><input type="text" placeholder="Llamada / Taller / Visita…" value="${r.accion||""}"></td>
-        <td><input type="text" placeholder="Hospital / Proveedor…" value="${r.derivacion||""}"></td>
-        <td><input type="number" min="0" value="${r.citas??""}"></td>
-        <td><input type="number" min="0" value="${r.ventas??""}"></td>
-        <td><input type="text" disabled value="${conv}%"></td>
-        <td><input type="text" placeholder="Paquete…" value="${r.paquete||""}"></td>
-        <td>
-          <label class="btn small" style="padding:4px 8px">${fileLabel}
-            <input type="file" accept=".xls,.xlsx,.csv" style="display:none">
-          </label>
-        </td>
-        <td><button class="iconbtn delA">🗑️</button></td>
-      </tr>`;
-    }
-    function renderAcc(){
-      tbA.innerHTML = it.historial.map((r,i)=>rowAccHTML(r,i)).join("") || `<tr><td colspan="9" class="muted">Sin filas</td></tr>`;
-    }
-    renderAcc();
-
-    // delegación de eventos acciones
-    tbA.onclick = (ev)=>{
-      const tr=ev.target.closest("tr"); if(!tr) return; const i=+tr.dataset.i;
-      if(ev.target.classList.contains("delA")){ it.historial.splice(i,1); renderAcc(); setDirty(true); return;}
-      if(ev.target.dataset.pick==="date"){ tr.querySelector('input[type="date"]').showPicker?.(); return; }
-    };
-    tbA.oninput = (ev)=>{
-      const tr=ev.target.closest("tr"); if(!tr) return; const i=+tr.dataset.i;
-      const inputs=[...tr.querySelectorAll("input")];
-      const [date,acc,der,citas,ventas,conv,paq]=inputs;
-      it.historial[i].fecha   = date.value;
-      it.historial[i].accion  = acc.value;
-      it.historial[i].derivacion = der.value;
-      it.historial[i].citas   = +citas.value||0;
-      it.historial[i].ventas  = +ventas.value||0;
-      it.historial[i].paquete = paq.value;
-      const p = (it.historial[i].citas ? (it.historial[i].ventas||0)/it.historial[i].citas*100 : 0).toFixed(1);
-      conv.value = p+"%";
-      setDirty(true);
-    };
-    tbA.onchange = (ev)=>{
-      const tr=ev.target.closest("tr"); if(!tr) return; const i=+tr.dataset.i;
-      const file=ev.target.files?.[0]; if(!file) return;
-      const r=new FileReader();
-      r.onload=()=>{ it.historial[i].archivoName=file.name; it.historial[i].archivoDataUrl=String(r.result||""); tr.querySelector("label").firstChild.textContent=`📎 ${file.name}`; setDirty(true); };
-      r.readAsDataURL(file);
-    };
-    $("#addRowAcc").onclick=()=>{ it.historial.push({fecha:"",accion:"",derivacion:"",citas:0,ventas:0,paquete:"",archivoName:"",archivoDataUrl:""}); renderAcc(); setDirty(true);};
-
-    /* ===== FORMACIONES ===== */
-    const tbF=detailForm.querySelector("#tblForm tbody");
-    function rowFormHTML(r,i){
-      return `<tr data-i="${i}">
-        <td><input type="text" placeholder="Tema del curso o mentoring" value="${r.tema||""}"></td>
-        <td style="text-align:center"><input type="checkbox" ${r.realizado?"checked":""}></td>
-        <td style="text-align:center"><input type="checkbox" ${r.aplica?"checked":""}></td>
-        <td><button class="iconbtn delF">🗑️</button></td>
-      </tr>`;
-    }
-    function renderForm(){ tbF.innerHTML = it.formaciones.map((r,i)=>rowFormHTML(r,i)).join("") || `<tr><td colspan="4" class="muted">Sin formaciones</td></tr>`; }
-    renderForm();
-    tbF.onclick=(ev)=>{ const tr=ev.target.closest("tr"); if(!tr) return; const i=+tr.dataset.i; if(ev.target.classList.contains("delF")){it.formaciones.splice(i,1); renderForm(); setDirty(true);} };
-    tbF.oninput=(ev)=>{ const tr=ev.target.closest("tr"); if(!tr)return; const i=+tr.dataset.i; const ins=[...tr.querySelectorAll("input")]; it.formaciones[i].tema=ins[0].value; it.formaciones[i].realizado=ins[1].checked; it.formaciones[i].aplica=ins[2].checked; setDirty(true); };
-    tbF.onchange=tbF.oninput;
-    $("#addRowForm").onclick=()=>{ if(it.formaciones.length>=12){ toast("Máximo 12 formaciones"); return; } it.formaciones.push({tema:"",realizado:false,aplica:false}); renderForm(); setDirty(true); };
-
-    /* ===== EVALUACIONES ===== */
-    const tbE=detailForm.querySelector("#tblEval tbody");
-    function rowEvalHTML(r,i){
-      const fileLabel = r.archivoName ? `📎 ${r.archivoName}` : "Adjuntar .xls/.xlsx/.csv";
-      return `<tr data-i="${i}">
-        <td class="cell-act"><input type="date" value="${r.fecha||""}"><button class="pick" data-pick="date">📅</button></td>
-        <td><input type="number" min="0" max="10" step="0.1" placeholder="0-10" value="${r.puntos??""}"></td>
-        <td><input type="text" placeholder="Áreas de mejora…" value="${r.mejoras||""}"></td>
-        <td><label class="btn small" style="padding:4px 8px">${fileLabel}<input type="file" accept=".xls,.xlsx,.csv" style="display:none"></label></td>
-        <td><button class="iconbtn delE">🗑️</button></td>
-      </tr>`;
-    }
-    function renderEval(){ tbE.innerHTML = it.evaluaciones.map((r,i)=>rowEvalHTML(r,i)).join("") || `<tr><td colspan="5" class="muted">Sin evaluaciones</td></tr>`; }
-    renderEval();
-    tbE.onclick=(ev)=>{ const tr=ev.target.closest("tr"); if(!tr)return; const i=+tr.dataset.i; if(ev.target.classList.contains("delE")){it.evaluaciones.splice(i,1); renderEval(); setDirty(true); return;} if(ev.target.dataset.pick==="date"){ tr.querySelector('input[type="date"]').showPicker?.(); } };
-    tbE.oninput=(ev)=>{ const tr=ev.target.closest("tr"); if(!tr)return; const i=+tr.dataset.i; const ins=[...tr.querySelectorAll("input")]; it.evaluaciones[i].fecha=ins[0].value; it.evaluaciones[i].puntos=+ins[1].value||0; it.evaluaciones[i].mejoras=ins[2].value; setDirty(true); };
-    tbE.onchange=(ev)=>{ const tr=ev.target.closest("tr"); if(!tr)return; const i=+tr.dataset.i; const file=ev.target.files?.[0]; if(!file)return; const r=new FileReader(); r.onload=()=>{it.evaluaciones[i].archivoName=file.name; it.evaluaciones[i].archivoDataUrl=String(r.result||""); tr.querySelector("label").firstChild.textContent=`📎 ${file.name}`; setDirty(true);}; r.readAsDataURL(file); };
-    $("#addRowEval").onclick=()=>{ it.evaluaciones.push({fecha:"",puntos:0,mejoras:"",archivoName:"",archivoDataUrl:""}); renderEval(); setDirty(true); };
-
-  } else if(section==="visitas"){
-    detailForm.innerHTML=`<div class="row"><div class="col-6"><label>Responsable</label><input id="f_responsable" type="text" value="${arr.find(x=>x.id===id)?.responsable||""}"></div></div>`;
-    $("#f_responsable").oninput=()=>{const v=$("#f_responsable").value; arr.find(x=>x.id===id).responsable=v; renderLists($("#search").value); setDirty(true);};
-  } else {
-    detailForm.innerHTML=`<div class="row">
-      <div class="col-6"><label>Título</label><input id="f_titulo" type="text" value="${arr.find(x=>x.id===id)?.titulo||""}"></div>
-      <div class="col-3"><label>Mentor</label><input id="f_mentor" type="text" value="${arr.find(x=>x.id===id)?.mentor||""}"></div>
-      <div class="col-3"><label>Fecha</label><div class="cell-act"><input id="f_fecha" type="date" value="${arr.find(x=>x.id===id)?.fecha||""}"><button class="pick" onclick="document.getElementById('f_fecha').showPicker?.()">📅</button></div></div>
-    </div>`;
-    $("#f_titulo").oninput=()=>{arr.find(x=>x.id===id).titulo=$("#f_titulo").value; renderLists($("#search").value); setDirty(true);};
-    $("#f_mentor").oninput=()=>{arr.find(x=>x.id===id).mentor=$("#f_mentor").value; setDirty(true);};
-    $("#f_fecha").oninput =()=>{arr.find(x=>x.id===id).fecha=$("#f_fecha").value; setDirty(true);};
+  // detalle
+  if(state.selected.section!=null){
+    const sec = state.selected.section;
+    const idx = state.selected.index;
+    const item = data[sec][idx];
+    q('#detTitle').textContent = 'Detalle';
+    q('#detTag').textContent = sec;
+    q('#detHint').style.display='none';
+    q('#detForm').style.display='block';
+    q('#fNombre').value = item.nombre||'';
+    q('#fFecha').value = item.fecha||'';
+    q('#fEstado').value = item.estado||'';
+    q('#fNotas').value = item.notas||'';
+    setDetailTone(SECTION_TONE[sec]);
+  }else{
+    q('#detTitle').textContent = 'Detalle';
+    q('#detTag').textContent = '—';
+    q('#detHint').style.display='block';
+    q('#detForm').style.display='none';
+    setDetailTone(null);
   }
 }
 
-/* ===== add items ===== */
-function addItem(section){
-  if(section==="exclusivos" && state.exclusivos.length>=10){ toast("Máx. 10 exclusivos"); return; }
-  const obj = section==="visitas" ? {id:uid(), responsable:""}
-    : section==="formaciones" ? {id:uid(), titulo:"", mentor:"", fecha:""}
-    : {id:uid(), nombre:"", delegado:"", audiologo:"", tipo:"", historial:[], formaciones:[], evaluaciones:[]};
-  state[section].push(obj); selected={section,id:obj.id}; renderLists($("#search").value); renderDetail(); setDirty(true);
-}
-$$(".toggle").forEach(b=>b.onclick=()=>{const k=b.dataset.toggle; const l=document.getElementById(`list-${k}`); const open=!l.classList.contains("hidden"); if(open){l.classList.add("hidden");b.textContent="►";}else{l.classList.remove("hidden");b.textContent="▼";}});
-$$(".add").forEach(b=>b.onclick=()=>addItem(b.dataset.add));
+/* ======= Eventos globales ======= */
+q('#btnEdit').addEventListener('click',()=>{
+  state.editing = !state.editing;
+  renderAll();
+});
+q('#btnRefresh').addEventListener('click',()=>{
+  data = load() || data;
+  q('#pillOk').style.display='inline-flex';
+  q('#stamp').textContent = 'Actualizado: ' + nowISO();
+  renderAll();
+});
+q('#btnSaveTop').addEventListener('click',()=>{ save(); });
 
-/* ===== edit pin ===== */
-function setEdit(on){ canEdit=!!on; editLbl.textContent=canEdit?"Editando":"Bloqueado"; renderDetail(); }
-$("#btnEdit").onclick=()=>{ if(canEdit){ setEdit(false); return; } const p=prompt("Introduce PIN para editar cabecera (tablas ya son editables):"); if(p===PIN){ setEdit(true); toast("Edición desbloqueada"); } else alert("PIN incorrecto."); };
+q('#btnAR').addEventListener('click',()=>{
+  alert('Atajo AR listo ✅');
+});
 
-/* ===== cloud (con fallbacks CORS) ===== */
-async function tryPost(type,mode){const body=JSON.stringify({action:"save",pin:PIN,state}); return fetch(ENDPOINT,{method:"POST",headers:{"Content-Type":type},body,...(mode?{mode}:{})});}
-async function saveToCloud(){
-  try{
-    setStatus("💾 Guardando…");
-    try{const r1=await tryPost("application/json"); const t1=await r1.text(); let j1=null; try{j1=JSON.parse(t1);}catch{} if(r1.ok&&j1?.ok){okSave(j1.updatedAt); return;} throw 0;}catch{}
-    try{const r2=await tryPost("text/plain;charset=utf-8"); const t2=await r2.text(); let j2=null; try{j2=JSON.parse(t2);}catch{} if(r2.ok&&j2?.ok){okSave(j2.updatedAt); return;} throw 0;}catch{}
-    await tryPost("text/plain;charset=utf-8","no-cors"); setStatus("⏳ Verificando…"); setTimeout(async()=>{await loadFromCloud(); okSave(new Date().toISOString());},450);
-  }catch(e){console.error(e); setStatus("❌ Error al guardar"); alert("No se pudo guardar.");}
-}
-function okSave(ts){setStatus("✅ Guardado"); setLast(ts); setDirty(false); toast("Guardado");}
-async function loadFromCloud(){
-  try{
-    setStatus("⬇️ Cargando…");
-    const u=new URL(ENDPOINT); u.searchParams.set("action","load"); u.searchParams.set("pin",PIN);
-    const res=await fetch(u.toString(),{method:"GET"}); const t=await res.text(); let j=null; try{j=JSON.parse(t);}catch{}
-    if(!res.ok||!j?.ok) throw 0;
-    state=Object.assign({logoDataUrl:"",exclusivos:[],flop:[],visitas:[],formaciones:[]}, j.state||{});
-    // mostrar logo con fondo blanco
-    const logo=$("#logoPreview"); if(state.logoDataUrl){logo.src=state.logoDataUrl;} else {logo.src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='36'%3E%3Ctext x='0' y='24' font-size='20'%3E%3C/text%3E%3C/svg%3E";}
-    selected={section:null,id:null}; renderLists($("#search").value); renderDetail();
-    setStatus("✅ Actualizado"); setLast(j.updatedAt); setDirty(false);
-  }catch(e){console.error(e); setStatus("❌ Error al cargar"); alert("No se pudo cargar.");}
-}
-$("#btnSave").onclick=saveToCloud;
-$("#btnLoad").onclick=loadFromCloud;
-$("#btnSaveDetail").onclick=saveToCloud;
+/* ======= Delegación: secciones ======= */
+qa('.section').forEach(secEl=>{
+  const secName = secEl.dataset.section;
 
-/* ===== init ===== */
-setEdit(false); renderLists(); renderDetail(); loadFromCloud();
+  // Toggle mostrar/ocultar
+  q('[data-act="toggle"]',secEl).addEventListener('click',()=>{
+    const lst = q('.sec-list',secEl);
+    lst.style.display = (lst.style.display==='none') ? '' : 'none';
+  });
+
+  // Añadir
+  q('[data-act="add"]',secEl).addEventListener('click',()=>{
+    if(secName === 'CENTROS EXCLUSIVOS' && (data[secName]?.length||0) >= 10){
+      alert('Máximo 10 en CENTROS EXCLUSIVOS');
+      return;
+    }
+    const nuevo = { nombre:'(nuevo)', fecha:'', estado:'', notas:'' };
+    data[secName] = data[secName] || [];
+    data[secName].push(nuevo);
+    state.selected = { section:secName, index:data[secName].length-1 };
+    save(); renderAll();
+  });
+
+  // Click en lista (editar/eliminar)
+  q('.sec-list',secEl).addEventListener('click',(ev)=>{
+    const itemEl = ev.target.closest('.item');
+    if(!itemEl) return;
+    const idx = +itemEl.dataset.index;
+
+    if(ev.target.textContent.includes('🗑️')){
+      if(confirm('¿Eliminar este item?')){
+        data[secName].splice(idx,1);
+        state.selected = {section:null,index:null};
+        save(); renderAll();
+      }
+      return;
+    }
+    // seleccionar para editar
+    state.selected = { section:secName, index:idx };
+    renderAll();
+  });
+});
+
+/* ======= Detalle (form) ======= */
+q('#btnSave').addEventListener('click',()=>{
+  if(state.selected.section==null) return;
+  const {section,index} = state.selected;
+  const it = data[section][index];
+  it.nombre = q('#fNombre').value.trim();
+  it.fecha = q('#fFecha').value;
+  it.estado = q('#fEstado').value.trim();
+  it.notas = q('#fNotas').value.trim();
+  save(); renderAll();
+});
+q('#btnCancel').addEventListener('click',()=>{
+  state.selected = {section:null,index:null};
+  renderAll();
+});
+
+/* ======= Init ======= */
+(function init(){
+  q('#stamp').textContent = 'Actualizado: ' + nowISO();
+  renderAll();
+})();
 </script>
 </body>
 </html>
