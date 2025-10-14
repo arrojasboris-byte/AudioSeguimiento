@@ -59,23 +59,36 @@ body{margin:0;background:var(--bg);font-family:Inter,system-ui,Segoe UI,Roboto,A
 .field label{font-weight:700;opacity:.9}
 .field input,.field select{border:1px solid var(--line);border-radius:10px;padding:.5rem .6rem;font-size:1rem;background:#fff;outline:none}
 
-/* Tablas con scroll horizontal */
+/* Tablas + densidad tipo Excel */
 .table-wrap{border:1px solid var(--line);border-radius:12px;background:#fff;box-shadow:var(--shadow);padding:.5rem}
 .xscroll{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;padding-bottom:14px}
-.table-inner{display:block;width:max-content;min-width:1800px}
+.table-inner{display:block;width:max-content;min-width:1600px}
+.table-inner input,.table-inner select{padding:.35rem .45rem;font-size:.95rem}
+.va-head,.va-row{display:grid;gap:.25rem;align-items:center;margin:.1rem .1rem} /* más densidad */
 .scroll{max-height:58vh;overflow:auto;padding-right:.3rem}
-.va-head,.va-row{display:grid;gap:.35rem;align-items:center;margin:.2rem .1rem}
-.va-cols{grid-template-columns:52px 1.1fr 140px 140px 160px 130px 120px 70px 170px 170px}
-.fm-head,.fm-row{grid-template-columns:52px 120px 220px 160px 140px 140px 140px 140px 140px 120px 120px}
-.ta-head,.ta-row{grid-template-columns:52px 1.2fr 160px 150px 180px 110px 110px 130px 130px 140px}
+
+/* Columnas (grid templates) */
+.va-cols{grid-template-columns:52px 1.1fr 140px 140px 160px 130px 120px 90px 170px 170px}
+.fm-head,.fm-row{grid-template-columns:52px 110px 220px 150px 110px 120px 120px 120px 120px 110px 110px}
+.ta-head,.ta-row{grid-template-columns:52px 1.2fr 150px 140px 170px 110px 110px 120px 130px 130px}
+
+/* Score / conversión */
 .pscore{border:2px solid transparent}
 .pscore.good{background:#eaf9f0;border-color:#2ecc71aa}
 .pscore.bad{background:#ffe8e8;border-color:#e74c3caa}
 .conv{border:2px solid transparent}
 .conv.good{background:#eaf9f0;border-color:rgba(46,204,113,.6)}
 .conv.bad{background:#fff4e1;border-color:rgba(243,156,18,.7)}
-@media (max-width:1200px){.wrap{grid-template-columns:1fr}.scroll{max-height:52vh}}
 
+/* HIT rojo/verde (celda) */
+.hitcell{background:#ffe5e5;border:1px solid #f5c2c2;border-radius:8px;display:flex;justify-content:center;align-items:center;padding:.2rem}
+.hitcell.on{background:#e6f6ed;border-color:#bfe7cc}
+
+.summary{display:flex;align-items:center;gap:1rem;margin:.3rem 0 .6rem 0}
+.progress{flex:1;height:10px;background:#e9ecef;border-radius:999px;overflow:hidden}
+.progress>div{height:100%;background:#1f6feb;width:0%}
+
+@media (max-width:1200px){.wrap{grid-template-columns:1fr}.scroll{max-height:52vh}}
 /* Overlay PIN: negro */
 .gate{position:fixed;inset:0;background:#000;display:flex;align-items:center;justify-content:center;z-index:1000}
 .gate-card{background:#111;color:#fff;border-radius:16px;box-shadow:var(--shadow);padding:24px 22px;min-width:320px;border:1px solid #2a2a2a}
@@ -187,6 +200,12 @@ body{margin:0;background:var(--bg);font-family:Inter,system-ui,Segoe UI,Roboto,A
       <!-- VISITAS -->
       <div id="detVisitas" style="display:none">
         <div class="save-band"><button id="saveVisitasTop" class="save-big">💾 GUARDAR VISITAS</button></div>
+
+        <div class="summary">
+          <div id="vaSummaryTxt">Centros visitados: 0 / 0</div>
+          <div class="progress"><div id="vaProg"></div></div>
+        </div>
+
         <div class="row">
           <div class="field"><label>Rol</label><select id="vaRol"><option>Delegado audio</option><option>Responsable AAR</option></select></div>
           <div class="field"><label>Nombre</label><input id="vaResp" placeholder="Nombre"></div>
@@ -273,20 +292,11 @@ body{margin:0;background:var(--bg);font-family:Inter,system-ui,Segoe UI,Roboto,A
 <script>
 /* ======= CONFIG ======= */
 const REQUIRE_PIN = true;
-const PIN_CODE = '4321';             // <— PIN (admite may/min)
-const DB_PATH  = 'audioseguimiento/v6'; // cambia para “versionar” datos
+const PIN_CODE = '4321';                // PIN obligatorio
+const DB_PATH  = 'audioseguimiento/v7'; // rama de datos
 
-// Rellena esto si quieres usar Firebase Realtime Database.
-// Si lo dejas vacío, la app usa LocalStorage automáticamente.
-const firebaseConfig = {
-  apiKey: "",
-  authDomain: "",
-  databaseURL: "",
-  projectId: "",
-  storageBucket: "",
-  messagingSenderId: "",
-  appId: ""
-};
+// Rellena para usar Realtime Database; si lo dejas vacío, usa LocalStorage.
+const firebaseConfig = { apiKey:"", authDomain:"", databaseURL:"", projectId:"", storageBucket:"", messagingSenderId:"", appId:"" };
 
 /* ======= Utiles ======= */
 const $=(s,r=document)=>r.querySelector(s); const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
@@ -314,7 +324,7 @@ let data={
 };
 
 /* ======= Persistencia (Nube/Local) ======= */
-const LOCAL_KEY='audioseguimiento_local_v6';
+const LOCAL_KEY='audioseguimiento_local_v7';
 function localLoad(){ try{const raw=localStorage.getItem(LOCAL_KEY); if(raw){data=JSON.parse(raw);} }catch(e){} }
 function localSave(){ try{localStorage.setItem(LOCAL_KEY,JSON.stringify(data));}catch(e){} }
 
@@ -335,21 +345,13 @@ function initFirebase(){
 }
 function saveCloudOrLocal(){
   if(cloud.enabled && cloud.ready){
-    cloud.ref.set(data).then(()=>{
-      lastCloud=JSON.parse(JSON.stringify(data));
-      $('#stamp').textContent='Guardado (nube): '+now();
-    });
-  }else{
-    localSave();
-    $('#stamp').textContent='Guardado (local): '+now();
-  }
+    cloud.ref.set(data).then(()=>{ lastCloud=JSON.parse(JSON.stringify(data)); $('#stamp').textContent='Guardado (nube): '+now(); });
+  }else{ localSave(); $('#stamp').textContent='Guardado (local): '+now(); }
 }
 function fetchCloudOrLocal(){
   if(cloud.enabled && cloud.ready){
     cloud.ref.once('value').then(s=>{const v=s.val(); if(v){data=v; lastCloud=JSON.parse(JSON.stringify(v)); localSave(); renderAll(); $('#stamp').textContent='Actualizado (nube): '+now();}});
-  }else{
-    localLoad(); renderAll(); $('#stamp').textContent='Actualizado (local): '+now();
-  }
+  }else{ localLoad(); renderAll(); $('#stamp').textContent='Actualizado (local): '+now(); }
 }
 function resetLocalView(){
   if(cloud.enabled && lastCloud){ data=JSON.parse(JSON.stringify(lastCloud)); }
@@ -485,15 +487,38 @@ function renderVaTabs(){const it=cur(); const tabs=$('#vaTabs'); tabs.innerHTML=
 }
 function vClass80(v){const n=Number(v); if(!Number.isFinite(n)) return ''; return n>=80?'good':'bad';}
 function vScore85(v){const n=Number(v); if(!Number.isFinite(n)) return ''; return n>=85?'good':'bad';}
+function updateVaSummary(h){
+  // visitado = fila con fecha no vacía; únicos = centros distintos con fecha
+  const visited = h.rows.filter(r=> (r.fecha||'').trim()!=='' );
+  const unique = new Set( visited.map(r=>(r.centro||'').trim()).filter(Boolean) );
+  $('#vaSummaryTxt').textContent = `Centros visitados: ${unique.size}  ·  Registros: ${visited.length} / ${h.rows.length}`;
+  const p = Math.min(100, Math.round(visited.length*100/h.rows.length));
+  $('#vaProg').style.width = p+'%';
+}
 function renderVA(){const it=cur(); const h=it.hojas[state.vaSheet]||it.hojas[0]; const f=(state.vaFilter||'').toLowerCase(); const cont=$('#vaRows'); cont.innerHTML='';
+  updateVaSummary(h);
   h.rows.forEach((r,i)=>{if(f && !(r.centro||'').toLowerCase().includes(f)) return; const row=document.createElement('div'); row.className='va-row va-cols';
-    row.innerHTML=`<div>${i+1}</div><input data-i="${i}" data-k="centro" value="${esc(r.centro||'')}"><input data-i="${i}" data-k="delegado" value="${esc(r.delegado||'')}"><input data-i="${i}" data-k="audiologo" value="${esc(r.audiologo||'')}"><select data-i="${i}" data-k="tipo"><option ${r.tipo==='Sucursal'?'selected':''}>Sucursal</option><option ${r.tipo==='Franquicia'?'selected':''}>Franquicia</option></select><input type="date" data-i="${i}" data-k="fecha" value="${r.fecha||''}"><input class="pscore ${vScore85(r.puntuacion)}" type="number" min="0" max="100" step="1" data-i="${i}" data-k="puntuacion" value="${r.puntuacion??''}"><input type="checkbox" data-i="${i}" data-k="hit" ${r.hit?'checked':''}><input class="conv ${vClass80(r.conv_prueba)}" type="number" min="0" max="100" step="1" data-i="${i}" data-k="conv_prueba" value="${r.conv_prueba??''}"><input class="conv ${vClass80(r.conv_venta)}" type="number" min="0" max="100" step="1" data-i="${i}" data-k="conv_venta" value="${r.conv_venta??''}">`; cont.appendChild(row);});
+    row.innerHTML=`<div>${i+1}</div>
+    <input data-i="${i}" data-k="centro" value="${esc(r.centro||'')}">
+    <input data-i="${i}" data-k="delegado" value="${esc(r.delegado||'')}">
+    <input data-i="${i}" data-k="audiologo" value="${esc(r.audiologo||'')}">
+    <select data-i="${i}" data-k="tipo"><option ${r.tipo==='Sucursal'?'selected':''}>Sucursal</option><option ${r.tipo==='Franquicia'?'selected':''}>Franquicia</option></select>
+    <input type="date" data-i="${i}" data-k="fecha" value="${r.fecha||''}">
+    <input class="pscore ${vScore85(r.puntuacion)}" type="number" min="0" max="100" step="1" data-i="${i}" data-k="puntuacion" value="${r.puntuacion??''}">
+    <div class="hitcell ${r.hit?'on':''}"><input type="checkbox" class="hit" data-i="${i}" data-k="hit" ${r.hit?'checked':''}></div>
+    <input class="conv ${vClass80(r.conv_prueba)}" type="number" min="0" max="100" step="1" data-i="${i}" data-k="conv_prueba" value="${r.conv_prueba??''}">
+    <input class="conv ${vClass80(r.conv_venta)}" type="number" min="0" max="100" step="1" data-i="${i}" data-k="conv_venta" value="${r.conv_venta??''}">`;
+    cont.appendChild(row);
+  });
 }
 $('#vaRows').addEventListener('input',e=>{
   const i=+e.target.dataset.i, k=e.target.dataset.k; if(!k) return;
-  const h=cur().hojas[state.vaSheet]; if(e.target.type==='checkbox') h.rows[i][k]=e.target.checked;
+  const h=cur().hojas[state.vaSheet];
+  if(k==='hit'){ h.rows[i][k]=e.target.checked; const box=e.target.closest('.hitcell'); if(box) box.classList.toggle('on',e.target.checked); saveCloudOrLocal(); return; }
+  if(e.target.type==='checkbox') h.rows[i][k]=e.target.checked;
   else if(e.target.type==='number') h.rows[i][k]=e.target.value===''?null:Number(e.target.value);
-  else h.rows[i][k]=e.target.value; saveCloudOrLocal();
+  else h.rows[i][k]=e.target.value;
+  saveCloudOrLocal(); updateVaSummary(h);
 });
 $('#saveVisitasTop').onclick=saveCloudOrLocal;
 
@@ -527,7 +552,7 @@ $('#taSearch').oninput=e=>{state.taFilter=e.target.value.trim(); renderTA();};
 $('#taPerson').onchange=e=>{state.taPerson=e.target.value; renderTA();};
 function renderTA(){ const it=cur(); const h=it.hojas[0]; const f=(state.taFilter||'').toLowerCase(); const per=state.taPerson||''; const cont=$('#taRows'); cont.innerHTML='';
   h.rows.forEach((r,i)=>{ if((f && !(r.centro||'').toLowerCase().includes(f) && !(r.persona||'').toLowerCase().includes(f)) || (per && (r.persona||'')!==per)) return;
-    const row=document.createElement('div'); row.className='ta-row'; row.style.gridTemplateColumns='52px 1.2fr 160px 150px 180px 110px 110px 130px 130px 140px';
+    const row=document.createElement('div'); row.className='ta-row'; row.style.gridTemplateColumns='52px 1.2fr 150px 140px 170px 110px 110px 120px 130px 130px';
     row.innerHTML=`<div>${i+1}</div><input data-i="${i}" data-k="centro" value="${esc(r.centro||'')}"><input data-i="${i}" data-k="delegado" value="${esc(r.delegado||'')}"><select data-i="${i}" data-k="rol"><option ${r.rol!=='Técnico'?'selected':''}>Audiólogo</option><option ${r.rol==='Técnico'?'selected':''}>Técnico</option></select><input data-i="${i}" data-k="persona" value="${esc(r.persona||'')}" placeholder="Nombre"><input type="checkbox" data-i="${i}" data-k="formacion" ${r.formacion?'checked':''}><input type="checkbox" data-i="${i}" data-k="practicas" ${r.practicas?'checked':''}><input type="checkbox" data-i="${i}" data-k="certificado" ${r.certificado?'checked':''}><input type="number" min="0" step="1" data-i="${i}" data-k="pruebas_reales" value="${r.pruebas_reales??''}"><input type="number" min="0" step="1" data-i="${i}" data-k="ventas" value="${r.ventas??''}">`; cont.appendChild(row);
   });
 }
@@ -547,7 +572,8 @@ $('#btnAddParCols').onclick=()=>{ const it=cur(); it.columnas=(it.columnas||3)+1
 
 function renderEQ(){
   const it=cur(); const cols=Math.max(1,it.columnas||3); const f=(state.eqFilter||'').toLowerCase(); const root=$('#eqTable'); root.innerHTML='';
-  const template=['52px','220px','160px','180px','130px'].concat(Array.from({length:cols},()=>['180px','110px']).flat()).join(' ');
+  /* columnas más compactas tipo Excel */
+  const template=['52px','170px','130px','150px','120px'].concat(Array.from({length:cols},()=>['150px','90px']).flat()).join(' ');
   const head=document.createElement('div'); head.className='va-head'; head.style.gridTemplateColumns=template;
   head.innerHTML=`<div>#</div><div>Equipo</div><div>Nº serie</div><div>Persona que envía</div><div>Fecha</div>`+Array.from({length:cols},(_,i)=>`<div>Centro ${i+1}</div><div>Sede ${i+1}</div>`).join(''); root.appendChild(head);
   const body=document.createElement('div'); body.className='scroll'; root.appendChild(body);
@@ -592,8 +618,8 @@ $('#cancelPin').onclick=()=>{ $('#pin').value=''; $('#pinMsg').style.display='no
 /* ======= Init ======= */
 function renderAll(){ renderLeft(); if(state.selected.section) renderDetail(); else renderDetailBlank(); }
 window.addEventListener('load',()=>{
-  localLoad();           // siempre tenemos un respaldo local
-  initFirebase();        // opcional (si no hay claves, se queda en local)
+  localLoad();
+  initFirebase();        // si no hay claves → permanece en local
   renderAll();
   $('#stamp').textContent='Listo: '+now();
   if(REQUIRE_PIN){ $('#gate').style.display='flex'; $('#pin').focus(); }
