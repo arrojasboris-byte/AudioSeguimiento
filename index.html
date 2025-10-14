@@ -3,96 +3,83 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>SEGUIMIENTO AUDIO • Cloud v5e</title>
+<title>SEGUIMIENTO AUDIO · Cloud</title>
 
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23c82727'/%3E%3Ctext x='50%' y='54%' font-family='Arial,Helvetica,sans-serif' font-size='36' font-weight='900' text-anchor='middle' fill='white'%3EAR%3C/text%3E%3C/svg%3E">
 <meta name="theme-color" content="#c82727">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23c82727'/%3E%3Ctext x='50%' y='54%' font-family='Arial,Helvetica,sans-serif' font-size='36' font-weight='900' text-anchor='middle' fill='white'%3EAR%3C/text%3E%3C/svg%3E">
 
 <style>
   :root{
     --rojo:#c82727; --rojo-osc:#a71f1f;
     --bg:#f6f7fb; --card:#ffffff; --shadow:0 8px 22px rgba(0,0,0,.08);
     --col-exclusivos:#fde2e4; --col-flop:#e2f0cb; --col-visitas:#cde7f0; --col-formaciones:#f9e5c9; --col-tele:#eadcf8;
-    --st-rojo:#ffe5e5; --st-ambar:#fff2cc; --st-ambar2:#ffe29a; --st-verde:#e6f7ea;
     --line:#e6e7ee;
   }
   *{box-sizing:border-box}
   html,body{height:100%}
   body{margin:0;background:var(--bg);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;color:#222}
 
-  /* Top bar full-width sin 100vw */
-  .topbar{
-    position:sticky; top:0; left:0; right:0; width:100%;
-    z-index:50; display:flex; align-items:center; gap:.75rem;
-    padding:.8rem 0; margin:0;
-    background:linear-gradient(180deg,var(--rojo),var(--rojo-osc)); color:#fff;
-    box-shadow:var(--shadow)
-  }
-  .bar-inner{max-width:1380px;margin:0 auto;display:flex;align-items:center;gap:.75rem;padding:0 1rem;width:100%}
-  .brand{font-weight:800;letter-spacing:.4px;font-size:1.05rem}
+  /* Topbar a 100% del documento */
+  .topbar{position:sticky;top:0;left:0;right:0;width:100%;z-index:50;background:linear-gradient(180deg,var(--rojo),var(--rojo-osc));color:#fff;box-shadow:var(--shadow)}
+  .bar-inner{max-width:1380px;margin:0 auto;display:flex;align-items:center;gap:.75rem;padding:.8rem 1rem}
+  .brand{font-weight:900;letter-spacing:.35px}
   .spacer{flex:1}
-  .btn{border:0;border-radius:12px;padding:.5rem .85rem;cursor:pointer;box-shadow:var(--shadow);font-weight:650}
+  .btn{border:0;border-radius:12px;padding:.55rem .9rem;cursor:pointer;box-shadow:var(--shadow);font-weight:700}
+  .btn-lite{background:#fff;color:#9b1010}
+  .btn-save{background:#fff;color:#7e0e0e}
   .btn:disabled{opacity:.55;cursor:not-allowed}
-  .btn-lite{background:#fff;color:var(--rojo)}
-  .btn-save{background:#fff;color:#a31212}
-  .pill{display:inline-flex;align-items:center;gap:.45rem;background:#ffffff18;color:#fff;padding:.35rem .6rem;border-radius:999px;border:1px solid #ffffff44;font-weight:600}
-  .pill.ok{background:#1fcc7b33;border-color:#1fcc7b66}
-  .pill.warn{background:#ffd16633;border-color:#ffd16666}
+  .pill{display:inline-flex;align-items:center;gap:.4rem;padding:.35rem .6rem;border-radius:999px;border:1px solid #ffffff3d;background:#ffffff17}
+  .pill.ok{background:#28c76f2a;border-color:#28c76f66}
+  .pill.warn{background:#ffd1662e;border-color:#ffd16666}
   .ar{min-width:32px;height:32px;border-radius:9px;background:#fff;color:#b30000;font-weight:900;border:0;box-shadow:var(--shadow);cursor:pointer}
 
-  /* Área principal centrada */
+  /* Layout */
   .app{max-width:1380px;margin:0 auto}
   .wrap{display:grid;grid-template-columns:320px 1fr;gap:1rem;padding:1rem}
   .card{background:var(--card);border-radius:16px;box-shadow:var(--shadow)}
   .title{font-weight:900;font-size:1.05rem;padding:.8rem 1rem;border-bottom:1px solid var(--line)}
-
   .section{margin:12px;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:#fff}
-  .sec-head{display:flex;align-items:center;justify-content:space-between;gap:.5rem;padding:.75rem .9rem;font-weight:900}
-  .sec-head .tools{display:flex;gap:.4rem}
-  .sec-btn{display:inline-flex;align-items:center;justify-content:center;width:36px;height:32px;border-radius:9px;border:1px solid var(--line);background:#fff;cursor:pointer}
+  .sec-head{display:flex;align-items:center;justify-content:space-between;padding:.75rem .9rem;font-weight:900}
   .sec-list{padding:.4rem .6rem 1rem}
+  .sec-btn{width:36px;height:32px;border-radius:9px;border:1px solid var(--line);background:#fff;cursor:pointer}
+
   .item{display:flex;align-items:center;justify-content:space-between;gap:.6rem;background:#fff;border:1px solid var(--line);border-radius:12px;padding:.6rem .7rem;margin:.5rem 0}
   .item .name{font-weight:750}
-  .item small{display:block;opacity:.65}
   .acts{display:flex;gap:.25rem}
   .ico-btn{min-width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:#fff;cursor:pointer}
   .ico-btn:hover{background:#fafafa}
-  .ico{font-size:15px}
 
-  .detail{padding:1rem 1.1rem 1.2rem;min-height:520px;border-radius:18px;border:1px solid var(--line);background:#fff;transition:background .2s}
-  .detail h2{margin:.1rem 0 0 0;font-size:1.15rem}
+  .bg-exclusivos{background:var(--col-exclusivos)}
+  .bg-flop{background:var(--col-flop)}
+  .bg-visitas{background:var(--col-visitas)}
+  .bg-formaciones{background:var(--col-formaciones)}
+  .bg-tele{background:var(--col-tele)}
+
+  .detail{padding:1rem 1.1rem 1.2rem;min-height:520px;border-radius:18px;border:1px solid var(--line);background:#fff}
+  .detail h2{margin:0 0 .4rem 0}
   .hint{opacity:.7;margin:.2rem 0 1rem}
-  .field{display:grid;gap:.3rem;margin:.5rem 0}
-  .field label{font-weight:700;opacity:.9}
-  .field input,.field select,.field textarea{border:1px solid var(--line);border-radius:10px;padding:.5rem .6rem;font-size:1rem;background:#fff;outline:none}
-  .bar-right{display:flex;justify-content:flex-end;gap:.5rem}
-  .bar-split{display:flex;justify-content:space-between;align-items:center;gap:.6rem;margin:.4rem 0}
-  .badge{display:inline-block;padding:.2rem .5rem;border-radius:999px;background:#00000010;font-size:.85rem}
+  .badge{padding:.15rem .5rem;border-radius:999px;background:#00000010}
   .row{display:flex;gap:.8rem;align-items:flex-end;flex-wrap:wrap}
-  .row .field{flex:1;min-width:200px}
+  .field{display:grid;gap:.3rem;margin:.5rem 0;flex:1;min-width:200px}
+  .field label{font-weight:700;opacity:.9}
+  .field input,.field select{border:1px solid var(--line);border-radius:10px;padding:.5rem .6rem;font-size:1rem;background:#fff;outline:none}
+  .bar-right{display:flex;gap:.5rem;justify-content:flex-end}
+  .bar-split{display:flex;justify-content:space-between;align-items:center;margin:.4rem 0}
 
-  .bg-exclusivos{ background:var(--col-exclusivos)}
-  .bg-flop{ background:var(--col-flop)}
-  .bg-visitas{ background:var(--col-visitas)}
-  .bg-formaciones{ background:var(--col-formaciones)}
-  .bg-tele{ background:var(--col-tele)}
-
-  .panel{margin:.8rem 0 1rem;background:#ffffffd0;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow)}
-  .panel .ph{display:flex;align-items:center;justify-content:space-between;padding:.7rem .9rem;border-bottom:1px solid var(--line);font-weight:900}
-  .panel .pl{padding:.7rem .9rem}
-
-  /* tablas con scroll horizontal */
-  .table-wrap{border:1px solid var(--line);border-radius:12px;background:#fff;box-shadow:var(--shadow);padding:.5rem .5rem .7rem}
-  .xscroll{overflow-x:auto}
-  .table-inner{min-width:1700px}  /* asegura scroll lateral en pantallas estrechas */
+  /* Tablas: scroll horizontal robusto */
+  .table-wrap{border:1px solid var(--line);border-radius:12px;background:#fff;box-shadow:var(--shadow);padding:.5rem}
+  .xscroll{overflow-x:auto;overflow-y:hidden}
+  .table-inner{display:block;width:max-content;min-width:1700px} /* fuerza scroll X */
   .scroll{max-height:58vh;overflow:auto;padding-right:.3rem}
 
-  /* VISITAS */
-  .va-head, .va-row {display:grid;gap:.35rem;align-items:center;margin:.2rem .1rem}
-  .va-cols {grid-template-columns: 52px 1.1fr 140px 140px 160px 130px 120px 70px 170px 170px;}
-  .va-head{font-weight:800;opacity:.75}
+  /* Grids por módulo (mismo ancho para header y filas) */
+  .va-head,.va-row{display:grid;gap:.35rem;align-items:center;margin:.2rem .1rem}
+  .va-cols{grid-template-columns:52px 1.1fr 140px 140px 160px 130px 120px 70px 170px 170px}
+  .fm-head,.fm-row{display:grid;gap:.35rem;align-items:center;margin:.2rem .1rem;grid-template-columns:52px 120px 220px 160px 140px 140px 140px 140px 140px 120px 120px}
+  .ta-head,.ta-row{display:grid;gap:.35rem;align-items:center;margin:.2rem .1rem;grid-template-columns:52px 1.2fr 160px 150px 180px 110px 110px 130px 130px 140px}
 
+  /* Colores de celdas por % */
   .pscore{border:2px solid transparent}
   .pscore.good{background:#eaf9f0;border-color:#2ecc71aa}
   .pscore.bad{background:#ffe8e8;border-color:#e74c3caa}
@@ -100,35 +87,24 @@
   .conv.good{background:#eaf9f0;border-color:rgba(46,204,113,.6)}
   .conv.bad{background:#fff4e1;border-color:rgba(243,156,18,.7)}
 
-  .tabs{display:flex;gap:.4rem;flex-wrap:wrap;margin:.3rem 0 .6rem}
-  .tab{border:1px solid var(--line);background:#fff;border-radius:999px;padding:.3rem .65rem;cursor:pointer}
-  .tab.active{border-color:#888;background:#f7f7f7}
-  .tab-add{font-weight:900}
-
-  /* FM */
-  .fm-head, .fm-row{display:grid;gap:.35rem;align-items:center;margin:.2rem .1rem}
-  .fm-head, .fm-row{grid-template-columns: 52px 120px 220px 160px 140px 140px 140px 140px 140px 120px 120px}
-
-  /* TELE */
-  .ta-head, .ta-row{display:grid;gap:.35rem;align-items:center;margin:.2rem .1rem}
-  .ta-head, .ta-row{grid-template-columns: 52px 1.2fr 160px 150px 180px 110px 110px 130px 130px 140px}
-
-  @media (max-width:1200px){ .wrap{grid-template-columns:1fr} .scroll{max-height:50vh} }
+  @media (max-width:1200px){ .wrap{grid-template-columns:1fr} .scroll{max-height:52vh} }
 </style>
 </head>
 <body>
 
-<!-- TOPBAR a todo lo ancho -->
 <header class="topbar">
   <div class="bar-inner">
-    <button class="ar" title="AR" id="btnAR">AR</button>
-    <div class="brand">SEGUIMIENTO AUDIO • Cloud</div>
+    <button class="ar" title="Menú">AR</button>
+    <div class="brand">SEGUIMIENTO AUDIO · Cloud</div>
     <div class="spacer"></div>
 
+    <span id="viewMode" class="pill warn" style="display:none">👁️ Solo lectura — pulsa <b>Editar</b></span>
     <span id="lockInfo" class="pill warn" style="display:none">🔒 En uso…</span>
-    <button class="btn btn-lite" id="btnEdit">Editar</button>
-    <button class="btn btn-lite" id="btnRefresh">Actualizar</button>
-    <button class="btn btn-save" id="btnSaveTop" disabled>Guardar</button>
+
+    <button class="btn btn-lite" id="btnEdit" title="Pedir bloqueo y habilitar edición">Editar</button>
+    <button class="btn btn-lite" id="btnRefresh" title="Leer última versión desde la nube (no guarda)">Actualizar</button>
+    <button class="btn btn-save" id="btnSaveTop" title="Guardar cambios en la nube" disabled>Guardar</button>
+
     <span class="pill ok" id="pillOk" style="display:none">✓ Guardado</span>
     <span class="pill" id="stamp">Conectando…</span>
   </div>
@@ -136,14 +112,14 @@
 
 <main class="app">
   <section class="wrap">
-    <!-- LADO IZQUIERDO -->
+    <!-- IZQUIERDA -->
     <aside class="card">
       <div class="title">SEGUIMIENTO</div>
 
       <section class="section bg-exclusivos" data-section="CENTROS EXCLUSIVOS">
         <div class="sec-head">
           <div>📒 CENTROS EXCLUSIVOS <span class="badge">(máx. 10)</span></div>
-          <div class="tools"><button class="sec-btn" data-act="toggle">▾</button><button class="sec-btn" data-act="add">＋</button></div>
+          <div><button class="sec-btn" data-act="toggle">▾</button> <button class="sec-btn" data-act="add">＋</button></div>
         </div>
         <div class="sec-list"></div>
       </section>
@@ -151,7 +127,7 @@
       <section class="section bg-flop" data-section="CENTROS FLOP">
         <div class="sec-head">
           <div>📒 CENTROS FLOP</div>
-          <div class="tools"><button class="sec-btn" data-act="toggle">▾</button><button class="sec-btn" data-act="add">＋</button></div>
+          <div><button class="sec-btn" data-act="toggle">▾</button> <button class="sec-btn" data-act="add">＋</button></div>
         </div>
         <div class="sec-list"></div>
       </section>
@@ -159,7 +135,7 @@
       <section class="section bg-visitas" data-section="VISITAS AUDIO">
         <div class="sec-head">
           <div>📋 VISITAS AUDIO</div>
-          <div class="tools"><button class="sec-btn" data-act="toggle">▾</button><button class="sec-btn" data-act="add">＋</button></div>
+          <div><button class="sec-btn" data-act="toggle">▾</button> <button class="sec-btn" data-act="add">＋</button></div>
         </div>
         <div class="sec-list"></div>
       </section>
@@ -167,7 +143,7 @@
       <section class="section bg-formaciones" data-section="FORMACIONES Y MENTORING">
         <div class="sec-head">
           <div>🎓 FORMACIONES Y MENTORING</div>
-          <div class="tools"><button class="sec-btn" data-act="toggle">▾</button><button class="sec-btn" data-act="add">＋</button></div>
+          <div><button class="sec-btn" data-act="toggle">▾</button> <button class="sec-btn" data-act="add">＋</button></div>
         </div>
         <div class="sec-list"></div>
       </section>
@@ -175,13 +151,13 @@
       <section class="section bg-tele" data-section="TELEAUDIOLOGIA">
         <div class="sec-head">
           <div>📡 TELEAUDIOLOGIA</div>
-          <div class="tools"><button class="sec-btn" data-act="toggle">▾</button><button class="sec-btn" data-act="add">＋</button></div>
+          <div><button class="sec-btn" data-act="toggle">▾</button> <button class="sec-btn" data-act="add">＋</button></div>
         </div>
         <div class="sec-list"></div>
       </section>
     </aside>
 
-    <!-- DETALLE -->
+    <!-- DERECHA (DETALLE) -->
     <section class="detail card" id="detail">
       <div class="row" style="align-items:center">
         <h2 id="detTitle">Detalle</h2>
@@ -205,44 +181,35 @@
           <div class="field"><label>Franquicia o Sucursal</label><select id="cTipo"><option>Franquicia</option><option>Sucursal</option></select></div>
         </div>
 
-        <div class="panel">
-          <div class="ph">ACCIONES <div class="bar-right"><button class="btn" id="addAccion">＋ Añadir fila</button></div></div>
-          <div class="pl">
-            <div class="xscroll">
-              <div class="table-inner">
-                <div class="va-head" style="grid-template-columns:52px 130px 1fr 110px 110px 110px 150px 52px">
-                  <div>#</div><div>Fecha</div><div>Tipo de acción</div><div>Paquete</div><div>Derivación</div><div>Citas</div><div>Venta</div><div></div>
-                </div>
-                <div id="accionesRows"></div>
+        <div class="table-wrap">
+          <div class="xscroll">
+            <div class="table-inner">
+              <div class="va-head" style="grid-template-columns:52px 130px 1fr 110px 110px 110px 150px 52px">
+                <div>#</div><div>Fecha</div><div>Tipo de acción</div><div>Paquete</div><div>Derivación</div><div>Citas</div><div>Venta</div><div></div>
               </div>
+              <div id="accionesRows"></div>
             </div>
           </div>
         </div>
 
-        <div class="panel">
-          <div class="ph">FORMACIONES RELEVANTES <div class="bar-right"><button class="btn" id="addFormacion">＋ Añadir fila</button></div></div>
-          <div class="pl">
-            <div class="xscroll">
-              <div class="table-inner">
-                <div class="va-head" style="grid-template-columns:52px 1.2fr .7fr .7fr 1.4fr 52px">
-                  <div>#</div><div>Curso</div><div>Realizado</div><div>Aplica</div><div>Observaciones</div><div></div>
-                </div>
-                <div id="formacionesRows"></div>
+        <div class="table-wrap">
+          <div class="xscroll">
+            <div class="table-inner">
+              <div class="va-head" style="grid-template-columns:52px 1.2fr .7fr .7fr 1.4fr 52px">
+                <div>#</div><div>Curso</div><div>Realizado</div><div>Aplica</div><div>Observaciones</div><div></div>
               </div>
+              <div id="formacionesRows"></div>
             </div>
           </div>
         </div>
 
-        <div class="panel">
-          <div class="ph">CONTROL DE PROCESOS <div class="bar-right"><button class="btn" id="addProceso">＋ Añadir fila</button></div></div>
-          <div class="pl">
-            <div class="xscroll">
-              <div class="table-inner">
-                <div class="va-head" style="grid-template-columns:52px 220px 120px 160px 52px">
-                  <div>#</div><div>Puntuación checklist (0–100 %)</div><div>HIT</div><div>Colaboraciones</div><div></div>
-                </div>
-                <div id="procesosRows"></div>
+        <div class="table-wrap">
+          <div class="xscroll">
+            <div class="table-inner">
+              <div class="va-head" style="grid-template-columns:52px 220px 120px 160px 52px">
+                <div>#</div><div>Puntuación checklist (0–100 %)</div><div>HIT</div><div>Colaboraciones</div><div></div>
               </div>
+              <div id="procesosRows"></div>
             </div>
           </div>
         </div>
@@ -262,17 +229,18 @@
           <div class="field"><label>Buscar centro</label><input id="vaSearchTop" type="text" placeholder="Filtrar…"></div>
         </div>
         <div class="tabs" id="vaTabs"></div>
+
         <div class="table-wrap">
           <div class="xscroll">
             <div class="table-inner">
               <div class="va-head va-cols">
-                <div>#</div><div>Centro</div><div>Delegado</div><div>Audiólogo</div>
-                <div>Sucursal/Franquicia</div><div>Fecha visita</div><div>Puntuación (%)</div><div>HIT</div><div>% Conversión prueba</div><div>% Conversión venta</div>
+                <div>#</div><div>Centro</div><div>Delegado</div><div>Audiólogo</div><div>Sucursal/Franquicia</div><div>Fecha visita</div><div>Puntuación (%)</div><div>HIT</div><div>% Conversión prueba</div><div>% Conversión venta</div>
               </div>
               <div id="vaRows" class="scroll"></div>
             </div>
           </div>
         </div>
+
         <div class="bar-right" style="margin-top:.7rem"><button class="btn" id="btnCancelVA">Cancelar</button><button class="btn btn-save" id="btnSaveVA">💾 Guardar visitas</button></div>
       </div>
 
@@ -283,6 +251,7 @@
           <div class="field"><label>Delegado regional</label><input id="fmDelegado" type="text"></div>
           <div class="field"><label>Buscar</label><input id="fmSearchTop" type="text" placeholder="Filtrar…"></div>
         </div>
+
         <div class="table-wrap">
           <div class="xscroll">
             <div class="table-inner">
@@ -293,6 +262,7 @@
             </div>
           </div>
         </div>
+
         <div class="bar-right" style="margin-top:.7rem"><button class="btn" id="btnCancelFM">Cancelar</button><button class="btn btn-save" id="btnSaveFM">💾 Guardar</button></div>
       </div>
 
@@ -303,31 +273,30 @@
           <div class="field"><label>Buscar</label><input id="taSearchTop" type="text" placeholder="Centro o persona…"></div>
           <div class="field"><label>Persona</label><select id="taPersonSelect"><option value="">Todos</option></select></div>
         </div>
+
         <div class="table-wrap">
           <div class="xscroll">
             <div class="table-inner">
-              <div class="ta-head" style="font-weight:800;opacity:.75;margin:.2rem .1rem;display:grid;gap:.35rem;grid-template-columns:52px 1.2fr 160px 150px 180px 110px 110px 130px 130px 140px">
+              <div class="ta-head">
                 <div>#</div><div>Centro</div><div>Delegado</div><div>Rol</div><div>Persona</div><div>Formación</div><div>Prácticas</div><div>Certificado</div><div>Pruebas reales</div><div>Ventas</div>
               </div>
               <div id="taRows" class="scroll"></div>
             </div>
           </div>
         </div>
+
         <div class="bar-right" style="margin-top:.7rem"><button class="btn" id="btnCancelTA">Cancelar</button><button class="btn btn-save" id="btnSaveTA">💾 Guardar tele</button></div>
       </div>
 
-      <input type="file" id="fileAccion" style="display:none" accept=".pdf,.png,.jpg,.jpeg,.xlsx,.xls,.csv,.doc,.docx" />
     </section>
   </section>
 </main>
 
-<!-- Firebase (compat) -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-
 <script>
-/* ================== CONFIGURA AQUÍ TUS CLAVES ================== */
+/* ======= Rellena tus claves ======= */
 const firebaseConfig = {
   apiKey: "TU_API_KEY",
   authDomain: "TU_DOMINIO.firebaseapp.com",
@@ -337,18 +306,18 @@ const firebaseConfig = {
   messagingSenderId: "TUSENDERID",
   appId: "TU_APP_ID"
 };
-const DB_PATH = 'audioseguimiento/v5e';
-const LOCK_PATH = DB_PATH + '/__lock__';
-const LOCK_TIMEOUT_MS = 5 * 60 * 1000; // 5 min
-/* ================================================================ */
+const DB_PATH='audioseguimiento/v5f';
+const LOCK_PATH=DB_PATH+'/__lock__';
+const LOCK_TIMEOUT_MS=5*60*1000;
+/* ================================== */
 
-let cloud = { ready:false, ref:null, db:null };
-let state = { selected:{section:null,index:null}, vaSheet:0, vaFilter:'', fmFilter:'', taFilter:'', taPerson:'', canEdit:true, myLock:false };
-let sessionId = localStorage.getItem('aas_session') || ('S'+Math.random().toString(36).slice(2));
-localStorage.setItem('aas_session', sessionId);
-let editorName = localStorage.getItem('aas_name') || '';
+let cloud={ready:false,ref:null,db:null};
+let state={selected:{section:null,index:null},vaSheet:0,vaFilter:'',fmFilter:'',taFilter:'',taPerson:'',canEdit:false,myLock:false};
+let sessionId=localStorage.getItem('aas_session')||('S'+Math.random().toString(36).slice(2));
+localStorage.setItem('aas_session',sessionId);
+let editorName=localStorage.getItem('aas_name')||'';
 
-let data = {
+let data={
   "CENTROS EXCLUSIVOS":[{ nombre:"Reina Mercedes", delegado:"", audiologo:"", tipo:"Franquicia", acciones:[], formaciones:[], procesos:[] }],
   "CENTROS FLOP":[],
   "VISITAS AUDIO":[{ rol:"Delegado audio", responsable:"", hojas:[ makeSheetVA("Visita 1") ] }],
@@ -356,152 +325,123 @@ let data = {
   "TELEAUDIOLOGIA":[{ hojas:[ makeSheetTA("Tele 1") ] }]
 };
 
-/* ======= Utils ======= */
 const $=(s,r=document)=>r.querySelector(s); const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
-const nowISO=()=>new Date().toISOString();
 const esc=s=>(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-function makeSheetVA(nombre){ const rows=Array.from({length:300},()=>({centro:'', delegado:'', audiologo:'', tipo:'Sucursal', fecha:'', puntuacion:null, hit:false, conv_prueba:null, conv_venta:null})); return {nombre, rows}; }
-function makeRowsFM(){ return Array.from({length:300},()=>({fecha:'', tema:'', audiologo:'', duracion:1, p_ini:null, v_ini:null, p_3m:null, v_3m:null})); }
-function makeSheetTA(nombre){ const rows=Array.from({length:300},()=>({centro:'', delegado:'', rol:'Audiólogo', persona:'', formacion:false, practicas:false, certificado:false, pruebas_reales:null, ventas:null})); return {nombre, rows}; }
-function setDetailTone(section){ const det=$('#detail'); if(section==="CENTROS EXCLUSIVOS") det.style.background='var(--col-exclusivos)'; else if(section==="CENTROS FLOP") det.style.background='var(--col-flop)'; else if(section==="VISITAS AUDIO") det.style.background='var(--col-visitas)'; else if(section==="FORMACIONES Y MENTORING") det.style.background='var(--col-formaciones)'; else if(section==="TELEAUDIOLOGIA") det.style.background='var(--col-tele)'; else det.style.background='#fff'; }
-function currentItem(){ return data[state.selected.section]?.[state.selected.index]; }
 
-/* ======= Firebase + bloqueo ======= */
+function makeSheetVA(n){const rows=Array.from({length:300},()=>({centro:'',delegado:'',audiologo:'',tipo:'Sucursal',fecha:'',puntuacion:null,hit:false,conv_prueba:null,conv_venta:null}));return{nombre:n,rows};}
+function makeRowsFM(){return Array.from({length:300},()=>({fecha:'',tema:'',audiologo:'',duracion:1,p_ini:null,v_ini:null,p_3m:null,v_3m:null}));}
+function makeSheetTA(n){const rows=Array.from({length:300},()=>({centro:'',delegado:'',rol:'Audiólogo',persona:'',formacion:false,practicas:false,certificado:false,pruebas_reales:null,ventas:null}));return{nombre:n,rows};}
+function setDetailTone(s){const d=$('#detail');d.style.background = s==="CENTROS EXCLUSIVOS"?'var(--col-exclusivos)':s==="CENTROS FLOP"?'var(--col-flop)':s==="VISITAS AUDIO"?'var(--col-visitas)':s==="FORMACIONES Y MENTORING"?'var(--col-formaciones)':s==="TELEAUDIOLOGIA"?'var(--col-tele)':'#fff';}
+function currentItem(){return data[state.selected.section]?.[state.selected.index];}
+
+/* ===== Firebase + Lock ===== */
 function initFirebase(){
-  try{ firebase.initializeApp(firebaseConfig); }catch(e){}
-  cloud.db = firebase.database();
+  try{firebase.initializeApp(firebaseConfig);}catch(e){}
+  cloud.db=firebase.database();
   firebase.auth().signInAnonymously().then(()=>{
-    cloud.ref = cloud.db.ref(DB_PATH);
-    cloud.ref.on('value',snap=>{ const val=snap.val(); if(val) data=val; cloud.ready=true; $('#btnSaveTop').disabled=false; $('#stamp').textContent='Conectado: '+nowISO(); renderAll(); });
+    cloud.ref=cloud.db.ref(DB_PATH);
+    cloud.ref.on('value',snap=>{const v=snap.val(); if(v) data=v; cloud.ready=true; $('#btnSaveTop').disabled=false; $('#stamp').textContent='Conectado'; renderAll();});
     watchLock();
   });
 }
-function save(){
-  if(!cloud.ready){ return; }
-  if(!state.canEdit){ alert('Modo solo lectura: la plataforma está en uso.'); return; }
-  cloud.ref.set(data).then(()=>{ $('#pillOk').style.display='inline-flex'; setTimeout(()=>$('#pillOk').style.display='none',2000); $('#stamp').textContent='Guardado: '+nowISO(); });
+function save(){if(!cloud.ready)return; if(!state.canEdit){alert('Solo lectura. Pulsa Editar.');return;}
+  cloud.ref.set(data).then(()=>{$('#pillOk').style.display='inline-flex';setTimeout(()=>$('#pillOk').style.display='none',1800);});
 }
 function watchLock(){
-  const lref = cloud.db.ref(LOCK_PATH);
-  lref.on('value', snap=>{
-    const lock = snap.val();
-    const now = Date.now();
-    const active = lock && (now - lock.at) <= LOCK_TIMEOUT_MS;
-    if(active && lock.by !== sessionId){
-      state.canEdit = false;
-      state.myLock = false;
-      $('#lockInfo').textContent = `🔒 En uso por ${lock.name||'otro usuario'}`;
+  const lref=cloud.db.ref(LOCK_PATH);
+  lref.on('value',snap=>{
+    const lock=snap.val(); const now=Date.now(); const activo=lock && (now-lock.at)<=LOCK_TIMEOUT_MS;
+    if(activo && lock.by!==sessionId){
+      state.canEdit=false; state.myLock=false;
+      $('#viewMode').style.display='inline-flex';
       $('#lockInfo').style.display='inline-flex';
+      $('#lockInfo').textContent=`🔒 En uso por ${lock.name||'otro usuario'}`;
     }else{
-      // libre o mío
-      state.canEdit = true;
-      state.myLock = !!(active && lock.by===sessionId);
-      $('#lockInfo').style.display = state.myLock ? 'inline-flex' : 'none';
-      if(state.myLock) $('#lockInfo').textContent='🔓 Tienes el bloqueo de edición';
+      $('#lockInfo').style.display='none';
+      if(!state.myLock) $('#viewMode').style.display='inline-flex';  // hasta que pulse Editar
     }
-    toggleInputsByEdit();
-  });
-}
-function toggleInputsByEdit(){
-  const disable = !state.canEdit;
-  $$("input,select,textarea,button").forEach(el=>{
-    const id = el.id || '';
-    if(['btnRefresh','btnEdit','btnAR'].includes(id)) return;
-    if(id.startsWith('btnCancel')) return;
-    if(id.startsWith('btnSave')){ el.disabled = disable; return; }
-    if(el.classList.contains('btn-del')){ el.disabled = disable; return; }
-    if(['checkbox','text','number','date'].includes(el.type) || el.tagName==='SELECT' || el.tagName==='TEXTAREA'){
-      el.disabled = disable;
-    }
+    toggleEditability();
   });
 }
 function requestEdit(){
-  if(!editorName){
-    const name = prompt('Tu nombre para mostrar el bloqueo (ej.: Sergio)') || '';
-    if(name) { editorName = name; localStorage.setItem('aas_name', name); }
-  }
-  const lref = cloud.db.ref(LOCK_PATH);
+  if(!editorName){const n=prompt('Tu nombre para mostrar (ej.: Sergio)')||''; if(n){editorName=n;localStorage.setItem('aas_name',n);}}
+  const lref=cloud.db.ref(LOCK_PATH);
   lref.transaction(curr=>{
-    const now = Date.now();
-    if(!curr || (now - curr.at) > LOCK_TIMEOUT_MS || curr.by===sessionId){
-      return { by: sessionId, name: editorName || 'Usuario', at: now };
-    }
+    const now=Date.now();
+    if(!curr || (now-curr.at)>LOCK_TIMEOUT_MS || curr.by===sessionId){return {by:sessionId,name:editorName||'Usuario',at:now};}
     return; // otro lo tiene
-  }, (err, committed, snap)=>{
-    if(err){ alert('Error al solicitar edición.'); return; }
-    const lock = snap.val();
-    if(committed && lock.by===sessionId){
-      state.canEdit = true; state.myLock = true; $('#lockInfo').textContent='🔓 Tienes el bloqueo de edición'; $('#lockInfo').style.display='inline-flex';
-      toggleInputsByEdit();
-      keepAliveLock(); onReleaseLock();
+  },(err,ok,snap)=>{
+    if(err){alert('Error al pedir edición.');return;}
+    const lock=snap.val();
+    if(ok && lock.by===sessionId){
+      state.canEdit=true; state.myLock=true; $('#viewMode').style.display='none'; $('#lockInfo').style.display='inline-flex'; $('#lockInfo').textContent='🔓 Edición habilitada';
+      keepAlive(); window.addEventListener('beforeunload',releaseLock); toggleEditability();
     }else{
-      alert(`En uso por ${lock?.name||'otro usuario'}. Queda en solo lectura.`);
-      state.canEdit = false; state.myLock = false; toggleInputsByEdit();
+      alert(`En uso por ${lock?.name||'otro usuario'}.`);
     }
   });
 }
-let hbTimer=null;
-function keepAliveLock(){
-  clearInterval(hbTimer);
-  hbTimer = setInterval(()=>{
-    if(!state.myLock) return;
-    cloud.db.ref(LOCK_PATH).update({ by: sessionId, name: editorName||'Usuario', at: Date.now() });
-  }, 30*1000);
-}
-function releaseLock(){
-  if(!state.myLock) return;
-  cloud.db.ref(LOCK_PATH).remove();
-  state.myLock=false; state.canEdit=true;
-}
-function onReleaseLock(){
-  window.addEventListener('beforeunload', releaseLock);
+let hb=null;
+function keepAlive(){clearInterval(hb); hb=setInterval(()=>{if(!state.myLock) return; cloud.db.ref(LOCK_PATH).update({by:sessionId,name:editorName||'Usuario',at:Date.now()});},30*1000);}
+function releaseLock(){if(!state.myLock) return; cloud.db.ref(LOCK_PATH).remove(); state.myLock=false; state.canEdit=false; $('#viewMode').style.display='inline-flex'; toggleEditability();}
+function toggleEditability(){
+  const dis=!state.canEdit;
+  $$("input,select,textarea").forEach(el=>el.disabled=dis);
+  // Permite pulsar Cancelar y Editar siempre
+  $$("button").forEach(b=>{
+    const id=b.id||'';
+    if(['btnEdit','btnRefresh','btnCancelC','btnCancelCTop','btnCancelVA','btnCancelVATop','btnCancelFM','btnCancelFMTop','btnCancelTA','btnCancelTATop'].includes(id)){b.disabled=false;return;}
+    if(id.startsWith('btnSave')){b.disabled=dis;return;}
+    if(!id) b.disabled=dis;
+  });
 }
 
-/* ======= Render izquierda ======= */
+/* ===== Render IZQ ===== */
 const SECTIONS=["CENTROS EXCLUSIVOS","CENTROS FLOP","VISITAS AUDIO","FORMACIONES Y MENTORING","TELEAUDIOLOGIA"];
 function renderLeft(){
   SECTIONS.forEach(name=>{
-    const cont=document.querySelector(`.section[data-section="${name}"] .sec-list`);
-    cont.innerHTML='';
+    const cont=document.querySelector(`.section[data-section="${name}"] .sec-list`); cont.innerHTML='';
     (data[name]||[]).forEach((it,i)=>{
       const div=document.createElement('div'); div.className='item'; div.dataset.index=i;
       if(name.includes('CENTROS')){
         div.innerHTML=`<div><div class="name">${esc(it.nombre||'—')}</div><small>Delegado: ${esc(it.delegado||'—')} · Aud.: ${esc(it.audiologo||'—')}</small></div>
-        <div class="acts"><button class="ico-btn btn-edit" title="Editar"><span class="ico">✏️</span></button><button class="ico-btn btn-del" title="Eliminar"><span class="ico">🗑️</span></button></div>`;
+        <div class="acts"><button class="ico-btn btn-edit" title="Editar">✏️</button><button class="ico-btn btn-del" title="Eliminar">🗑️</button></div>`;
       }else if(name==="VISITAS AUDIO"){
         div.innerHTML=`<div><div class="name">(${esc(it.rol||'Rol')}) ${esc(it.responsable||'—')}</div><small>Visitas</small></div>
-        <div class="acts"><button class="ico-btn btn-edit" title="Editar"><span class="ico">✏️</span></button><button class="ico-btn btn-del" title="Eliminar"><span class="ico">🗑️</span></button></div>`;
+        <div class="acts"><button class="ico-btn btn-edit" title="Editar">✏️</button><button class="ico-btn btn-del" title="Eliminar">🗑️</button></div>`;
       }else if(name==="FORMACIONES Y MENTORING"){
         div.innerHTML=`<div><div class="name">${esc(it.delegado||'(Delegado regional)')}</div></div>
-        <div class="acts"><button class="ico-btn btn-edit" title="Editar"><span class="ico">✏️</span></button><button class="ico-btn btn-del" title="Eliminar"><span class="ico">🗑️</span></button></div>`;
+        <div class="acts"><button class="ico-btn btn-edit" title="Editar">✏️</button><button class="ico-btn btn-del" title="Eliminar">🗑️</button></div>`;
       }else{
         div.innerHTML=`<div><div class="name">Teleaudiología</div></div>
-        <div class="acts"><button class="ico-btn btn-edit" title="Editar"><span class="ico">✏️</span></button><button class="ico-btn btn-del" title="Eliminar"><span class="ico">🗑️</span></button></div>`;
+        <div class="acts"><button class="ico-btn btn-edit" title="Editar">✏️</button><button class="ico-btn btn-del" title="Eliminar">🗑️</button></div>`;
       }
       cont.appendChild(div);
     });
 
-    const secEl=document.querySelector(`.section[data-section="${name}"]`);
-    secEl.querySelector('[data-act="toggle"]').onclick=()=>{ cont.style.display = cont.style.display==='none' ? '' : 'none'; if(cont.style.display==='none' && name.includes('CENTROS')){ state.selected={section:null,index:null}; renderDetailBlank(); } };
-    secEl.querySelector('[data-act="add"]').onclick=()=>{ if(!state.canEdit){ alert('En uso. No puedes crear elementos.'); return; }
+    const sec=document.querySelector(`.section[data-section="${name}"]`);
+    sec.querySelector('[data-act="toggle"]').onclick=()=>{cont.style.display=cont.style.display==='none'?'':'none'; if(cont.style.display==='none' && name.includes('CENTROS')){state.selected={section:null,index:null};renderDetailBlank();}};
+    sec.querySelector('[data-act="add"]').onclick=()=>{
+      if(!state.canEdit){alert('Pulsa Editar para crear.');return;}
       let nuevo;
       if(name.includes('CENTROS')) nuevo={nombre:'(nuevo centro)',delegado:'',audiologo:'',tipo:'Franquicia',acciones:[],formaciones:[],procesos:[]};
-      else if(name==="VISITAS AUDIO") nuevo={rol:'Delegado audio', responsable:'', hojas:[ makeSheetVA('Visita 1') ]};
-      else if(name==="FORMACIONES Y MENTORING") nuevo={delegado:'(delegado regional)', filas: makeRowsFM()};
-      else nuevo={hojas:[ makeSheetTA('Tele 1') ]};
+      else if(name==="VISITAS AUDIO") nuevo={rol:'Delegado audio',responsable:'',hojas:[makeSheetVA('Visita 1')]};
+      else if(name==="FORMACIONES Y MENTORING") nuevo={delegado:'(delegado regional)',filas:makeRowsFM()};
+      else nuevo={hojas:[makeSheetTA('Tele 1')]};
       data[name].push(nuevo); save(); renderAll();
     };
 
-    cont.onclick=ev=>{
-      const item=ev.target.closest('.item'); if(!item) return; const idx=+item.dataset.index;
-      if(ev.target.closest('.btn-del')){ if(!state.canEdit){ alert('En uso. No puedes borrar.'); return; } if(confirm('¿Eliminar este item?')){ data[name].splice(idx,1); save(); renderAll(); } return; }
-      if(ev.target.closest('.btn-edit') || !ev.target.closest('.acts')){ state.selected={section:name,index:idx}; renderDetail(); }
+    cont.onclick=e=>{
+      const item=e.target.closest('.item'); if(!item) return; const idx=+item.dataset.index;
+      if(e.target.closest('.btn-del')){ if(!state.canEdit){alert('Solo lectura.');return;} if(confirm('¿Eliminar este item?')){ data[name].splice(idx,1); save(); renderAll(); } return; }
+      state.selected={section:name,index:idx}; renderDetail();
     };
   });
 }
 
-/* ======= Detalle ======= */
+/* ===== Detalle switch ===== */
 function renderDetailBlank(){ $('#detHint').style.display='block'; $('#collapseDetail').style.display='none'; setDetailTone(null);
+  $('#detFormCentro,#detFormVisitas,#detFormMentoring,#detFormTele').forEach?null:0; // noop
   $('#detFormCentro').style.display='none'; $('#detFormVisitas').style.display='none'; $('#detFormMentoring').style.display='none'; $('#detFormTele').style.display='none'; $('#detTag').textContent='—'; }
 function renderDetail(){ $('#detHint').style.display='none'; $('#collapseDetail').style.display='inline-flex'; $('#detTag').textContent=state.selected.section; setDetailTone(state.selected.section);
   const s=state.selected.section;
@@ -516,79 +456,87 @@ function renderDetail(){ $('#detHint').style.display='none'; $('#collapseDetail'
 }
 $('#collapseDetail').onclick=()=>{ state.selected={section:null,index:null}; renderDetailBlank(); };
 
-/* ======= Centros ======= */
-function fillCentro(){ const it=currentItem(); if(!it) return;
+/* ===== CENTROS ===== */
+function fillCentro(){const it=currentItem(); if(!it) return;
   $('#cNombre').value=it.nombre||''; $('#cDelegado').value=it.delegado||''; $('#cAudiologo').value=it.audiologo||''; $('#cTipo').value=it.tipo||'Franquicia';
-  renderAcciones(); renderFormaciones(); renderProcesos(); toggleInputsByEdit();
+  renderAcciones(); renderFormaciones(); renderProcesos(); toggleEditability();
 }
-function saveCentro(){ if(!state.canEdit){ alert('En uso.'); return; } const it=currentItem(); it.nombre=$('#cNombre').value.trim(); it.delegado=$('#cDelegado').value.trim(); it.audiologo=$('#cAudiologo').value.trim(); it.tipo=$('#cTipo').value; save(); renderLeft(); }
-$('#btnSaveC').onclick=saveCentro; $('#btnSaveCTop').onclick=saveCentro;
-$('#btnCancelC').onclick=()=>{state.selected={section:null,index:null};renderDetailBlank();}; $('#btnCancelCTop').onclick=()=>{state.selected={section:null,index:null};renderDetailBlank();};
+function saveCentro(){ if(!state.canEdit){alert('Solo lectura.');return;} const it=currentItem(); it.nombre=$('#cNombre').value.trim(); it.delegado=$('#cDelegado').value.trim(); it.audiologo=$('#cAudiologo').value.trim(); it.tipo=$('#cTipo').value; save(); renderLeft(); }
+$('#btnSaveC').onclick=saveCentro; $('#btnSaveCTop').onclick=saveCentro; $('#btnCancelC').onclick=()=>{state.selected={section:null,index:null};renderDetailBlank();}; $('#btnCancelCTop').onclick=()=>{state.selected={section:null,index:null};renderDetailBlank();};
 
-function renderAcciones(){ const it=currentItem(); it.acciones=it.acciones||[]; const cont=$('#accionesRows'); cont.innerHTML='';
-  it.acciones.forEach((r,i)=>{ const row=document.createElement('div'); row.className='va-row'; row.style.gridTemplateColumns='52px 130px 1fr 110px 110px 110px 150px 52px';
-    row.innerHTML=`<div>${i+1}</div><input type="date" data-i="${i}" data-k="fecha" value="${r.fecha||''}"><input type="text" data-i="${i}" data-k="tipo" value="${esc(r.tipo||'')}">
+function renderAcciones(){const it=currentItem(); it.acciones=it.acciones||[]; const cont=$('#accionesRows'); cont.innerHTML='';
+  it.acciones.forEach((r,i)=>{const row=document.createElement('div'); row.className='va-row'; row.style.gridTemplateColumns='52px 130px 1fr 110px 110px 110px 150px 52px';
+    row.innerHTML=`<div>${i+1}</div><input type="date" data-i="${i}" data-k="fecha" value="${r.fecha||''}"><input data-i="${i}" data-k="tipo" value="${esc(r.tipo||'')}">
     <select data-i="${i}" data-k="paquete"><option ${r.paquete==='1'?'selected':''}>1</option><option ${r.paquete==='2'?'selected':''}>2</option><option ${r.paquete==='3'?'selected':''}>3</option></select>
-    <input type="number" min="0" step="1" data-i="${i}" data-k="derivacion" value="${r.derivacion ?? ''}">
-    <input type="number" min="0" step="1" data-i="${i}" data-k="citas" value="${r.citas ?? ''}">
-    <input type="number" min="0" step="1" data-i="${i}" data-k="venta" value="${r.venta ?? ''}">
-    <button class="ico-btn row-del" data-i="${i}" title="Eliminar"><span class="ico">🗑️</span></button>`; cont.appendChild(row); });
-  toggleInputsByEdit();
+    <input type="number" min="0" step="1" data-i="${i}" data-k="derivacion" value="${r.derivacion??''}">
+    <input type="number" min="0" step="1" data-i="${i}" data-k="citas" value="${r.citas??''}">
+    <input type="number" min="0" step="1" data-i="${i}" data-k="venta" value="${r.venta??''}">
+    <button class="ico-btn row-del" data-i="${i}">🗑️</button>`; cont.appendChild(row);});
 }
-$('#addAccion').onclick=()=>{ if(!state.canEdit){ alert('En uso.'); return; } const it=currentItem(); it.acciones.push({fecha:'',tipo:'',paquete:'1',derivacion:null,citas:null,venta:null}); renderAcciones(); save(); };
-$('#accionesRows').addEventListener('click',ev=>{ const i=ev.target.closest('.row-del')?.dataset.i; if(i!=null){ if(!state.canEdit){ alert('En uso.'); return; } const it=currentItem(); it.acciones.splice(+i,1); renderAcciones(); save(); }});
-$('#accionesRows').addEventListener('input',ev=>{ if(!state.canEdit){ ev.preventDefault(); return; } const it=currentItem(); const i=+ev.target.dataset.i; const k=ev.target.dataset.k; if(!k) return;
-  const r=it.acciones[i]; if(ev.target.type==='number') r[k]=ev.target.value===''?null:Number(ev.target.value); else r[k]=ev.target.value; save(); });
+$('#accionesRows').addEventListener('click',e=>{const i=e.target.closest('.row-del')?.dataset.i; if(i!=null){ if(!state.canEdit){alert('Solo lectura.');return;} const it=currentItem(); it.acciones.splice(+i,1); renderAcciones(); save(); }});
+$('#accionesRows').addEventListener('input',e=>{if(!state.canEdit){e.preventDefault();return;}const it=currentItem(); const i=+e.target.dataset.i; const k=e.target.dataset.k; if(!k) return; const r=it.acciones[i]; r[k]=e.target.type==='number'?(e.target.value===''?null:Number(e.target.value)):e.target.value; save();});
 
-function renderFormaciones(){ const it=currentItem(); it.formaciones=it.formaciones||[]; const cont=$('#formacionesRows'); cont.innerHTML='';
-  it.formaciones.forEach((r,i)=>{ const row=document.createElement('div'); row.className='va-row'; row.style.gridTemplateColumns='52px 1.2fr .7fr .7fr 1.4fr 52px';
-    row.innerHTML=`<div>${i+1}</div><input type="text" data-i="${i}" data-k="curso" value="${esc(r.curso||'')}">
-    <input type="checkbox" data-i="${i}" data-k="realizado" ${r.realizado?'checked':''}>
-    <input type="checkbox" data-i="${i}" data-k="aplica" ${r.aplica?'checked':''}>
-    <input type="text" data-i="${i}" data-k="obs" value="${esc(r.obs||'')}"><button class="ico-btn row-del" data-i="${i}"><span class="ico">🗑️</span></button>`; cont.appendChild(row); });
-  toggleInputsByEdit();
+function renderFormaciones(){const it=currentItem(); it.formaciones=it.formaciones||[]; const cont=$('#formacionesRows'); cont.innerHTML='';
+  it.formaciones.forEach((r,i)=>{const row=document.createElement('div'); row.className='va-row'; row.style.gridTemplateColumns='52px 1.2fr .7fr .7fr 1.4fr 52px';
+    row.innerHTML=`<div>${i+1}</div><input data-i="${i}" data-k="curso" value="${esc(r.curso||'')}"><input type="checkbox" data-i="${i}" data-k="realizado" ${r.realizado?'checked':''}><input type="checkbox" data-i="${i}" data-k="aplica" ${r.aplica?'checked':''}><input data-i="${i}" data-k="obs" value="${esc(r.obs||'')}"><button class="ico-btn row-del" data-i="${i}">🗑️</button>`; cont.appendChild(row);});
 }
-$('#addFormacion').onclick=()=>{ if(!state.canEdit){ alert('En uso.'); return; } const it=currentItem(); it.formaciones.push({curso:'',realizado:false,aplica:false,obs:''}); renderFormaciones(); save(); };
-$('#formacionesRows').addEventListener('click',ev=>{ const i=ev.target.closest('.row-del')?.dataset.i; if(i!=null){ if(!state.canEdit){ alert('En uso.'); return; } const it=currentItem(); it.formaciones.splice(+i,1); renderFormaciones(); save(); }});
-$('#formacionesRows').addEventListener('input',ev=>{ if(!state.canEdit){ ev.preventDefault(); return; } const it=currentItem(); const i=+ev.target.dataset.i; const k=ev.target.dataset.k; if(!k) return; const r=it.formaciones[i]; if(ev.target.type==='checkbox') r[k]=ev.target.checked; else r[k]=ev.target.value; save(); });
+$('#formacionesRows').addEventListener('click',e=>{const i=e.target.closest('.row-del')?.dataset.i; if(i!=null){ if(!state.canEdit){alert('Solo lectura.');return;} const it=currentItem(); it.formaciones.splice(+i,1); renderFormaciones(); save(); }});
+$('#formacionesRows').addEventListener('input',e=>{if(!state.canEdit){e.preventDefault();return;}const it=currentItem(); const i=+e.target.dataset.i; const k=e.target.dataset.k; const r=it.formaciones[i]; r[k]=e.target.type==='checkbox'?e.target.checked:e.target.value; save();});
 
-function scoreClass(v){ const n=Number(v); if(isNaN(n)) return ''; if(n>=95) return 'good'; if(n>=85) return 'mid'; return 'bad'; }
-function renderProcesos(){ const it=currentItem(); it.procesos=it.procesos||[]; const cont=$('#procesosRows'); cont.innerHTML='';
-  it.procesos.forEach((r,i)=>{ const row=document.createElement('div'); row.className='va-row'; row.style.gridTemplateColumns='52px 220px 120px 160px 52px';
-    const cls=scoreClass(r.puntuacion); row.innerHTML=`<div>${i+1}</div>
-    <input class="pscore ${cls}" type="number" min="0" max="100" step="1" data-i="${i}" data-k="puntuacion" value="${r.puntuacion ?? ''}">
-    <input type="checkbox" data-i="${i}" data-k="hit" ${r.hit?'checked':''}>
-    <input type="checkbox" data-i="${i}" data-k="colaboraciones" ${r.colaboraciones?'checked':''}>
-    <button class="ico-btn row-del" data-i="${i}"><span class="ico">🗑️</span></button>`; cont.appendChild(row); });
-  toggleInputsByEdit();
+function renderProcesos(){const it=currentItem(); it.procesos=it.procesos||[]; const cont=$('#procesosRows'); cont.innerHTML='';
+  function color(v){const n=Number(v); if(!Number.isFinite(n)) return ''; return n>=95?'good':(n>=85?'':'bad');}
+  it.procesos.forEach((r,i)=>{const row=document.createElement('div'); row.className='va-row'; row.style.gridTemplateColumns='52px 220px 120px 160px 52px';
+    row.innerHTML=`<div>${i+1}</div><input class="pscore ${color(r.puntuacion)}" type="number" min="0" max="100" step="1" data-i="${i}" data-k="puntuacion" value="${r.puntuacion??''}"><input type="checkbox" data-i="${i}" data-k="hit" ${r.hit?'checked':''}><input type="checkbox" data-i="${i}" data-k="colaboraciones" ${r.colaboraciones?'checked':''}><button class="ico-btn row-del" data-i="${i}">🗑️</button>`; cont.appendChild(row);});
 }
-$('#addProceso').onclick=()=>{ if(!state.canEdit){ alert('En uso.'); return; } const it=currentItem(); it.procesos.push({puntuacion:null,hit:false,colaboraciones:false}); renderProcesos(); save(); };
-$('#procesosRows').addEventListener('click',ev=>{ const i=ev.target.closest('.row-del')?.dataset.i; if(i!=null){ if(!state.canEdit){ alert('En uso.'); return; } const it=currentItem(); it.procesos.splice(+i,1); renderProcesos(); save(); }});
-$('#procesosRows').addEventListener('input',ev=>{ if(!state.canEdit){ ev.preventDefault(); return; } const it=currentItem(); const i=+ev.target.dataset.i; const k=ev.target.dataset.k; if(!k) return; const r=it.procesos[i];
-  if(ev.target.type==='checkbox') r[k]=ev.target.checked; else r[k]=ev.target.value===''?null:Number(ev.target.value);
-  if(k==='puntuacion'){ const cls=scoreClass(r[k]); ev.target.className='pscore '+cls; }
-  save();
-});
+$('#procesosRows').addEventListener('click',e=>{const i=e.target.closest('.row-del')?.dataset.i; if(i!=null){ if(!state.canEdit){alert('Solo lectura.');return;} const it=currentItem(); it.procesos.splice(+i,1); renderProcesos(); save(); }});
+$('#procesosRows').addEventListener('input',e=>{if(!state.canEdit){e.preventDefault();return;}const it=currentItem(); const i=+e.target.dataset.i; const k=e.target.dataset.k; const r=it.procesos[i]; r[k]=e.target.type==='checkbox'?e.target.checked:(e.target.value===''?null:Number(e.target.value)); save();});
 
-/* ======= Visitas ======= */
-function fillVisitas(){ const it=currentItem(); if(!it) return; $('#vaRol').value=it.rol||'Delegado audio'; $('#vaResp').value=it.responsable||''; $('#vaSearchTop').value=state.vaFilter||''; renderVaTabs(); renderVA(); toggleInputsByEdit(); }
-$('#vaRol').onchange=e=>{ if(!state.canEdit){ e.preventDefault(); return; } const it=currentItem(); it.rol=e.target.value; save(); renderLeft(); };
-$('#vaResp').oninput=e=>{ if(!state.canEdit){ e.preventDefault(); return; } const it=currentItem(); it.responsable=e.target.value; save(); renderLeft(); };
-$('#vaSearchTop').oninput=e=>{ state.vaFilter=e.target.value.trim(); renderVA(); };
+/* ===== VISITAS ===== */
+function fillVisitas(){const it=currentItem(); if(!it) return; $('#vaRol').value=it.rol||'Delegado audio'; $('#vaResp').value=it.responsable||''; $('#vaSearchTop').value=state.vaFilter||''; renderVaTabs(); renderVA(); toggleEditability();}
+$('#vaRol').onchange=e=>{if(!state.canEdit){e.preventDefault();return;}currentItem().rol=e.target.value; save(); renderLeft();};
+$('#vaResp').oninput=e=>{if(!state.canEdit){e.preventDefault();return;}currentItem().responsable=e.target.value; save(); renderLeft();};
+$('#vaSearchTop').oninput=e=>{state.vaFilter=e.target.value.trim(); renderVA();};
 
-function renderVaTabs(){ const it=currentItem(); const tabs=$('#vaTabs'); tabs.innerHTML=''; it.hojas=it.hojas||[makeSheetVA('Visita 1')];
-  it.hojas.forEach((h,idx)=>{ const b=document.createElement('button'); b.className='tab'+(idx===state.vaSheet?' active':''); b.textContent=h.nombre||('Visita '+(idx+1)); b.onclick=()=>{ state.vaSheet=idx; renderVA(); renderVaTabs(); }; tabs.appendChild(b); });
-  const add=document.createElement('button'); add.className='tab tab-add'; add.textContent='＋'; add.title='Añadir visita'; add.onclick=()=>{ if(!state.canEdit){ alert('En uso.'); return; } it.hojas.push(makeSheetVA('Visita '+(it.hojas.length+1))); state.vaSheet=it.hojas.length-1; save(); renderVaTabs(); renderVA(); }; tabs.appendChild(add);
+function renderVaTabs(){const it=currentItem(); const tabs=$('#vaTabs'); tabs.innerHTML=''; it.hojas=it.hojas||[makeSheetVA('Visita 1')];
+  it.hojas.forEach((h,idx)=>{const b=document.createElement('button'); b.className='sec-btn '+(idx===state.vaSheet?'':''); b.textContent=h.nombre||('Visita '+(idx+1)); b.onclick=()=>{state.vaSheet=idx; renderVA();}; tabs.appendChild(b);});
+  const add=document.createElement('button'); add.className='sec-btn'; add.textContent='＋'; add.title='Añadir visita'; add.onclick=()=>{if(!state.canEdit){alert('Solo lectura.');return;} it.hojas.push(makeSheetVA('Visita '+(it.hojas.length+1))); state.vaSheet=it.hojas.length-1; save(); renderVaTabs(); renderVA();}; tabs.appendChild(add);
 }
-function vClassPct(v){ const n=Number(v); if(Number.isNaN(n)) return ''; return n>=80?'good':'bad'; }
-function pScoreClass(v){ const n=Number(v); if(Number.isNaN(n)) return ''; return n>=85?'good':'bad'; }
-function renderVA(){ const it=currentItem(); const hoja=it.hojas[state.vaSheet]||it.hojas[0]; const filter=(state.vaFilter||'').toLowerCase(); const cont=$('#vaRows'); cont.innerHTML='';
-  hoja.rows.forEach((r,i)=>{ if(filter && !(r.centro||'').toLowerCase().includes(filter)) return; const row=document.createElement('div'); row.className='va-row va-cols';
-    row.innerHTML=`<div>${i+1}</div>
-      <input data-i="${i}" data-k="centro" value="${esc(r.centro||'')}">
-      <input data-i="${i}" data-k="delegado" value="${esc(r.delegado||'')}">
-      <input data-i="${i}" data-k="audiologo" value="${esc(r.audiologo||'')}">
-      <select data-i="${i}" data-k="tipo"><option ${r.tipo==='Sucursal'?'selected':''}>Sucursal</option><option ${r.tipo==='Franquicia'?'selected':''}>Franquicia</option></select>
-      <input type="date" data-i="${i}" data-k="fecha" value="${r.fecha||''}">
-      <input class="pscore ${pScoreClass(r.puntuacion)}" type="number" min="0" max="100" step="analysis"
-::contentReference[oaicite:0]{index=0}
+function vClass80(v){const n=Number(v); if(!Number.isFinite(n)) return ''; return n>=80?'good':'bad';}
+function vScore85(v){const n=Number(v); if(!Number.isFinite(n)) return ''; return n>=85?'good':'bad';}
+function renderVA(){const it=currentItem(); const hoja=it.hojas[state.vaSheet]||it.hojas[0]; const f=(state.vaFilter||'').toLowerCase(); const cont=$('#vaRows'); cont.innerHTML='';
+  hoja.rows.forEach((r,i)=>{if(f && !(r.centro||'').toLowerCase().includes(f)) return; const row=document.createElement('div'); row.className='va-row va-cols';
+    row.innerHTML=`<div>${i+1}</div><input data-i="${i}" data-k="centro" value="${esc(r.centro||'')}"><input data-i="${i}" data-k="delegado" value="${esc(r.delegado||'')}"><input data-i="${i}" data-k="audiologo" value="${esc(r.audiologo||'')}"><select data-i="${i}" data-k="tipo"><option ${r.tipo==='Sucursal'?'selected':''}>Sucursal</option><option ${r.tipo==='Franquicia'?'selected':''}>Franquicia</option></select><input type="date" data-i="${i}" data-k="fecha" value="${r.fecha||''}"><input class="pscore ${vScore85(r.puntuacion)}" type="number" min="0" max="100" step="1" data-i="${i}" data-k="puntuacion" value="${r.puntuacion??''}"><input type="checkbox" data-i="${i}" data-k="hit" ${r.hit?'checked':''}><input class="conv ${vClass80(r.conv_prueba)}" type="number" min="0" max="100" step="1" data-i="${i}" data-k="conv_prueba" value="${r.conv_prueba??''}"><input class="conv ${vClass80(r.conv_venta)}" type="number" min="0" max="100" step="1" data-i="${i}" data-k="conv_venta" value="${r.conv_venta??''}">`; cont.appendChild(row);});
+}
+$('#vaRows').addEventListener('input',e=>{if(!state.canEdit){e.preventDefault();return;}const h=currentItem().hojas[state.vaSheet]; const i=+e.target.dataset.i; const k=e.target.dataset.k; if(!k) return; if(e.target.type==='checkbox') h.rows[i][k]=e.target.checked; else if(e.target.type==='number') h.rows[i][k]=e.target.value===''?null:Number(e.target.value); else h.rows[i][k]=e.target.value; save(); if(k==='puntuacion') e.target.className='pscore '+(Number(h.rows[i][k])>=85?'good':'bad'); if(k==='conv_prueba'||k==='conv_venta') e.target.className='conv '+(Number(h.rows[i][k])>=80?'good':'bad');});
+function saveVA(){save();} $('#btnSaveVA').onclick=saveVA; $('#btnSaveVATop').onclick=saveVA; $('#btnCancelVA').onclick=()=>{state.selected={section:null,index:null};renderDetailBlank();}; $('#btnCancelVATop').onclick=()=>{state.selected={section:null,index:null};renderDetailBlank();};
+
+/* ===== FM ===== */
+function fillFM(){const it=currentItem(); if(!it) return; $('#fmDelegado').value=it.delegado||''; $('#fmSearchTop').value=state.fmFilter||''; renderFM(); toggleEditability();}
+$('#fmSearchTop').oninput=e=>{state.fmFilter=e.target.value.trim(); renderFM();};
+function renderFM(){const it=currentItem(); it.filas=it.filas||makeRowsFM(); const f=(state.fmFilter||'').toLowerCase(); const cont=$('#fmRows'); cont.innerHTML='';
+  it.filas.forEach((r,i)=>{const ok=!f||(r.tema||'').toLowerCase().includes(f)||(r.audiologo||'').toLowerCase().includes(f); if(!ok) return; const evoP=(Number.isFinite(+r.p_ini)&&Number.isFinite(+r.p_3m))?(Number(r.p_3m)-Number(r.p_ini)):null; const evoV=(Number.isFinite(+r.v_ini)&&Number.isFinite(+r.v_3m))?(Number(r.v_3m)-Number(r.v_ini)):null; const row=document.createElement('div'); row.className='fm-row';
+    row.innerHTML=`<div>${i+1}</div><input type="date" data-i="${i}" data-k="fecha" value="${r.fecha||''}"><input data-i="${i}" data-k="tema" value="${esc(r.tema||'')}"><input data-i="${i}" data-k="audiologo" value="${esc(r.audiologo||'')}"><select data-i="${i}" data-k="duracion">${[1,2,3,4].map(n=>`<option ${Number(r.duracion)===n?'selected':''}>${n}</option>`).join('')}</select><input class="conv ${(Number(r.p_ini)>=80)?'good':'bad'}" type="number" min="0" max="100" step="1" data-i="${i}" data-k="p_ini" value="${r.p_ini??''}"><input class="conv ${(Number(r.v_ini)>=80)?'good':'bad'}" type="number" min="0" max="100" step="1" data-i="${i}" data-k="v_ini" value="${r.v_ini??''}"><input class="conv ${(Number(r.p_3m)>=80)?'good':'bad'}" type="number" min="0" max="100" step="1" data-i="${i}" data-k="p_3m" value="${r.p_3m??''}"><input class="conv ${(Number(r.v_3m)>=80)?'good':'bad'}" type="number" min="0" max="100" step="1" data-i="${i}" data-k="v_3m" value="${r.v_3m??''}"><div style="text-align:center;font-weight:700">${evoP==null?'—':(evoP>0?'↑ ':'')+(evoP<0?'↓ ':'')+Math.abs(Math.round(evoP))}</div><div style="text-align:center;font-weight:700">${evoV==null?'—':(evoV>0?'↑ ':'')+(evoV<0?'↓ ':'')+Math.abs(Math.round(evoV))}</div>`; cont.appendChild(row);});
+}
+$('#fmRows').addEventListener('input',e=>{if(!state.canEdit){e.preventDefault();return;}const it=currentItem(); const i=+e.target.dataset.i; const k=e.target.dataset.k; if(!k) return; if(e.target.type==='number') it.filas[i][k]=e.target.value===''?null:Number(e.target.value); else if(e.target.tagName==='SELECT') it.filas[i][k]=Number(e.target.value); else it.filas[i][k]=e.target.value; save();});
+function saveFM(){save();} $('#btnSaveFM').onclick=saveFM; $('#btnSaveFMTop').onclick=saveFM; $('#btnCancelFM').onclick=()=>{state.selected={section:null,index:null};renderDetailBlank();}; $('#btnCancelFMTop').onclick=()=>{state.selected={section:null,index:null};renderDetailBlank();};
+
+/* ===== TELE ===== */
+function fillTele(){ $('#taSearchTop').value=state.taFilter||''; populateTaPersonSelect(); renderTA(); toggleEditability(); }
+function populateTaPersonSelect(){ const it=currentItem(); const hoja=(it.hojas&&it.hojas[0])||makeSheetTA('Tele 1'); it.hojas=it.hojas||[hoja]; const names=Array.from(new Set(hoja.rows.map(r=>(r.persona||'').trim()).filter(Boolean))).sort((a,b)=>a.localeCompare(b)); const sel=$('#taPersonSelect'); const prev=state.taPerson||''; sel.innerHTML='<option value=\"\">Todos</option>'+names.map(n=>`<option ${n===prev?'selected':''}>${esc(n)}</option>`).join(''); }
+$('#taSearchTop').oninput=e=>{ state.taFilter=e.target.value.trim(); renderTA(); }; $('#taPersonSelect').onchange=e=>{ state.taPerson=e.target.value; renderTA(); };
+function renderTA(){ const it=currentItem(); const hoja=it.hojas[0]; const f=(state.taFilter||'').toLowerCase(); const per=state.taPerson||''; const cont=$('#taRows'); cont.innerHTML=''; hoja.rows.forEach((r,i)=>{ const okTxt=!f||(r.centro||'').toLowerCase().includes(f)||(r.persona||'').toLowerCase().includes(f); const okPer=!per||(r.persona||'')===per; if(!okTxt||!okPer) return; const row=document.createElement('div'); row.className='ta-row';
+    row.innerHTML=`<div>${i+1}</div><input data-i="${i}" data-k="centro" value="${esc(r.centro||'')}"><input data-i="${i}" data-k="delegado" value="${esc(r.delegado||'')}"><select data-i="${i}" data-k="rol"><option ${r.rol!=='Técnico'?'selected':''}>Audiólogo</option><option ${r.rol==='Técnico'?'selected':''}>Técnico</option></select><input data-i="${i}" data-k="persona" value="${esc(r.persona||'')}" placeholder="Nombre"><input type="checkbox" data-i="${i}" data-k="formacion" ${r.formacion?'checked':''}><input type="checkbox" data-i="${i}" data-k="practicas" ${r.practicas?'checked':''}><input type="checkbox" data-i="${i}" data-k="certificado" ${r.certificado?'checked':''}><input type="number" min="0" step="1" data-i="${i}" data-k="pruebas_reales" value="${r.pruebas_reales??''}"><input type="number" min="0" step="1" data-i="${i}" data-k="ventas" value="${r.ventas??''}">`; cont.appendChild(row); });
+}
+$('#taRows').addEventListener('input',e=>{ if(!state.canEdit){e.preventDefault();return;} const it=currentItem(); const h=it.hojas[0]; const i=+e.target.dataset.i; const k=e.target.dataset.k; if(!k) return; if(e.target.type==='checkbox') h.rows[i][k]=e.target.checked; else if(e.target.type==='number') h.rows[i][k]=e.target.value===''?null:Number(e.target.value); else h.rows[i][k]=e.target.value; save(); });
+
+/* ===== UI topbar ===== */
+$('#btnEdit').onclick=requestEdit;
+$('#btnRefresh').onclick=()=>{ if(!cloud.ready) return; cloud.ref.once('value').then(s=>{ const v=s.val(); if(v) data=v; renderAll();}); };
+$('#btnSaveTop').onclick=save;
+
+/* ===== Boot ===== */
+function renderAll(){ renderLeft(); if(state.selected.section) renderDetail(); else renderDetailBlank(); toggleEditability(); }
+window.addEventListener('load',()=>{ if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js').catch(()=>{}); } initFirebase(); renderAll(); });
+</script>
+</body>
+</html>
