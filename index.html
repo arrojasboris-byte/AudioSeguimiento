@@ -16,11 +16,11 @@ html,body{height:100%}
 body{margin:0;background:var(--bg);font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;color:#222;overflow-x:hidden}
 
 /* Bloqueo global hasta PIN */
-body.locked header, body.locked main { pointer-events:none; user-select:none; filter:blur(1.3px); }
+body.locked header, body.locked main { pointer-events:none; user-select:none; filter:blur(1.2px); }
 body.locked #gate { pointer-events:auto; filter:none }
 
-/* Topbar 100% */
-.topbar{position:sticky;top:0;z-index:60;width:100%;
+/* Topbar */
+.topbar{position:sticky;top:0;z-index:70;width:100%;
   background:linear-gradient(180deg,var(--rojo),var(--rojo-osc));color:#fff;box-shadow:var(--shadow)}
 .bar-inner{width:100%;margin:0;padding:.85rem 12px;display:flex;align-items:center;gap:.6rem}
 .brand{font-weight:900;letter-spacing:.35px}
@@ -31,21 +31,16 @@ body.locked #gate { pointer-events:auto; filter:none }
 .btn-ghost{background:transparent;border:1px solid #ffffff66;color:#fff}
 .pill{display:inline-flex;gap:.45rem;align-items:center;border:1px solid #ffffff2f;background:#ffffff1c;padding:.35rem .6rem;border-radius:999px;white-space:nowrap}
 
-/* Banner de bloqueo remoto */
-.lock-banner{display:none;align-items:center;gap:.6rem;background:#fff3cd;color:#7a5c00;border-bottom:1px solid #f6e3a5;padding:.6rem 12px}
-.lock-banner.show{display:flex}
+/* Layout izquierda–derecha */
+.main{display:grid;grid-template-columns:320px minmax(0,1fr);gap:14px;padding:14px 12px 16px}
+@media (max-width:1100px){ .main{grid-template-columns:1fr} }
 
-/* Layout 100%: cinta arriba + detalle abajo */
-.app{width:100%;margin:0}
-.wrapV{display:grid;grid-template-rows:auto 1fr;gap:14px;padding:14px 12px 16px}
-
-/* Cinta superior */
-.ribbon.card{padding:10px;background:var(--card);border-radius:16px;box-shadow:var(--shadow)}
-.ribbon-inner{display:flex;gap:12px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:8px}
-.section{border:1px solid var(--line);border-radius:14px;background:#fff;min-width:280px;max-width:320px;height:230px;display:flex;flex-direction:column;box-shadow:var(--shadow)}
-.sec-head{display:flex;justify-content:space-between;align-items:center;padding:.65rem .8rem;font-weight:900}
-.sec-list{padding:.4rem .6rem .7rem;flex:1;overflow:auto}
-.sec-btn{width:36px;height:32px;border-radius:9px;border:1px solid var(--line);background:#fff;cursor:pointer}
+/* Sidebar */
+.sidebar{display:flex;flex-direction:column;gap:12px;min-height:70vh}
+.side-card{border:1px solid var(--line);border-radius:16px;background:#fff;box-shadow:var(--shadow);display:flex;flex-direction:column;min-height:140px}
+.side-head{display:flex;justify-content:space-between;align-items:center;padding:.65rem .8rem;font-weight:900;border-bottom:1px solid var(--line)}
+.side-list{padding:.6rem .6rem .8rem;overflow:auto;max-height:260px}
+.side-btn{width:36px;height:32px;border-radius:9px;border:1px solid var(--line);background:#fff;cursor:pointer}
 .item{display:flex;justify-content:space-between;gap:.6rem;align-items:center;background:#fff;border:1px solid var(--line);border-radius:12px;padding:.5rem .6rem;margin:.35rem 0;user-select:none}
 .item .name{font-weight:750}
 .item.selected{outline:2px solid #a1c4fd}
@@ -53,12 +48,12 @@ body.locked #gate { pointer-events:auto; filter:none }
 .ico-btn{min-width:30px;height:30px;border-radius:8px;border:1px solid #e3e3ea;background:#fff;cursor:pointer}
 .ico-btn:hover{background:#fafafa}
 
-/* Colores secciones */
+/* Colores cabeceras */
 .bg-ex{background:var(--col-ex)} .bg-fl{background:var(--col-fl)} .bg-va{background:var(--col-va)}
 .bg-fm{background:var(--col-fm)} .bg-ta{background:var(--col-ta)} .bg-eq{background:var(--col-eq)}
 
-/* Detalle */
-.detail{padding:1rem 1.1rem 1.2rem;border-radius:18px;border:1px solid var(--line);background:#fff;min-height:62vh;box-shadow:var(--shadow)}
+/* Detalle (derecha) */
+.detail{padding:1rem 1.1rem 1.2rem;border-radius:18px;border:1px solid var(--line);background:#fff;min-height:70vh;box-shadow:var(--shadow)}
 .detail h2{margin:.1rem 0 .4rem 0}
 .badge{padding:.15rem .5rem;border-radius:999px;background:#00000010}
 .save-band{display:flex;justify-content:center;margin:.2rem 0 .8rem}
@@ -71,10 +66,10 @@ body.locked #gate { pointer-events:auto; filter:none }
 .field label{font-weight:700;opacity:.9}
 .field input,.field select{border:1px solid var(--line);border-radius:10px;padding:.5rem .6rem;font-size:1rem;background:#fff;outline:none}
 
-/* Tablas densas + scroll */
+/* Tablas densas + scroll horizontal */
 .table-wrap{border:1px solid var(--line);border-radius:12px;background:#fff;box-shadow:var(--shadow);padding:.5rem}
 .xscroll{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;padding-bottom:14px;min-height:24px}
-.table-inner{display:block;width:max-content;min-width:1800px} /* hace visible la barra horizontal */
+.table-inner{display:block;width:max-content;min-width:1800px}
 .table-inner input,.table-inner select{padding:.35rem .45rem;font-size:.95rem}
 .va-head,.va-row{display:grid;gap:.25rem;align-items:center;margin:.1rem .1rem}
 .scroll{max-height:58vh;overflow:auto;padding-right:.3rem}
@@ -101,10 +96,6 @@ body.locked #gate { pointer-events:auto; filter:none }
 .progress{flex:1;height:10px;background:#e9ecef;border-radius:999px;overflow:hidden}
 .progress>div{height:100%;background:#1f6feb;width:0%}
 
-@media (max-width:980px){
-  .table-inner{min-width:1300px}
-}
-
 /* PIN overlay negro */
 .gate{position:fixed;inset:0;background:#000;display:flex;align-items:center;justify-content:center;z-index:1000}
 .gate-card{background:#111;color:#fff;border-radius:16px;box-shadow:var(--shadow);padding:24px 22px;min-width:320px;border:1px solid #2a2a2a}
@@ -112,7 +103,7 @@ body.locked #gate { pointer-events:auto; filter:none }
 .pin{letter-spacing:.45rem;font-size:1.25rem;text-align:center;background:#000;color:#fff;border:1px solid #444;border-radius:10px;padding:.6rem}
 .subtle{opacity:.8;font-size:.9rem}
 
-/* Modo solo lectura si hay bloqueo remoto */
+/* Readonly visual */
 .readonly .detail input,
 .readonly .detail select,
 .readonly .detail .ico-btn,
@@ -128,55 +119,69 @@ body.locked #gate { pointer-events:auto; filter:none }
     <button id="btnFetch" class="btn btn-lite" title="Leer de la nube o local (no guarda)">Actualizar (nube)</button>
     <button id="btnSaveTop" class="btn btn-save" title="Guardar en la nube o local">Guardar (nube)</button>
     <button id="btnReset" class="btn btn-ghost" title="Descartar cambios locales y volver al último leído">Resetear</button>
-    <span id="stamp" class="pill">v7.6 · Cargando…</span>
+    <span id="stamp" class="pill">v7.7-LR · Cargando…</span>
   </div>
-  <div id="lockBanner" class="lock-banner">⚠️ <b>En uso</b> por otra sesión. Modo lectura hasta que libere.</div>
 </header>
 
-<main class="app">
-  <section class="wrapV">
-    <!-- CINTA SUPERIOR -->
-    <div class="ribbon card">
-      <div class="ribbon-inner">
-        <section class="section bg-ex" data-section="CENTROS EXCLUSIVOS">
-          <div class="sec-head"><div>📒 CENTROS EXCLUSIVOS <span class="badge">(máx. 10)</span></div>
-            <div><button class="sec-btn" data-act="toggle" title="Mostrar/ocultar">▾</button><button class="sec-btn" data-act="add" title="Añadir">＋</button></div>
-          </div><div class="sec-list"></div>
-        </section>
-        <section class="section bg-fl" data-section="CENTROS FLOP">
-          <div class="sec-head"><div>📒 CENTROS FLOP</div>
-            <div><button class="sec-btn" data-act="toggle" title="Mostrar/ocultar">▾</button><button class="sec-btn" data-act="add" title="Añadir">＋</button></div>
-          </div><div class="sec-list"></div>
-        </section>
-        <section class="section bg-va" data-section="VISITAS AUDIO">
-          <div class="sec-head"><div>📋 VISITAS AUDIO</div>
-            <div><button class="sec-btn" data-act="toggle" title="Mostrar/ocultar">▾</button><button class="sec-btn" data-act="add" title="Añadir">＋</button></div>
-          </div><div class="sec-list"></div>
-        </section>
-        <section class="section bg-fm" data-section="FORMACIONES Y MENTORING">
-          <div class="sec-head"><div>🎓 FORMACIONES Y MENTORING</div>
-            <div><button class="sec-btn" data-act="toggle" title="Mostrar/ocultar">▾</button><button class="sec-btn" data-act="add" title="Añadir">＋</button></div>
-          </div><div class="sec-list"></div>
-        </section>
-        <section class="section bg-ta" data-section="TELEAUDIOLOGIA">
-          <div class="sec-head"><div>📡 TELEAUDIOLOGIA</div>
-            <div><button class="sec-btn" data-act="toggle" title="Mostrar/ocultar">▾</button><button class="sec-btn" data-act="add" title="Añadir">＋</button></div>
-          </div><div class="sec-list"></div>
-        </section>
-        <section class="section bg-eq" data-section="EQUIPOS">
-          <div class="sec-head"><div>🧰 EQUI﻿POS</div>
-            <div><button class="sec-btn" data-act="toggle" title="Mostrar/ocultar">▾</button><button class="sec-btn" data-act="add" title="Añadir">＋</button></div>
-          </div><div class="sec-list"></div>
-        </section>
+<main>
+  <section class="main">
+    <!-- SIDEBAR IZQUIERDA -->
+    <aside class="sidebar">
+      <div class="side-card bg-ex" data-section="CENTROS EXCLUSIVOS">
+        <div class="side-head">
+          <div>📒 CENTROS EXCLUSIVOS</div>
+          <div><button class="side-btn" data-act="toggle" title="Mostrar/ocultar">▾</button><button class="side-btn" data-act="add" title="Añadir">＋</button></div>
+        </div>
+        <div class="side-list"></div>
       </div>
-    </div>
 
-    <!-- DETALLE -->
+      <div class="side-card bg-fl" data-section="CENTROS FLOP">
+        <div class="side-head">
+          <div>📒 CENTROS FLOP</div>
+          <div><button class="side-btn" data-act="toggle" title="Mostrar/ocultar">▾</button><button class="side-btn" data-act="add" title="Añadir">＋</button></div>
+        </div>
+        <div class="side-list"></div>
+      </div>
+
+      <div class="side-card bg-va" data-section="VISITAS AUDIO">
+        <div class="side-head">
+          <div>📋 VISITAS AUDIO</div>
+          <div><button class="side-btn" data-act="toggle" title="Mostrar/ocultar">▾</button><button class="side-btn" data-act="add" title="Añadir">＋</button></div>
+        </div>
+        <div class="side-list"></div>
+      </div>
+
+      <div class="side-card bg-fm" data-section="FORMACIONES Y MENTORING">
+        <div class="side-head">
+          <div>🎓 FORMACIONES Y MENTORING</div>
+          <div><button class="side-btn" data-act="toggle" title="Mostrar/ocultar">▾</button><button class="side-btn" data-act="add" title="Añadir">＋</button></div>
+        </div>
+        <div class="side-list"></div>
+      </div>
+
+      <div class="side-card bg-ta" data-section="TELEAUDIOLOGIA">
+        <div class="side-head">
+          <div>📡 TELEAUDIOLOGIA</div>
+          <div><button class="side-btn" data-act="toggle" title="Mostrar/ocultar">▾</button><button class="side-btn" data-act="add" title="Añadir">＋</button></div>
+        </div>
+        <div class="side-list"></div>
+      </div>
+
+      <div class="side-card bg-eq" data-section="EQUIPOS">
+        <div class="side-head">
+          <div>🧰 EQUIPOS</div>
+          <div><button class="side-btn" data-act="toggle" title="Mostrar/ocultar">▾</button><button class="side-btn" data-act="add" title="Añadir">＋</button></div>
+        </div>
+        <div class="side-list"></div>
+      </div>
+    </aside>
+
+    <!-- DETALLE DERECHA -->
     <section class="detail card" id="detail">
       <div style="display:flex;align-items:center;gap:.6rem">
         <h2 id="detTitle">Detalle</h2><span id="detTag" class="badge">—</span>
       </div>
-      <p id="detHint" style="opacity:.7">Selecciona un item (doble clic o ✏️) o crea uno con ＋.</p>
+      <p id="detHint" style="opacity:.7">Selecciona en la izquierda (doble clic o ✏️) o crea con ＋.</p>
 
       <!-- CENTROS -->
       <div id="detCentro" style="display:none">
@@ -184,13 +189,10 @@ body.locked #gate { pointer-events:auto; filter:none }
         <div class="row">
           <div class="field"><label>Nombre</label><input id="cNombre"></div>
           <div class="field"><label>Delegado</label><input id="cDelegado"></div>
-        </div>
-        <div class="row">
           <div class="field"><label>Audiólogo</label><input id="cAudiologo"></div>
           <div class="field"><label>Franquicia o Sucursal</label><select id="cTipo"><option>Franquicia</option><option>Sucursal</option></select></div>
         </div>
 
-        <!-- Acciones -->
         <div class="table-wrap">
           <div class="xscroll"><div class="table-inner">
             <div class="va-head" style="grid-template-columns:52px 130px 1fr 110px 110px 110px 150px 52px">
@@ -199,7 +201,6 @@ body.locked #gate { pointer-events:auto; filter:none }
           </div></div>
         </div>
 
-        <!-- Formaciones -->
         <div class="table-wrap">
           <div class="xscroll"><div class="table-inner">
             <div class="va-head" style="grid-template-columns:52px 1.2fr .7fr .7fr 1.4fr 52px">
@@ -208,7 +209,6 @@ body.locked #gate { pointer-events:auto; filter:none }
           </div></div>
         </div>
 
-        <!-- Procesos -->
         <div class="table-wrap">
           <div class="xscroll"><div class="table-inner">
             <div class="va-head" style="grid-template-columns:52px 220px 120px 160px 52px">
@@ -234,6 +234,7 @@ body.locked #gate { pointer-events:auto; filter:none }
           <div class="field"><label>Buscar centro</label><input id="vaSearch" placeholder="Filtrar…"></div>
         </div>
         <div id="vaTabs" style="margin:.2rem 0 .5rem 0"></div>
+
         <div class="table-wrap">
           <div class="xscroll"><div class="table-inner">
             <div class="va-head va-cols">
@@ -251,6 +252,7 @@ body.locked #gate { pointer-events:auto; filter:none }
           <div class="field"><label>Delegado regional</label><input id="fmDelegado"></div>
           <div class="field"><label>Buscar</label><input id="fmSearch" placeholder="Filtrar…"></div>
         </div>
+
         <div class="table-wrap">
           <div class="xscroll"><div class="table-inner">
             <div class="va-head fm-head">
@@ -317,9 +319,9 @@ body.locked #gate { pointer-events:auto; filter:none }
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script>
 /* ======= CONFIG ======= */
-const APP_VERSION='v7.6';
+const APP_VERSION='v7.7-LR';
 const REQUIRE_PIN = true;
-/* SHA-256('4321'): fe2592b42a727e977f055947385b709cc82b16b9a87f88c6abf3900d65d0cdc3 */
+/* SHA-256('4321') */
 const PIN_SHA256='fe2592b42a727e977f055947385b709cc82b16b9a87f88c6abf3900d65d0cdc3';
 const DB_PATH  = 'audioseguimiento/v7';
 const firebaseConfig = { apiKey:"", authDomain:"", databaseURL:"", projectId:"", storageBucket:"", messagingSenderId:"", appId:"" };
@@ -353,75 +355,37 @@ const LOCAL_KEY='audioseguimiento_local_v7';
 function localLoad(){ try{const raw=localStorage.getItem(LOCAL_KEY); if(raw){data=JSON.parse(raw);} }catch(e){} }
 function localSave(){ try{localStorage.setItem(LOCAL_KEY,JSON.stringify(data));}catch(e){} }
 
-/* ======= Firebase (si hay claves) ======= */
 function initFirebase(){
-  if(!firebaseConfig || !firebaseConfig.apiKey) return; // sin claves → LocalStorage
+  if(!firebaseConfig || !firebaseConfig.apiKey) return;
   try{firebase.initializeApp(firebaseConfig);}catch(e){}
   cloud.enabled=true; cloud.db=firebase.database();
   firebase.auth().signInAnonymously().then(()=>{
     cloud.ref=cloud.db.ref(DB_PATH);
     cloud.ref.on('value',snap=>{
       const v=snap.val(); if(v){data=v; lastCloud=JSON.parse(JSON.stringify(v)); localSave();}
-      cloud.ready=true; $('#stamp').textContent=APP_VERSION+' · Actualizado: '+now(); renderAll();
+      cloud.ready=true; stamp('Actualizado: '+now()); renderAll();
     });
   }).catch(()=>{cloud.enabled=false;});
 }
 function saveCloudOrLocal(){
   if(cloud.enabled && cloud.ready){
-    cloud.ref.set(data).then(()=>{ lastCloud=JSON.parse(JSON.stringify(data)); $('#stamp').textContent=APP_VERSION+' · Guardado (nube): '+now(); toast('Guardado en nube'); });
-  }else{ localSave(); $('#stamp').textContent=APP_VERSION+' · Guardado (local): '+now(); toast('Guardado local'); }
+    cloud.ref.set(data).then(()=>{ lastCloud=JSON.parse(JSON.stringify(data)); stamp('Guardado (nube): '+now()); toast('Guardado en nube'); });
+  }else{ localSave(); stamp('Guardado (local): '+now()); toast('Guardado local'); }
 }
 function fetchCloudOrLocal(){
   if(cloud.enabled && cloud.ready){
-    cloud.ref.once('value').then(s=>{const v=s.val(); if(v){data=v; lastCloud=JSON.parse(JSON.stringify(v)); localSave(); renderAll(); $('#stamp').textContent=APP_VERSION+' · Actualizado (nube): '+now(); toast('Actualizado desde nube');}});
-  }else{ localLoad(); renderAll(); $('#stamp').textContent=APP_VERSION+' · Actualizado (local): '+now(); toast('Actualizado local'); }
+    cloud.ref.once('value').then(s=>{const v=s.val(); if(v){data=v; lastCloud=JSON.parse(JSON.stringify(v)); localSave(); renderAll(); stamp('Actualizado (nube): '+now()); toast('Actualizado desde nube');}});
+  }else{ localLoad(); renderAll(); stamp('Actualizado (local): '+now()); toast('Actualizado local'); }
 }
-function resetLocalView(){ if(cloud.enabled && lastCloud){ data=JSON.parse(JSON.stringify(lastCloud)); toast('Vista reseteada a última nube'); } else { localLoad(); toast('Vista reseteada a local'); } renderAll(); }
+function resetLocalView(){ if(cloud.enabled && lastCloud){ data=JSON.parse(JSON.stringify(lastCloud)); toast('Vista: última nube'); } else { localLoad(); toast('Vista: local'); } renderAll(); }
+function stamp(txt){ $('#stamp').textContent='v7.7-LR · '+txt; }
 
-/* ======= Bloqueo “En uso” ======= */
-const TAB_ID = Math.random().toString(36).slice(2);
-let lockMode='none', lockRef=null, lockTimer=null;
-function setReadonly(on){ document.body.classList.toggle('readonly',on); $('#lockBanner').classList.toggle('show',on); }
-function startLocalLock(){
-  lockMode='local';
-  const KEY='audioseguimiento_edit_lock';
-  function claim(){
-    const raw=localStorage.getItem(KEY);
-    let obj=raw?JSON.parse(raw):null, nowT=Date.now();
-    if(obj && obj.id!==TAB_ID && (nowT-obj.ts)<180000){ // 3 min
-      setReadonly(true); return false;
-    }
-    localStorage.setItem(KEY, JSON.stringify({id:TAB_ID, ts:nowT}));
-    setReadonly(false); return true;
-  }
-  claim(); // primer intento
-  lockTimer=setInterval(()=>{ if(document.hidden) return; const raw=localStorage.getItem(KEY); let obj=raw?JSON.parse(raw):null; if(!obj || obj.id===TAB_ID){ localStorage.setItem(KEY, JSON.stringify({id:TAB_ID, ts:Date.now()})); setReadonly(false);} }, 30000);
-  window.addEventListener('storage',e=>{ if(e.key!==KEY) return; const raw=e.newValue; let obj=raw?JSON.parse(raw):null; if(obj && obj.id!==TAB_ID){ setReadonly(true);} else { setReadonly(false);} });
-}
-function startFirebaseLock(){
-  if(!cloud.enabled) return false;
-  try{
-    lockRef = cloud.db.ref(DB_PATH+'/-lock');
-    const my = { id:TAB_ID, ts:firebase.database.ServerValue.TIMESTAMP };
-    lockRef.transaction(current=>{
-      const nowT=Date.now();
-      if(current && current.id && (nowT - (current.ts||0))<180000){ return; } // ocupado
-      return my;
-    }, (err, committed, snap)=>{
-      if(!committed){ setReadonly(true); } else { setReadonly(false); lockRef.onDisconnect().remove(); }
-    });
-    // Heartbeat
-    lockTimer=setInterval(()=>{ lockRef.update({ts:Date.now()}); }, 30000);
-    return true;
-  }catch(_){ return false; }
-}
-
-/* ======= Cinta superior (menos sensible) ======= */
+/* ======= Sidebar (menos sensible) ======= */
 const SECTIONS=["CENTROS EXCLUSIVOS","CENTROS FLOP","VISITAS AUDIO","FORMACIONES Y MENTORING","TELEAUDIOLOGIA","EQUIPOS"];
 function renderLeft(){
   SECTIONS.forEach(name=>{
-    const sec=document.querySelector(`.section[data-section="${name}"]`);
-    const list=sec.querySelector('.sec-list'); list.innerHTML='';
+    const box=document.querySelector(`.side-card[data-section="${name}"]`);
+    const list=box.querySelector('.side-list'); list.innerHTML='';
     (data[name]||[]).forEach((it,i)=>{
       const div=document.createElement('div'); div.className='item'; div.dataset.index=i;
       let inner='', acts=true;
@@ -435,16 +399,16 @@ function renderLeft(){
         inner=`<div><div class="name">Teleaudiología</div></div>`;
       }else{ inner=`<div><div class="name">Inventario de equipos</div></div>`; acts=false; }
       div.innerHTML=inner+(acts?`<div class="acts"><button class="ico-btn" data-role="edit" title="Editar">✏️</button><button class="ico-btn" data-role="del" title="Eliminar">🗑️</button></div>`:'');
-      // selección visual con un clic
-      div.addEventListener('click',e=>{ $$('.item',list).forEach(x=>x.classList.remove('selected')); div.classList.add('selected'); });
-      // abrir detalle solo con Doble clic o botón ✏️
+      // selección con 1 clic
+      div.addEventListener('click',()=>{ $$('.item',list).forEach(x=>x.classList.remove('selected')); div.classList.add('selected'); });
+      // abrir con doble clic o ✏️
       div.addEventListener('dblclick',()=>{ state.selected={section:name,index:i}; renderDetail(); });
       div.querySelector('[data-role="edit"]')?.addEventListener('click',e=>{ e.stopPropagation(); state.selected={section:name,index:i}; renderDetail(); });
       div.querySelector('[data-role="del"]')?.addEventListener('click',e=>{ e.stopPropagation(); if(confirm('¿Eliminar este item?')){ data[name].splice(i,1); renderAll(); saveCloudOrLocal(); }});
       list.appendChild(div);
     });
-    sec.querySelector('[data-act="toggle"]').onclick=()=>{list.style.display=list.style.display==='none'?'':'none'; if(list.style.display==='none'&&name.includes('CENTROS')){state.selected={section:null,index:null}; renderDetailBlank();}};
-    sec.querySelector('[data-act="add"]').onclick=()=>{
+    box.querySelector('[data-act="toggle"]').onclick=()=>{ list.style.display=list.style.display==='none'?'':'none'; if(list.style.display==='none'&&name.includes('CENTROS')){state.selected={section:null,index:null}; renderDetailBlank();}};
+    box.querySelector('[data-act="add"]').onclick=()=>{
       let nuevo;
       if(name.includes('CENTROS')) nuevo={nombre:'(nuevo centro)',delegado:'',audiologo:'',tipo:'Franquicia',acciones:[],formaciones:[],procesos:[]};
       else if(name==="VISITAS AUDIO") nuevo={rol:'Delegado audio',responsable:'',hojas:[sheetVA('Visita 1')]};
@@ -539,8 +503,8 @@ $('#vaRol').onchange=e=>{cur().rol=e.target.value; saveCloudOrLocal(); renderLef
 $('#vaResp').oninput=e=>{cur().responsable=e.target.value; saveCloudOrLocal(); renderLeft();};
 $('#vaSearch').oninput=e=>{state.vaFilter=e.target.value.trim(); renderVA();};
 function renderVaTabs(){const it=cur(); const tabs=$('#vaTabs'); tabs.innerHTML=''; it.hojas=it.hojas||[sheetVA('Visita 1')];
-  it.hojas.forEach((h,idx)=>{const b=document.createElement('button'); b.className='sec-btn'; b.textContent=h.nombre||('Visita '+(idx+1)); if(idx===state.vaSheet) b.style.background='#f1f1f1'; b.onclick=()=>{state.vaSheet=idx; renderVA();}; tabs.appendChild(b);});
-  const add=document.createElement('button'); add.className='sec-btn'; add.textContent='＋'; add.title='Añadir visita'; add.onclick=()=>{it.hojas.push(sheetVA('Visita '+(it.hojas.length+1))); state.vaSheet=it.hojas.length-1; saveCloudOrLocal(); renderVaTabs(); renderVA();}; tabs.appendChild(add);
+  it.hojas.forEach((h,idx)=>{const b=document.createElement('button'); b.className='side-btn'; b.textContent=h.nombre||('Visita '+(idx+1)); if(idx===state.vaSheet){b.style.background='#f1f1f1';} b.onclick=()=>{state.vaSheet=idx; renderVA();}; tabs.appendChild(b);});
+  const add=document.createElement('button'); add.className='side-btn'; add.textContent='＋'; add.title='Añadir visita'; add.onclick=()=>{it.hojas.push(sheetVA('Visita '+(it.hojas.length+1))); state.vaSheet=it.hojas.length-1; saveCloudOrLocal(); renderVaTabs(); renderVA();}; tabs.appendChild(add);
 }
 function vClass80(v){const n=Number(v); if(!Number.isFinite(n)) return ''; return n>=80?'good':'bad';}
 function vScore85(v){const n=Number(v); if(!Number.isFinite(n)) return ''; return n>=85?'good':'bad';}
@@ -667,8 +631,7 @@ async function sha256Hex(str){
   return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
 }
 async function checkPin(val){
-  let s=(val||'').trim();
-  if(/^AR/i.test(s)) s=s.slice(2); // permite AR4321
+  let s=(val||'').trim(); if(/^AR/i.test(s)) s=s.slice(2);
   if(!s) return false;
   try{ return (await sha256Hex(s))===PIN_SHA256; }catch(_){ return false; }
 }
@@ -687,12 +650,7 @@ $('#cancelPin').onclick=()=>{ $('#pin').value=''; $('#pinMsg').style.display='no
 function renderAll(){ renderLeft(); if(state.selected.section) renderDetail(); else renderDetailBlank(); }
 window.addEventListener('DOMContentLoaded',()=>{ if(REQUIRE_PIN){ lock(); } });
 window.addEventListener('load',()=>{
-  localLoad(); initFirebase();
-  // Lock remoto (si hay Firebase) o local (si no)
-  const okFb = startFirebaseLock();
-  if(!okFb) startLocalLock();
-  renderAll();
-  $('#stamp').textContent=APP_VERSION+' · Listo: '+now();
+  localLoad(); initFirebase(); renderAll(); stamp('Listo: '+now());
 });
 </script>
 </body>
