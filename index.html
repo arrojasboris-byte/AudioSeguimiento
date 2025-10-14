@@ -1,11 +1,10 @@
 <!doctype html>
 <html lang="es">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>SEGUIMIENTO AUDIO · Cloud</title>
-<link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#c82727">
+<meta name="theme-color" content="#c82727" />
 <style>
 :root{
   --rojo:#c82727; --rojo-osc:#a71f1f;
@@ -77,7 +76,7 @@ body{margin:0;background:var(--bg);font-family:Inter,system-ui,Segoe UI,Roboto,A
 .conv.bad{background:#fff4e1;border-color:rgba(243,156,18,.7)}
 @media (max-width:1200px){.wrap{grid-template-columns:1fr}.scroll{max-height:52vh}}
 
-/* Overlay PIN: fondo negro */
+/* Overlay PIN: negro */
 .gate{position:fixed;inset:0;background:#000;display:flex;align-items:center;justify-content:center;z-index:1000}
 .gate-card{background:#111;color:#fff;border-radius:16px;box-shadow:var(--shadow);padding:24px 22px;min-width:320px;border:1px solid #2a2a2a}
 .gate-card h3{margin:.25rem 0 1rem 0}
@@ -91,8 +90,8 @@ body{margin:0;background:var(--bg);font-family:Inter,system-ui,Segoe UI,Roboto,A
   <div class="bar-inner">
     <div class="brand">SEGUIMIENTO AUDIO · Cloud</div>
     <div class="spacer"></div>
-    <button id="btnFetch" class="btn btn-lite" title="Leer de la nube (no guarda)">Actualizar (nube)</button>
-    <button id="btnSaveTop" class="btn btn-save" title="Guardar en la nube">Guardar (nube)</button>
+    <button id="btnFetch" class="btn btn-lite" title="Leer de la nube o local (no guarda)">Actualizar (nube)</button>
+    <button id="btnSaveTop" class="btn btn-save" title="Guardar en la nube o local">Guardar (nube)</button>
     <button id="btnReset" class="btn btn-ghost" title="Descartar cambios locales y volver al último leído">Resetear</button>
     <span id="stamp" class="pill">Conectando…</span>
   </div>
@@ -254,7 +253,7 @@ body{margin:0;background:var(--bg);font-family:Inter,system-ui,Segoe UI,Roboto,A
 </main>
 
 <!-- Overlay PIN -->
-<div id="gate" class="gate" style="display:none">
+<div id="gate" class="gate">
   <div class="gate-card">
     <h3>Acceso</h3>
     <p class="subtle">Introduce el PIN para editar:</p>
@@ -267,30 +266,38 @@ body{margin:0;background:var(--bg);font-family:Inter,system-ui,Segoe UI,Roboto,A
   </div>
 </div>
 
+<!-- (Firebase opcional) -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script>
-/* ==== CONFIG ==== */
-const PIN_CODE = 'AR4321';              // << PIN
-const DB_PATH  = 'audioseguimiento/v5i'; // cambia si quieres otra rama
+/* ======= CONFIG ======= */
+const REQUIRE_PIN = true;
+const PIN_CODE = '4321';             // <— PIN (admite may/min)
+const DB_PATH  = 'audioseguimiento/v6'; // cambia para “versionar” datos
 
+// Rellena esto si quieres usar Firebase Realtime Database.
+// Si lo dejas vacío, la app usa LocalStorage automáticamente.
 const firebaseConfig = {
-  apiKey: "TU_API_KEY",
-  authDomain: "TU_DOMINIO.firebaseapp.com",
-  databaseURL: "https://TU_ID_PROYECTO-default-rtdb.firebaseio.com",
-  projectId: "TU_ID_PROYECTO",
-  storageBucket: "TU_ID_PROYECTO.appspot.com",
-  messagingSenderId: "TUSENDERID",
-  appId: "TU_APP_ID"
+  apiKey: "",
+  authDomain: "",
+  databaseURL: "",
+  projectId: "",
+  storageBucket: "",
+  messagingSenderId: "",
+  appId: ""
 };
 
-/* ==== Estado/Datos ==== */
+/* ======= Utiles ======= */
 const $=(s,r=document)=>r.querySelector(s); const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
-const esc=s=>(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); const now=()=>new Date().toLocaleString();
+const esc=s=>(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const now=()=>new Date().toLocaleString();
 
-let cloud={db:null,ref:null,ready:false}, lastCloud=null;
-let state={selected:{section:null,index:null},vaSheet=0,vaFilter:'',fmFilter:'',taFilter:'',taPerson:'',eqFilter:''};
+/* ======= Estado/Datos ======= */
+let cloud={enabled:false,db:null,ref:null,ready:false};
+let lastCloud=null;
+
+let state={selected:{section:null,index:null},vaSheet:0,vaFilter:'',fmFilter:'',taFilter:'',taPerson:'',eqFilter:''};
 
 function sheetVA(n){const rows=Array.from({length:300},()=>({centro:'',delegado:'',audiologo:'',tipo:'Sucursal',fecha:'',puntuacion:null,hit:false,conv_prueba:null,conv_venta:null}));return{nombre:n,rows};}
 function rowsFM(){return Array.from({length:300},()=>({fecha:'',tema:'',audiologo:'',duracion:1,p_ini:null,v_ini:null,p_3m:null,v_3m:null}));}
@@ -306,23 +313,51 @@ let data={
   "EQUIPOS":[equiposInit()]
 };
 
-/* ==== Firebase ==== */
+/* ======= Persistencia (Nube/Local) ======= */
+const LOCAL_KEY='audioseguimiento_local_v6';
+function localLoad(){ try{const raw=localStorage.getItem(LOCAL_KEY); if(raw){data=JSON.parse(raw);} }catch(e){} }
+function localSave(){ try{localStorage.setItem(LOCAL_KEY,JSON.stringify(data));}catch(e){} }
+
 function initFirebase(){
+  if(!firebaseConfig || !firebaseConfig.apiKey) return; // sin claves -> local
   try{firebase.initializeApp(firebaseConfig);}catch(e){}
+  cloud.enabled=true;
   cloud.db=firebase.database();
   firebase.auth().signInAnonymously().then(()=>{
     cloud.ref=cloud.db.ref(DB_PATH);
     cloud.ref.on('value',snap=>{
-      const v=snap.val(); if(v){data=v; lastCloud=JSON.parse(JSON.stringify(v));}
-      cloud.ready=true; $('#stamp').textContent='Actualizado: '+now(); renderAll();
+      const v=snap.val(); if(v){data=v; lastCloud=JSON.parse(JSON.stringify(v)); localSave();}
+      cloud.ready=true;
+      $('#stamp').textContent='Actualizado: '+now();
+      renderAll();
     });
-  });
+  }).catch(()=>{cloud.enabled=false;});
 }
-function saveCloud(){ if(!cloud.ready) return; cloud.ref.set(data).then(()=>{lastCloud=JSON.parse(JSON.stringify(data)); $('#stamp').textContent='Guardado: '+now();}); }
-function fetchCloud(){ if(!cloud.ready) return; cloud.ref.once('value').then(s=>{const v=s.val(); if(v){data=v; lastCloud=JSON.parse(JSON.stringify(v)); renderAll(); $('#stamp').textContent='Actualizado: '+now();}}); }
-function resetLocal(){ if(lastCloud){ data=JSON.parse(JSON.stringify(lastCloud)); renderAll(); }}
+function saveCloudOrLocal(){
+  if(cloud.enabled && cloud.ready){
+    cloud.ref.set(data).then(()=>{
+      lastCloud=JSON.parse(JSON.stringify(data));
+      $('#stamp').textContent='Guardado (nube): '+now();
+    });
+  }else{
+    localSave();
+    $('#stamp').textContent='Guardado (local): '+now();
+  }
+}
+function fetchCloudOrLocal(){
+  if(cloud.enabled && cloud.ready){
+    cloud.ref.once('value').then(s=>{const v=s.val(); if(v){data=v; lastCloud=JSON.parse(JSON.stringify(v)); localSave(); renderAll(); $('#stamp').textContent='Actualizado (nube): '+now();}});
+  }else{
+    localLoad(); renderAll(); $('#stamp').textContent='Actualizado (local): '+now();
+  }
+}
+function resetLocalView(){
+  if(cloud.enabled && lastCloud){ data=JSON.parse(JSON.stringify(lastCloud)); }
+  else localLoad();
+  renderAll();
+}
 
-/* ==== Izquierda ==== */
+/* ======= UI izquierda ======= */
 const SECTIONS=["CENTROS EXCLUSIVOS","CENTROS FLOP","VISITAS AUDIO","FORMACIONES Y MENTORING","TELEAUDIOLOGIA","EQUIPOS"];
 function renderLeft(){
   SECTIONS.forEach(name=>{
@@ -350,21 +385,21 @@ function renderLeft(){
       else if(name==="FORMACIONES Y MENTORING") nuevo={delegado:'(Delegado regional)',filas:rowsFM()};
       else if(name==="TELEAUDIOLOGIA") nuevo={hojas:[sheetTA('Tele 1')]};
       else nuevo=equiposInit();
-      data[name].push(nuevo); renderAll(); saveCloud();
+      data[name].push(nuevo); renderAll(); saveCloudOrLocal();
     };
     list.onclick=(e)=>{
       const role=e.target.dataset.role; const item=e.target.closest('.item'); if(!item) return;
       const idx=+item.dataset.index;
-      if(role==='del'){ if(confirm('¿Eliminar este item?')){ data[name].splice(idx,1); renderAll(); saveCloud(); } return; }
+      if(role==='del'){ if(confirm('¿Eliminar este item?')){ data[name].splice(idx,1); renderAll(); saveCloudOrLocal(); } return; }
       state.selected={section:name,index:idx}; renderDetail();
     };
   });
 }
 
-/* ==== Detalle ==== */
+/* ======= Detalle ======= */
 function renderDetailBlank(){ $('#detHint').style.display='block'; $('#detTag').textContent='—';
   $('#detCentro').style.display='none'; $('#detVisitas').style.display='none'; $('#detFormaciones').style.display='none'; $('#detTele').style.display='none'; $('#detEquipos').style.display='none'; }
-function setTone(s){ const d=$('#detail'); d.style.background = s==="CENTROS EXCLUSIVOS"?'var(--col-ex)':s==="CENTROS FLOP"?'var(--col-fl)':s==="VISITAS AUDIO"?'var(--col-va)':s==="FORMACIONES Y MENTORING"?'var(--col-fm)':s==="TELEAUDIOLOGIA"?'var(--col-ta)':s==="EQUIPOS"?'var(--col-eq)':'#fff'; }
+function setTone(s){ const d=$('#detail'); d.style.background = s==="CENTROS EXCLUSIVOS"?'var(--col-ex)':s==="CENTROS FLOP"?'var(--col-fl)':s==="VISITAS AUDIO"?'var(--col-va)':s==="FORMACIONES Y MENTORING"?'var(--col-fm)':s==="TELEAUDIOLOGIA"?'var(--col-ta)':'var(--col-eq)'; }
 function cur(){ return data[state.selected.section]?.[state.selected.index]; }
 function renderDetail(){
   $('#detHint').style.display='none';
@@ -381,12 +416,12 @@ function renderDetail(){
   if(s==='EQUIPOS') fillEQ();
 }
 
-/* ==== CENTROS ==== */
+/* ======= CENTROS ======= */
 function fillCentro(){ const it=cur(); if(!it) return;
   $('#cNombre').value=it.nombre||''; $('#cDelegado').value=it.delegado||''; $('#cAudiologo').value=it.audiologo||''; $('#cTipo').value=it.tipo||'Franquicia';
   renderAcciones(); renderFormaciones(); renderProcesos();
 }
-function saveCentro(){ const it=cur(); if(!it) return; it.nombre=$('#cNombre').value.trim(); it.delegado=$('#cDelegado').value.trim(); it.audiologo=$('#cAudiologo').value.trim(); it.tipo=$('#cTipo').value; saveCloud(); renderLeft(); }
+function saveCentro(){ const it=cur(); if(!it) return; it.nombre=$('#cNombre').value.trim(); it.delegado=$('#cDelegado').value.trim(); it.audiologo=$('#cAudiologo').value.trim(); it.tipo=$('#cTipo').value; saveCloudOrLocal(); renderLeft(); }
 $('#saveCentroTop').onclick=saveCentro;
 
 function renderAcciones(){ const it=cur(); it.acciones=it.acciones||[]; const cont=$('#accionesRows'); cont.innerHTML='';
@@ -404,12 +439,12 @@ function renderAcciones(){ const it=cur(); it.acciones=it.acciones||[]; const co
   <input type="number" data-new="1" data-k="derivacion"><input type="number" data-new="1" data-k="citas"><input type="number" data-new="1" data-k="venta"><span></span>`;
   cont.appendChild(add);
 }
-$('#accionesRows').addEventListener('click',e=>{const i=e.target.dataset.del; if(i!=null){cur().acciones.splice(+i,1); renderAcciones(); saveCloud();}});
+$('#accionesRows').addEventListener('click',e=>{const i=e.target.dataset.del; if(i!=null){cur().acciones.splice(+i,1); renderAcciones(); saveCloudOrLocal();}});
 $('#accionesRows').addEventListener('input',e=>{
   const i=e.target.dataset.i, k=e.target.dataset.k, isNew=e.target.dataset.new;
   if(!k) return;
-  if(isNew){ const r={fecha:'',tipo:'',paquete:'1',derivacion:null,citas:null,venta:null}; r[k]=e.target.type==='number'?(e.target.value===''?null:Number(e.target.value)):e.target.value; cur().acciones.push(r); renderAcciones(); saveCloud(); return; }
-  const r=cur().acciones[+i]; r[k]=e.target.type==='number'?(e.target.value===''?null:Number(e.target.value)):e.target.value; saveCloud();
+  if(isNew){ const r={fecha:'',tipo:'',paquete:'1',derivacion:null,citas:null,venta:null}; r[k]=e.target.type==='number'?(e.target.value===''?null:Number(e.target.value)):e.target.value; cur().acciones.push(r); renderAcciones(); saveCloudOrLocal(); return; }
+  const r=cur().acciones[+i]; r[k]=e.target.type==='number'?(e.target.value===''?null:Number(e.target.value)):e.target.value; saveCloudOrLocal();
 });
 
 function renderFormaciones(){ const it=cur(); it.formaciones=it.formaciones||[]; const cont=$('#formacionesRows'); cont.innerHTML='';
@@ -418,11 +453,11 @@ function renderFormaciones(){ const it=cur(); it.formaciones=it.formaciones||[];
   const add=document.createElement('div'); add.className='va-row'; add.style.gridTemplateColumns='52px 1.2fr .7fr .7fr 1.4fr 52px';
   add.innerHTML=`<div>${it.formaciones.length+1}</div><input data-new="1" data-k="curso"><input type="checkbox" data-new="1" data-k="realizado"><input type="checkbox" data-new="1" data-k="aplica"><input data-new="1" data-k="obs"><span></span>`; cont.appendChild(add);
 }
-$('#formacionesRows').addEventListener('click',e=>{const i=e.target.dataset.delf; if(i!=null){cur().formaciones.splice(+i,1); renderFormaciones(); saveCloud();}});
+$('#formacionesRows').addEventListener('click',e=>{const i=e.target.dataset.delf; if(i!=null){cur().formaciones.splice(+i,1); renderFormaciones(); saveCloudOrLocal();}});
 $('#formacionesRows').addEventListener('input',e=>{
   const i=e.target.dataset.i,k=e.target.dataset.k,isNew=e.target.dataset.new;if(!k)return;
-  if(isNew){const r={curso:'',realizado:false,aplica:false,obs:''};r[k]=e.target.type==='checkbox'?e.target.checked:e.target.value;cur().formaciones.push(r);renderFormaciones();saveCloud();return;}
-  const r=cur().formaciones[+i]; r[k]=e.target.type==='checkbox'?e.target.checked:e.target.value; saveCloud();
+  if(isNew){const r={curso:'',realizado:false,aplica:false,obs:''};r[k]=e.target.type==='checkbox'?e.target.checked:e.target.value;cur().formaciones.push(r);renderFormaciones();saveCloudOrLocal();return;}
+  const r=cur().formaciones[+i]; r[k]=e.target.type==='checkbox'?e.target.checked:e.target.value; saveCloudOrLocal();
 });
 
 function renderProcesos(){ const it=cur(); it.procesos=it.procesos||[]; const cont=$('#procesosRows'); cont.innerHTML='';
@@ -432,21 +467,21 @@ function renderProcesos(){ const it=cur(); it.procesos=it.procesos||[]; const co
   const add=document.createElement('div'); add.className='va-row'; add.style.gridTemplateColumns='52px 220px 120px 160px 52px';
   add.innerHTML=`<div>${it.procesos.length+1}</div><input class="pscore" type="number" min="0" max="100" step="1" data-new="1" data-k="puntuacion"><input type="checkbox" data-new="1" data-k="hit"><input type="checkbox" data-new="1" data-k="colaboraciones"><span></span>`; cont.appendChild(add);
 }
-$('#procesosRows').addEventListener('click',e=>{const i=e.target.dataset.delp; if(i!=null){cur().procesos.splice(+i,1); renderProcesos(); saveCloud();}});
+$('#procesosRows').addEventListener('click',e=>{const i=e.target.dataset.delp; if(i!=null){cur().procesos.splice(+i,1); renderProcesos(); saveCloudOrLocal();}});
 $('#procesosRows').addEventListener('input',e=>{
   const i=e.target.dataset.i,k=e.target.dataset.k,isNew=e.target.dataset.new;if(!k)return;
-  if(isNew){const r={puntuacion:null,hit:false,colaboraciones:false}; r[k]=e.target.type==='checkbox'?e.target.checked:(e.target.value===''?null:Number(e.target.value)); cur().procesos.push(r); renderProcesos(); saveCloud(); return;}
-  const r=cur().procesos[+i]; r[k]=e.target.type==='checkbox'?e.target.checked:(e.target.value===''?null:Number(e.target.value)); if(k==='puntuacion'){e.target.className='pscore '+(Number(r[k])>=95?'good':(Number(r[k])>=85?'':'bad'));} saveCloud();
+  if(isNew){const r={puntuacion:null,hit:false,colaboraciones:false}; r[k]=e.target.type==='checkbox'?e.target.checked:(e.target.value===''?null:Number(e.target.value)); cur().procesos.push(r); renderProcesos(); saveCloudOrLocal(); return;}
+  const r=cur().procesos[+i]; r[k]=e.target.type==='checkbox'?e.target.checked:(e.target.value===''?null:Number(e.target.value)); if(k==='puntuacion'){e.target.className='pscore '+(Number(r[k])>=95?'good':(Number(r[k])>=85?'':'bad'));} saveCloudOrLocal();
 });
 
-/* ==== VISITAS ==== */
+/* ======= VISITAS ======= */
 function fillVisitas(){const it=cur(); if(!it) return; $('#vaRol').value=it.rol||'Delegado audio'; $('#vaResp').value=it.responsable||''; $('#vaSearch').value=state.vaFilter||''; renderVaTabs(); renderVA();}
-$('#vaRol').onchange=e=>{cur().rol=e.target.value; saveCloud(); renderLeft();};
-$('#vaResp').oninput=e=>{cur().responsable=e.target.value; saveCloud(); renderLeft();};
+$('#vaRol').onchange=e=>{cur().rol=e.target.value; saveCloudOrLocal(); renderLeft();};
+$('#vaResp').oninput=e=>{cur().responsable=e.target.value; saveCloudOrLocal(); renderLeft();};
 $('#vaSearch').oninput=e=>{state.vaFilter=e.target.value.trim(); renderVA();};
 function renderVaTabs(){const it=cur(); const tabs=$('#vaTabs'); tabs.innerHTML=''; it.hojas=it.hojas||[sheetVA('Visita 1')];
   it.hojas.forEach((h,idx)=>{const b=document.createElement('button'); b.className='sec-btn'; b.textContent=h.nombre||('Visita '+(idx+1)); if(idx===state.vaSheet) b.style.background='#f1f1f1'; b.onclick=()=>{state.vaSheet=idx; renderVA();}; tabs.appendChild(b);});
-  const add=document.createElement('button'); add.className='sec-btn'; add.textContent='＋'; add.title='Añadir visita'; add.onclick=()=>{it.hojas.push(sheetVA('Visita '+(it.hojas.length+1))); state.vaSheet=it.hojas.length-1; saveCloud(); renderVaTabs(); renderVA();}; tabs.appendChild(add);
+  const add=document.createElement('button'); add.className='sec-btn'; add.textContent='＋'; add.title='Añadir visita'; add.onclick=()=>{it.hojas.push(sheetVA('Visita '+(it.hojas.length+1))); state.vaSheet=it.hojas.length-1; saveCloudOrLocal(); renderVaTabs(); renderVA();}; tabs.appendChild(add);
 }
 function vClass80(v){const n=Number(v); if(!Number.isFinite(n)) return ''; return n>=80?'good':'bad';}
 function vScore85(v){const n=Number(v); if(!Number.isFinite(n)) return ''; return n>=85?'good':'bad';}
@@ -458,13 +493,13 @@ $('#vaRows').addEventListener('input',e=>{
   const i=+e.target.dataset.i, k=e.target.dataset.k; if(!k) return;
   const h=cur().hojas[state.vaSheet]; if(e.target.type==='checkbox') h.rows[i][k]=e.target.checked;
   else if(e.target.type==='number') h.rows[i][k]=e.target.value===''?null:Number(e.target.value);
-  else h.rows[i][k]=e.target.value; saveCloud();
+  else h.rows[i][k]=e.target.value; saveCloudOrLocal();
 });
-$('#saveVisitasTop').onclick=saveCloud;
+$('#saveVisitasTop').onclick=saveCloudOrLocal;
 
-/* ==== FORMACIONES ==== */
+/* ======= FORMACIONES ======= */
 function fillFM(){const it=cur(); if(!it) return; $('#fmDelegado').value=it.delegado||''; $('#fmSearch').value=state.fmFilter||''; renderFM();}
-$('#fmDelegado').oninput=e=>{cur().delegado=e.target.value; saveCloud(); renderLeft();};
+$('#fmDelegado').oninput=e=>{cur().delegado=e.target.value; saveCloudOrLocal(); renderLeft();};
 $('#fmSearch').oninput=e=>{state.fmFilter=e.target.value.trim(); renderFM();};
 function renderFM(){const it=cur(); it.filas=it.filas||rowsFM(); const f=(state.fmFilter||'').toLowerCase(); const cont=$('#fmRows'); cont.innerHTML='';
   it.filas.forEach((r,i)=>{const ok=!f||(r.tema||'').toLowerCase().includes(f)||(r.audiologo||'').toLowerCase().includes(f); if(!ok) return;
@@ -478,11 +513,11 @@ $('#fmRows').addEventListener('input',e=>{
   const i=+e.target.dataset.i,k=e.target.dataset.k; if(!k)return;
   const it=cur(); if(e.target.type==='number') it.filas[i][k]=e.target.value===''?null:Number(e.target.value);
   else if(e.target.tagName==='SELECT') it.filas[i][k]=Number(e.target.value);
-  else it.filas[i][k]=e.target.value; saveCloud();
+  else it.filas[i][k]=e.target.value; saveCloudOrLocal();
 });
-$('#saveFMTop').onclick=saveCloud;
+$('#saveFMTop').onclick=saveCloudOrLocal;
 
-/* ==== TELE ==== */
+/* ======= TELE ======= */
 function fillTA(){ $('#taSearch').value=state.taFilter||''; populateTASelect(); renderTA(); }
 function populateTASelect(){ const it=cur(); const h=(it.hojas&&it.hojas[0])||sheetTA('Tele 1'); it.hojas=it.hojas||[h];
   const names=[...new Set(h.rows.map(r=>(r.persona||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
@@ -500,15 +535,15 @@ $('#taRows').addEventListener('input',e=>{
   const i=+e.target.dataset.i,k=e.target.dataset.k;if(!k)return;
   const h=cur().hojas[0]; if(e.target.type==='checkbox') h.rows[i][k]=e.target.checked;
   else if(e.target.type==='number') h.rows[i][k]=e.target.value===''?null:Number(e.target.value);
-  else h.rows[i][k]=e.target.value; saveCloud();
+  else h.rows[i][k]=e.target.value; saveCloudOrLocal();
 });
-$('#saveTATop').onclick=saveCloud;
+$('#saveTATop').onclick=saveCloudOrLocal;
 
-/* ==== EQUIPOS ==== */
+/* ======= EQUIPOS ======= */
 function fillEQ(){ $('#eqSearch').value=state.eqFilter||''; renderEQ(); }
 $('#eqSearch').oninput=e=>{state.eqFilter=e.target.value.trim(); renderEQ();};
-$('#btnAddFila').onclick=()=>{ const it=cur(); it.filas.push({equipo:'',serie:'',persona:'',fecha:'',pares:Array.from({length:it.columnas},()=>({centro:'',sede:false}))}); renderEQ(); saveCloud(); };
-$('#btnAddParCols').onclick=()=>{ const it=cur(); it.columnas=(it.columnas||3)+1; it.filas.forEach(r=>r.pares.push({centro:'',sede:false})); renderEQ(); saveCloud(); };
+$('#btnAddFila').onclick=()=>{ const it=cur(); it.filas.push({equipo:'',serie:'',persona:'',fecha:'',pares:Array.from({length:it.columnas},()=>({centro:'',sede:false}))}); renderEQ(); saveCloudOrLocal(); };
+$('#btnAddParCols').onclick=()=>{ const it=cur(); it.columnas=(it.columnas||3)+1; it.filas.forEach(r=>r.pares.push({centro:'',sede:false})); renderEQ(); saveCloudOrLocal(); };
 
 function renderEQ(){
   const it=cur(); const cols=Math.max(1,it.columnas||3); const f=(state.eqFilter||'').toLowerCase(); const root=$('#eqTable'); root.innerHTML='';
@@ -531,31 +566,37 @@ function renderEQ(){
     body.appendChild(row);
   });
 
-  // **IMPORTANTE**: listener SIN {once:true} (así no se desactiva tras el primer input)
   body.addEventListener('input',e=>{
     const i=+e.target.dataset.i,k=e.target.dataset.k; if(isNaN(i)||!k) return;
     if(k==='centro'||k==='sede'){ const c=+e.target.dataset.c; const p=cur().filas[i].pares[c]; if(k==='centro') p.centro=e.target.value; else p.sede=e.target.checked; }
     else cur().filas[i][k]= e.target.value;
-    saveCloud();
+    saveCloudOrLocal();
   });
 }
-$('#saveEQTop').onclick=saveCloud;
+$('#saveEQTop').onclick=saveCloudOrLocal;
 
-/* ==== Topbar ==== */
-$('#btnSaveTop').onclick=saveCloud; $('#btnFetch').onclick=fetchCloud; $('#btnReset').onclick=resetLocal;
+/* ======= Topbar ======= */
+$('#btnSaveTop').onclick=saveCloudOrLocal; $('#btnFetch').onclick=fetchCloudOrLocal; $('#btnReset').onclick=resetLocalView;
 
-/* ==== PIN ==== */
-function showGate(){ $('#gate').style.display='flex'; $('#pin').focus(); }
-function hideGate(){ $('#gate').style.display='none'; }
-function tryEnter(){ const val=(($('#pin').value)||'').trim().toUpperCase(); const ok= val === (PIN_CODE||'').toUpperCase(); if(ok){sessionStorage.setItem('aas_ok','1'); hideGate();} else {$('#pinMsg').style.display='block';}}
-$('#enter').onclick=tryEnter; $('#pin').addEventListener('keydown',e=>{if(e.key==='Enter') tryEnter();}); $('#cancelPin').onclick=()=>{$('#pin').value='';$('#pinMsg').style.display='none';};
+/* ======= PIN (siempre) ======= */
+function tryEnter(){
+  const val=(($('#pin').value)||'').trim();
+  const ok = val.toLowerCase() === (PIN_CODE||'').toLowerCase();
+  if(ok){ document.getElementById('gate').style.display='none'; }
+  else { document.getElementById('pinMsg').style.display='block'; }
+}
+$('#enter').onclick=tryEnter;
+$('#pin').addEventListener('keydown',e=>{ if(e.key==='Enter') tryEnter(); });
+$('#cancelPin').onclick=()=>{ $('#pin').value=''; $('#pinMsg').style.display='none'; };
 
-/* ==== Boot ==== */
+/* ======= Init ======= */
 function renderAll(){ renderLeft(); if(state.selected.section) renderDetail(); else renderDetailBlank(); }
 window.addEventListener('load',()=>{
-  if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js').catch(()=>{}); }
-  if(!sessionStorage.getItem('aas_ok')) showGate();
-  initFirebase();
+  localLoad();           // siempre tenemos un respaldo local
+  initFirebase();        // opcional (si no hay claves, se queda en local)
+  renderAll();
+  $('#stamp').textContent='Listo: '+now();
+  if(REQUIRE_PIN){ $('#gate').style.display='flex'; $('#pin').focus(); }
 });
 </script>
 </body>
