@@ -15,6 +15,10 @@
 html,body{height:100%}
 body{margin:0;background:var(--bg);font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;color:#222;overflow-x:hidden}
 
+/* Bloqueo global hasta PIN */
+body.locked header, body.locked main { pointer-events:none; user-select:none; }
+body.locked #gate { pointer-events:auto; }
+
 /* Topbar 100% */
 .topbar{position:sticky;top:0;z-index:50;width:100%;
   background:linear-gradient(180deg,var(--rojo),var(--rojo-osc));color:#fff;box-shadow:var(--shadow)}
@@ -27,7 +31,7 @@ body{margin:0;background:var(--bg);font-family:Inter,system-ui,Segoe UI,Roboto,A
 .btn-ghost{background:transparent;border:1px solid #ffffff66;color:#fff}
 .pill{display:inline-flex;gap:.45rem;align-items:center;border:1px solid #ffffff2f;background:#ffffff1c;padding:.35rem .6rem;border-radius:999px;white-space:nowrap}
 
-/* Layout a 100%: cinta arriba + detalle abajo */
+/* Layout 100%: cinta arriba + detalle abajo */
 .app{width:100%;margin:0}
 .wrapV{display:grid;grid-template-rows:auto 1fr;gap:14px;padding:14px 12px 16px}
 
@@ -48,7 +52,7 @@ body{margin:0;background:var(--bg);font-family:Inter,system-ui,Segoe UI,Roboto,A
 .bg-ex{background:var(--col-ex)} .bg-fl{background:var(--col-fl)} .bg-va{background:var(--col-va)}
 .bg-fm{background:var(--col-fm)} .bg-ta{background:var(--col-ta)} .bg-eq{background:var(--col-eq)}
 
-/* Detalle abajo, ocupando ancho completo */
+/* Detalle */
 .detail{padding:1rem 1.1rem 1.2rem;border-radius:18px;border:1px solid var(--line);background:#fff;min-height:62vh;box-shadow:var(--shadow)}
 .detail h2{margin:.1rem 0 .4rem 0}
 .badge{padding:.15rem .5rem;border-radius:999px;background:#00000010}
@@ -95,7 +99,7 @@ body{margin:0;background:var(--bg);font-family:Inter,system-ui,Segoe UI,Roboto,A
   .table-inner{min-width:1100px}
 }
 
-/* PIN negro */
+/* PIN overlay negro SIEMPRE visible de inicio */
 .gate{position:fixed;inset:0;background:#000;display:flex;align-items:center;justify-content:center;z-index:1000}
 .gate-card{background:#111;color:#fff;border-radius:16px;box-shadow:var(--shadow);padding:24px 22px;min-width:320px;border:1px solid #2a2a2a}
 .gate-card h3{margin:.25rem 0 1rem 0}
@@ -103,7 +107,8 @@ body{margin:0;background:var(--bg);font-family:Inter,system-ui,Segoe UI,Roboto,A
 .subtle{opacity:.8;font-size:.9rem}
 </style>
 </head>
-<body>
+<!-- Arranca bloqueado -->
+<body class="locked">
 
 <header class="topbar">
   <div class="bar-inner">
@@ -112,7 +117,7 @@ body{margin:0;background:var(--bg);font-family:Inter,system-ui,Segoe UI,Roboto,A
     <button id="btnFetch" class="btn btn-lite" title="Leer de la nube o local (no guarda)">Actualizar (nube)</button>
     <button id="btnSaveTop" class="btn btn-save" title="Guardar en la nube o local">Guardar (nube)</button>
     <button id="btnReset" class="btn btn-ghost" title="Descartar cambios locales y volver al último leído">Resetear</button>
-    <span id="stamp" class="pill">v7.2 · Cargando…</span>
+    <span id="stamp" class="pill">v7.3 · Cargando…</span>
   </div>
 </header>
 
@@ -273,15 +278,15 @@ body{margin:0;background:var(--bg);font-family:Inter,system-ui,Segoe UI,Roboto,A
   </section>
 </main>
 
-<!-- PIN -->
-<div id="gate" class="gate">
+<!-- PIN SIEMPRE visible hasta desbloqueo -->
+<div id="gate" class="gate" aria-modal="true" role="dialog">
   <div class="gate-card">
     <h3>Acceso</h3>
     <p class="subtle">Introduce el PIN para editar:</p>
-    <input id="pin" class="pin" type="password" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="••••"/>
+    <input id="pin" class="pin" type="password" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="4321"/>
     <div style="display:flex;gap:.5rem;margin-top:12px">
       <button id="enter" class="btn btn-lite" style="flex:1">Entrar</button>
-      <button id="cancelPin" class="btn btn-ghost" style="flex:.8">Cancelar</button>
+      <button id="cancelPin" class="btn btn-ghost" style="flex:.8">Limpiar</button>
     </div>
     <p id="pinMsg" class="subtle" style="color:#ff7b7b;margin:.7rem 0 0 0;display:none">PIN incorrecto</p>
   </div>
@@ -293,7 +298,7 @@ body{margin:0;background:var(--bg);font-family:Inter,system-ui,Segoe UI,Roboto,A
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script>
 /* ======= CONFIG ======= */
-const APP_VERSION='v7.2';
+const APP_VERSION='v7.3';
 const REQUIRE_PIN = true;
 const PIN_CODE = '4321';
 const DB_PATH  = 'audioseguimiento/v7';
@@ -375,7 +380,7 @@ function renderLeft(){
     sec.querySelector('[data-act="toggle"]').onclick=()=>{list.style.display=list.style.display==='none'?'':'none'; if(list.style.display==='none'&&name.includes('CENTROS')){state.selected={section:null,index:null}; renderDetailBlank();}};
     sec.querySelector('[data-act="add"]').onclick=()=>{
       let nuevo;
-      if(name.includes('CENTROS')) nuevo={nombre:'(nuevo centro)',delegado:'',audiologo:'',tipo:'Franquicia',acciones:[],formaciones:[],procesos:[]}; /* ← corregido procesos:[] */
+      if(name.includes('CENTROS')) nuevo={nombre:'(nuevo centro)',delegado:'',audiologo:'',tipo:'Franquicia',acciones:[],formaciones:[],procesos:[]};
       else if(name==="VISITAS AUDIO") nuevo={rol:'Delegado audio',responsable:'',hojas:[sheetVA('Visita 1')]};
       else if(name==="FORMACIONES Y MENTORING") nuevo={delegado:'(Delegado regional)',filas:rowsFM()};
       else if(name==="TELEAUDIOLOGIA") nuevo={hojas:[sheetTA('Tele 1')]};
@@ -592,19 +597,30 @@ function renderEQ(){
 }
 $('#saveEQTop').onclick=saveCloudOrLocal;
 
-/* Topbar botones */
+/* Topbar */
 $('#btnSaveTop').onclick=saveCloudOrLocal; $('#btnFetch').onclick=fetchCloudOrLocal; $('#btnReset').onclick=resetLocalView;
 
-/* PIN */
-function tryEnter(){ const val=(($('#pin').value)||'').trim(); const ok = val.toLowerCase() === (PIN_CODE||'').toLowerCase(); if(ok){ $('#gate').style.display='none'; } else { $('#pinMsg').style.display='block'; } }
-$('#enter').onclick=tryEnter; $('#pin').addEventListener('keydown',e=>{ if(e.key==='Enter') tryEnter(); }); $('#cancelPin').onclick=()=>{ $('#pin').value=''; $('#pinMsg').style.display='none'; };
+/* ======= PIN: bloqueo fuerte ======= */
+function unlock(){ document.body.classList.remove('locked'); $('#gate').style.display='none'; }
+function lock(){ document.body.classList.add('locked'); $('#gate').style.display='flex'; $('#pin').focus(); }
+function tryEnter(){
+  const val=(($('#pin').value)||'').trim();
+  const ok = val === (PIN_CODE||'');
+  if(ok){ unlock(); } else { $('#pinMsg').style.display='block'; }
+}
+$('#enter').onclick=tryEnter;
+$('#pin').addEventListener('keydown',e=>{ if(e.key==='Enter') tryEnter(); });
+$('#cancelPin').onclick=()=>{ $('#pin').value=''; $('#pinMsg').style.display='none'; };
 
 /* Init */
 function renderAll(){ renderLeft(); if(state.selected.section) renderDetail(); else renderDetailBlank(); }
+window.addEventListener('DOMContentLoaded',()=>{
+  // MOSTRAR overlay de inmediato y bloquear interacción
+  if(REQUIRE_PIN){ lock(); } else { unlock(); }
+});
 window.addEventListener('load',()=>{
   localLoad(); initFirebase(); renderAll();
   $('#stamp').textContent=APP_VERSION+' · Listo: '+now();
-  if(REQUIRE_PIN){ $('#gate').style.display='flex'; $('#pin').focus(); }
 });
 </script>
 </body>
