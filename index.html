@@ -1,74 +1,77 @@
 <!doctype html>
 <html lang="es">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>SEGUIMIENTO AUDIO · Cloud</title>
-<meta name="theme-color" content="#c82727">
-
-<!-- ==== ESTILOS (compacto, tipografía pequeña, tablas tipo Excel) ==== -->
+<meta name="theme-color" content="#c82727"/>
 <style>
 :root{
-  --rojo:#c82727;--rojo2:#a71f1f;--bg:#f6f7fb;--line:#e6e7ee;--sh:0 4px 14px rgba(0,0,0,.06);
-  --col-ex:#fde2e4;--col-fl:#e2f0cb;--col-va:#cde7f0;--col-fm:#f9e5c9;--col-ta:#eadcf8;--col-eq:#e8f1ff;
-  --fs:11.2px;--fs-sm:10.2px;
+  --rojo:#c82727; --rojo-osc:#a71f1f; --bg:#f6f7fb; --line:#e6e7ee; --shadow:0 4px 14px rgba(0,0,0,.06);
+  --col-ex:#fde2e4; --col-fl:#e2f0cb; --col-va:#cde7f0; --col-fm:#f9e5c9; --col-ta:#eadcf8; --col-eq:#e8f1ff;
+  --fs:11px; --fs-sm:10px;
 }
-*{box-sizing:border-box} html,body{height:100%}
-body{margin:0;background:var(--bg);font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;font-size:var(--fs);color:#222;line-height:1.18;overflow-x:auto}
-button,input,select,textarea{font-family:inherit;font-size:inherit}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;color:#222;font-size:var(--fs);line-height:1.15;overflow-x:auto}
 
 /* Topbar */
-.topbar{position:sticky;top:0;z-index:99;width:100%;background:linear-gradient(180deg,var(--rojo),var(--rojo2));color:#fff;box-shadow:var(--sh)}
-.bar{padding:.8rem 10px;display:grid;grid-template-columns:1fr auto 1fr;gap:.5rem;align-items:center}
-.left,.right{display:flex;gap:.35rem;align-items:center}
-.brand{justify-self:center;text-align:center}
-.brand h1{margin:0;font-size:22px;letter-spacing:.4px}
-.brand small{display:block;font-size:10.5px;opacity:.9}
-.btn{border:0;border-radius:9px;padding:.34rem .66rem;cursor:pointer;box-shadow:var(--sh);font-weight:800;font-size:10.6px}
-.btn-w{background:#fff;color:#7b0e0e}
-.btn-g{background:transparent;border:1px solid #ffffff5c;color:#fff}
-.pill{border:1px solid #ffffff25;background:#ffffff1c;border-radius:999px;padding:.12rem .46rem;font-size:10.4px}
+.topbar{position:sticky;top:0;z-index:99;width:100%;background:linear-gradient(180deg,var(--rojo),var(--rojo-osc));color:#fff;box-shadow:var(--shadow)}
+.bar-inner{padding:.7rem 8px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:.5rem}
+.action-group{justify-self:start;display:flex;gap:.3rem}
+.brand-wrap{justify-self:center;text-align:center}
+.brand{display:flex;align-items:center;gap:.4rem;justify-content:center;font-weight:900;letter-spacing:.4px;font-size:22px}
+.brand i{font-style:normal}
+.subbrand{display:block;font-size:10px;opacity:.95;margin-top:2px}
+.meta{justify-self:end;display:flex;align-items:center;gap:.3rem}
+.btn{border:0;border-radius:9px;padding:.32rem .65rem;cursor:pointer;box-shadow:var(--shadow);font-weight:800;font-size:10px}
+.btn-lite{background:#fff;color:#861212}
+.btn-save{background:#fff;color:#7b0e0e}
+.btn-ghost{background:transparent;border:1px solid #ffffff66;color:#fff}
+.btn-id{background:#fff;color:#7b0e0e;border-radius:999px;padding:.32rem .65rem;font-weight:900}
+.pill{display:inline-flex;gap:.24rem;align-items:center;border:1px solid #ffffff2f;background:#ffffff1c;padding:.14rem .42rem;border-radius:999px;white-space:nowrap;font-size:10px}
 
 /* Layout */
-.main{display:grid;grid-template-columns:190px minmax(0,1fr);gap:6px;padding:6px}
+.main{display:grid;grid-template-columns:180px minmax(0,1fr);gap:6px;padding:6px}
 @media (max-width:1100px){.main{grid-template-columns:1fr}}
 .sidebar{display:flex;flex-direction:column;gap:6px}
-.card{background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:var(--sh)}
-.side-head{display:flex;justify-content:space-between;align-items:center;padding:.34rem .42rem;border-bottom:1px solid var(--line);font-weight:900;font-size:11px}
-.side-list{padding:.32rem;max-height:180px;overflow:auto}
-.side-btn{width:26px;height:22px;border:1px solid var(--line);background:#fff;border-radius:6px;cursor:pointer;font-size:10px}
-.item{display:flex;justify-content:space-between;gap:.35rem;align-items:center;border:1px solid var(--line);border-radius:8px;padding:.26rem .32rem;margin:.2rem 0}
-.item .name{font-weight:800}
+.side-card{border:1px solid var(--line);border-radius:10px;background:#fff;box-shadow:var(--shadow);display:flex;flex-direction:column}
+.side-head{display:flex;justify-content:space-between;align-items:center;padding:.3rem .38rem;font-weight:900;border-bottom:1px solid var(--line);font-size:10.5px}
+.side-list{padding:.25rem .3rem .35rem;overflow:auto;max-height:170px}
+.side-btn{width:24px;height:20px;border-radius:6px;border:1px solid var(--line);background:#fff;cursor:pointer;font-size:10px}
+.item{display:flex;justify-content:space-between;gap:.3rem;align-items:center;background:#fff;border:1px solid var(--line);border-radius:8px;padding:.24rem .3rem;margin:.18rem 0}
+.item .name{font-weight:750;font-size:10.8px}
+.item small{font-size:9.8px;opacity:.82}
 
 /* Detalle */
-.detail{background:#fff;border:1px solid var(--line);border-radius:8px;min-height:66vh;padding:.5rem;box-shadow:var(--sh)}
-.hdr{display:flex;align-items:center;gap:.6rem;margin-bottom:.25rem}
-.hdr h2{margin:0;font-size:18px} .hdr .big{font-weight:900;font-size:20px}
-.badge{background:#00000010;padding:.1rem .5rem;border-radius:999px;font-size:10.8px}
-.save-mini{margin-left:auto;background:#1f6feb;color:#fff;border:0;border-radius:999px;padding:.38rem .7rem;box-shadow:var(--sh);cursor:pointer;font-size:11px}
+.detail{padding:.45rem .45rem;border-radius:8px;border:1px solid var(--line);background:#fff;min-height:66vh;box-shadow:var(--shadow);position:relative}
+.header-row{display:flex;align-items:center;gap:.7rem;margin-bottom:.3rem}
+.header-row h2{margin:0;font-size:16px;letter-spacing:.2px}
+.hdr-name{font-weight:900;font-size:18px}
+.badge{padding:.08rem .44rem;border-radius:999px;background:#00000010;font-size:10.5px}
+.header-row .spacer{flex:1}
+.save-small{font-size:10px;padding:.32rem .65rem;border-radius:999px;background:#1f6feb;color:#fff;border:0;box-shadow:var(--shadow);cursor:pointer}
 
-/* Forms */
-.row{display:flex;gap:.35rem;flex-wrap:wrap;align-items:flex-end}
-.field{display:grid;gap:.12rem;flex:1;min-width:140px;margin:.14rem 0}
-.field label{font-weight:700;opacity:.9;font-size:10.3px}
-.field input,.field select,.field textarea{border:1px solid var(--line);border-radius:7px;padding:.18rem .26rem;font-size:var(--fs-sm);background:#fff}
-
-/* Tablas */
-.table{border:1px solid var(--line);border-radius:8px;background:#fff;box-shadow:var(--sh);padding:.22rem;margin-top:.18rem}
-.xscroll{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;padding-bottom:4px}
-.grid{display:grid;gap:.12rem;align-items:center}
+/* Form + tablas compactas */
+.row{display:flex;gap:.3rem;flex-wrap:wrap;align-items:flex-end}
+.field{display:grid;gap:.1rem;min-width:130px;flex:1;margin:.14rem 0}
+.field label{font-weight:700;opacity:.9;font-size:9.8px}
+.field input,.field select,.field textarea{border:1px solid var(--line);border-radius:7px;padding:.16rem .26rem;font-size:var(--fs-sm);background:#fff;outline:none}
+.table-wrap{border:1px solid var(--line);border-radius:8px;background:#fff;box-shadow:var(--shadow);padding:.18rem;margin-top:.18rem}
+.xscroll{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;padding-bottom:3px}
+.table-inner{display:block;width:max-content;min-width:820px}
+.table-inner input,.table-inner select{padding:.14rem .22rem;font-size:var(--fs-sm)}
 .scroll{max-height:62vh;overflow:auto}
-.tool{border:1px solid var(--line);background:#fff;border-radius:7px;padding:.16rem .4rem;font-size:10.3px;cursor:pointer}
-.tools{display:flex;justify-content:flex-end;gap:.25rem;margin:.12rem 0}
+.acc-head,.acc-row,.frm-head,.frm-row,.proc-head,.proc-row,.va-head,.va-row,.fm-head,.fm-row,.ta-head,.ta-row,.eq-head,.eq-row{display:grid;gap:.1rem;align-items:center;margin:.03rem}
 
-/* Columnas */
-.acc-h,.acc-r{grid-template-columns:36px 90px 70px 220px 80px 70px 70px 1fr 36px}
-.frm-h,.frm-r{grid-template-columns:36px 1.1fr .45fr .45fr 2fr 36px}
-.proc-h,.proc-r{grid-template-columns:36px 110px 110px 58px 70px 82px 82px 150px 1.1fr 90px 36px}
-.va-h,.va-r{grid-template-columns:36px .9fr 100px 100px 110px 105px 88px 52px 100px 100px}
-.fm-h,.fm-r{grid-template-columns:36px 78px 160px 110px 78px 90px 90px 90px 90px 78px 78px}
-.ta-h,.ta-r{grid-template-columns:36px 1fr 120px 110px 150px 44px 44px 44px 44px 44px 1.2fr}
-.eq-h,.eq-r{grid-template-columns:36px 120px 98px 140px 100px 120px 40px 40px 120px 40px 40px 120px 40px 40px}
+/* Grids */
+.acc-head,.acc-row{grid-template-columns:30px 94px 70px 200px 80px 70px 70px 1fr 30px}
+.frm-head,.frm-row{grid-template-columns:30px 1.1fr .45fr .45fr 2fr 30px}
+.proc-head,.proc-row{grid-template-columns:30px 116px 110px 60px 70px 90px 90px 150px 1.1fr 80px 30px}
+.va-cols{grid-template-columns:30px .8fr 90px 90px 100px 100px 90px 46px 100px 100px}
+.fm-head,.fm-row{grid-template-columns:30px 78px 160px 106px 78px 90px 90px 90px 90px 78px 78px}
+.ta-head,.ta-row{grid-template-columns:30px 1fr 120px 110px 150px 44px 44px 44px 44px 44px 1.1fr}
+.eq-head,.eq-row{grid-template-columns:30px 120px 98px 140px 100px 120px 36px 36px 120px 36px 36px 120px 36px 36px}
 
 /* Estados */
 .pscore{border:2px solid transparent}
@@ -77,252 +80,283 @@ button,input,select,textarea{font-family:inherit;font-size:inherit}
 .conv{border:2px solid transparent}
 .conv.good{background:#eaf9f0;border-color:rgba(46,204,113,.6)}
 .conv.bad{background:#ffe8e8;border-color:rgba(231,76,60,.6)}
-.hitcell{background:#ffe5e5;border:1px solid #f5c2c2;border-radius:5px;display:flex;justify-content:center;align-items:center;padding:.06rem}
+.hitcell{background:#ffe5e5;border:1px solid #f5c2c2;border-radius:5px;display:flex;justify-content:center;align-items:center;padding:.04rem}
 .hitcell.on{background:#e6f6ed;border-color:#bfe7cc}
 
-/* Widget visitas lateral */
-.va-right{position:fixed;right:12px;top:120px;width:210px;display:flex;flex-direction:column;gap:.25rem;z-index:50}
-.va-right .card{background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:var(--sh);padding:.32rem}
+/* Widget visitas */
+.va-right{position:fixed;right:12px;top:110px;width:200px;display:flex;flex-direction:column;gap:.22rem;z-index:50}
+.va-right .card{background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:.3rem}
 .va-right .bar{height:6px;background:#e9ecef;border-radius:999px;overflow:hidden}
 .va-right .bar>div{height:100%;background:#1f6feb;width:0%}
 
-/* PIN */
+/* PIN gate */
 .gate{position:fixed;inset:0;background:#000;display:flex;align-items:center;justify-content:center;z-index:1000}
-.gcard{background:#111;color:#fff;border:1px solid #2a2a2a;border-radius:10px;box-shadow:var(--sh);padding:16px 14px;min-width:260px}
-.pin{letter-spacing:.3rem;text-align:center;background:#000;color:#fff;border:1px solid #444;border-radius:7px;padding:.36rem}
+.gate-card{background:#111;color:#fff;border-radius:10px;box-shadow:var(--shadow);padding:14px 12px;min-width:260px;border:1px solid #2a2a2a}
+.pin{letter-spacing:.3rem;font-size:.9rem;text-align:center;background:#000;color:#fff;border:1px solid #444;border-radius:7px;padding:.34rem}
+
+/* lock visual */
 body.locked header, body.locked main{pointer-events:none;user-select:none;filter:blur(.8px)}
 body.locked #gate{pointer-events:auto;filter:none}
 </style>
 </head>
 <body class="locked">
 
-<!-- ==================== TOPBAR ==================== -->
 <header class="topbar">
-  <div class="bar">
-    <div class="left">
-      <button id="btnFetch" class="btn btn-w" title="Leer última versión de la nube">Actualizar (nube)</button>
-      <button id="btnSave"  class="btn btn-w" title="Guardar cambios en la nube">Guardar (nube)</button>
-      <button id="btnReset" class="btn btn-g" title="Descartar cambios sin guardar y recargar">Resetear</button>
+  <div class="bar-inner">
+    <div class="action-group">
+      <button id="btnFetch" class="btn btn-lite" title="Leer desde la nube">Actualizar (nube)</button>
+      <button id="btnSaveTop" class="btn btn-save" title="Guardar en la nube">Guardar (nube)</button>
+      <button id="btnReset" class="btn btn-ghost" title="Descartar cambios locales y recargar">Resetear</button>
     </div>
-    <div class="brand">
-      <h1>🎧 SEGUIMIENTO AUDIO</h1>
-      <small>Control de centros, visitas, formaciones, teleaudiología y equipos</small>
+    <div class="brand-wrap">
+      <div class="brand"><i>🎧</i> SEGUIMIENTO AUDIO</div>
+      <span class="subbrand">Control de centros, visitas, formaciones, teleaudiología y equipos</span>
     </div>
-    <div class="right">
-      <span class="pill" id="stamp">vCloud · Cargando…</span>
+    <div class="meta">
+      <button class="btn-id" title="Identidad">AROJAS</button>
+      <span id="stamp" class="pill">Cloud · Cargando…</span>
     </div>
   </div>
 </header>
 
-<!-- ==================== LAYOUT ==================== -->
-<main class="main">
-  <!-- -------- SIDEBAR -------- -->
-  <aside class="sidebar">
-    <section class="card" data-section="CENTROS EXCLUSIVOS" style="background:var(--col-ex)">
-      <div class="side-head">📒 CENTROS EXCLUSIVOS <div><button class="side-btn" data-act="toggle">▾</button><button class="side-btn" data-act="add">＋</button></div></div>
-      <div class="side-list"></div>
-    </section>
-    <section class="card" data-section="CENTROS FLOP" style="background:var(--col-fl)">
-      <div class="side-head">📒 CENTROS FLOP <div><button class="side-btn" data-act="toggle">▾</button><button class="side-btn" data-act="add">＋</button></div></div>
-      <div class="side-list"></div>
-    </section>
-    <section class="card" data-section="VISITAS AUDIO" style="background:var(--col-va)">
-      <div class="side-head">📋 VISITAS AUDIO <div><button class="side-btn" data-act="toggle">▾</button><button class="side-btn" data-act="add">＋</button></div></div>
-      <div class="side-list"></div>
-    </section>
-    <section class="card" data-section="FORMACIONES Y MENTORING" style="background:var(--col-fm)">
-      <div class="side-head">🎓 FORMACIONES Y MENTORING <div><button class="side-btn" data-act="toggle">▾</button><button class="side-btn" data-act="add">＋</button></div></div>
-      <div class="side-list"></div>
-    </section>
-    <section class="card" data-section="TELEAUDIOLOGIA" style="background:var(--col-ta)">
-      <div class="side-head">📡 TELEAUDIOLOGIA <div><button class="side-btn" data-act="toggle">▾</button><button class="side-btn" data-act="add">＋</button></div></div>
-      <div class="side-list"></div>
-    </section>
-    <section class="card" data-section="EQUIPOS" style="background:var(--col-eq)">
-      <div class="side-head">🧰 EQUIPOS <div><button class="side-btn" data-act="toggle">▾</button><button class="side-btn" data-act="add">＋</button></div></div>
-      <div class="side-list"></div>
-    </section>
-  </aside>
-
-  <!-- -------- DETALLE -------- -->
-  <section class="detail" id="detail">
-    <div class="hdr">
-      <h2>Detalle — <span id="hdrName" class="big">—</span></h2>
-      <span id="hdrTag" class="badge">—</span>
-      <button id="btnSavePanel" class="save-mini" title="Guardar panel">💾 Guardar</button>
-    </div>
-    <p id="hint" style="opacity:.7;margin:.1rem 0 .2rem">Selecciona algo a la izquierda (doble clic o ✏️) o crea con ＋.</p>
-
-    <!-- === CENTROS (EXCLUSIVOS / FLOP) === -->
-    <div id="detCentro" style="display:none">
-      <div class="row">
-        <div class="field"><label>Nombre</label><input id="cNombre"></div>
-        <div class="field"><label>Delegado</label><input id="cDelegado"></div>
-        <div class="field"><label>Audiólogo</label><input id="cAudiologo"></div>
-        <div class="field"><label>Franquicia o Sucursal</label><select id="cTipo"><option>Franquicia</option><option>Sucursal</option></select></div>
+<main>
+  <section class="main">
+    <!-- ===== SIDEBAR ===== -->
+    <aside class="sidebar">
+      <div class="side-card" data-section="CENTROS EXCLUSIVOS" style="background:var(--col-ex)">
+        <div class="side-head"><div>📒 CENTROS EXCLUSIVOS</div><div><button class="side-btn" data-act="toggle">▾</button><button class="side-btn" data-act="add">＋</button></div></div>
+        <div class="side-list"></div>
       </div>
+      <div class="side-card" data-section="CENTROS FLOP" style="background:var(--col-fl)">
+        <div class="side-head"><div>📒 CENTROS FLOP</div><div><button class="side-btn" data-act="toggle">▾</button><button class="side-btn" data-act="add">＋</button></div></div>
+        <div class="side-list"></div>
+      </div>
+      <div class="side-card" data-section="VISITAS AUDIO" style="background:var(--col-va)">
+        <div class="side-head"><div>📋 VISITAS AUDIO</div><div><button class="side-btn" data-act="toggle">▾</button><button class="side-btn" data-act="add">＋</button></div></div>
+        <div class="side-list"></div>
+      </div>
+      <div class="side-card" data-section="FORMACIONES Y MENTORING" style="background:var(--col-fm)">
+        <div class="side-head"><div>🎓 FORMACIONES Y MENTORING</div><div><button class="side-btn" data-act="toggle">▾</button><button class="side-btn" data-act="add">＋</button></div></div>
+        <div class="side-list"></div>
+      </div>
+      <div class="side-card" data-section="TELEAUDIOLOGIA" style="background:var(--col-ta)">
+        <div class="side-head"><div>📡 TELEAUDIOLOGIA</div><div><button class="side-btn" data-act="toggle">▾</button><button class="side-btn" data-act="add">＋</button></div></div>
+        <div class="side-list"></div>
+      </div>
+      <div class="side-card" data-section="EQUIPOS" style="background:var(--col-eq)">
+        <div class="side-head"><div>🧰 EQUIPOS</div><div><button class="side-btn" data-act="toggle">▾</button><button class="side-btn" data-act="add">＋</button></div></div>
+        <div class="side-list"></div>
+      </div>
+    </aside>
 
-      <h3 style="margin:.32rem 0 .08rem;font-size:11.6px">ACCIONES</h3>
-      <div class="tools"><button id="accAdd" class="tool">＋ Añadir fila</button></div>
-      <div class="table"><div class="xscroll"><div class="grid acc-h"><div>#</div><div>Fecha</div><div>Paquete</div><div>Tipo de acción</div><div>Derivación</div><div>Citas</div><div>Ventas</div><div>Observaciones</div><div></div></div><div id="accionesRows" class="scroll"></div></div></div>
-      <div class="field" style="margin-top:.2rem"><small>Paquete: <b>1</b> Tráfico · <b>2</b> Formación y comercial · <b>3</b> Equipo</small></div>
+    <!-- ===== DETALLE ===== -->
+    <section class="detail" id="detail">
+      <div class="header-row">
+        <h2>Detalle — <span id="centerNameHdr" class="hdr-name">—</span></h2>
+        <span id="detTag" class="badge">—</span>
+        <div class="spacer"></div>
+        <button id="saveBtnActive" class="save-small" title="Guardar panel">💾 Guardar</button>
+      </div>
+      <p id="detHint" style="opacity:.7;margin:.06rem 0 .18rem">Selecciona en la izquierda (doble clic o ✏️) o crea con ＋.</p>
 
-      <h3 style="margin:.32rem 0 .08rem;font-size:11.6px">FORMACIÓN</h3>
-      <div class="tools"><button id="frmAdd" class="tool">＋ Añadir fila</button></div>
-      <div class="table"><div class="xscroll"><div class="grid frm-h"><div>#</div><div>Curso</div><div>Realizado</div><div>Aplica</div><div>Observaciones</div><div></div></div><div id="formacionesRows"></div></div></div>
+      <!-- ===== CENTROS ===== -->
+      <div id="detCentro" style="display:none">
+        <div class="row">
+          <div class="field"><label>Nombre</label><input id="cNombre"></div>
+          <div class="field"><label>Delegado</label><input id="cDelegado"></div>
+          <div class="field"><label>Audíologo</label><input id="cAudiologo"></div>
+          <div class="field"><label>Franquicia o Sucursal</label><select id="cTipo"><option>Franquicia</option><option>Sucursal</option></select></div>
+        </div>
 
-      <h3 style="margin:.32rem 0 .08rem;font-size:11.6px">PROCESOS</h3>
-      <div class="tools"><button id="procAdd" class="tool">＋ Añadir fila</button></div>
-      <div class="table"><div class="xscroll"><div class="grid proc-h">
-        <div>#</div><div>Fecha de visita</div><div>Puntuación procesos (%)</div><div>HIT</div><div>Pruebas RT</div><div>% Pruebas</div><div>% Venta</div><div>Colaboraciones locales</div><div>Observaciones</div><div>Adjunto</div><div></div>
-      </div><div id="procesosRows"></div></div></div>
-    </div>
+        <h3 style="margin:.3rem 0 .1rem;font-size:11px">ACCIONES</h3>
+        <div class="toolbar"><button id="accAdd" class="side-btn" title="Añadir fila">＋</button></div>
+        <div class="table-wrap">
+          <div class="xscroll"><div class="table-inner">
+            <div class="acc-head">
+              <div>#</div><div>Fecha</div><div>Paquete</div><div>Tipo de acción</div><div>Derivación</div><div>Citas</div><div>Ventas</div><div>Observaciones</div><div></div>
+            </div><div id="accionesRows" class="scroll"></div>
+          </div></div>
+        </div>
+        <div class="legend" style="font-size:10px;margin-top:.1rem">Paquete: <strong>1</strong> Tráfico · <strong>2</strong> Formación y comercial · <strong>3</strong> Equipo</div>
 
-    <!-- === VISITAS === -->
-    <div id="detVisitas" style="display:none">
-      <div class="va-right">
-        <div class="card">
-          <div style="font-weight:800;font-size:11px;margin-bottom:.2rem">Avance de visitas</div>
-          <div id="vaRightCount" style="font-size:11px;margin-bottom:.16rem">0 registradas</div>
-          <div class="bar"><div id="vaRightBar"></div></div>
+        <h3 style="margin:.3rem 0 .1rem;font-size:11px">FORMACIÓN</h3>
+        <div class="toolbar"><button id="frmAdd" class="side-btn" title="Añadir fila">＋</button></div>
+        <div class="table-wrap">
+          <div class="xscroll"><div class="table-inner">
+            <div class="frm-head"><div>#</div><div>Curso</div><div>Realizado</div><div>Aplica</div><div>Observaciones</div><div></div></div>
+            <div id="formacionesRows"></div>
+          </div></div>
+        </div>
+
+        <h3 style="margin:.3rem 0 .1rem;font-size:11px">PROCESOS</h3>
+        <div class="toolbar"><button id="procAdd" class="side-btn" title="Añadir fila">＋</button></div>
+        <div class="table-wrap">
+          <div class="xscroll"><div class="table-inner">
+            <div class="proc-head">
+              <div>#</div><div>Fecha de visita</div><div>Puntuación procesos (%)</div><div>HIT</div><div>Pruebas RT</div><div>% Pruebas</div><div>% Venta</div><div>Colaboraciones locales</div><div>Observaciones</div><div>Adjunto</div><div></div>
+            </div><div id="procesosRows"></div>
+          </div></div>
         </div>
       </div>
-      <div class="row">
-        <div class="field"><label>Rol</label><select id="vaRol"><option>Delegado audio</option><option>Responsable AAR</option></select></div>
-        <div class="field"><label>Nombre</label><input id="vaResp"></div>
-        <div class="field"><label>Buscar centro</label><input id="vaSearch" placeholder="Filtrar…"></div>
-      </div>
-      <div id="vaTabs" style="margin:.06rem 0 .18rem"></div>
-      <div class="table">
-        <div class="xscroll">
-          <div class="grid va-h"><div>#</div><div>Centro</div><div>Delegado</div><div>Audiólogo</div><div>Sucursal/Franquicia</div><div>Fecha visita</div><div>Puntuación (%)</div><div>HIT</div><div>% Conv. prueba</div><div>% Conv. venta</div></div>
-          <div id="vaRows" class="scroll"></div>
+
+      <!-- ===== VISITAS ===== -->
+      <div id="detVisitas" style="display:none">
+        <div class="va-right">
+          <div class="card">
+            <div style="font-weight:800;font-size:10.5px;margin-bottom:.18rem">Avance de visitas</div>
+            <div id="vaRightCount" style="font-size:10.5px;margin-bottom:.14rem">0 registradas</div>
+            <div class="bar"><div id="vaRightBar"></div></div>
+          </div>
+        </div>
+        <div class="summary" style="display:flex;align-items:center;gap:.45rem;margin:.1rem 0 .22rem;font-size:10.2px">
+          <div id="vaSummaryTxt">Centros visitados: 0 / 0</div>
+          <div class="progress" style="flex:1;height:5px;background:#e9ecef;border-radius:999px;overflow:hidden"><div id="vaProg" style="height:100%;background:#1f6feb;width:0%"></div></div>
+        </div>
+        <div class="row">
+          <div class="field"><label>Rol</label><select id="vaRol"><option>Delegado audio</option><option>Responsable AAR</option></select></div>
+          <div class="field"><label>Nombre</label><input id="vaResp" placeholder="Nombre"></div>
+          <div class="field"><label>Buscar centro</label><input id="vaSearch" placeholder="Filtrar…"></div>
+        </div>
+        <div id="vaTabs" style="margin:.06rem 0 .18rem"></div>
+        <div class="table-wrap">
+          <div class="xscroll"><div class="table-inner">
+            <div class="va-head va-cols">
+              <div>#</div><div>Centro</div><div>Delegado</div><div>Audíologo</div><div>Sucursal/Franquicia</div><div>Fecha visita</div><div>Puntuación (%)</div><div>HIT</div><div>% Conv. prueba</div><div>% Conv. venta</div>
+            </div><div id="vaRows" class="scroll"></div>
+          </div></div>
         </div>
       </div>
-    </div>
 
-    <!-- === FORMACIONES (global) === -->
-    <div id="detFormaciones" style="display:none">
-      <div class="row"><div class="field"><label>Delegado regional</label><input id="fmDelegado"></div><div class="field"><label>Buscar</label><input id="fmSearch" placeholder="Filtrar…"></div></div>
-      <div class="table"><div class="xscroll"><div class="grid fm-h"><div>#</div><div>Fecha</div><div>Tema</div><div>Audiólogo</div><div>Duración (sem.)</div><div>% Prueba ini</div><div>% Venta ini</div><div>% Prueba 3m</div><div>% Venta 3m</div><div>Evo. prueba</div><div>Evo. venta</div></div><div id="fmRows" class="scroll"></div></div></div>
-    </div>
-
-    <!-- === TELEAUDIOLOGIA === -->
-    <div id="detTele" style="display:none">
-      <div class="row"><div class="field"><label>Buscar</label><input id="taSearch" placeholder="Centro o persona…"></div><div class="field"><label>Persona</label><select id="taPerson"><option value="">Todos</option></select></div></div>
-      <div class="table"><div class="xscroll"><div class="grid ta-h"><div>#</div><div>Centro</div><div>Delegado</div><div>Rol</div><div>Persona</div><div>Form.</div><div>Prác.</div><div>Cert.</div><div>Pruebas</div><div>Ventas</div><div>Observaciones</div></div><div id="taRows" class="scroll"></div></div></div>
-    </div>
-
-    <!-- === EQUIPOS === -->
-    <div id="detEquipos" style="display:none">
-      <div class="row">
-        <div class="field"><label>Buscar</label><input id="eqSearch" placeholder="Equipo, serie, centro o persona…"></div>
-        <div class="field"><label>&nbsp;</label><div style="display:flex;gap:.3rem"><button id="btnAddParCols" class="btn">＋ Añadir par</button><button id="btnAddFila" class="btn">＋ Añadir fila</button></div></div>
+      <!-- ===== FORMACIONES glob. ===== -->
+      <div id="detFormaciones" style="display:none">
+        <div class="row">
+          <div class="field"><label>Delegado regional</label><input id="fmDelegado"></div>
+          <div class="field"><label>Buscar</label><input id="fmSearch" placeholder="Filtrar…"></div>
+        </div>
+        <div class="table-wrap">
+          <div class="xscroll"><div class="table-inner">
+            <div class="fm-head">
+              <div>#</div><div>Fecha</div><div>Tema</div><div>Audíologo</div>
+              <div>Duración (sem.)</div><div>% Prueba ini</div><div>% Venta ini</div>
+              <div>% Prueba 3m</div><div>% Venta 3m</div><div>Evo. prueba</div><div>Evo. venta</div>
+            </div><div id="fmRows" class="scroll"></div>
+          </div></div>
+        </div>
       </div>
-      <div class="table"><div class="xscroll"><div class="grid eq-h"><div>#</div><div>Equipo</div><div>Nº serie</div><div>Persona que envía</div><div>Fecha</div><div>Centro 1</div><div>C1</div><div>S1</div><div>Centro 2</div><div>C2</div><div>S2</div><div>Centro 3</div><div>C3</div><div>S3</div></div><div id="eqBody" class="scroll"></div></div></div>
-    </div>
 
+      <!-- ===== TELEAUDIOLOGIA ===== -->
+      <div id="detTele" style="display:none">
+        <div class="row">
+          <div class="field"><label>Buscar</label><input id="taSearch" placeholder="Centro o persona…"></div>
+          <div class="field"><label>Persona</label><select id="taPerson"><option value="">Todos</option></select></div>
+        </div>
+        <div class="table-wrap">
+          <div class="xscroll"><div class="table-inner">
+            <div class="ta-head">
+              <div>#</div><div>Centro</div><div>Delegado</div><div>Rol</div><div>Persona</div><div>Form.</div><div>Prác.</div><div>Cert.</div><div>Pruebas</div><div>Ventas</div><div>Observaciones</div>
+            </div><div id="taRows" class="scroll"></div>
+          </div></div>
+        </div>
+      </div>
+
+      <!-- ===== EQUIPOS ===== -->
+      <div id="detEquipos" style="display:none">
+        <div class="row">
+          <div class="field"><label>Buscar</label><input id="eqSearch" placeholder="Equipo, serie, centro o persona…"></div>
+          <div class="field"><label>&nbsp;</label>
+            <div style="display:flex;gap:.28rem"><button id="btnAddParCols" class="btn" title="Añadir otro par">＋ Añadir par</button><button id="btnAddFila" class="btn" title="Añadir fila">＋ Añadir fila</button></div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <div class="xscroll"><div class="table-inner">
+            <div class="eq-head">
+              <div>#</div><div>Equipo</div><div>Nº serie</div><div>Persona que envía</div><div>Fecha</div>
+              <div>Centro 1</div><div>C1</div><div>S1</div><div>Centro 2</div><div>C2</div><div>S2</div><div>Centro 3</div><div>C3</div><div>S3</div>
+            </div><div id="eqBody" class="scroll"></div>
+          </div></div>
+        </div>
+      </div>
+
+    </section>
   </section>
 </main>
 
-<!-- ==================== PIN ==================== -->
+<!-- ===== PIN ===== -->
 <div id="gate" class="gate" aria-modal="true" role="dialog">
-  <div class="gcard">
-    <h3 style="margin:.1rem 0 .4rem">Acceso</h3>
-    <p style="opacity:.8">Introduce el PIN para editar:</p>
-    <input id="pin" class="pin" type="password" inputmode="numeric" maxlength="6" placeholder="••••">
-    <div style="display:flex;gap:.35rem;margin-top:10px">
-      <button id="enter" class="btn btn-w" style="flex:1">Entrar</button>
-      <button id="clearPin" class="btn btn-g" style="flex:.8">Limpiar</button>
+  <div class="gate-card">
+    <h3 style="margin:.1rem 0 .35rem">Acceso</h3>
+    <p style="opacity:.85">Introduce el PIN para editar:</p>
+    <input id="pin" class="pin" type="password" inputmode="numeric" maxlength="6" placeholder="••••"/>
+    <div style="display:flex;gap:.3rem;margin-top:9px">
+      <button id="enter" class="btn btn-lite" style="flex:1">Entrar</button>
+      <button id="cancelPin" class="btn btn-ghost" style="flex:.8">Limpiar</button>
     </div>
-    <p id="pinMsg" style="color:#ff7b7b;margin:.45rem 0 0;display:none">PIN incorrecto</p>
+    <p id="pinMsg" style="color:#ff7b7b;margin:.4rem 0 0;display:none">PIN incorrecto</p>
   </div>
 </div>
 
-<!-- ==================== SCRIPT ==================== -->
 <script>
-/* ========= CONFIGURA AQUI TU BACKEND =========
-   Pega la URL del despliegue WebApp de Apps Script (Code.gs)
-   (Debe terminar en /exec) */
-const CLOUD_URL = 'PEGAR_AQUI_TU_WEB_APP_URL';   // <-- REEMPLAZA ESTO
-const EDITOR_NAME = 'AROJAS';                     // quién aparece en el bloqueo
-/* ============================================= */
+/* ===================== CLOUD CONFIG ===================== */
+/* Puedes pasar la URL de la Web App con ?api=... en el enlace público.  */
+const urlParams = new URLSearchParams(location.search);
+const FALLBACK_API = ''; // opcional: pega aquí tu Web App si no quieres usar ?api=
+const CLOUD_URL = urlParams.get('api') || localStorage.getItem('api') || FALLBACK_API;
+if (urlParams.get('api')) localStorage.setItem('api', urlParams.get('api'));
 
-/* PIN (SHA-256 de '4321') */
+const EDITOR_NAME = 'AROJAS';   // nombre visible en el bloqueo
+/* Hash SHA-256 del PIN 4321 */
 const PIN_SHA256='fe2592b42a727e977f055947385b709cc82b16b9a87f88c6abf3900d65d0cdc3';
-const APP_VERSION='vCloud';
 
-/* ====== utils ====== */
+/* ===================== UTILS ===================== */
 const $=(s,r=document)=>r.querySelector(s); const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+const esc=s=>(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const now=()=>new Date().toLocaleString();
-async function sha256Hex(str){const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str));return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');}
-function toast(m){const t=document.createElement('div');t.textContent=m;Object.assign(t.style,{position:'fixed',bottom:'10px',left:'50%',transform:'translateX(-50%)',background:'#111',color:'#fff',padding:'6px 9px',borderRadius:'8px',zIndex:90,opacity:.95,fontSize:'11px'});document.body.appendChild(t);setTimeout(()=>t.remove(),1200);}
+function toast(m){const t=document.createElement('div');t.textContent=m;Object.assign(t.style,{position:'fixed',bottom:'10px',left:'50%',transform:'translateX(-50%)',background:'#111',color:'#fff',padding:'6px 9px',borderRadius:'8px',zIndex:90,opacity:.95,fontSize:'10.5px'});document.body.appendChild(t);setTimeout(()=>t.remove(),1300);}
 
-/* ====== datos base ====== */
+/* ===================== DATA MODELS ===================== */
+let state={selected:{section:null,index:null},vaSheet:0,vaFilter:'',fmFilter:'',taFilter:'',taPerson:'',eqFilter:''};
 function sheetVA(n){const rows=Array.from({length:300},()=>({centro:'',delegado:'',audiologo:'',tipo:'Sucursal',fecha:'',puntuacion:null,hit:false,conv_prueba:null,conv_venta:null}));return{nombre:n,rows};}
 function rowsFM(){return Array.from({length:300},()=>({fecha:'',tema:'',audiologo:'',duracion:1,p_ini:null,v_ini:null,p_3m:null,v_3m:null}));}
 function sheetTA(n){const rows=Array.from({length:300},()=>({centro:'',delegado:'',rol:'Audiólogo',persona:'',formacion:false,practicas:false,certificado:false,pruebas:false,ventas:false,obs:''}));return{nombre:n,rows};}
 function equiposInit(){const filas=Array.from({length:25},()=>({equipo:'',serie:'',persona:'',fecha:'',pares:[{centro:'',en:false,sede:false},{centro:'',en:false,sede:false},{centro:'',en:false,sede:false}]}));return{columnas:3,filas};}
+
 let data={
- "CENTROS EXCLUSIVOS":[{nombre:"Reina Mercedes",delegado:"",audiologo:"",tipo:"Franquicia",
-   acciones:Array.from({length:12},()=>({fecha:'',paquete:'1',tipo:'Azafata/Buzoneo',derivacion:null,citas:null,venta:null,obs:''})),
-   formaciones:Array.from({length:5},()=>({curso:'',realizado:false,aplica:false,obs:''})),
-   procesos:Array.from({length:4},()=>({fecha:'',puntuacion:null,hit:false,rt:false,pruebas:null,venta:null,colab:'',obs:'',adjunto:null}))}],
- "CENTROS FLOP":[],
- "VISITAS AUDIO":[{rol:"Delegado audio",responsable:"",hojas:[sheetVA("Visita 1")]}],
- "FORMACIONES Y MENTORING":[{delegado:"",filas:rowsFM()}],
- "TELEAUDIOLOGIA":[{hojas:[sheetTA("Tele 1")]}],
- "EQUIPOS":[equiposInit()]
+  "CENTROS EXCLUSIVOS":[{nombre:"Reina Mercedes",delegado:"",audiologo:"",tipo:"Franquicia",
+    acciones:Array.from({length:12},()=>({fecha:'',paquete:'1',tipo:'Azafata/Buzoneo',derivacion:null,citas:null,venta:null,obs:''})),
+    formaciones:Array.from({length:5},()=>({curso:'',realizado:false,aplica:false,obs:''})),
+    procesos:Array.from({length:4},()=>({fecha:'',puntuacion:null,hit:false,rt:false,pruebas:null,venta:null,colab:'',obs:'',adjunto:null}))}],
+  "CENTROS FLOP":[],
+  "VISITAS AUDIO":[{rol:"Delegado audio",responsable:"",hojas:[sheetVA("Visita 1")]}],
+  "FORMACIONES Y MENTORING":[{delegado:"",filas:rowsFM()}],
+  "TELEAUDIOLOGIA":[{hojas:[sheetTA("Tele 1")]}],
+  "EQUIPOS":[equiposInit()]
 };
-let state={selected:{section:null,index:null},vaSheet:0,vaFilter:'',fmFilter:'',taFilter:'',taPerson:'',eqFilter:''};
 
-/* ====== CLOUD API (no localStorage) ====== */
-async function cloudLoad(){
-  if(!CLOUD_URL||!/^https?:\/\//.test(CLOUD_URL)) { toast('Configura CLOUD_URL'); return; }
-  const r = await fetch(CLOUD_URL+'?action=load',{cache:'no-store'});
-  if(!r.ok) throw new Error('Carga fallida');
-  const txt = await r.text();
-  if(txt) data = JSON.parse(txt);
-  renderAll(); $('#stamp').textContent=APP_VERSION+' · Cargado: '+now();
-}
-async function cloudSave(){
-  const r = await fetch(CLOUD_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'save',data})});
-  if(!r.ok) throw new Error('Guardado fallido');
-  const res=await r.json();
-  $('#stamp').textContent=APP_VERSION+' · Guardado: '+(res.updated_at||now());
-  toast('Guardado en la nube');
-}
-async function cloudLock(mode='lock'){
-  const r=await fetch(CLOUD_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'lock',mode,user:EDITOR_NAME})});
-  return r.json();
-}
-async function cloudStatus(){
-  const r=await fetch(CLOUD_URL+'?action=status',{cache:'no-store'});
-  return r.json();
-}
-
-/* ====== sidebar/render ====== */
+/* ===================== LEFT MENU ===================== */
 const SECTIONS=["CENTROS EXCLUSIVOS","CENTROS FLOP","VISITAS AUDIO","FORMACIONES Y MENTORING","TELEAUDIOLOGIA","EQUIPOS"];
-const esc=s=>(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function renderLeft(){
   SECTIONS.forEach(name=>{
-    const box=document.querySelector(`.card[data-section="${name}"]`);
+    const box=document.querySelector(`.side-card[data-section="${name}"]`);
     const list=box.querySelector('.side-list'); list.innerHTML='';
     (data[name]||[]).forEach((it,i)=>{
       const div=document.createElement('div');div.className='item';div.dataset.index=i;
-      let html='';
-      if(name.includes('CENTROS')) html=`<div><div class="name">${esc(it.nombre||'—')}</div><small>Delegado: ${esc(it.delegado||'—')} · Aud.: ${esc(it.audiologo||'—')}</small></div>`;
-      else if(name==="VISITAS AUDIO") html=`<div><div class="name">(${esc(it.rol||'Rol')}) ${esc(it.responsable||'—')}</div><small>Visitas</small></div>`;
-      else if(name==="FORMACIONES Y MENTORING") html=`<div><div class="name">${esc(it.delegado||'(Delegado regional)')}</div></div>`;
-      else if(name==="TELEAUDIOLOGIA") html=`<div><div class="name">Teleaudiología</div></div>`;
-      else html=`<div><div class="name">Inventario de equipos</div></div>`;
-      div.innerHTML=html+`<div><button class="side-btn" data-role="edit">✏️</button><button class="side-btn" data-role="del">🗑️</button></div>`;
-      div.addEventListener('dblclick',()=>{state.selected={section:name,index:i}; renderDetail();});
-      div.querySelector('[data-role="edit"]').onclick=(e)=>{e.stopPropagation();state.selected={section:name,index:i};renderDetail();};
-      div.querySelector('[data-role="del"]').onclick=(e)=>{e.stopPropagation();if(confirm('¿Eliminar?')){data[name].splice(i,1);renderAll();}};
+      let inner='';
+      if(name.includes('CENTROS')){
+        inner=`<div><div class="name">${esc(it.nombre||'—')}</div><small>Delegado: ${esc(it.delegado||'—')} · Aud.: ${esc(it.audiologo||'—')}</small></div>`;
+      }else if(name==="VISITAS AUDIO"){
+        inner=`<div><div class="name">(${esc(it.rol||'Rol')}) ${esc(it.responsable||'—')}</div><small>Visitas</small></div>`;
+      }else if(name==="FORMACIONES Y MENTORING"){
+        inner=`<div><div class="name">${esc(it.delegado||'(Delegado regional)')}</div></div>`;
+      }else if(name==="TELEAUDIOLOGIA"){
+        inner=`<div><div class="name">Teleaudiología</div></div>`;
+      }else{ inner=`<div><div class="name">Inventario de equipos</div></div>`; }
+      div.innerHTML=inner+`<div class="acts"><button class="side-btn" data-role="edit" title="Editar">✏️</button><button class="side-btn" data-role="del" title="Eliminar">🗑️</button></div>`;
+      div.addEventListener('dblclick',()=>{ state.selected={section:name,index:i}; renderDetail(); });
+      div.querySelector('[data-role="edit"]').onclick=(e)=>{ e.stopPropagation(); state.selected={section:name,index:i}; renderDetail(); };
+      div.querySelector('[data-role="del"]').onclick=(e)=>{ e.stopPropagation(); if(confirm('¿Eliminar este item?')){ data[name].splice(i,1); renderAll(); cloudSave(); } };
       list.appendChild(div);
     });
-    box.querySelector('[data-act="toggle"]').onclick=()=>{list.style.display=list.style.display==='none'?'':'none'; if(list.style.display==='none'&&name.includes('CENTROS')){state.selected={section:null,index:null}; renderDetailBlank();}};
+    box.querySelector('[data-act="toggle"]').onclick=()=>{ list.style.display=list.style.display==='none'?'':'none'; if(list.style.display==='none'&&name.includes('CENTROS')){state.selected={section:null,index:null}; renderDetailBlank();}};
     box.querySelector('[data-act="add"]').onclick=()=>{
       let nuevo;
       if(name.includes('CENTROS')) nuevo={nombre:'(nuevo centro)',delegado:'',audiologo:'',tipo:'Franquicia',
@@ -333,84 +367,262 @@ function renderLeft(){
       else if(name==="FORMACIONES Y MENTORING") nuevo={delegado:'(Delegado regional)',filas:rowsFM()};
       else if(name==="TELEAUDIOLOGIA") nuevo={hojas:[sheetTA('Tele 1')]};
       else nuevo=equiposInit();
-      data[name].push(nuevo); renderAll();
+      data[name].push(nuevo); renderAll(); cloudSave();
     };
   });
 }
+
+/* ===== Detalle switch ===== */
 function renderDetailBlank(){
-  $('#hint').style.display='block'; $('#hdrTag').textContent='—'; $('#hdrName').textContent='—';
-  $('#detCentro,#detVisitas,#detFormaciones,#detTele,#detEquipos').forEach?.(()=>{}) // noop
-  $('#detCentro').style.display='none'; $('#detVisitas').style.display='none'; $('#detFormaciones').style.display='none'; $('#detTele').style.display='none'; $('#detEquipos').style.display='none';
+  $('#detHint').style.display='block'; $('#detTag').textContent='—'; $('#centerNameHdr').textContent='—';
+  $('#detCentro').style.display='none'; $('#detVisitas').style.display='none';
+  $('#detFormaciones').style.display='none'; $('#detTele').style.display='none'; $('#detEquipos').style.display='none';
 }
-function tone(s){const d=$('#detail'); d.style.background = s==="CENTROS EXCLUSIVOS"?'var(--col-ex)': s==="CENTROS FLOP"?'var(--col-fl)': s==="VISITAS AUDIO"?'var(--col-va)': s==="FORMACIONES Y MENTORING"?'var(--col-fm)': s==="TELEAUDIOLOGIA"?'var(--col-ta)':'var(--col-eq)';}
-function cur(){return data[state.selected.section]?.[state.selected.index];}
+function setTone(s){ const d=$('#detail');
+  d.style.background = s==="CENTROS EXCLUSIVOS"?'var(--col-ex)'
+    : s==="CENTROS FLOP"?'var(--col-fl)'
+    : s==="VISITAS AUDIO"?'var(--col-va)'
+    : s==="FORMACIONES Y MENTORING"?'var(--col-fm)'
+    : s==="TELEAUDIOLOGIA"?'var(--col-ta)':'var(--col-eq)';
+}
+function cur(){ return data[state.selected.section]?.[state.selected.index]; }
 function renderDetail(){
-  $('#hint').style.display='none';
-  const s=state.selected.section; tone(s); $('#hdrTag').textContent=s||'—';
-  $('#btnSavePanel').onclick = s?.includes('CENTROS') ? saveCentro : cloudSave;
-  $('#hdrName').textContent = (s && s.includes('CENTROS'))?(cur()?.nombre||'—'):'—';
-  $('#detCentro').style.display = s?.includes('CENTROS')?'block':'none';
-  $('#detVisitas').style.display = s==='VISITAS AUDIO'?'block':'none';
-  $('#detFormaciones').style.display = s==='FORMACIONES Y MENTORING'?'block':'none';
-  $('#detTele').style.display = s==='TELEAUDIOLOGIA'?'block':'none';
-  $('#detEquipos').style.display = s==='EQUIPOS'?'block':'none';
+  $('#detHint').style.display='none';
+  const s=state.selected.section; setTone(s); $('#detTag').textContent=s||'—';
+  $('#saveBtnActive').onclick = async()=>{ if(s?.includes('CENTROS')) saveCentro(); await cloudSave(); };
+  $('#centerNameHdr').textContent = (s && s.includes('CENTROS')) ? (cur()?.nombre||'—') : '—';
+  $('#detCentro').style.display=s?.includes('CENTROS')?'block':'none';
+  $('#detVisitas').style.display=s==='VISITAS AUDIO'?'block':'none';
+  $('#detFormaciones').style.display=s==='FORMACIONES Y MENTORING'?'block':'none';
+  $('#detTele').style.display=s==='TELEAUDIOLOGIA'?'block':'none';
+  $('#detEquipos').style.display=s==='EQUIPOS'?'block':'none';
   if(s?.includes('CENTROS')) fillCentro();
-  if(s==='VISITAS AUDIO') fillVA();
+  if(s==='VISITAS AUDIO') fillVisitas();
   if(s==='FORMACIONES Y MENTORING') fillFM();
   if(s==='TELEAUDIOLOGIA') fillTA();
   if(s==='EQUIPOS') fillEQ();
 }
 
-/* ===== Centros ===== */
-function fillCentro(){const it=cur(); $('#cNombre').value=it.nombre||''; $('#cDelegado').value=it.delegado||''; $('#cAudiologo').value=it.audiologo||''; $('#cTipo').value=it.tipo||'Franquicia'; renderAcc(); renderFrm(); renderProc();}
-function saveCentro(){const it=cur(); it.nombre=$('#cNombre').value.trim(); it.delegado=$('#cDelegado').value.trim(); it.audiologo=$('#cAudiologo').value.trim(); it.tipo=$('#cTipo').value; $('#hdrName').textContent=it.nombre||'—'; cloudSave();}
-function accRow(r,i){return `<div>${i+1}</div><input type="date" data-i="${i}" data-k="fecha" value="${r.fecha||''}"><select data-i="${i}" data-k="paquete"><option ${r.paquete==='1'?'selected':''}>1</option><option ${r.paquete==='2'?'selected':''}>2</option><option ${r.paquete==='3'?'selected':''}>3</option></select><select data-i="${i}" data-k="tipo"><option ${r.tipo==='Azafata/Buzoneo'?'selected':''}>Azafata/Buzoneo</option><option ${r.tipo==='Stand'?'selected':''}>Stand</option><option ${r.tipo==='Mailing/Cashback'?'selected':''}>Mailing/Cashback</option><option ${r.tipo==='Otros'?'selected':''}>Otros</option></select><input type="number" min="0" step="1" data-i="${i}" data-k="derivacion" value="${r.derivacion??''}"><input type="number" min="0" step="1" data-i="${i}" data-k="citas" value="${r.citas??''}"><input type="number" min="0" step="1" data-i="${i}" data-k="venta" value="${r.venta??''}"><input data-i="${i}" data-k="obs" value="${esc(r.obs||'')}"><button class="side-btn" data-del="${i}">🗑️</button>`;}
-function renderAcc(){const it=cur(); const c=$('#accionesRows'); c.innerHTML=''; it.acciones.forEach((r,i)=>{const d=document.createElement('div');d.className='grid acc-r';d.innerHTML=accRow(r,i);c.appendChild(d);});}
-$('#accAdd').onclick=()=>{cur().acciones.push({fecha:'',paquete:'1',tipo:'Azafata/Buzoneo',derivacion:null,citas:null,venta:null,obs:''});renderAcc();};
-$('#accionesRows').addEventListener('click',e=>{if(e.target.dataset.del!=null){cur().acciones.splice(+e.target.dataset.del,1);renderAcc();}});
-$('#accionesRows').addEventListener('input',e=>{const i=e.target.dataset.i,k=e.target.dataset.k;if(i==null||!k)return;const r=cur().acciones[+i];r[k]=e.target.type==='number'?(e.target.value===''?null:Number(e.target.value)):e.target.value;});
+/* ===================== CENTROS ===================== */
+function fillCentro(){ const it=cur(); if(!it) return;
+  $('#cNombre').value=it.nombre||''; $('#cDelegado').value=it.delegado||''; $('#cAudiologo').value=it.audiologo||''; $('#cTipo').value=it.tipo||'Franquicia';
+  renderAcciones(); renderFormacion(); renderProcesos();
+}
+function saveCentro(){ const it=cur(); if(!it) return;
+  it.nombre=$('#cNombre').value.trim(); it.delegado=$('#cDelegado').value.trim(); it.audiologo=$('#cAudiologo').value.trim(); it.tipo=$('#cTipo').value;
+  $('#centerNameHdr').textContent = it.nombre || '—';
+}
+/* Acciones */
+function renderAcciones(){ const it=cur(); const cont=$('#accionesRows'); cont.innerHTML='';
+  it.acciones.forEach((r,i)=>{ const row=document.createElement('div'); row.className='acc-row';
+    row.innerHTML=`<div>${i+1}</div><input type="date" data-i="${i}" data-k="fecha" value="${r.fecha||''}">
+    <select data-i="${i}" data-k="paquete"><option ${r.paquete==='1'?'selected':''}>1</option><option ${r.paquete==='2'?'selected':''}>2</option><option ${r.paquete==='3'?'selected':''}>3</option></select>
+    <select data-i="${i}" data-k="tipo"><option ${r.tipo==='Azafata/Buzoneo'?'selected':''}>Azafata/Buzoneo</option><option ${r.tipo==='Stand'?'selected':''}>Stand</option><option ${r.tipo==='Mailing/Cashback'?'selected':''}>Mailing/Cashback</option><option ${r.tipo==='Otros'?'selected':''}>Otros</option></select>
+    <input type="number" min="0" step="1" data-i="${i}" data-k="derivacion" value="${r.derivacion??''}">
+    <input type="number" min="0" step="1" data-i="${i}" data-k="citas" value="${r.citas??''}">
+    <input type="number" min="0" step="1" data-i="${i}" data-k="venta" value="${r.venta??''}">
+    <input data-i="${i}" data-k="obs" value="${esc(r.obs||'')}"><button class="side-btn" data-acc-del="${i}" title="Eliminar">🗑️</button>`;
+    cont.appendChild(row);
+  });
+}
+$('#accAdd').onclick=()=>{cur().acciones.push({fecha:'',paquete:'1',tipo:'Azafata/Buzoneo',derivacion:null,citas:null,venta:null,obs:''});renderAcciones();};
+$('#accionesRows').addEventListener('click',e=>{const i=e.target.dataset.accDel;if(i!=null){cur().acciones.splice(+i,1);renderAcciones();}});
+$('#accionesRows').addEventListener('input',e=>{const i=e.target.dataset.i,k=e.target.dataset.k;if(i==null||!k) return; const r=cur().acciones[+i]; r[k]=e.target.type==='number'? (e.target.value===''?null:Number(e.target.value)):e.target.value;});
 
-function frmRow(r,i){return `<div>${i+1}</div><input data-i="${i}" data-k="curso" value="${esc(r.curso||'')}"><input type="checkbox" data-i="${i}" data-k="realizado" ${r.realizado?'checked':''}><input type="checkbox" data-i="${i}" data-k="aplica" ${r.aplica?'checked':''}><input data-i="${i}" data-k="obs" value="${esc(r.obs||'')}"><button class="side-btn" data-fdel="${i}">🗑️</button>`;}
-function renderFrm(){const it=cur(); const c=$('#formacionesRows'); c.innerHTML=''; it.formaciones.forEach((r,i)=>{const d=document.createElement('div');d.className='grid frm-r';d.innerHTML=frmRow(r,i);c.appendChild(d);});}
-$('#frmAdd').onclick=()=>{cur().formaciones.push({curso:'',realizado:false,aplica:false,obs:''});renderFrm();};
-$('#formacionesRows').addEventListener('click',e=>{if(e.target.dataset.fdel!=null){cur().formaciones.splice(+e.target.dataset.fdel,1);renderFrm();}});
-$('#formacionesRows').addEventListener('input',e=>{const i=e.target.dataset.i,k=e.target.dataset.k;if(i==null||!k)return;const r=cur().formaciones[+i];r[k]=e.target.type==='checkbox'?e.target.checked:e.target.value;});
+/* Formación */
+function ensureMin5(a){while(a.length<5) a.push({curso:'',realizado:false,aplica:false,obs:''});}
+function renderFormacion(){ const it=cur(); ensureMin5(it.formaciones); const c=$('#formacionesRows'); c.innerHTML='';
+  it.formaciones.forEach((r,i)=>{const row=document.createElement('div'); row.className='frm-row';
+    row.innerHTML=`<div>${i+1}</div><input data-i="${i}" data-k="curso" value="${esc(r.curso||'')}"><input type="checkbox" data-i="${i}" data-k="realizado" ${r.realizado?'checked':''}><input type="checkbox" data-i="${i}" data-k="aplica" ${r.aplica?'checked':''}><input data-i="${i}" data-k="obs" value="${esc(r.obs||'')}"><button class="side-btn" data-frm-del="${i}" title="Eliminar">🗑️</button>`; c.appendChild(row);});
+}
+$('#frmAdd').onclick=()=>{cur().formaciones.push({curso:'',realizado:false,aplica:false,obs:''});renderFormacion();};
+$('#formacionesRows').addEventListener('click',e=>{const i=e.target.dataset.frmDel;if(i!=null){cur().formaciones.splice(+i,1);renderFormacion();}});
+$('#formacionesRows').addEventListener('input',e=>{const i=e.target.dataset.i,k=e.target.dataset.k;if(i==null||!k) return; const r=cur().formaciones[+i]; r[k]=e.target.type==='checkbox'?e.target.checked:e.target.value;});
 
-function class95(v){const n=Number(v);if(!Number.isFinite(n))return'';return n>=95?'good':'bad'}
-function class80(v){const n=Number(v);if(!Number.isFinite(n))return'';return n>=80?'good':'bad'}
-function procRow(r,i){const has=r.adjunto&&r.adjunto.data;return `<div>${i+1}</div><input type="date" data-i="${i}" data-k="fecha" value="${r.fecha||''}"><input class="pscore ${class95(r.puntuacion)}" type="number" min="0" max="100" step="1" data-i="${i}" data-k="puntuacion" value="${r.puntuacion??''}"><div class="hitcell ${r.hit?'on':''}"><input type="checkbox" data-i="${i}" data-k="hit" ${r.hit?'checked':''}></div><input type="checkbox" data-i="${i}" data-k="rt" ${r.rt?'checked':''}><input class="conv ${class80(r.pruebas)}" type="number" min="0" max="100" step="1" data-i="${i}" data-k="pruebas" value="${r.pruebas??''}"><input class="conv ${class80(r.venta)}" type="number" min="0" max="100" step="1" data-i="${i}" data-k="venta" value="${r.venta??''}"><input data-i="${i}" data-k="colab" value="${esc(r.colab||'')}"><input data-i="${i}" data-k="obs" value="${esc(r.obs||'')}"><span><button class="side-btn" data-adj="${i}">📎</button>${has?`<a class="side-btn" style="text-decoration:none;text-align:center" href="${r.adjunto.data}" download="${esc(r.adjunto.name||'adjunto')}" target="_blank">🔗</a>`:''}<input type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg" data-file="${i}" style="display:none"></span><button class="side-btn" data-pdel="${i}">🗑️</button>`;}
-function renderProc(){const it=cur(); const c=$('#procesosRows'); c.innerHTML=''; it.procesos.forEach((r,i)=>{const d=document.createElement('div');d.className='grid proc-r';d.innerHTML=procRow(r,i);c.appendChild(d);});}
-$('#procAdd').onclick=()=>{cur().procesos.push({fecha:'',puntuacion:null,hit:false,rt:false,pruebas:null,venta:null,colab:'',obs:'',adjunto:null});renderProc();};
+/* Procesos */
+function score95(v){const n=Number(v);if(!Number.isFinite(n))return'';return n>=95?'good':'bad';}
+function score80(v){const n=Number(v);if(!Number.isFinite(n))return'';return n>=80?'good':'bad';}
+function ensureMin4(a){while(a.length<4) a.push({fecha:'',puntuacion:null,hit:false,rt:false,pruebas:null,venta:null,colab:'',obs:'',adjunto:null});}
+function renderProcesos(){ const it=cur(); ensureMin4(it.procesos); const c=$('#procesosRows'); c.innerHTML='';
+  it.procesos.forEach((r,i)=>{const row=document.createElement('div'); row.className='proc-row';
+    const hasAdj=r.adjunto&&r.adjunto.data;
+    row.innerHTML=`<div>${i+1}</div><input type="date" data-i="${i}" data-k="fecha" value="${r.fecha||''}">
+    <input class="pscore ${score95(r.puntuacion)}" type="number" min="0" max="100" step="1" data-i="${i}" data-k="puntuacion" value="${r.puntuacion??''}">
+    <div class="hitcell ${r.hit?'on':''}"><input type="checkbox" data-i="${i}" data-k="hit" ${r.hit?'checked':''}></div>
+    <input type="checkbox" data-i="${i}" data-k="rt" ${r.rt?'checked':''}>
+    <input class="conv ${score80(r.pruebas)}" type="number" min="0" max="100" step="1" data-i="${i}" data-k="pruebas" value="${r.pruebas??''}">
+    <input class="conv ${score80(r.venta)}" type="number" min="0" max="100" step="1" data-i="${i}" data-k="venta" value="${r.venta??''}">
+    <input data-i="${i}" data-k="colab" value="${esc(r.colab||'')}"><input data-i="${i}" data-k="obs" value="${esc(r.obs||'')}">
+    <span><button class="side-btn" data-adj="${i}" title="Adjuntar">📎</button>${hasAdj?`<a class="side-btn" style="text-decoration:none;text-align:center" href="${r.adjunto.data}" download="${esc(r.adjunto.name||'adjunto')}" target="_blank">🔗</a>`:''}<input type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg" data-file="${i}" style="display:none"></span>
+    <button class="side-btn" data-proc-del="${i}" title="Eliminar">🗑️</button>`; c.appendChild(row);});
+}
+$('#procAdd').onclick=()=>{cur().procesos.push({fecha:'',puntuacion:null,hit:false,rt:false,pruebas:null,venta:null,colab:'',obs:'',adjunto:null});renderProcesos();};
 $('#procesosRows').addEventListener('click',e=>{
-  if(e.target.dataset.pdel!=null){cur().procesos.splice(+e.target.dataset.pdel,1);renderProc();return;}
-  if(e.target.dataset.adj!=null){$(`[data-file="${e.target.dataset.adj}"]`,$('#procesosRows')).click();}
+  const d=e.target.dataset; if(d.procDel!=null){cur().procesos.splice(+d.procDel,1);renderProcesos();return;}
+  if(d.adj!=null){const i=+d.adj; $(`[data-file="${i}"]`,$('#procesosRows')).click();}
 });
 $('#procesosRows').addEventListener('change',e=>{
   const i=e.target.dataset.file; if(i==null) return; const f=e.target.files[0]; if(!f) return;
-  const rd=new FileReader(); rd.onload=()=>{cur().procesos[+i].adjunto={name:f.name,data:rd.result}; renderProc();}; rd.readAsDataURL(f);
+  const reader=new FileReader(); reader.onload=()=>{cur().procesos[+i].adjunto={name:f.name,data:reader.result}; renderProcesos(); toast('Adjunto listo (guardar para subir)');}; reader.readAsDataURL(f);
 });
 $('#procesosRows').addEventListener('input',e=>{
-  const i=e.target.dataset.i,k=e.target.dataset.k;if(i==null||!k)return;const r=cur().procesos[+i];
-  if(e.target.type==='checkbox'){r[k]=e.target.checked; if(k==='hit') e.target.closest('.hitcell')?.classList.toggle('on',e.target.checked);}
-  else if(e.target.type==='number'){r[k]=e.target.value===''?null:Number(e.target.value); if(k==='puntuacion') e.target.className='pscore '+class95(r[k]); if(k==='pruebas'||k==='venta') e.target.className='conv '+class80(r[k]);}
+  const i=e.target.dataset.i,k=e.target.dataset.k;if(i==null||!k)return; const r=cur().procesos[+i];
+  if(e.target.type==='checkbox'){ r[k]=e.target.checked; if(k==='hit'){e.target.closest('.hitcell')?.classList.toggle('on',e.target.checked);} }
+  else if(e.target.type==='number'){ r[k]=e.target.value===''?null:Number(e.target.value); if(k==='puntuacion') e.target.className='pscore '+score95(r[k]); if(k==='pruebas'||k==='venta') e.target.className='conv '+score80(r[k]); }
   else r[k]=e.target.value;
 });
 
-/* ===== Visitas ===== */
-function fillVA(){const it=cur(); $('#vaRol').value=it.rol||'Delegado audio'; $('#vaResp').value=it.responsable||''; $('#vaSearch').value=state.vaFilter||''; vaTabs(); vaRender();}
+/* ===================== VISITAS ===================== */
+function fillVisitas(){const it=cur(); if(!it) return; $('#vaRol').value=it.rol||'Delegado audio'; $('#vaResp').value=it.responsable||''; $('#vaSearch').value=state.vaFilter||''; renderVaTabs(); renderVA();}
 $('#vaRol').onchange=e=>{cur().rol=e.target.value;};
 $('#vaResp').oninput=e=>{cur().responsable=e.target.value;};
-$('#vaSearch').oninput=e=>{state.vaFilter=e.target.value.trim(); vaRender();};
-function vaTabs(){const it=cur(); const t=$('#vaTabs'); t.innerHTML=''; it.hojas=it.hojas||[sheetVA('Visita 1')];
-  it.hojas.forEach((h,idx)=>{const b=document.createElement('button');b.className='side-btn';b.textContent=h.nombre||('Visita '+(idx+1)); if(idx===state.vaSheet) b.style.background='#f1f1f1'; b.onclick=()=>{state.vaSheet=idx; vaRender();}; t.appendChild(b);});
-  const add=document.createElement('button'); add.className='side-btn'; add.textContent='＋'; add.onclick=()=>{it.hojas.push(sheetVA('Visita '+(it.hojas.length+1))); state.vaSheet=it.hojas.length-1; vaTabs(); vaRender();}; t.appendChild(add);
+$('#vaSearch').oninput=e=>{state.vaFilter=e.target.value.trim(); renderVA();};
+function renderVaTabs(){const it=cur(); const tabs=$('#vaTabs'); tabs.innerHTML=''; it.hojas=it.hojas||[sheetVA('Visita 1')];
+  it.hojas.forEach((h,idx)=>{const b=document.createElement('button'); b.className='side-btn'; b.textContent=h.nombre||('Visita '+(idx+1)); if(idx===state.vaSheet){b.style.background='#f1f1f1';} b.onclick=()=>{state.vaSheet=idx; renderVA();}; tabs.appendChild(b);});
+  const add=document.createElement('button'); add.className='side-btn'; add.textContent='＋'; add.title='Añadir visita'; add.onclick=()=>{it.hojas.push(sheetVA('Visita '+(it.hojas.length+1))); state.vaSheet=it.hojas.length-1; renderVaTabs(); renderVA();}; tabs.appendChild(add);
 }
-function vaSummary(h){const visited=h.rows.filter(r=>(r.fecha||'').trim()!==''); const unique=new Set(visited.map(r=>(r.centro||'').trim()).filter(Boolean)); const p=Math.min(100,Math.round(visited.length*100/h.rows.length)); $('#vaRightBar').style.width=p+'%'; $('#vaRightCount').textContent=`${visited.length} registradas`;}
-function v80(v){const n=Number(v);return Number.isFinite(n)&&n>=80?'good':(Number.isFinite(n)?'bad':'')}
-function v85(v){const n=Number(v);return Number.isFinite(n)&&n>=85?'good':(Number.isFinite(n)?'bad':'')}
-function vaRender(){const it=cur(); const h=it.hojas[state.vaSheet]||it.hojas[0]; const f=(state.vaFilter||'').toLowerCase(); const c=$('#vaRows'); c.innerHTML=''; vaSummary(h);
-  h.rows.forEach((r,i)=>{if(f && !(r.centro||'').toLowerCase().includes(f)) return; const d=document.createElement('div'); d.className='grid va-r';
-    d.innerHTML=`<div>${i+1}</div><input data-i="${i}" data-k="centro" value="${esc(r.centro||'')}"><input data-i="${i}" data-k="delegado" value="${esc(r.delegado||'')}"><input data-i="${i}" data-k="audiologo" value="${esc(r.audiologo||'')}"><select data-i="${i}" data-k="tipo"><option ${r.tipo==='Sucursal'?'selected':''}>Sucursal</option><option ${r.tipo==='Franquicia'?'selected':''}>Franquicia</option></select><input type="date" data-i="${i}" data-k="fecha" value="${r.fecha||''}"><input class="pscore ${v85(r.puntuacion)}" type="number" min="0" max="100" step="1" data-i="${i}" data-k="puntuacion" value="${r.puntuacion??''}"><div class="hitcell ${r.hit?'on':''}"><input type="checkbox" data-i="${i}" data-k="hit" ${r.hit?'checked':''}></div><input class="conv ${v80(r.conv_prueba)}" type="number" min="0" max="100" step="1" data-i="${i}" data-k="conv_prueba" value="${r.conv_prueba??''}"><input class="conv ${v80(r.conv_venta)}" type="number" min="0" max="100" step="1" data-i="${i}" data-k="conv_venta" value="${r.conv_venta??''}">`; c.appendChild(d);
+function updateVaSummary(h){ const visited=h.rows.filter(r=>(r.fecha||'').trim()!==''); const unique=new Set(visited.map(r=>(r.centro||'').trim()).filter(Boolean));
+  $('#vaSummaryTxt').textContent=`Centros visitados: ${unique.size} · Registros: ${visited.length} / ${h.rows.length}`;
+  const p=Math.min(100,Math.round(visited.length*100/h.rows.length));
+  $('#vaProg').style.width=p+'%'; $('#vaRightBar').style.width=p+'%'; $('#vaRightCount').textContent=`${visited.length} registradas`;
+}
+function vClass80(v){const n=Number(v); if(!Number.isFinite(n)) return ''; return n>=80?'good':'bad';}
+function vScore85(v){const n=Number(v); if(!Number.isFinite(n)) return ''; return n>=85?'good':'bad';}
+function renderVA(){const it=cur(); const h=it.hojas[state.vaSheet]||it.hojas[0]; const f=(state.vaFilter||'').toLowerCase(); const cont=$('#vaRows'); cont.innerHTML=''; updateVaSummary(h);
+  h.rows.forEach((r,i)=>{if(f && !(r.centro||'').toLowerCase().includes(f)) return; const row=document.createElement('div'); row.className='va-row va-cols';
+    row.innerHTML=`<div>${i+1}</div><input data-i="${i}" data-k="centro" value="${esc(r.centro||'')}"><input data-i="${i}" data-k="delegado" value="${esc(r.delegado||'')}"><input data-i="${i}" data-k="audiologo" value="${esc(r.audiologo||'')}"><select data-i="${i}" data-k="tipo"><option ${r.tipo==='Sucursal'?'selected':''}>Sucursal</option><option ${r.tipo==='Franquicia'?'selected':''}>Franquicia</option></select><input type="date" data-i="${i}" data-k="fecha" value="${r.fecha||''}"><input class="pscore ${vScore85(r.puntuacion)}" type="number" min="0" max="100" step="1" data-i="${i}" data-k="puntuacion" value="${r.puntuacion??''}"><div class="hitcell ${r.hit?'on':''}"><input type="checkbox" class="hit" data-i="${i}" data-k="hit" ${r.hit?'checked':''}></div><input class="conv ${vClass80(r.conv_prueba)}" type="number" min="0" max="100" step="1" data-i="${i}" data-k="conv_prueba" value="${r.conv_prueba??''}"><input class="conv ${vClass80(r.conv_venta)}" type="number" min="0" max="100" step="1" data-i="${i}" data-k="conv_venta" value="${r.conv_venta??''}">`; cont.appendChild(row);});
+}
+$('#vaRows').addEventListener('input',e=>{const i=+e.target.dataset.i,k=e.target.dataset.k;if(!k)return; const h=cur().hojas[state.vaSheet];
+  if(k==='hit'){h.rows[i][k]=e.target.checked; e.target.closest('.hitcell')?.classList.toggle('on',e.target.checked); return;}
+  if(e.target.type==='number') h.rows[i][k]=e.target.value===''?null:Number(e.target.value); else if(e.target.type==='checkbox') h.rows[i][k]=e.target.checked; else h.rows[i][k]=e.target.value;});
+
+/* ===================== FORMACIONES (global) ===================== */
+function fillFM(){const it=cur(); if(!it) return; $('#fmDelegado').value=it.delegado||''; $('#fmSearch').value=state.fmFilter||''; renderFM();}
+$('#fmDelegado').oninput=e=>{cur().delegado=e.target.value;};
+$('#fmSearch').oninput=e=>{state.fmFilter=e.target.value.trim(); renderFM();};
+function renderFM(){const it=cur(); it.filas=it.filas||rowsFM(); const f=(state.fmFilter||'').toLowerCase(); const cont=$('#fmRows'); cont.innerHTML='';
+  it.filas.forEach((r,i)=>{if(f && !(r.tema||'').toLowerCase().includes(f) && !(r.audiologo||'').toLowerCase().includes(f)) return;
+    const evoP=(Number.isFinite(+r.p_ini)&&Number.isFinite(+r.p_3m))?(Number(r.p_3m)-Number(r.p_ini)):null;
+    const evoV=(Number.isFinite(+r.v_ini)&&Number.isFinite(+r.v_3m))?(Number(r.v_3m)-Number(r.v_ini)):null;
+    const row=document.createElement('div'); row.className='fm-row';
+    row.innerHTML=`<div>${i+1}</div><input type="date" data-i="${i}" data-k="fecha" value="${r.fecha||''}"><input data-i="${i}" data-k="tema" value="${esc(r.tema||'')}"><input data-i="${i}" data-k="audiologo" value="${esc(r.audiologo||'')}"><select data-i="${i}" data-k="duracion">${[1,2,3,4].map(n=>`<option ${Number(r.duracion)===n?'selected':''}>${n}</option>`).join('')}</select><input class="conv ${(Number(r.p_ini)>=80)?'good':'bad'}" type="number" min="0" max="100" step="1" data-i="${i}" data-k="p_ini" value="${r.p_ini??''}"><input class="conv ${(Number(r.v_ini)>=80)?'good':'bad'}" type="number" min="0" max="100" step="1" data-i="${i}" data-k="v_ini" value="${r.v_ini??''}"><input class="conv ${(Number(r.p_3m)>=80)?'good':'bad'}" type="number" min="0" max="100" step="1" data-i="${i}" data-k="p_3m" value="${r.p_3m??''}"><input class="conv ${(Number(r.v_3m)>=80)?'good':'bad'}" type="number" min="0" max="100" step="1" data-i="${i}" data-k="v_3m" value="${r.v_3m??''}"><div style="text-align:center;font-weight:700">${evoP==null?'—':(evoP>0?'↑ ':'')+(evoP<0?'↓ ':'')+Math.abs(Math.round(evoP))}</div><div style="text-align:center;font-weight:700">${evoV==null?'—':(evoV>0?'↑ ':'')+(evoV<0?'↓ ':'')+Math.abs(Math.round(evoV))}</div>`; cont.appendChild(row);
   });
 }
-$('#vaRows').addEventListener('input',e=>{const i=+e.target.dataset.i,k=e.target.dataset.k;if(!k)return;const h=cur().hojas[state.vaSheet]; if(e.target.type==='number')h.rows[i][k]=e.target.value===''?null
+$('#fmRows').addEventListener('input',e=>{const i=+e.target.dataset.i,k=e.target.dataset.k;if(!k)return; const it=cur();
+  if(e.target.type==='number') it.filas[i][k]=e.target.value===''?null:Number(e.target.value); else if(e.target.tagName==='SELECT') it.filas[i][k]=Number(e.target.value); else it.filas[i][k]=e.target.value;});
+
+/* ===================== TELEAUDIOLOGIA ===================== */
+function fillTA(){ $('#taSearch').value=state.taFilter||''; populateTASelect(); renderTA(); }
+function populateTASelect(){ const it=cur(); const h=(it.hojas&&it.hojas[0])||sheetTA('Tele 1'); it.hojas=it.hojas||[h];
+  const names=[...new Set(h.rows.map(r=>(r.persona||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+  $('#taPerson').innerHTML='<option value="">Todos</option>'+names.map(n=>`<option>${esc(n)}</option>`).join('');
+}
+$('#taSearch').oninput=e=>{state.taFilter=e.target.value.trim(); renderTA();};
+$('#taPerson').onchange=e=>{state.taPerson=e.target.value; renderTA();};
+function renderTA(){ const it=cur(); const h=it.hojas[0]; const f=(state.taFilter||'').toLowerCase(); const per=state.taPerson||''; const cont=$('#taRows'); cont.innerHTML='';
+  h.rows.forEach((r,i)=>{ if((f && !(r.centro||'').toLowerCase().includes(f) && !(r.persona||'').toLowerCase().includes(f)) || (per && (r.persona||'')!==per)) return;
+    const row=document.createElement('div'); row.className='ta-row';
+    row.innerHTML=`<div>${i+1}</div><input data-i="${i}" data-k="centro" value="${esc(r.centro||'')}"><input data-i="${i}" data-k="delegado" value="${esc(r.delegado||'')}"><select data-i="${i}" data-k="rol"><option ${r.rol!=='Técnico'?'selected':''}>Audiólogo</option><option ${r.rol==='Técnico'?'selected':''}>Técnico</option></select><input data-i="${i}" data-k="persona" value="${esc(r.persona||'')}" placeholder="Nombre"><input type="checkbox" data-i="${i}" data-k="formacion" ${r.formacion?'checked':''}><input type="checkbox" data-i="${i}" data-k="practicas" ${r.practicas?'checked':''}><input type="checkbox" data-i="${i}" data-k="certificado" ${r.certificado?'checked':''}><input type="checkbox" data-i="${i}" data-k="pruebas" ${r.pruebas?'checked':''}><input type="checkbox" data-i="${i}" data-k="ventas" ${r.ventas?'checked':''}><input data-i="${i}" data-k="obs" value="${esc(r.obs||'')}">`;
+    cont.appendChild(row);
+  });
+}
+$('#taRows').addEventListener('input',e=>{const i=+e.target.dataset.i,k=e.target.dataset.k;if(!k)return; const h=cur().hojas[0];
+  if(e.target.type==='checkbox') h.rows[i][k]=e.target.checked; else h.rows[i][k]=e.target.value;});
+
+/* ===================== EQUIPOS ===================== */
+function fillEQ(){ $('#eqSearch').value=state.eqFilter||''; renderEQ(); }
+$('#eqSearch').oninput=e=>{state.eqFilter=e.target.value.trim(); renderEQ();};
+$('#btnAddFila').onclick=()=>{ const it=cur(); it.filas.push({equipo:'',serie:'',persona:'',fecha:'',pares:Array.from({length:it.columnas},()=>({centro:'',en:false,sede:false}))}); renderEQ(); };
+$('#btnAddParCols').onclick=()=>{ const it=cur(); it.columnas=(it.columnas||3)+1; it.filas.forEach(r=>r.pares.push({centro:'',en:false,sede:false})); renderEQ(); };
+function renderEQ(){
+  const it=cur(); const f=(state.eqFilter||'').toLowerCase(); const body=$('#eqBody'); body.innerHTML='';
+  it.filas.forEach((r,i)=>{ const txt=(r.equipo||'')+' '+(r.serie||'')+' '+(r.persona||' ')+(r.pares||[]).map(p=>(p.centro||'')).join(' '); if(f && !txt.toLowerCase().includes(f)) return;
+    const row=document.createElement('div'); row.className='eq-row';
+    const P=(idx)=>r.pares?.[idx]||{centro:'',en:false,sede:false};
+    row.innerHTML=`<div>${i+1}</div><input data-i="${i}" data-k="equipo" value="${esc(r.equipo||'')}"><input data-i="${i}" data-k="serie" value="${esc(r.serie||'')}"><input data-i="${i}" data-k="persona" value="${esc(r.persona||'')}"><input type="date" data-i="${i}" data-k="fecha" value="${r.fecha||''}">
+      <input data-i="${i}" data-k="centro" data-c="0" value="${esc(P(0).centro)}"><input type="checkbox" data-i="${i}" data-k="en" data-c="0" ${P(0).en?'checked':''}><input type="checkbox" data-i="${i}" data-k="sede" data-c="0" ${P(0).sede?'checked':''}>
+      <input data-i="${i}" data-k="centro" data-c="1" value="${esc(P(1).centro)}"><input type="checkbox" data-i="${i}" data-k="en" data-c="1" ${P(1).en?'checked':''}><input type="checkbox" data-i="${i}" data-k="sede" data-c="1" ${P(1).sede?'checked':''}>
+      <input data-i="${i}" data-k="centro" data-c="2" value="${esc(P(2).centro)}"><input type="checkbox" data-i="${i}" data-k="en" data-c="2" ${P(2).en?'checked':''}><input type="checkbox" data-i="${i}" data-k="sede" data-c="2" ${P(2).sede?'checked':''}>`;
+    body.appendChild(row);
+  });
+  body.oninput=(e)=>{
+    const i=+e.target.dataset.i,k=e.target.dataset.k; if(isNaN(i)||!k) return;
+    if(k==='centro'||k==='en'||k==='sede'){ const c=+e.target.dataset.c; const p=cur().filas[i].pares[c]; if(k==='centro') p.centro=e.target.value; else p[k]=e.target.checked; }
+    else cur().filas[i][k]= e.target.value;
+  };
+}
+
+/* ===================== CLOUD I/O ===================== */
+function stamp(txt){$('#stamp').textContent='Cloud · '+txt;}
+async function cloudLoad(){
+  if(!CLOUD_URL){toast('Configura ?api=URL o FALLBACK_API'); return;}
+  const r = await fetch(`${CLOUD_URL}?action=load`, {cache:'no-store'});
+  if(!r.ok) throw new Error('Cargar nube');
+  const txt = await r.text();
+  if(txt) data = JSON.parse(txt);
+  renderAll(); stamp('Cargado: '+now());
+}
+async function cloudSave(){
+  if(!CLOUD_URL){toast('Configura ?api=URL o FALLBACK_API'); return;}
+  const r = await fetch(CLOUD_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({action:'save', data})});
+  if(!r.ok) throw new Error('Guardar nube');
+  const res = await r.json(); stamp('Guardado: '+(res.updated_at||now())); toast('Guardado en la nube');
+}
+async function cloudStatus(){
+  if(!CLOUD_URL) return {ok:false};
+  const r = await fetch(`${CLOUD_URL}?action=status`, {cache:'no-store'});
+  return r.ok ? r.json() : {ok:false};
+}
+async function cloudLock(mode='lock'){
+  if(!CLOUD_URL) return {ok:false};
+  const r = await fetch(CLOUD_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({action:'lock', mode, user: EDITOR_NAME})});
+  return r.json();
+}
+
+/* Topbar */
+$('#btnSaveTop').onclick=async()=>{ try{ await cloudSave(); }catch(e){ console.error(e); toast('Error al guardar'); } };
+$('#btnFetch').onclick=async()=>{ try{ await cloudLoad(); }catch(e){ console.error(e); toast('Error al actualizar'); } };
+$('#btnReset').onclick=async()=>{ try{ await cloudLoad(); toast('Actualizado'); }catch(e){ toast('No se pudo actualizar'); } };
+
+/* ===================== PIN + LOCK ===================== */
+async function sha256Hex(str){const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str));return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');}
+async function checkPin(val){let s=(val||'').trim(); if(/^AR/i.test(s)) s=s.slice(2); if(!s) return false; try{return (await sha256Hex(s))===PIN_SHA256;}catch(_){return false;}}
+async function tryEnter(){
+  $('#pinMsg').style.display='none';
+  const ok=await checkPin($('#pin').value);
+  if(!ok){ $('#pinMsg').style.display='block'; return; }
+
+  try{
+    const st = await cloudStatus();
+    if(st.lock_user && st.lock_until && new Date(st.lock_until) > new Date() && st.lock_user!==EDITOR_NAME){
+      alert(`En uso por ${st.lock_user} hasta ${new Date(st.lock_until).toLocaleString()}. Entrarás en lectura.`);
+      document.body.classList.remove('locked'); $('#gate').style.display='none';
+    }else{
+      const res = await cloudLock('lock');
+      if(!res.ok && res.locked_by && res.locked_by!==EDITOR_NAME){
+        alert(`En uso por ${res.locked_by}. Entrarás en lectura.`);
+      }
+      document.body.classList.remove('locked'); $('#gate').style.display='none';
+    }
+  }catch(e){ document.body.classList.remove('locked'); $('#gate').style.display='none'; }
+
+  try{ await cloudLoad(); }catch(_){}
+}
+$('#enter').onclick=tryEnter;
+$('#pin').addEventListener('keydown',e=>{if(e.key==='Enter') tryEnter();});
+$('#cancelPin').onclick=()=>{$('#pin').value='';$('#pinMsg').style.display='none';};
+
+// liberar lock al salir
+window.addEventListener('beforeunload', ()=>{ 
+  if(!CLOUD_URL) return;
+  navigator.sendBeacon?.(CLOUD_URL, new Blob([JSON.stringify({action:'lock', mode:'unlock', user:EDITOR_NAME})],{type:'application/json'}));
+});
+
+/* ===================== RENDER CORE ===================== */
+function renderAll(){ renderLeft(); if(state.selected.section){ renderDetail(); } else { renderDetailBlank(); } }
+
+/* Init */
+window.addEventListener('load',()=>{ stamp(CLOUD_URL?'Listo':'Configura ?api=URL'); });
+</script>
+</body>
+</html>
