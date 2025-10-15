@@ -9,7 +9,7 @@
 :root{
   --rojo:#c82727; --rojo-osc:#a71f1f;
   --bg:#f6f7fb; --line:#e6e7ee; --shadow:0 4px 14px rgba(0,0,0,.06);
-  --col-ex:#fde2e4; --col-fl:#e2f0cb; --col-va:#cde7f0; --col-fm:#f9e5c9; --col-ta:#eadcf8; --col-eq:#e8f1ff;
+  --col-ex:#fde2e4; --col-fl:#e2f0cb;
   --fs:11.5px; --fs-sm:10.3px;
 }
 *{box-sizing:border-box}
@@ -24,7 +24,7 @@ body.locked #gate{pointer-events:auto;filter:none}
 /* Topbar */
 .topbar{position:sticky;top:0;z-index:99;width:100%;background:linear-gradient(180deg,var(--rojo),var(--rojo-osc));color:#fff;box-shadow:var(--shadow)}
 .bar-inner{padding:.45rem 6px;display:flex;align-items:center;gap:.35rem}
-.brand{font-weight:900;letter-spacing:.28px;font-size:11.8px}
+.brand{font-weight:900;letter-spacing:.28px;font-size:12.2px}
 .spacer{flex:1}
 .btn{border:0;border-radius:8px;padding:.28rem .5rem;cursor:pointer;box-shadow:var(--shadow);font-weight:800;font-size:10.8px}
 .btn-lite{background:#fff;color:#861212}
@@ -47,18 +47,17 @@ body.locked #gate{pointer-events:auto;filter:none}
 .acts{display:flex;gap:.14rem}
 .ico-btn{min-width:20px;height:20px;border-radius:5px;border:1px solid #e3e3ea;background:#fff;cursor:pointer;font-size:10px}
 
-/* Colors */
-.bg-ex{background:var(--col-ex)} .bg-fl{background:var(--col-fl)} .bg-va{background:var(--col-va)}
-.bg-fm{background:var(--col-fm)} .bg-ta{background:var(--col-ta)} .bg-eq{background:var(--col-eq)}
+/* Color fondos */
+.bg-ex{background:var(--col-ex)} .bg-fl{background:var(--col-fl)}
 
 /* Detail */
 .detail{padding:.35rem .4rem;border-radius:8px;border:1px solid var(--line);background:#fff;min-height:66vh;box-shadow:var(--shadow)}
-.header-row{display:flex;align-items:center;gap:.5rem;margin-bottom:.25rem}
-.header-row h2{margin:0;font-size:13px}
-.hdr-name{font-weight:900;font-size:15px}
-.badge{padding:.06rem .36rem;border-radius:999px;background:#00000010;font-size:10.5px}
+.header-row{display:flex;align-items:center;gap:.6rem;margin-bottom:.25rem}
+.header-row h2{margin:0;font-size:16px;letter-spacing:.1px}
+.hdr-name{font-weight:900;font-size:19px}
+.badge{padding:.08rem .44rem;border-radius:999px;background:#00000010;font-size:10.7px}
 .header-row .spacer{flex:1}
-.save-small{font-size:10.8px;padding:.32rem .58rem;border-radius:999px;background:#1f6feb;color:#fff;border:0;box-shadow:var(--shadow);cursor:pointer}
+.save-small{font-size:11px;padding:.36rem .66rem;border-radius:999px;background:#1f6feb;color:#fff;border:0;box-shadow:var(--shadow);cursor:pointer}
 
 /* Forms */
 .row{display:flex;gap:.35rem;flex-wrap:wrap;align-items:flex-end}
@@ -80,13 +79,20 @@ body.locked #gate{pointer-events:auto;filter:none}
 
 /* Grids */
 .acc-head,.acc-row{grid-template-columns:36px 100px 80px 190px 90px 80px 90px 1fr 36px}
-.frm-head,.frm-row{grid-template-columns:36px 1.02fr .55fr .55fr 1.05fr 36px}
-.proc-head,.proc-row{grid-template-columns:36px 110px 150px 86px 86px 160px 1fr 88px 36px}
+/* Formación: Observaciones mucho más ancho; checks centrados */
+.frm-head,.frm-row{grid-template-columns:36px 1.1fr .45fr .45fr 2fr 36px}
+.frm-row input[type="checkbox"]{display:block;margin:auto}
+/* Procesos ampliado */
+.proc-head,.proc-row{grid-template-columns:36px 116px 150px 86px 86px 98px 98px 160px 1.2fr 88px 36px}
+.proc-row input[type="checkbox"]{display:block;margin:auto}
 
 /* Status colors */
 .pscore{border:2px solid transparent}
 .pscore.good{background:#eaf9f0;border-color:#2ecc71aa}
 .pscore.bad{background:#ffe8e8;border-color:#e74c3caa}
+.conv{border:2px solid transparent}
+.conv.good{background:#eaf9f0;border-color:rgba(46,204,113,.6)}
+.conv.bad{background:#ffe8e8;border-color:rgba(231,76,60,.6)}
 .hitcell{background:#ffe5e5;border:1px solid #f5c2c2;border-radius:5px;display:flex;justify-content:center;align-items:center;padding:.06rem}
 .hitcell.on{background:#e6f6ed;border-color:#bfe7cc}
 
@@ -95,6 +101,7 @@ body.locked #gate{pointer-events:auto;filter:none}
 .gate-card{background:#111;color:#fff;border-radius:10px;box-shadow:var(--shadow);padding:16px 14px;min-width:260px;border:1px solid #2a2a2a}
 .pin{letter-spacing:.3rem;font-size:.95rem;text-align:center;background:#000;color:#fff;border:1px solid #444;border-radius:7px;padding:.38rem}
 .subtle{opacity:.8;font-size:.82rem}
+.legend{margin:.25rem 0 .1rem;color:#555;font-size:10.5px}
 </style>
 </head>
 <body class="locked">
@@ -103,10 +110,10 @@ body.locked #gate{pointer-events:auto;filter:none}
   <div class="bar-inner">
     <div class="brand">SEGUIMIENTO AUDIO · Cloud</div>
     <div class="spacer"></div>
-    <button id="btnFetch" class="btn btn-lite" title="Leer de la nube o local (no guarda)">Actualizar (nube)</button>
-    <button id="btnSaveTop" class="btn btn-save" title="Guardar en la nube o local">Guardar (nube)</button>
-    <button id="btnReset" class="btn btn-ghost" title="Descartar cambios locales y volver al último leído">Resetear</button>
-    <span id="stamp" class="pill">v8.2 · Cargando…</span>
+    <button id="btnFetch" class="btn btn-lite" title="Leer desde local (demo)">Actualizar</button>
+    <button id="btnSaveTop" class="btn btn-save" title="Guardar local">Guardar</button>
+    <button id="btnReset" class="btn btn-ghost" title="Restaurar última vista">Resetear</button>
+    <span id="stamp" class="pill">v8.3 · Cargando…</span>
   </div>
 </header>
 
@@ -124,26 +131,6 @@ body.locked #gate{pointer-events:auto;filter:none}
           <div><button class="side-btn" data-act="toggle">▾</button><button class="side-btn" data-act="add">＋</button></div>
         </div><div class="side-list"></div>
       </div>
-      <div class="side-card bg-va" data-section="VISITAS AUDIO">
-        <div class="side-head"><div>📋 VISITAS AUDIO</div>
-          <div><button class="side-btn" data-act="toggle">▾</button><button class="side-btn" data-act="add">＋</button></div>
-        </div><div class="side-list"></div>
-      </div>
-      <div class="side-card bg-fm" data-section="FORMACIONES Y MENTORING">
-        <div class="side-head"><div>🎓 FORMACIONES Y MENTORING</div>
-          <div><button class="side-btn" data-act="toggle">▾</button><button class="side-btn" data-act="add">＋</button></div>
-        </div><div class="side-list"></div>
-      </div>
-      <div class="side-card bg-ta" data-section="TELEAUDIOLOGIA">
-        <div class="side-head"><div>📡 TELEAUDIOLOGIA</div>
-          <div><button class="side-btn" data-act="toggle">▾</button><button class="side-btn" data-act="add">＋</button></div>
-        </div><div class="side-list"></div>
-      </div>
-      <div class="side-card bg-eq" data-section="EQUIPOS">
-        <div class="side-head"><div>🧰 EQUIPOS</div>
-          <div><button class="side-btn" data-act="toggle">▾</button><button class="side-btn" data-act="add">＋</button></div>
-        </div><div class="side-list"></div>
-      </div>
     </aside>
 
     <!-- Detail -->
@@ -154,7 +141,7 @@ body.locked #gate{pointer-events:auto;filter:none}
         <div class="spacer"></div>
         <button id="saveBtnActive" class="save-small">💾 Guardar</button>
       </div>
-      <p id="detHint" style="opacity:.7;margin:.1rem 0 .2rem">Selecciona en la izquierda (doble clic o ✏️) o crea con ＋.</p>
+      <p id="detHint" style="opacity:.7;margin:.1rem 0 .2rem">Selecciona un centro a la izquierda (doble clic o ✏️) o crea con ＋.</p>
 
       <!-- CENTROS -->
       <div id="detCentro" style="display:none">
@@ -166,10 +153,8 @@ body.locked #gate{pointer-events:auto;filter:none}
         </div>
 
         <!-- ACCIONES -->
-        <h3 style="margin:.3rem 0 .15rem;font-size:11.6px">ACCIONES</h3>
-        <div class="toolbar">
-          <button id="accAdd" class="tool" title="Añadir fila">＋ Añadir fila</button>
-        </div>
+        <h3 style="margin:.35rem 0 .12rem;font-size:11.8px">ACCIONES</h3>
+        <div class="toolbar"><button id="accAdd" class="tool">＋ Añadir fila</button></div>
         <div class="table-wrap full">
           <div class="xscroll"><div class="table-inner">
             <div class="va-head acc-head">
@@ -179,11 +164,12 @@ body.locked #gate{pointer-events:auto;filter:none}
           </div></div>
         </div>
 
+        <!-- Leyenda de paquete -->
+        <div class="legend">Paquete: <strong>1</strong> Tráfico · <strong>2</strong> Formación y comercial · <strong>3</strong> Equipo</div>
+
         <!-- FORMACIÓN -->
-        <h3 style="margin:.4rem 0 .15rem;font-size:11.6px">FORMACIÓN</h3>
-        <div class="toolbar">
-          <button id="frmAdd" class="tool" title="Añadir fila">＋ Añadir fila</button>
-        </div>
+        <h3 style="margin:.35rem 0 .12rem;font-size:11.8px">FORMACIÓN</h3>
+        <div class="toolbar"><button id="frmAdd" class="tool">＋ Añadir fila</button></div>
         <div class="table-wrap">
           <div class="xscroll"><div class="table-inner">
             <div class="va-head frm-head">
@@ -193,24 +179,16 @@ body.locked #gate{pointer-events:auto;filter:none}
         </div>
 
         <!-- PROCESOS -->
-        <h3 style="margin:.4rem 0 .15rem;font-size:11.6px">PROCESOS</h3>
-        <div class="toolbar">
-          <button id="procAdd" class="tool" title="Añadir fila">＋ Añadir fila</button>
-        </div>
+        <h3 style="margin:.35rem 0 .12rem;font-size:11.8px">PROCESOS</h3>
+        <div class="toolbar"><button id="procAdd" class="tool">＋ Añadir fila</button></div>
         <div class="table-wrap">
           <div class="xscroll"><div class="table-inner">
             <div class="va-head proc-head">
-              <div>#</div><div>Fecha 1ª visita</div><div>Puntuación procesos (%)</div><div>HIT</div><div>Pruebas RT</div><div>Colaboraciones locales</div><div>Observaciones</div><div>Adjunto</div><div></div>
+              <div>#</div><div>Fecha de visita</div><div>Puntuación procesos (%)</div><div>HIT</div><div>Pruebas RT</div><div>% Pruebas</div><div>% Venta</div><div>Colaboraciones locales</div><div>Observaciones</div><div>Adjunto</div><div></div>
             </div><div id="procesosRows"></div>
           </div></div>
         </div>
       </div>
-
-      <!-- Otros paneles (se mantienen) -->
-      <div id="detVisitas" style="display:none"></div>
-      <div id="detFormaciones" style="display:none"></div>
-      <div id="detTele" style="display:none"></div>
-      <div id="detEquipos" style="display:none"></div>
     </section>
   </section>
 </main>
@@ -231,7 +209,7 @@ body.locked #gate{pointer-events:auto;filter:none}
 
 <script>
 /* ===== CONFIG ===== */
-const APP_VERSION='v8.2-Centros';
+const APP_VERSION='v8.3-Centros';
 const REQUIRE_PIN=true;
 /* SHA-256('4321') */
 const PIN_SHA256='fe2592b42a727e977f055947385b709cc82b16b9a87f88c6abf3900d65d0cdc3';
@@ -248,15 +226,15 @@ let data={
   "CENTROS EXCLUSIVOS":[{nombre:"Reina Mercedes",delegado:"",audiologo:"",tipo:"Franquicia",
     acciones:Array.from({length:12},()=>({fecha:'',paquete:'1',tipo:'Azafata/Buzoneo',derivacion:null,citas:null,venta:null,obs:''})),
     formaciones:Array.from({length:5},()=>({curso:'',realizado:false,aplica:false,obs:''})),
-    procesos:[]}],
+    procesos:Array.from({length:4},()=>({fecha:'',puntuacion:null,hit:false,rt:false,pruebas:null,venta:null,colab:'',obs:'',adjunto:null}))}],
   "CENTROS FLOP":[]
 };
-const LOCAL_KEY='audioseguimiento_centros_v82';
+const LOCAL_KEY='audioseguimiento_centros_v83';
 function localLoad(){try{const r=localStorage.getItem(LOCAL_KEY);if(r) data=JSON.parse(r);}catch(e){}}
 function localSave(){try{localStorage.setItem(LOCAL_KEY,JSON.stringify(data));}catch(e){}}
-function stamp(txt){$('#stamp').textContent='v8.2 · '+txt}
+function stamp(txt){$('#stamp').textContent='v8.3 · '+txt}
 
-/* ===== Sidebar simple (solo centros para este fichero) ===== */
+/* ===== Sidebar ===== */
 const SECTIONS=["CENTROS EXCLUSIVOS","CENTROS FLOP"];
 function renderLeft(){
   SECTIONS.forEach(name=>{
@@ -271,7 +249,7 @@ function renderLeft(){
       div.querySelector('[data-role="del"]').onclick=(e)=>{e.stopPropagation();if(confirm('¿Eliminar?')){data[name].splice(i,1);renderLeft();renderDetailBlank();localSave();}};
       list.appendChild(div);
     });
-    box.querySelector('[data-act="add"]').onclick=()=>{data[name].push({nombre:'(nuevo centro)',delegado:'',audiologo:'',tipo:'Franquicia',acciones:Array.from({length:12},()=>({fecha:'',paquete:'1',tipo:'Azafata/Buzoneo',derivacion:null,citas:null,venta:null,obs:''})),formaciones:Array.from({length:5},()=>({curso:'',realizado:false,aplica:false,obs:''})),procesos:[]});renderLeft();localSave();}
+    box.querySelector('[data-act="add"]').onclick=()=>{data[name].push({nombre:'(nuevo centro)',delegado:'',audiologo:'',tipo:'Franquicia',acciones:Array.from({length:12},()=>({fecha:'',paquete:'1',tipo:'Azafata/Buzoneo',derivacion:null,citas:null,venta:null,obs:''})),formaciones:Array.from({length:5},()=>({curso:'',realizado:false,aplica:false,obs:''})),procesos:Array.from({length:4},()=>({fecha:'',puntuacion:null,hit:false,rt:false,pruebas:null,venta:null,colab:'',obs:'',adjunto:null}))});renderLeft();localSave();}
     box.querySelector('[data-act="toggle"]').onclick=()=>{list.style.display=list.style.display==='none'?'':'none'; if(list.style.display==='none'){renderDetailBlank();}};
   });
 }
@@ -342,7 +320,7 @@ $('#accionesRows').addEventListener('input',e=>{
   localSave();
 });
 
-/* ===== FORMACIÓN (5 filas mínimas) ===== */
+/* ===== FORMACIÓN (mínimo 5) ===== */
 function ensureMin5(arr){while(arr.length<5) arr.push({curso:'',realizado:false,aplica:false,obs:''});}
 function renderFormacion(){
   const it=cur(); it.formaciones=it.formaciones||[]; ensureMin5(it.formaciones);
@@ -368,18 +346,22 @@ $('#formacionesRows').addEventListener('input',e=>{
 });
 
 /* ===== PROCESOS ===== */
-function procScoreClass(v){const n=Number(v);if(!Number.isFinite(n))return'';return n>=95?'good':'bad';}
+function score95(v){const n=Number(v);if(!Number.isFinite(n))return'';return n>=95?'good':'bad';}
+function score80(v){const n=Number(v);if(!Number.isFinite(n))return'';return n>=80?'good':'bad';}
+function ensureMin4(arr){while(arr.length<4) arr.push({fecha:'',puntuacion:null,hit:false,rt:false,pruebas:null,venta:null,colab:'',obs:'',adjunto:null});}
 function renderProcesos(){
-  const it=cur(); it.procesos=it.procesos||[];
+  const it=cur(); it.procesos=it.procesos||[]; ensureMin4(it.procesos);
   const cont=$('#procesosRows'); cont.innerHTML='';
   it.procesos.forEach((r,i)=>{
     const row=document.createElement('div'); row.className='proc-row va-row';
     const hasAdj = r.adjunto && r.adjunto.data;
     row.innerHTML=`<div>${i+1}</div>
       <input type="date" data-i="${i}" data-k="fecha" value="${r.fecha||''}">
-      <input class="pscore ${procScoreClass(r.puntuacion)}" type="number" min="0" max="100" step="1" data-i="${i}" data-k="puntuacion" value="${r.puntuacion??''}">
+      <input class="pscore ${score95(r.puntuacion)}" type="number" min="0" max="100" step="1" data-i="${i}" data-k="puntuacion" value="${r.puntuacion??''}">
       <div class="hitcell ${r.hit?'on':''}"><input type="checkbox" data-i="${i}" data-k="hit" ${r.hit?'checked':''}></div>
       <input type="checkbox" data-i="${i}" data-k="rt" ${r.rt?'checked':''}>
+      <input class="conv ${score80(r.pruebas)}" type="number" min="0" max="100" step="1" data-i="${i}" data-k="pruebas" value="${r.pruebas??''}">
+      <input class="conv ${score80(r.venta)}" type="number" min="0" max="100" step="1" data-i="${i}" data-k="venta" value="${r.venta??''}">
       <input data-i="${i}" data-k="colab" value="${esc(r.colab||'')}">
       <input data-i="${i}" data-k="obs" value="${esc(r.obs||'')}">
       <span>
@@ -391,13 +373,11 @@ function renderProcesos(){
     cont.appendChild(row);
   });
 }
-$('#procAdd').onclick=()=>{cur().procesos.push({fecha:'',puntuacion:null,hit:false,rt:false,colab:'',obs:'',adjunto:null});renderProcesos();localSave();}
+$('#procAdd').onclick=()=>{cur().procesos.push({fecha:'',puntuacion:null,hit:false,rt:false,pruebas:null,venta:null,colab:'',obs:'',adjunto:null});renderProcesos();localSave();}
 $('#procesosRows').addEventListener('click',e=>{
   const d=e.target.dataset;
   if(d.procDel!=null){cur().procesos.splice(+d.procDel,1);renderProcesos();localSave();return;}
-  if(d.adj!=null){
-    const i=+d.adj; const input=$(`[data-file="${i}"]`,$('#procesosRows')); input.click();
-  }
+  if(d.adj!=null){const i=+d.adj; const input=$(`[data-file="${i}"]`,$('#procesosRows')); input.click();}
 });
 $('#procesosRows').addEventListener('change',e=>{
   const i=e.target.dataset.file; if(i==null) return;
@@ -410,8 +390,11 @@ $('#procesosRows').addEventListener('input',e=>{
   const i=e.target.dataset.i,k=e.target.dataset.k;if(i==null||!k)return;
   const r=cur().procesos[+i];
   if(e.target.type==='checkbox'){ r[k]=e.target.checked; if(k==='hit'){const cell=e.target.closest('.hitcell'); if(cell) cell.classList.toggle('on',e.target.checked);} }
-  else if(e.target.type==='number'){ r[k]=e.target.value===''?null:Number(e.target.value); if(k==='puntuacion'){e.target.className='pscore '+procScoreClass(r[k]);} }
-  else r[k]=e.target.value;
+  else if(e.target.type==='number'){
+    r[k]=e.target.value===''?null:Number(e.target.value);
+    if(k==='puntuacion'){e.target.className='pscore '+score95(r[k]);}
+    if(k==='pruebas'||k==='venta'){e.target.className='conv '+score80(r[k]);}
+  } else r[k]=e.target.value;
   localSave();
 });
 
