@@ -8,112 +8,110 @@
 <style>
 :root{
   --rojo:#c82727; --rojo-osc:#a71f1f;
-  --bg:#f6f7fb; --card:#fff; --line:#e6e7ee; --shadow:0 6px 16px rgba(0,0,0,.06);
+  --bg:#f6f7fb; --line:#e6e7ee; --shadow:0 4px 14px rgba(0,0,0,.06);
   --col-ex:#fde2e4; --col-fl:#e2f0cb; --col-va:#cde7f0; --col-fm:#f9e5c9; --col-ta:#eadcf8; --col-eq:#e8f1ff;
-  --fs:12.5px; --fs-sm:11px; --fs-xs:10.5px;
+  --fs:11.5px; --fs-sm:10.3px;
 }
 *{box-sizing:border-box}
 html,body{height:100%}
 body{
   margin:0;background:var(--bg);
   font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;color:#222;
-  font-size:var(--fs); line-height:1.28; overflow-x:auto;
+  font-size:var(--fs); line-height:1.18; overflow-x:auto;
 }
+button,input,select{font-family:inherit}
 
-/* Bloqueo global hasta PIN */
-body.locked header, body.locked main { pointer-events:none; user-select:none; filter:blur(.9px) }
+/* ===== Bloqueo por PIN ===== */
+body.locked header, body.locked main { pointer-events:none; user-select:none; filter:blur(.8px) }
 body.locked #gate { pointer-events:auto; filter:none }
 
-/* Topbar compacta */
-.topbar{position:sticky;top:0;z-index:80;width:100%;
+/* ===== Topbar roja (a todo ancho exacto del workspace) ===== */
+.topbar{position:sticky;top:0;z-index:99;width:100%;
   background:linear-gradient(180deg,var(--rojo),var(--rojo-osc));color:#fff;box-shadow:var(--shadow)}
-.bar-inner{margin:0;padding:.5rem 8px;display:flex;align-items:center;gap:.4rem}
-.brand{font-weight:900;letter-spacing:.3px;font-size:12.5px}
+.bar-inner{margin:0;padding:.45rem 6px;display:flex;align-items:center;gap:.35rem}
+.brand{font-weight:900;letter-spacing:.28px;font-size:11.8px}
 .spacer{flex:1}
-.btn{border:0;border-radius:9px;padding:.35rem .55rem;cursor:pointer;box-shadow:var(--shadow);font-weight:800;font-size:11.5px}
+.btn{border:0;border-radius:8px;padding:.28rem .5rem;cursor:pointer;box-shadow:var(--shadow);font-weight:800;font-size:10.8px}
 .btn-lite{background:#fff;color:#861212}
 .btn-save{background:#fff;color:#7b0e0e}
 .btn-ghost{background:transparent;border:1px solid #ffffff66;color:#fff}
-.pill{display:inline-flex;gap:.3rem;align-items:center;border:1px solid #ffffff2f;background:#ffffff1c;padding:.18rem .45rem;border-radius:999px;white-space:nowrap;font-size:11px}
+.pill{display:inline-flex;gap:.28rem;align-items:center;border:1px solid #ffffff2f;background:#ffffff1c;padding:.15rem .42rem;border-radius:999px;white-space:nowrap;font-size:10.6px}
 
-/* Layout izquierda–derecha compacto */
-.main{display:grid;grid-template-columns:220px minmax(0,1fr);gap:8px;padding:8px}
+/* ===== Layout: sin márgenes, sidebar estrecha ===== */
+.main{display:grid;grid-template-columns:190px minmax(0,1fr);gap:6px;padding:0 0 6px 0}
 @media (max-width:1100px){ .main{grid-template-columns:1fr} }
 
-/* Sidebar compacta */
-.sidebar{display:flex;flex-direction:column;gap:8px;min-height:64vh}
-.side-card{border:1px solid var(--line);border-radius:12px;background:#fff;box-shadow:var(--shadow);display:flex;flex-direction:column;min-height:108px}
-.side-head{display:flex;justify-content:space-between;align-items:center;padding:.42rem .5rem;font-weight:900;border-bottom:1px solid var(--line);font-size:12px}
-.side-list{padding:.35rem .4rem .5rem;overflow:auto;max-height:190px}
-.side-btn{width:28px;height:24px;border-radius:7px;border:1px solid var(--line);background:#fff;cursor:pointer;font-size:11px}
-.item{display:flex;justify-content:space-between;gap:.45rem;align-items:center;background:#fff;border:1px solid var(--line);border-radius:9px;padding:.32rem .4rem;margin:.26rem 0;user-select:none}
-.item .name{font-weight:750;font-size:12px}
-.item small{font-size:10.8px;opacity:.82}
+/* Sidebar */
+.sidebar{display:flex;flex-direction:column;gap:6px;min-height:64vh}
+.side-card{border:1px solid var(--line);border-radius:10px;background:#fff;box-shadow:var(--shadow);display:flex;flex-direction:column}
+.side-head{display:flex;justify-content:space-between;align-items:center;padding:.34rem .42rem;font-weight:900;border-bottom:1px solid var(--line);font-size:11.2px}
+.side-list{padding:.3rem .35rem .4rem;overflow:auto;max-height:180px}
+.side-btn{width:26px;height:22px;border-radius:6px;border:1px solid var(--line);background:#fff;cursor:pointer;font-size:10.5px}
+.item{display:flex;justify-content:space-between;gap:.35rem;align-items:center;background:#fff;border:1px solid var(--line);border-radius:8px;padding:.28rem .34rem;margin:.22rem 0}
+.item .name{font-weight:750;font-size:11.2px}
+.item small{font-size:10.2px;opacity:.82}
 .item.selected{outline:2px solid #a1c4fd}
-.acts{display:flex;gap:.18rem}
-.ico-btn{min-width:22px;height:22px;border-radius:6px;border:1px solid #e3e3ea;background:#fff;cursor:pointer;font-size:11px}
-.ico-btn:hover{background:#fafafa}
+.acts{display:flex;gap:.14rem}
+.ico-btn{min-width:20px;height:20px;border-radius:5px;border:1px solid #e3e3ea;background:#fff;cursor:pointer;font-size:10px}
 
-/* Colores cabeceras */
+/* Colores */
 .bg-ex{background:var(--col-ex)} .bg-fl{background:var(--col-fl)} .bg-va{background:var(--col-va)}
 .bg-fm{background:var(--col-fm)} .bg-ta{background:var(--col-ta)} .bg-eq{background:var(--col-eq)}
 
-/* Detalle (derecha) MUY compacto */
-.detail{padding:.5rem .55rem .6rem;border-radius:12px;border:1px solid var(--line);background:#fff;min-height:66vh;box-shadow:var(--shadow)}
-.detail h2{margin:.02rem 0 .22rem 0;font-size:14px}
-.badge{padding:.08rem .38rem;border-radius:999px;background:#00000010;font-size:10.8px}
-.save-band{display:flex;justify-content:center;margin:.12rem 0 .45rem}
-.save-band.bottom{margin:.45rem 0 .12rem}
-.save-big{font-size:11.5px;padding:.42rem .7rem;border-radius:999px;background:#1f6feb;color:#fff;border:0;box-shadow:var(--shadow);cursor:pointer}
+/* ===== Detalle sin márgenes, súper compacto ===== */
+.detail{padding:.35rem .4rem;border-radius:8px;border:1px solid var(--line);background:#fff;min-height:66vh;box-shadow:var(--shadow)}
+.header-row{display:flex;align-items:center;gap:.4rem;margin-bottom:.25rem}
+.header-row h2{margin:0;font-size:13px}
+.badge{padding:.06rem .36rem;border-radius:999px;background:#00000010;font-size:10.5px}
+.header-row .spacer{flex:1}
+.save-cta{display:flex;gap:.35rem;align-items:center}
+.save-small{font-size:10.8px;padding:.32rem .58rem;border-radius:999px;background:#1f6feb;color:#fff;border:0;box-shadow:var(--shadow);cursor:pointer}
 
-/* Formularios / filas */
-.row{display:flex;gap:.45rem;flex-wrap:wrap;align-items:flex-end}
-.field{display:grid;gap:.18rem;min-width:150px;flex:1;margin:.22rem 0}
-.field label{font-weight:700;opacity:.9;font-size:11.2px}
-.field input,.field select{border:1px solid var(--line);border-radius:8px;padding:.24rem .38rem;font-size:var(--fs-sm);background:#fff;outline:none}
+/* Formularios / Inputs */
+.row{display:flex;gap:.35rem;flex-wrap:wrap;align-items:flex-end}
+.field{display:grid;gap:.14rem;min-width:140px;flex:1;margin:.18rem 0}
+.field label{font-weight:700;opacity:.9;font-size:10.6px}
+.field input,.field select{border:1px solid var(--line);border-radius:7px;padding:.2rem .3rem;font-size:var(--fs-sm);background:#fff;outline:none}
 
-/* Tablas densas + scroll horizontal (súper compactas) */
-.table-wrap{border:1px solid var(--line);border-radius:9px;background:#fff;box-shadow:var(--shadow);padding:.28rem}
-.xscroll{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;padding-bottom:6px;min-height:16px}
-.table-inner{display:block;width:max-content;min-width:940px}
-.table-inner input,.table-inner select{padding:.2rem .3rem;font-size:var(--fs-sm)}
-.va-head,.va-row{display:grid;gap:.15rem;align-items:center;margin:.05rem .05rem}
-.scroll{max-height:60vh;overflow:auto;padding-right:.2rem}
+/* Tablas “Excel” MUY compactas */
+.table-wrap{border:1px solid var(--line);border-radius:8px;background:#fff;box-shadow:var(--shadow);padding:.22rem;margin-top:.22rem}
+.xscroll{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;padding-bottom:4px}
+.table-inner{display:block;width:max-content;min-width:820px}
+.table-inner input,.table-inner select{padding:.16rem .26rem;font-size:var(--fs-sm)}
+.va-head,.va-row{display:grid;gap:.12rem;align-items:center;margin:.04rem}
+.scroll{max-height:62vh;overflow:auto}
 
-/* Grids (anchos más estrechos) */
-.va-cols{grid-template-columns:42px .9fr 105px 105px 118px 105px 85px 56px 118px 118px}
-.fm-head,.fm-row{grid-template-columns:42px 88px 180px 118px 86px 98px 98px 98px 98px 86px 86px}
-.ta-head,.ta-row{grid-template-columns:42px 1fr 116px 108px 132px 92px 92px 100px 98px 98px}
+/* Grids estrechos */
+.va-cols{grid-template-columns:36px .8fr 90px 90px 100px 90px 70px 46px 100px 100px}
+.fm-head,.fm-row{grid-template-columns:36px 78px 160px 106px 78px 90px 90px 90px 90px 78px 78px}
+.ta-head,.ta-row{grid-template-columns:36px 1fr 106px 98px 120px 86px 86px 92px 90px 90px}
 
-/* Score / conversión */
+/* Equipos (estrecho) */
+.eq-cols{grid-template-columns:36px 120px 98px 110px 94px 120px 58px 120px 58px 120px 58px}
+.eq-head,.eq-row{display:grid;gap:.12rem;align-items:center;margin:.04rem}
+
+/* Colores % y HIT */
 .pscore{border:2px solid transparent}
 .pscore.good{background:#eaf9f0;border-color:#2ecc71aa}
 .pscore.bad{background:#ffe8e8;border-color:#e74c3caa}
 .conv{border:2px solid transparent}
 .conv.good{background:#eaf9f0;border-color:rgba(46,204,113,.6)}
 .conv.bad{background:#fff4e1;border-color:rgba(243,156,18,.7)}
-
-/* HIT rojo/verde */
-.hitcell{background:#ffe5e5;border:1px solid #f5c2c2;border-radius:6px;display:flex;justify-content:center;align-items:center;padding:.1rem}
+.hitcell{background:#ffe5e5;border:1px solid #f5c2c2;border-radius:5px;display:flex;justify-content:center;align-items:center;padding:.06rem}
 .hitcell.on{background:#e6f6ed;border-color:#bfe7cc}
 
 /* Resumen Visitas */
-.summary{display:flex;align-items:center;gap:.6rem;margin:.2rem 0 .4rem 0;font-size:11.5px}
-.progress{flex:1;height:6px;background:#e9ecef;border-radius:999px;overflow:hidden}
+.summary{display:flex;align-items:center;gap:.5rem;margin:.14rem 0 .3rem 0;font-size:10.8px}
+.progress{flex:1;height:5px;background:#e9ecef;border-radius:999px;overflow:hidden}
 .progress>div{height:100%;background:#1f6feb;width:0%}
 
-/* PIN overlay negro */
+/* PIN overlay */
 .gate{position:fixed;inset:0;background:#000;display:flex;align-items:center;justify-content:center;z-index:1000}
-.gate-card{background:#111;color:#fff;border-radius:12px;box-shadow:var(--shadow);padding:18px 16px;min-width:280px;border:1px solid #2a2a2a}
-.gate-card h3{margin:.15rem 0 .6rem 0}
-.pin{letter-spacing:.35rem;font-size:1rem;text-align:center;background:#000;color:#fff;border:1px solid #444;border-radius:8px;padding:.45rem}
-.subtle{opacity:.8;font-size:.86rem}
-
-/* Readonly visual */
-.readonly .detail input,
-.readonly .detail select,
-.readonly .detail .ico-btn,
-.readonly .detail .save-big { pointer-events:none; opacity:.6 }
+.gate-card{background:#111;color:#fff;border-radius:10px;box-shadow:var(--shadow);padding:16px 14px;min-width:260px;border:1px solid #2a2a2a}
+.gate-card h3{margin:.1rem 0 .5rem 0}
+.pin{letter-spacing:.3rem;font-size:.95rem;text-align:center;background:#000;color:#fff;border:1px solid #444;border-radius:7px;padding:.38rem}
+.subtle{opacity:.8;font-size:.82rem}
+.readonly .detail *{pointer-events:none;opacity:.6}
 </style>
 </head>
 <body class="locked">
@@ -125,7 +123,7 @@ body.locked #gate { pointer-events:auto; filter:none }
     <button id="btnFetch" class="btn btn-lite" title="Leer de la nube o local (no guarda)">Actualizar (nube)</button>
     <button id="btnSaveTop" class="btn btn-save" title="Guardar en la nube o local">Guardar (nube)</button>
     <button id="btnReset" class="btn btn-ghost" title="Descartar cambios locales y volver al último leído">Resetear</button>
-    <span id="stamp" class="pill">v7.9-Micro · Cargando…</span>
+    <span id="stamp" class="pill">v8.0-MicroTight · Cargando…</span>
   </div>
 </header>
 
@@ -135,46 +133,49 @@ body.locked #gate { pointer-events:auto; filter:none }
     <aside class="sidebar">
       <div class="side-card bg-ex" data-section="CENTROS EXCLUSIVOS">
         <div class="side-head"><div>📒 CENTROS EXCLUSIVOS</div>
-          <div><button class="side-btn" data-act="toggle" title="Mostrar/ocultar">▾</button><button class="side-btn" data-act="add" title="Añadir">＋</button></div>
+          <div><button class="side-btn" data-act="toggle">▾</button><button class="side-btn" data-act="add">＋</button></div>
         </div><div class="side-list"></div>
       </div>
       <div class="side-card bg-fl" data-section="CENTROS FLOP">
         <div class="side-head"><div>📒 CENTROS FLOP</div>
-          <div><button class="side-btn" data-act="toggle" title="Mostrar/ocultar">▾</button><button class="side-btn" data-act="add" title="Añadir">＋</button></div>
+          <div><button class="side-btn" data-act="toggle">▾</button><button class="side-btn" data-act="add">＋</button></div>
         </div><div class="side-list"></div>
       </div>
       <div class="side-card bg-va" data-section="VISITAS AUDIO">
         <div class="side-head"><div>📋 VISITAS AUDIO</div>
-          <div><button class="side-btn" data-act="toggle" title="Mostrar/ocultar">▾</button><button class="side-btn" data-act="add" title="Añadir">＋</button></div>
+          <div><button class="side-btn" data-act="toggle">▾</button><button class="side-btn" data-act="add">＋</button></div>
         </div><div class="side-list"></div>
       </div>
       <div class="side-card bg-fm" data-section="FORMACIONES Y MENTORING">
         <div class="side-head"><div>🎓 FORMACIONES Y MENTORING</div>
-          <div><button class="side-btn" data-act="toggle" title="Mostrar/ocultar">▾</button><button class="side-btn" data-act="add" title="Añadir">＋</button></div>
+          <div><button class="side-btn" data-act="toggle">▾</button><button class="side-btn" data-act="add">＋</button></div>
         </div><div class="side-list"></div>
       </div>
       <div class="side-card bg-ta" data-section="TELEAUDIOLOGIA">
         <div class="side-head"><div>📡 TELEAUDIOLOGIA</div>
-          <div><button class="side-btn" data-act="toggle" title="Mostrar/ocultar">▾</button><button class="side-btn" data-act="add" title="Añadir">＋</button></div>
+          <div><button class="side-btn" data-act="toggle">▾</button><button class="side-btn" data-act="add">＋</button></div>
         </div><div class="side-list"></div>
       </div>
       <div class="side-card bg-eq" data-section="EQUIPOS">
         <div class="side-head"><div>🧰 EQUIPOS</div>
-          <div><button class="side-btn" data-act="toggle" title="Mostrar/ocultar">▾</button><button class="side-btn" data-act="add" title="Añadir">＋</button></div>
+          <div><button class="side-btn" data-act="toggle">▾</button><button class="side-btn" data-act="add">＋</button></div>
         </div><div class="side-list"></div>
       </div>
     </aside>
 
     <!-- ====== DETALLE ====== -->
-    <section class="detail card" id="detail">
-      <div style="display:flex;align-items:center;gap:.4rem">
-        <h2 id="detTitle">Detalle</h2><span id="detTag" class="badge">—</span>
+    <section class="detail" id="detail">
+      <div class="header-row">
+        <h2>Detalle</h2><span id="detTag" class="badge">—</span>
+        <div class="spacer"></div>
+        <div class="save-cta">
+          <button id="saveBtnActive" class="save-small" title="Guardar cambios del panel">💾 Guardar</button>
+        </div>
       </div>
-      <p id="detHint" style="opacity:.7">Selecciona en la izquierda (doble clic o ✏️) o crea con ＋.</p>
+      <p id="detHint" style="opacity:.7;margin:.1rem 0 .2rem">Selecciona en la izquierda (doble clic o ✏️) o crea con ＋.</p>
 
       <!-- CENTROS -->
       <div id="detCentro" style="display:none">
-        <div class="save-band"><button id="saveCentroTop" class="save-big" title="Guardar cambios del centro">💾 GUARDAR CENTRO</button></div>
         <div class="row">
           <div class="field"><label>Nombre</label><input id="cNombre"></div>
           <div class="field"><label>Delegado</label><input id="cDelegado"></div>
@@ -185,81 +186,71 @@ body.locked #gate { pointer-events:auto; filter:none }
         <!-- Acciones -->
         <div class="table-wrap">
           <div class="xscroll"><div class="table-inner">
-            <div class="va-head" style="grid-template-columns:42px 96px 1fr 86px 86px 86px 108px 40px">
+            <div class="va-head" style="grid-template-columns:36px 90px 1fr 80px 80px 80px 96px 36px">
               <div>#</div><div>Fecha</div><div>Tipo de acción</div><div>Paquete</div><div>Derivación</div><div>Citas</div><div>Venta</div><div></div>
             </div><div id="accionesRows"></div>
           </div></div>
         </div>
 
-        <!-- Formaciones -->
+        <!-- Formaciones relevantes -->
         <div class="table-wrap">
           <div class="xscroll"><div class="table-inner">
-            <div class="va-head" style="grid-template-columns:42px 1.05fr .58fr .58fr 1.1fr 40px">
+            <div class="va-head" style="grid-template-columns:36px 1.02fr .55fr .55fr 1.05fr 36px">
               <div>#</div><div>Curso</div><div>Realizado</div><div>Aplica</div><div>Observaciones</div><div></div>
             </div><div id="formacionesRows"></div>
           </div></div>
         </div>
 
-        <!-- Procesos -->
+        <!-- Control de procesos -->
         <div class="table-wrap">
           <div class="xscroll"><div class="table-inner">
-            <div class="va-head" style="grid-template-columns:42px 168px 86px 120px 40px">
+            <div class="va-head" style="grid-template-columns:36px 154px 80px 110px 36px">
               <div>#</div><div>Puntuación checklist (0–100 %)</div><div>HIT</div><div>Colaboraciones</div><div></div>
             </div><div id="procesosRows"></div>
           </div></div>
         </div>
-        <div class="save-band bottom"><button id="saveCentroBottom" class="save-big" title="Guardar cambios del centro">💾 GUARDAR CENTRO</button></div>
       </div>
 
       <!-- VISITAS -->
       <div id="detVisitas" style="display:none">
-        <div class="save-band"><button id="saveVisitasTop" class="save-big" title="Guardar tabla de visitas">💾 GUARDAR VISITAS</button></div>
-
         <div class="summary">
           <div id="vaSummaryTxt">Centros visitados: 0 / 0</div>
           <div class="progress"><div id="vaProg"></div></div>
         </div>
-
         <div class="row">
           <div class="field"><label>Rol</label><select id="vaRol"><option>Delegado audio</option><option>Responsable AAR</option></select></div>
           <div class="field"><label>Nombre</label><input id="vaResp" placeholder="Nombre"></div>
           <div class="field"><label>Buscar centro</label><input id="vaSearch" placeholder="Filtrar…"></div>
         </div>
-        <div id="vaTabs" style="margin:.12rem 0 .32rem 0"></div>
-
+        <div id="vaTabs" style="margin:.08rem 0 .22rem 0"></div>
         <div class="table-wrap">
           <div class="xscroll"><div class="table-inner">
             <div class="va-head va-cols">
-              <div>#</div><div>Centro</div><div>Delegado</div><div>Audiólogo</div><div>Sucursal/Franquicia</div><div>Fecha visita</div><div>Puntuación (%)</div><div>HIT</div><div>% Conversión prueba</div><div>% Conversión venta</div>
+              <div>#</div><div>Centro</div><div>Delegado</div><div>Audiólogo</div><div>Sucursal/Franquicia</div><div>Fecha visita</div><div>Puntuación (%)</div><div>HIT</div><div>% Conv. prueba</div><div>% Conv. venta</div>
             </div><div id="vaRows" class="scroll"></div>
           </div></div>
         </div>
-        <div class="save-band bottom"><button id="saveVisitasBottom" class="save-big" title="Guardar tabla de visitas">💾 GUARDAR VISITAS</button></div>
       </div>
 
       <!-- FORMACIONES -->
       <div id="detFormaciones" style="display:none">
-        <div class="save-band"><button id="saveFMTop" class="save-big" title="Guardar tabla de formaciones">💾 GUARDAR FORMACIONES</button></div>
         <div class="row">
           <div class="field"><label>Delegado regional</label><input id="fmDelegado"></div>
           <div class="field"><label>Buscar</label><input id="fmSearch" placeholder="Filtrar…"></div>
         </div>
-
         <div class="table-wrap">
           <div class="xscroll"><div class="table-inner">
             <div class="va-head fm-head">
               <div>#</div><div>Fecha</div><div>Tema</div><div>Audiólogo</div>
-              <div>Duración (semanas)</div><div>% Prueba inicial</div><div>% Venta inicial</div>
+              <div>Duración (sem.)</div><div>% Prueba ini</div><div>% Venta ini</div>
               <div>% Prueba 3m</div><div>% Venta 3m</div><div>Evo. prueba</div><div>Evo. venta</div>
             </div><div id="fmRows" class="scroll"></div>
           </div></div>
         </div>
-        <div class="save-band bottom"><button id="saveFMBottom" class="save-big" title="Guardar tabla de formaciones">💾 GUARDAR FORMACIONES</button></div>
       </div>
 
       <!-- TELEAUDIOLOGIA -->
       <div id="detTele" style="display:none">
-        <div class="save-band"><button id="saveTATop" class="save-big" title="Guardar tabla de teleaudiología">💾 GUARDAR TELE</button></div>
         <div class="row">
           <div class="field"><label>Buscar</label><input id="taSearch" placeholder="Centro o persona…"></div>
           <div class="field"><label>Persona</label><select id="taPerson"><option value="">Todos</option></select></div>
@@ -271,37 +262,41 @@ body.locked #gate { pointer-events:auto; filter:none }
             </div><div id="taRows" class="scroll"></div>
           </div></div>
         </div>
-        <div class="save-band bottom"><button id="saveTABottom" class="save-big" title="Guardar tabla de teleaudiología">💾 GUARDAR TELE</button></div>
       </div>
 
       <!-- EQUIPOS -->
       <div id="detEquipos" style="display:none">
-        <div class="save-band"><button id="saveEQTop" class="save-big" title="Guardar inventario de equipos">💾 GUARDAR EQUIPOS</button></div>
         <div class="row">
           <div class="field"><label>Buscar</label><input id="eqSearch" placeholder="Equipo, serie, centro o persona…"></div>
           <div class="field"><label>&nbsp;</label>
-            <div style="display:flex;gap:.35rem"><button id="btnAddParCols" class="btn" title="Añadir columnas Centro/Sede">＋ Añadir par</button><button id="btnAddFila" class="btn" title="Añadir fila">＋ Añadir fila</button></div>
+            <div style="display:flex;gap:.3rem"><button id="btnAddParCols" class="btn" title="Añadir par Centro/Sede">＋ Añadir par</button><button id="btnAddFila" class="btn" title="Añadir fila">＋ Añadir fila</button></div>
           </div>
         </div>
-        <div class="table-wrap"><div class="xscroll"><div id="eqTable" class="table-inner"></div></div></div>
-        <div class="save-band bottom"><button id="saveEQBottom" class="save-big" title="Guardar inventario de equipos">💾 GUARDAR EQUIPOS</button></div>
+        <div class="table-wrap">
+          <div class="xscroll"><div class="table-inner">
+            <div class="eq-head eq-cols">
+              <div>#</div><div>Equipo</div><div>Nº serie</div><div>Persona que envía</div><div>Fecha</div>
+              <div>Centro 1</div><div>Sede 1</div><div>Centro 2</div><div>Sede 2</div><div>Centro 3</div><div>Sede 3</div>
+            </div><div id="eqBody" class="scroll"></div>
+          </div></div>
+        </div>
       </div>
 
     </section>
   </section>
 </main>
 
-<!-- PIN overlay -->
+<!-- PIN -->
 <div id="gate" class="gate" aria-modal="true" role="dialog">
   <div class="gate-card">
     <h3>Acceso</h3>
     <p class="subtle">Introduce el PIN para editar:</p>
-    <input id="pin" class="pin" type="password" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="••••"/>
-    <div style="display:flex;gap:.45rem;margin-top:10px">
-      <button id="enter" class="btn btn-lite" style="flex:1" title="Desbloquear edición">Entrar</button>
-      <button id="cancelPin" class="btn btn-ghost" style="flex:.8" title="Limpiar campo">Limpiar</button>
+    <input id="pin" class="pin" type="password" inputmode="numeric" maxlength="6" placeholder="••••"/>
+    <div style="display:flex;gap:.35rem;margin-top:10px">
+      <button id="enter" class="btn btn-lite" style="flex:1">Entrar</button>
+      <button id="cancelPin" class="btn btn-ghost" style="flex:.8">Limpiar</button>
     </div>
-    <p id="pinMsg" class="subtle" style="color:#ff7b7b;margin:.5rem 0 0 0;display:none">PIN incorrecto</p>
+    <p id="pinMsg" class="subtle" style="color:#ff7b7b;margin:.45rem 0 0 0;display:none">PIN incorrecto</p>
   </div>
 </div>
 
@@ -310,21 +305,21 @@ body.locked #gate { pointer-events:auto; filter:none }
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script>
-/* ======= CONFIG ======= */
-const APP_VERSION='v7.9-Micro';
+/* ===== CONFIG ===== */
+const APP_VERSION='v8.0-MicroTight';
 const REQUIRE_PIN = true;
 /* SHA-256('4321') */
 const PIN_SHA256='fe2592b42a727e977f055947385b709cc82b16b9a87f88c6abf3900d65d0cdc3';
 const DB_PATH  = 'audioseguimiento/v7';
 const firebaseConfig = { apiKey:"", authDomain:"", databaseURL:"", projectId:"", storageBucket:"", messagingSenderId:"", appId:"" };
 
-/* ======= Utils ======= */
+/* ===== Utils ===== */
 const $=(s,r=document)=>r.querySelector(s); const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
 const esc=s=>(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const now=()=>new Date().toLocaleString();
-function toast(msg){ const t=document.createElement('div'); t.textContent=msg; Object.assign(t.style,{position:'fixed',bottom:'12px',left:'50%',transform:'translateX(-50%)',background:'#111',color:'#fff',padding:'7px 10px',borderRadius:'8px',zIndex:90,opacity:'0.95',fontSize:'12px'}); document.body.appendChild(t); setTimeout(()=>t.remove(),1400); }
+function toast(msg){ const t=document.createElement('div'); t.textContent=msg; Object.assign(t.style,{position:'fixed',bottom:'10px',left:'50%',transform:'translateX(-50%)',background:'#111',color:'#fff',padding:'6px 9px',borderRadius:'8px',zIndex:90,opacity:'0.95',fontSize:'11px'}); document.body.appendChild(t); setTimeout(()=>t.remove(),1200); }
 
-/* ======= Estado/Datos ======= */
+/* ===== Estado/Datos ===== */
 let cloud={enabled:false,db:null,ref:null,ready:false}, lastCloud=null;
 let state={selected:{section:null,index:null},vaSheet:0,vaFilter:'',fmFilter:'',taFilter:'',taPerson:'',eqFilter:''};
 
@@ -342,7 +337,7 @@ let data={
   "EQUIPOS":[equiposInit()]
 };
 
-/* ======= Persistencia ======= */
+/* ===== Persistencia ===== */
 const LOCAL_KEY='audioseguimiento_local_v7';
 function localLoad(){ try{const raw=localStorage.getItem(LOCAL_KEY); if(raw){data=JSON.parse(raw);} }catch(e){} }
 function localSave(){ try{localStorage.setItem(LOCAL_KEY,JSON.stringify(data));}catch(e){} }
@@ -370,9 +365,9 @@ function fetchCloudOrLocal(){
   }else{ localLoad(); renderAll(); stamp('Actualizado (local): '+now()); toast('Actualizado local'); }
 }
 function resetLocalView(){ if(cloud.enabled && lastCloud){ data=JSON.parse(JSON.stringify(lastCloud)); toast('Vista: última nube'); } else { localLoad(); toast('Vista: local'); } renderAll(); }
-function stamp(txt){ $('#stamp').textContent='v7.9-Micro · '+txt; }
+function stamp(txt){ $('#stamp').textContent='v8.0-MicroTight · '+txt; }
 
-/* ======= Sidebar ======= */
+/* ===== Sidebar (doble clic edita) ===== */
 const SECTIONS=["CENTROS EXCLUSIVOS","CENTROS FLOP","VISITAS AUDIO","FORMACIONES Y MENTORING","TELEAUDIOLOGIA","EQUIPOS"];
 function renderLeft(){
   SECTIONS.forEach(name=>{
@@ -410,9 +405,12 @@ function renderLeft(){
   });
 }
 
-/* ======= Detalle ======= */
-function renderDetailBlank(){ $('#detHint').style.display='block'; $('#detTag').textContent='—';
-  $('#detCentro').style.display='none'; $('#detVisitas').style.display='none'; $('#detFormaciones').style.display='none'; $('#detTele').style.display='none'; $('#detEquipos').style.display='none'; }
+/* ===== Detalle ===== */
+function renderDetailBlank(){
+  $('#detHint').style.display='block'; $('#detTag').textContent='—';
+  $('#detCentro').style.display='none'; $('#detVisitas').style.display='none';
+  $('#detFormaciones').style.display='none'; $('#detTele').style.display='none'; $('#detEquipos').style.display='none';
+}
 function setTone(s){ const d=$('#detail'); d.style.background = s==="CENTROS EXCLUSIVOS"?'var(--col-ex)':s==="CENTROS FLOP"?'var(--col-fl)':s==="VISITAS AUDIO"?'var(--col-va)':s==="FORMACIONES Y MENTORING"?'var(--col-fm)':s==="TELEAUDIOLOGIA"?'var(--col-ta)':'var(--col-eq)'; }
 function cur(){ return data[state.selected.section]?.[state.selected.index]; }
 function renderDetail(){
@@ -423,6 +421,12 @@ function renderDetail(){
   $('#detFormaciones').style.display=s==='FORMACIONES Y MENTORING'?'block':'none';
   $('#detTele').style.display=s==='TELEAUDIOLOGIA'?'block':'none';
   $('#detEquipos').style.display=s==='EQUIPOS'?'block':'none';
+  // Cambiamos el handler del botón azul según panel
+  $('#saveBtnActive').onclick = s?.includes('CENTROS') ? saveCentro
+    : s==='VISITAS AUDIO' ? saveCloudOrLocal
+    : s==='FORMACIONES Y MENTORING' ? saveCloudOrLocal
+    : s==='TELEAUDIOLOGIA' ? saveCloudOrLocal
+    : s==='EQUIPOS' ? saveCloudOrLocal : ()=>{};
   if(s?.includes('CENTROS')) fillCentro();
   if(s==='VISITAS AUDIO') fillVisitas();
   if(s==='FORMACIONES Y MENTORING') fillFM();
@@ -430,24 +434,23 @@ function renderDetail(){
   if(s==='EQUIPOS') fillEQ();
 }
 
-/* ======= CENTROS ======= */
+/* ===== CENTROS ===== */
 function fillCentro(){ const it=cur(); if(!it) return;
   $('#cNombre').value=it.nombre||''; $('#cDelegado').value=it.delegado||''; $('#cAudiologo').value=it.audiologo||''; $('#cTipo').value=it.tipo||'Franquicia';
   renderAcciones(); renderFormaciones(); renderProcesos();
 }
 function saveCentro(){ const it=cur(); if(!it) return; it.nombre=$('#cNombre').value.trim(); it.delegado=$('#cDelegado').value.trim(); it.audiologo=$('#cAudiologo').value.trim(); it.tipo=$('#cTipo').value; saveCloudOrLocal(); renderLeft(); }
-$('#saveCentroTop').onclick=saveCentro; $('#saveCentroBottom').onclick=saveCentro;
 
 function renderAcciones(){ const it=cur(); it.acciones=it.acciones||[]; const cont=$('#accionesRows'); cont.innerHTML='';
-  it.acciones.forEach((r,i)=>{const row=document.createElement('div'); row.className='va-row'; row.style.gridTemplateColumns='42px 96px 1fr 86px 86px 86px 108px 40px';
+  it.acciones.forEach((r,i)=>{const row=document.createElement('div'); row.className='va-row'; row.style.gridTemplateColumns='36px 90px 1fr 80px 80px 80px 96px 36px';
     row.innerHTML=`<div>${i+1}</div><input type="date" data-i="${i}" data-k="fecha" value="${r.fecha||''}">
     <input data-i="${i}" data-k="tipo" value="${esc(r.tipo||'')}">
     <select data-i="${i}" data-k="paquete"><option ${r.paquete==='1'?'selected':''}>1</option><option ${r.paquete==='2'?'selected':''}>2</option><option ${r.paquete==='3'?'selected':''}>3</option></select>
     <input type="number" min="0" step="1" data-i="${i}" data-k="derivacion" value="${r.derivacion??''}">
     <input type="number" min="0" step="1" data-i="${i}" data-k="citas" value="${r.citas??''}">
     <input type="number" min="0" step="1" data-i="${i}" data-k="venta" value="${r.venta??''}">
-    <button class="ico-btn" data-del="${i}" title="Eliminar fila">🗑️</button>`; cont.appendChild(row);});
-  const add=document.createElement('div'); add.className='va-row'; add.style.gridTemplateColumns='42px 96px 1fr 86px 86px 86px 108px 40px';
+    <button class="ico-btn" data-del="${i}" title="Eliminar">🗑️</button>`; cont.appendChild(row);});
+  const add=document.createElement('div'); add.className='va-row'; add.style.gridTemplateColumns='36px 90px 1fr 80px 80px 80px 96px 36px';
   add.innerHTML=`<div>${it.acciones.length+1}</div><input type="date" data-new="1" data-k="fecha"><input data-new="1" data-k="tipo">
   <select data-new="1" data-k="paquete"><option>1</option><option>2</option><option>3</option></select>
   <input type="number" data-new="1" data-k="derivacion"><input type="number" data-new="1" data-k="citas"><input type="number" data-new="1" data-k="venta"><span></span>`;
@@ -461,9 +464,9 @@ $('#accionesRows').addEventListener('input',e=>{
 });
 
 function renderFormaciones(){ const it=cur(); it.formaciones=it.formaciones||[]; const cont=$('#formacionesRows'); cont.innerHTML='';
-  it.formaciones.forEach((r,i)=>{const row=document.createElement('div'); row.className='va-row'; row.style.gridTemplateColumns='42px 1.05fr .58fr .58fr 1.1fr 40px';
-    row.innerHTML=`<div>${i+1}</div><input data-i="${i}" data-k="curso" value="${esc(r.curso||'')}"><input type="checkbox" data-i="${i}" data-k="realizado" ${r.realizado?'checked':''}><input type="checkbox" data-i="${i}" data-k="aplica" ${r.aplica?'checked':''}><input data-i="${i}" data-k="obs" value="${esc(r.obs||'')}"><button class="ico-btn" data-delf="${i}" title="Eliminar fila">🗑️</button>`; cont.appendChild(row);});
-  const add=document.createElement('div'); add.className='va-row'; add.style.gridTemplateColumns='42px 1.05fr .58fr .58fr 1.1fr 40px';
+  it.formaciones.forEach((r,i)=>{const row=document.createElement('div'); row.className='va-row'; row.style.gridTemplateColumns='36px 1.02fr .55fr .55fr 1.05fr 36px';
+    row.innerHTML=`<div>${i+1}</div><input data-i="${i}" data-k="curso" value="${esc(r.curso||'')}"><input type="checkbox" data-i="${i}" data-k="realizado" ${r.realizado?'checked':''}><input type="checkbox" data-i="${i}" data-k="aplica" ${r.aplica?'checked':''}><input data-i="${i}" data-k="obs" value="${esc(r.obs||'')}"><button class="ico-btn" data-delf="${i}" title="Eliminar">🗑️</button>`; cont.appendChild(row);});
+  const add=document.createElement('div'); add.className='va-row'; add.style.gridTemplateColumns='36px 1.02fr .55fr .55fr 1.05fr 36px';
   add.innerHTML=`<div>${it.formaciones.length+1}</div><input data-new="1" data-k="curso"><input type="checkbox" data-new="1" data-k="realizado"><input type="checkbox" data-new="1" data-k="aplica"><input data-new="1" data-k="obs"><span></span>`; cont.appendChild(add);
 }
 $('#formacionesRows').addEventListener('click',e=>{const i=e.target.dataset.delf; if(i!=null){ if(confirm('¿Eliminar fila?')){cur().formaciones.splice(+i,1); renderFormaciones(); saveCloudOrLocal();}}});
@@ -475,9 +478,9 @@ $('#formacionesRows').addEventListener('input',e=>{
 
 function renderProcesos(){ const it=cur(); it.procesos=it.procesos||[]; const cont=$('#procesosRows'); cont.innerHTML='';
   const color=v=>{const n=Number(v); if(!Number.isFinite(n)) return ''; return n>=95?'good':(n>=85?'':'bad');}
-  it.procesos.forEach((r,i)=>{const row=document.createElement('div'); row.className='va-row'; row.style.gridTemplateColumns='42px 168px 86px 120px 40px';
-    row.innerHTML=`<div>${i+1}</div><input class="pscore ${color(r.puntuacion)}" type="number" min="0" max="100" step="1" data-i="${i}" data-k="puntuacion" value="${r.puntuacion??''}"><input type="checkbox" data-i="${i}" data-k="hit" ${r.hit?'checked':''}><input type="checkbox" data-i="${i}" data-k="colaboraciones" ${r.colaboraciones?'checked':''}><button class="ico-btn" data-delp="${i}" title="Eliminar fila">🗑️</button>`; cont.appendChild(row);});
-  const add=document.createElement('div'); add.className='va-row'; add.style.gridTemplateColumns='42px 168px 86px 120px 40px';
+  it.procesos.forEach((r,i)=>{const row=document.createElement('div'); row.className='va-row'; row.style.gridTemplateColumns='36px 154px 80px 110px 36px';
+    row.innerHTML=`<div>${i+1}</div><input class="pscore ${color(r.puntuacion)}" type="number" min="0" max="100" step="1" data-i="${i}" data-k="puntuacion" value="${r.puntuacion??''}"><input type="checkbox" data-i="${i}" data-k="hit" ${r.hit?'checked':''}><input type="checkbox" data-i="${i}" data-k="colaboraciones" ${r.colaboraciones?'checked':''}><button class="ico-btn" data-delp="${i}" title="Eliminar">🗑️</button>`; cont.appendChild(row);});
+  const add=document.createElement('div'); add.className='va-row'; add.style.gridTemplateColumns='36px 154px 80px 110px 36px';
   add.innerHTML=`<div>${it.procesos.length+1}</div><input class="pscore" type="number" min="0" max="100" step="1" data-new="1" data-k="puntuacion"><input type="checkbox" data-new="1" data-k="hit"><input type="checkbox" data-new="1" data-k="colaboraciones"><span></span>`; cont.appendChild(add);
 }
 $('#procesosRows').addEventListener('click',e=>{const i=e.target.dataset.delp; if(i!=null){ if(confirm('¿Eliminar fila?')){cur().procesos.splice(+i,1); renderProcesos(); saveCloudOrLocal();}}});
@@ -487,7 +490,7 @@ $('#procesosRows').addEventListener('input',e=>{
   const r=cur().procesos[+i]; r[k]=e.target.type==='checkbox'?e.target.checked:(e.target.value===''?null:Number(e.target.value)); if(k==='puntuacion'){e.target.className='pscore '+(Number(r[k])>=95?'good':(Number(r[k])>=85?'':'bad'));} saveCloudOrLocal();
 });
 
-/* ======= VISITAS ======= */
+/* ===== VISITAS ===== */
 function fillVisitas(){const it=cur(); if(!it) return; $('#vaRol').value=it.rol||'Delegado audio'; $('#vaResp').value=it.responsable||''; $('#vaSearch').value=state.vaFilter||''; renderVaTabs(); renderVA();}
 $('#vaRol').onchange=e=>{cur().rol=e.target.value; saveCloudOrLocal(); renderLeft();};
 $('#vaResp').oninput=e=>{cur().responsable=e.target.value; saveCloudOrLocal(); renderLeft();};
@@ -502,8 +505,7 @@ function updateVaSummary(h){
   const visited = h.rows.filter(r=> (r.fecha||'').trim()!=='' );
   const unique = new Set( visited.map(r=>(r.centro||'').trim()).filter(Boolean) );
   $('#vaSummaryTxt').textContent = `Centros visitados: ${unique.size}  ·  Registros: ${visited.length} / ${h.rows.length}`;
-  const p = Math.min(100, Math.round(visited.length*100/h.rows.length));
-  $('#vaProg').style.width = p+'%';
+  $('#vaProg').style.width = Math.min(100, Math.round(visited.length*100/h.rows.length))+'%';
 }
 function renderVA(){const it=cur(); const h=it.hojas[state.vaSheet]||it.hojas[0]; const f=(state.vaFilter||'').toLowerCase(); const cont=$('#vaRows'); cont.innerHTML='';
   updateVaSummary(h);
@@ -527,12 +529,10 @@ $('#vaRows').addEventListener('input',e=>{
   if(k==='hit'){ h.rows[i][k]=e.target.checked; const box=e.target.closest('.hitcell'); if(box) box.classList.toggle('on',e.target.checked); saveCloudOrLocal(); return; }
   if(e.target.type==='checkbox') h.rows[i][k]=e.target.checked;
   else if(e.target.type==='number') h.rows[i][k]=e.target.value===''?null:Number(e.target.value);
-  else h.rows[i][k]=e.target.value;
-  saveCloudOrLocal(); updateVaSummary(h);
+  else h.rows[i][k]=e.target.value; saveCloudOrLocal(); updateVaSummary(h);
 });
-$('#saveVisitasTop').onclick=saveCloudOrLocal; $('#saveVisitasBottom').onclick=saveCloudOrLocal;
 
-/* ======= FORMACIONES ======= */
+/* ===== FORMACIONES ===== */
 function fillFM(){const it=cur(); if(!it) return; $('#fmDelegado').value=it.delegado||''; $('#fmSearch').value=state.fmFilter||''; renderFM();}
 $('#fmDelegado').oninput=e=>{cur().delegado=e.target.value; saveCloudOrLocal(); renderLeft();};
 $('#fmSearch').oninput=e=>{state.fmFilter=e.target.value.trim(); renderFM();};
@@ -550,9 +550,8 @@ $('#fmRows').addEventListener('input',e=>{
   else if(e.target.tagName==='SELECT') it.filas[i][k]=Number(e.target.value);
   else it.filas[i][k]=e.target.value; saveCloudOrLocal();
 });
-$('#saveFMTop').onclick=saveCloudOrLocal; $('#saveFMBottom').onclick=saveCloudOrLocal;
 
-/* ======= TELE ======= */
+/* ===== TELE ===== */
 function fillTA(){ $('#taSearch').value=state.taFilter||''; populateTASelect(); renderTA(); }
 function populateTASelect(){ const it=cur(); const h=(it.hojas&&it.hojas[0])||sheetTA('Tele 1'); it.hojas=it.hojas||[h];
   const names=[...new Set(h.rows.map(r=>(r.persona||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
@@ -572,50 +571,42 @@ $('#taRows').addEventListener('input',e=>{
   else if(e.target.type==='number') h.rows[i][k]=e.target.value===''?null:Number(e.target.value);
   else h.rows[i][k]=e.target.value; saveCloudOrLocal();
 });
-$('#saveTATop').onclick=saveCloudOrLocal; $('#saveTABottom').onclick=saveCloudOrLocal;
 
-/* ======= EQUIPOS ======= */
+/* ===== EQUIPOS ===== */
 function fillEQ(){ $('#eqSearch').value=state.eqFilter||''; renderEQ(); }
 $('#eqSearch').oninput=e=>{state.eqFilter=e.target.value.trim(); renderEQ();};
 $('#btnAddFila').onclick=()=>{ const it=cur(); it.filas.push({equipo:'',serie:'',persona:'',fecha:'',pares:Array.from({length:it.columnas},()=>({centro:'',sede:false}))}); renderEQ(); saveCloudOrLocal(); };
 $('#btnAddParCols').onclick=()=>{ const it=cur(); it.columnas=(it.columnas||3)+1; it.filas.forEach(r=>r.pares.push({centro:'',sede:false})); renderEQ(); saveCloudOrLocal(); };
 
 function renderEQ(){
-  const it=cur(); const cols=Math.max(1,it.columnas||3); const f=(state.eqFilter||'').toLowerCase(); const root=$('#eqTable'); root.innerHTML='';
-  const template=['42px','138px','110px','120px','100px'].concat(Array.from({length:cols},()=>['120px','64px']).flat()).join(' ');
-  const head=document.createElement('div'); head.className='va-head'; head.style.gridTemplateColumns=template;
-  head.innerHTML=`<div>#</div><div>Equipo</div><div>Nº serie</div><div>Persona que envía</div><div>Fecha</div>`+Array.from({length:cols},(_,i)=>`<div>Centro ${i+1}</div><div>Sede ${i+1}</div>`).join(''); root.appendChild(head);
-  const body=document.createElement('div'); body.className='scroll'; root.appendChild(body);
-
+  const it=cur(); const cols=Math.max(1,it.columnas||3); const f=(state.eqFilter||'').toLowerCase(); const body=$('#eqBody'); body.innerHTML='';
   it.filas.forEach((r,i)=>{ const txt=(r.equipo||'')+' '+(r.serie||'')+' '+(r.persona||' ')+' '+(r.pares||[]).map(p=>(p.centro||'')+(p.sede?' Sede':'' )).join(' '); if(f && !txt.toLowerCase().includes(f)) return;
-    const row=document.createElement('div'); row.className='va-row'; row.style.gridTemplateColumns=template;
+    const row=document.createElement('div'); row.className='eq-row eq-cols';
     row.innerHTML=`<div>${i+1}</div>
       <input data-i="${i}" data-k="equipo" value="${esc(r.equipo||'')}">
       <input data-i="${i}" data-k="serie" value="${esc(r.serie||'')}">
       <input data-i="${i}" data-k="persona" value="${esc(r.persona||'')}">
       <input type="date" data-i="${i}" data-k="fecha" value="${r.fecha||''}">`+
-      Array.from({length:cols},(_,c)=>`
+      Array.from({length:3},(_,c)=>`
         <input data-i="${i}" data-k="centro" data-c="${c}" value="${esc(r.pares?.[c]?.centro||'')}">
         <input type="checkbox" data-i="${i}" data-k="sede" data-c="${c}" ${r.pares?.[c]?.sede?'checked':''}>
       `).join('');
     body.appendChild(row);
   });
-
-  body.addEventListener('input',e=>{
+  body.oninput=(e)=>{
     const i=+e.target.dataset.i,k=e.target.dataset.k; if(isNaN(i)||!k) return;
     if(k==='centro'||k==='sede'){ const c=+e.target.dataset.c; const p=cur().filas[i].pares[c]; if(k==='centro') p.centro=e.target.value; else p.sede=e.target.checked; }
     else cur().filas[i][k]= e.target.value;
     saveCloudOrLocal();
-  });
+  };
 }
-$('#saveEQTop').onclick=saveCloudOrLocal; $('#saveEQBottom').onclick=saveCloudOrLocal;
 
-/* Topbar acciones */
+/* ===== Topbar botones ===== */
 $('#btnSaveTop').onclick=()=>{ saveCloudOrLocal(); };
 $('#btnFetch').onclick=()=>{ fetchCloudOrLocal(); };
 $('#btnReset').onclick=()=>{ resetLocalView(); };
 
-/* ======= PIN (hash) ======= */
+/* ===== PIN ===== */
 async function sha256Hex(str){
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
   return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
@@ -636,7 +627,7 @@ $('#enter').onclick=tryEnter;
 $('#pin').addEventListener('keydown',e=>{ if(e.key==='Enter') tryEnter(); });
 $('#cancelPin').onclick=()=>{ $('#pin').value=''; $('#pinMsg').style.display='none'; };
 
-/* Init */
+/* ===== Init ===== */
 function renderAll(){ renderLeft(); if(state.selected.section) renderDetail(); else renderDetailBlank(); }
 window.addEventListener('DOMContentLoaded',()=>{ if(REQUIRE_PIN){ lock(); } });
 window.addEventListener('load',()=>{
