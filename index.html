@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="es">
 <head>
@@ -21,11 +22,11 @@ body{
 }
 button,input,select{font-family:inherit}
 
-/* ===== Bloqueo por PIN ===== */
+/* ===== PIN lock ===== */
 body.locked header, body.locked main { pointer-events:none; user-select:none; filter:blur(.8px) }
 body.locked #gate { pointer-events:auto; filter:none }
 
-/* ===== Topbar roja (a todo ancho exacto del workspace) ===== */
+/* ===== Topbar ===== */
 .topbar{position:sticky;top:0;z-index:99;width:100%;
   background:linear-gradient(180deg,var(--rojo),var(--rojo-osc));color:#fff;box-shadow:var(--shadow)}
 .bar-inner{margin:0;padding:.45rem 6px;display:flex;align-items:center;gap:.35rem}
@@ -37,7 +38,7 @@ body.locked #gate { pointer-events:auto; filter:none }
 .btn-ghost{background:transparent;border:1px solid #ffffff66;color:#fff}
 .pill{display:inline-flex;gap:.28rem;align-items:center;border:1px solid #ffffff2f;background:#ffffff1c;padding:.15rem .42rem;border-radius:999px;white-space:nowrap;font-size:10.6px}
 
-/* ===== Layout: sin márgenes, sidebar estrecha ===== */
+/* ===== Layout ===== */
 .main{display:grid;grid-template-columns:190px minmax(0,1fr);gap:6px;padding:0 0 6px 0}
 @media (max-width:1100px){ .main{grid-template-columns:1fr} }
 
@@ -58,37 +59,41 @@ body.locked #gate { pointer-events:auto; filter:none }
 .bg-ex{background:var(--col-ex)} .bg-fl{background:var(--col-fl)} .bg-va{background:var(--col-va)}
 .bg-fm{background:var(--col-fm)} .bg-ta{background:var(--col-ta)} .bg-eq{background:var(--col-eq)}
 
-/* ===== Detalle sin márgenes, súper compacto ===== */
+/* ===== Detalle ===== */
 .detail{padding:.35rem .4rem;border-radius:8px;border:1px solid var(--line);background:#fff;min-height:66vh;box-shadow:var(--shadow)}
-.header-row{display:flex;align-items:center;gap:.4rem;margin-bottom:.25rem}
+.header-row{display:flex;align-items:center;gap:.5rem;margin-bottom:.25rem}
 .header-row h2{margin:0;font-size:13px}
+.hdr-name{font-weight:900;font-size:15px}
 .badge{padding:.06rem .36rem;border-radius:999px;background:#00000010;font-size:10.5px}
 .header-row .spacer{flex:1}
 .save-cta{display:flex;gap:.35rem;align-items:center}
 .save-small{font-size:10.8px;padding:.32rem .58rem;border-radius:999px;background:#1f6feb;color:#fff;border:0;box-shadow:var(--shadow);cursor:pointer}
 
-/* Formularios / Inputs */
+/* Formularios */
 .row{display:flex;gap:.35rem;flex-wrap:wrap;align-items:flex-end}
 .field{display:grid;gap:.14rem;min-width:140px;flex:1;margin:.18rem 0}
 .field label{font-weight:700;opacity:.9;font-size:10.6px}
 .field input,.field select{border:1px solid var(--line);border-radius:7px;padding:.2rem .3rem;font-size:var(--fs-sm);background:#fff;outline:none}
 
-/* Tablas “Excel” MUY compactas */
+/* Tablas Excel compactas */
 .table-wrap{border:1px solid var(--line);border-radius:8px;background:#fff;box-shadow:var(--shadow);padding:.22rem;margin-top:.22rem}
+.table-wrap.full .xscroll{overflow-x:hidden}
+.table-wrap.full .table-inner{min-width:100%;width:100%}
 .xscroll{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;padding-bottom:4px}
 .table-inner{display:block;width:max-content;min-width:820px}
-.table-inner input,.table-inner select{padding:.16rem .26rem;font-size:var(--fs-sm)}
+.table-inner input,.table-inner select, .table-inner textarea{padding:.16rem .26rem;font-size:var(--fs-sm)}
 .va-head,.va-row{display:grid;gap:.12rem;align-items:center;margin:.04rem}
 .scroll{max-height:62vh;overflow:auto}
 
-/* Grids estrechos */
+/* Grids */
 .va-cols{grid-template-columns:36px .8fr 90px 90px 100px 90px 70px 46px 100px 100px}
 .fm-head,.fm-row{grid-template-columns:36px 78px 160px 106px 78px 90px 90px 90px 90px 78px 78px}
 .ta-head,.ta-row{grid-template-columns:36px 1fr 106px 98px 120px 86px 86px 92px 90px 90px}
+/* Acciones (full width) */
+.acc-head,.acc-row{grid-template-columns:36px 100px 80px 180px 90px 80px 90px 1fr}
 
-/* Equipos (estrecho) */
+/* Equipos */
 .eq-cols{grid-template-columns:36px 120px 98px 110px 94px 120px 58px 120px 58px 120px 58px}
-.eq-head,.eq-row{display:grid;gap:.12rem;align-items:center;margin:.04rem}
 
 /* Colores % y HIT */
 .pscore{border:2px solid transparent}
@@ -123,7 +128,7 @@ body.locked #gate { pointer-events:auto; filter:none }
     <button id="btnFetch" class="btn btn-lite" title="Leer de la nube o local (no guarda)">Actualizar (nube)</button>
     <button id="btnSaveTop" class="btn btn-save" title="Guardar en la nube o local">Guardar (nube)</button>
     <button id="btnReset" class="btn btn-ghost" title="Descartar cambios locales y volver al último leído">Resetear</button>
-    <span id="stamp" class="pill">v8.0-MicroTight · Cargando…</span>
+    <span id="stamp" class="pill">v8.1-AccionesFull · Cargando…</span>
   </div>
 </header>
 
@@ -166,7 +171,8 @@ body.locked #gate { pointer-events:auto; filter:none }
     <!-- ====== DETALLE ====== -->
     <section class="detail" id="detail">
       <div class="header-row">
-        <h2>Detalle</h2><span id="detTag" class="badge">—</span>
+        <h2>Detalle — <span id="centerNameHdr" class="hdr-name">—</span></h2>
+        <span id="detTag" class="badge">—</span>
         <div class="spacer"></div>
         <div class="save-cta">
           <button id="saveBtnActive" class="save-small" title="Guardar cambios del panel">💾 Guardar</button>
@@ -174,7 +180,7 @@ body.locked #gate { pointer-events:auto; filter:none }
       </div>
       <p id="detHint" style="opacity:.7;margin:.1rem 0 .2rem">Selecciona en la izquierda (doble clic o ✏️) o crea con ＋.</p>
 
-      <!-- CENTROS -->
+      <!-- CENTROS (EXCLUSIVOS / FLOP) -->
       <div id="detCentro" style="display:none">
         <div class="row">
           <div class="field"><label>Nombre</label><input id="cNombre"></div>
@@ -183,16 +189,18 @@ body.locked #gate { pointer-events:auto; filter:none }
           <div class="field"><label>Franquicia o Sucursal</label><select id="cTipo"><option>Franquicia</option><option>Sucursal</option></select></div>
         </div>
 
-        <!-- Acciones -->
-        <div class="table-wrap">
+        <!-- BLOQUE 1: ACCIONES (12 filas, full width) -->
+        <h3 style="margin:.3rem 0 .15rem;font-size:11.6px">ACCIONES</h3>
+        <div class="table-wrap full">
           <div class="xscroll"><div class="table-inner">
-            <div class="va-head" style="grid-template-columns:36px 90px 1fr 80px 80px 80px 96px 36px">
-              <div>#</div><div>Fecha</div><div>Tipo de acción</div><div>Paquete</div><div>Derivación</div><div>Citas</div><div>Venta</div><div></div>
-            </div><div id="accionesRows"></div>
+            <div class="va-head acc-head">
+              <div>#</div><div>Fecha</div><div>Paquete</div><div>Tipo de acción</div><div>Derivación</div><div>Citas</div><div>Ventas</div><div>Observaciones</div>
+            </div>
+            <div id="accionesRows" class="scroll"></div>
           </div></div>
         </div>
 
-        <!-- Formaciones relevantes -->
+        <!-- Formaciones y Procesos se mantienen -->
         <div class="table-wrap">
           <div class="xscroll"><div class="table-inner">
             <div class="va-head" style="grid-template-columns:36px 1.02fr .55fr .55fr 1.05fr 36px">
@@ -201,7 +209,6 @@ body.locked #gate { pointer-events:auto; filter:none }
           </div></div>
         </div>
 
-        <!-- Control de procesos -->
         <div class="table-wrap">
           <div class="xscroll"><div class="table-inner">
             <div class="va-head" style="grid-template-columns:36px 154px 80px 110px 36px">
@@ -300,13 +307,13 @@ body.locked #gate { pointer-events:auto; filter:none }
   </div>
 </div>
 
-<!-- Firebase opcional -->
+<!-- Firebase (opcional) -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script>
 /* ===== CONFIG ===== */
-const APP_VERSION='v8.0-MicroTight';
+const APP_VERSION='v8.1-AccionesFull';
 const REQUIRE_PIN = true;
 /* SHA-256('4321') */
 const PIN_SHA256='fe2592b42a727e977f055947385b709cc82b16b9a87f88c6abf3900d65d0cdc3';
@@ -328,6 +335,7 @@ function rowsFM(){return Array.from({length:300},()=>({fecha:'',tema:'',audiolog
 function sheetTA(n){const rows=Array.from({length:300},()=>({centro:'',delegado:'',rol:'Audiólogo',persona:'',formacion:false,practicas:false,certificado:false,pruebas_reales:null,ventas:null}));return{nombre:n,rows};}
 function equiposInit(){const filas=Array.from({length:25},()=>({equipo:'',serie:'',persona:'',fecha:'',pares:[{centro:'',sede:false},{centro:'',sede:false},{centro:'',sede:false}]}));return{columnas:3,filas};}
 
+/* Centros ejemplo */
 let data={
   "CENTROS EXCLUSIVOS":[{nombre:"Reina Mercedes",delegado:"",audiologo:"",tipo:"Franquicia",acciones:[],formaciones:[],procesos:[]}],
   "CENTROS FLOP":[],
@@ -365,9 +373,9 @@ function fetchCloudOrLocal(){
   }else{ localLoad(); renderAll(); stamp('Actualizado (local): '+now()); toast('Actualizado local'); }
 }
 function resetLocalView(){ if(cloud.enabled && lastCloud){ data=JSON.parse(JSON.stringify(lastCloud)); toast('Vista: última nube'); } else { localLoad(); toast('Vista: local'); } renderAll(); }
-function stamp(txt){ $('#stamp').textContent='v8.0-MicroTight · '+txt; }
+function stamp(txt){ $('#stamp').textContent='v8.1-AccionesFull · '+txt; }
 
-/* ===== Sidebar (doble clic edita) ===== */
+/* ===== Sidebar ===== */
 const SECTIONS=["CENTROS EXCLUSIVOS","CENTROS FLOP","VISITAS AUDIO","FORMACIONES Y MENTORING","TELEAUDIOLOGIA","EQUIPOS"];
 function renderLeft(){
   SECTIONS.forEach(name=>{
@@ -407,7 +415,7 @@ function renderLeft(){
 
 /* ===== Detalle ===== */
 function renderDetailBlank(){
-  $('#detHint').style.display='block'; $('#detTag').textContent='—';
+  $('#detHint').style.display='block'; $('#detTag').textContent='—'; $('#centerNameHdr').textContent='—';
   $('#detCentro').style.display='none'; $('#detVisitas').style.display='none';
   $('#detFormaciones').style.display='none'; $('#detTele').style.display='none'; $('#detEquipos').style.display='none';
 }
@@ -416,17 +424,18 @@ function cur(){ return data[state.selected.section]?.[state.selected.index]; }
 function renderDetail(){
   $('#detHint').style.display='none';
   const s=state.selected.section; setTone(s); $('#detTag').textContent=s||'—';
-  $('#detCentro').style.display=s?.includes('CENTROS')?'block':'none';
-  $('#detVisitas').style.display=s==='VISITAS AUDIO'?'block':'none';
-  $('#detFormaciones').style.display=s==='FORMACIONES Y MENTORING'?'block':'none';
-  $('#detTele').style.display=s==='TELEAUDIOLOGIA'?'block':'none';
-  $('#detEquipos').style.display=s==='EQUIPOS'?'block':'none';
-  // Cambiamos el handler del botón azul según panel
+  const it=cur(); $('#centerNameHdr').textContent = (s && s.includes('CENTROS')) ? (it?.nombre||'—') : '—';
   $('#saveBtnActive').onclick = s?.includes('CENTROS') ? saveCentro
     : s==='VISITAS AUDIO' ? saveCloudOrLocal
     : s==='FORMACIONES Y MENTORING' ? saveCloudOrLocal
     : s==='TELEAUDIOLOGIA' ? saveCloudOrLocal
     : s==='EQUIPOS' ? saveCloudOrLocal : ()=>{};
+
+  $('#detCentro').style.display=s?.includes('CENTROS')?'block':'none';
+  $('#detVisitas').style.display=s==='VISITAS AUDIO'?'block':'none';
+  $('#detFormaciones').style.display=s==='FORMACIONES Y MENTORING'?'block':'none';
+  $('#detTele').style.display=s==='TELEAUDIOLOGIA'?'block':'none';
+  $('#detEquipos').style.display=s==='EQUIPOS'?'block':'none';
   if(s?.includes('CENTROS')) fillCentro();
   if(s==='VISITAS AUDIO') fillVisitas();
   if(s==='FORMACIONES Y MENTORING') fillFM();
@@ -439,30 +448,54 @@ function fillCentro(){ const it=cur(); if(!it) return;
   $('#cNombre').value=it.nombre||''; $('#cDelegado').value=it.delegado||''; $('#cAudiologo').value=it.audiologo||''; $('#cTipo').value=it.tipo||'Franquicia';
   renderAcciones(); renderFormaciones(); renderProcesos();
 }
-function saveCentro(){ const it=cur(); if(!it) return; it.nombre=$('#cNombre').value.trim(); it.delegado=$('#cDelegado').value.trim(); it.audiologo=$('#cAudiologo').value.trim(); it.tipo=$('#cTipo').value; saveCloudOrLocal(); renderLeft(); }
-
-function renderAcciones(){ const it=cur(); it.acciones=it.acciones||[]; const cont=$('#accionesRows'); cont.innerHTML='';
-  it.acciones.forEach((r,i)=>{const row=document.createElement('div'); row.className='va-row'; row.style.gridTemplateColumns='36px 90px 1fr 80px 80px 80px 96px 36px';
-    row.innerHTML=`<div>${i+1}</div><input type="date" data-i="${i}" data-k="fecha" value="${r.fecha||''}">
-    <input data-i="${i}" data-k="tipo" value="${esc(r.tipo||'')}">
-    <select data-i="${i}" data-k="paquete"><option ${r.paquete==='1'?'selected':''}>1</option><option ${r.paquete==='2'?'selected':''}>2</option><option ${r.paquete==='3'?'selected':''}>3</option></select>
-    <input type="number" min="0" step="1" data-i="${i}" data-k="derivacion" value="${r.derivacion??''}">
-    <input type="number" min="0" step="1" data-i="${i}" data-k="citas" value="${r.citas??''}">
-    <input type="number" min="0" step="1" data-i="${i}" data-k="venta" value="${r.venta??''}">
-    <button class="ico-btn" data-del="${i}" title="Eliminar">🗑️</button>`; cont.appendChild(row);});
-  const add=document.createElement('div'); add.className='va-row'; add.style.gridTemplateColumns='36px 90px 1fr 80px 80px 80px 96px 36px';
-  add.innerHTML=`<div>${it.acciones.length+1}</div><input type="date" data-new="1" data-k="fecha"><input data-new="1" data-k="tipo">
-  <select data-new="1" data-k="paquete"><option>1</option><option>2</option><option>3</option></select>
-  <input type="number" data-new="1" data-k="derivacion"><input type="number" data-new="1" data-k="citas"><input type="number" data-new="1" data-k="venta"><span></span>`;
-  cont.appendChild(add);
+function saveCentro(){ const it=cur(); if(!it) return;
+  it.nombre=$('#cNombre').value.trim(); it.delegado=$('#cDelegado').value.trim(); it.audiologo=$('#cAudiologo').value.trim(); it.tipo=$('#cTipo').value;
+  $('#centerNameHdr').textContent = it.nombre || '—';
+  saveCloudOrLocal(); renderLeft();
 }
-$('#accionesRows').addEventListener('click',e=>{const i=e.target.dataset.del; if(i!=null){ if(confirm('¿Eliminar fila?')){cur().acciones.splice(+i,1); renderAcciones(); saveCloudOrLocal();}}});
+
+/* ===== ACCIONES (12 filas, ancho completo) ===== */
+function ensure12(arr){
+  while(arr.length<12) arr.push({fecha:'',paquete:'1',tipo:'Azafata/Buzoneo',derivacion:null,citas:null,venta:null,obs:''});
+  if(arr.length>12) arr.length=12; // fijamos 12
+}
+function renderAcciones(){
+  const it=cur(); it.acciones=it.acciones||[];
+  ensure12(it.acciones);
+  const cont=$('#accionesRows'); cont.innerHTML='';
+  it.acciones.forEach((r,i)=>{
+    const row=document.createElement('div'); row.className='acc-row va-row';
+    row.innerHTML=`
+      <div>${i+1}</div>
+      <input type="date" data-i="${i}" data-k="fecha" value="${r.fecha||''}">
+      <select data-i="${i}" data-k="paquete">
+        <option ${r.paquete==='1'?'selected':''}>1</option>
+        <option ${r.paquete==='2'?'selected':''}>2</option>
+        <option ${r.paquete==='3'?'selected':''}>3</option>
+      </select>
+      <select data-i="${i}" data-k="tipo">
+        <option ${r.tipo==='Azafata/Buzoneo'?'selected':''}>Azafata/Buzoneo</option>
+        <option ${r.tipo==='Stand'?'selected':''}>Stand</option>
+        <option ${r.tipo==='Mailing/Cashback'?'selected':''}>Mailing/Cashback</option>
+        <option ${r.tipo==='Otros'?'selected':''}>Otros</option>
+      </select>
+      <input type="number" min="0" step="1" data-i="${i}" data-k="derivacion" value="${r.derivacion??''}">
+      <input type="number" min="0" step="1" data-i="${i}" data-k="citas" value="${r.citas??''}">
+      <input type="number" min="0" step="1" data-i="${i}" data-k="venta" value="${r.venta??''}">
+      <input data-i="${i}" data-k="obs" value="${esc(r.obs||'')}" placeholder="">
+    `;
+    cont.appendChild(row);
+  });
+}
 $('#accionesRows').addEventListener('input',e=>{
-  const i=e.target.dataset.i, k=e.target.dataset.k, isNew=e.target.dataset.new; if(!k) return;
-  if(isNew){ const r={fecha:'',tipo:'',paquete:'1',derivacion:null,citas:null,venta:null}; r[k]=e.target.type==='number'?(e.target.value===''?null:Number(e.target.value)):e.target.value; cur().acciones.push(r); renderAcciones(); saveCloudOrLocal(); return; }
-  const r=cur().acciones[+i]; r[k]=e.target.type==='number'?(e.target.value===''?null:Number(e.target.value)):e.target.value; saveCloudOrLocal();
+  const i=e.target.dataset.i, k=e.target.dataset.k; if(i==null||!k) return;
+  const row=cur().acciones[+i];
+  if(e.target.type==='number') row[k]=e.target.value===''?null:Number(e.target.value);
+  else row[k]=e.target.value;
+  saveCloudOrLocal();
 });
 
+/* ===== Formaciones y Procesos (sin cambios funcionales) ===== */
 function renderFormaciones(){ const it=cur(); it.formaciones=it.formaciones||[]; const cont=$('#formacionesRows'); cont.innerHTML='';
   it.formaciones.forEach((r,i)=>{const row=document.createElement('div'); row.className='va-row'; row.style.gridTemplateColumns='36px 1.02fr .55fr .55fr 1.05fr 36px';
     row.innerHTML=`<div>${i+1}</div><input data-i="${i}" data-k="curso" value="${esc(r.curso||'')}"><input type="checkbox" data-i="${i}" data-k="realizado" ${r.realizado?'checked':''}><input type="checkbox" data-i="${i}" data-k="aplica" ${r.aplica?'checked':''}><input data-i="${i}" data-k="obs" value="${esc(r.obs||'')}"><button class="ico-btn" data-delf="${i}" title="Eliminar">🗑️</button>`; cont.appendChild(row);});
@@ -490,7 +523,7 @@ $('#procesosRows').addEventListener('input',e=>{
   const r=cur().procesos[+i]; r[k]=e.target.type==='checkbox'?e.target.checked:(e.target.value===''?null:Number(e.target.value)); if(k==='puntuacion'){e.target.className='pscore '+(Number(r[k])>=95?'good':(Number(r[k])>=85?'':'bad'));} saveCloudOrLocal();
 });
 
-/* ===== VISITAS ===== */
+/* ===== VISITAS (sin cambios de lógica respecto v8.0) ===== */
 function fillVisitas(){const it=cur(); if(!it) return; $('#vaRol').value=it.rol||'Delegado audio'; $('#vaResp').value=it.responsable||''; $('#vaSearch').value=state.vaFilter||''; renderVaTabs(); renderVA();}
 $('#vaRol').onchange=e=>{cur().rol=e.target.value; saveCloudOrLocal(); renderLeft();};
 $('#vaResp').oninput=e=>{cur().responsable=e.target.value; saveCloudOrLocal(); renderLeft();};
@@ -586,18 +619,20 @@ function renderEQ(){
       <input data-i="${i}" data-k="equipo" value="${esc(r.equipo||'')}">
       <input data-i="${i}" data-k="serie" value="${esc(r.serie||'')}">
       <input data-i="${i}" data-k="persona" value="${esc(r.persona||'')}">
-      <input type="date" data-i="${i}" data-k="fecha" value="${r.fecha||''}">`+
-      Array.from({length:3},(_,c)=>`
-        <input data-i="${i}" data-k="centro" data-c="${c}" value="${esc(r.pares?.[c]?.centro||'')}">
-        <input type="checkbox" data-i="${i}" data-k="sede" data-c="${c}" ${r.pares?.[c]?.sede?'checked':''}>
-      `).join('');
+      <input type="date" data-i="${i}" data-k="fecha" value="${r.fecha||''}">
+      <input data-i="${i}" data-k="centro" data-c="0" value="${esc(r.pares?.[0]?.centro||'')}">
+      <input type="checkbox" data-i="${i}" data-k="sede" data-c="0" ${r.pares?.[0]?.sede?'checked':''}>
+      <input data-i="${i}" data-k="centro" data-c="1" value="${esc(r.pares?.[1]?.centro||'')}">
+      <input type="checkbox" data-i="${i}" data-k="sede" data-c="1" ${r.pares?.[1]?.sede?'checked':''}>
+      <input data-i="${i}" data-k="centro" data-c="2" value="${esc(r.pares?.[2]?.centro||'')}">
+      <input type="checkbox" data-i="${i}" data-k="sede" data-c="2" ${r.pares?.[2]?.sede?'checked':''}>
+    `;
     body.appendChild(row);
   });
   body.oninput=(e)=>{
     const i=+e.target.dataset.i,k=e.target.dataset.k; if(isNaN(i)||!k) return;
     if(k==='centro'||k==='sede'){ const c=+e.target.dataset.c; const p=cur().filas[i].pares[c]; if(k==='centro') p.centro=e.target.value; else p.sede=e.target.checked; }
-    else cur().filas[i][k]= e.target.value;
-    saveCloudOrLocal();
+    else cur().filas[i][k]= e.target.value; saveCloudOrLocal();
   };
 }
 
@@ -632,6 +667,8 @@ function renderAll(){ renderLeft(); if(state.selected.section) renderDetail(); e
 window.addEventListener('DOMContentLoaded',()=>{ if(REQUIRE_PIN){ lock(); } });
 window.addEventListener('load',()=>{
   localLoad(); initFirebase(); renderAll(); stamp('Listo: '+now());
+  // reflejar nombre en cabecera si se edita
+  $('#cNombre')?.addEventListener('input',()=>{ $('#centerNameHdr').textContent = $('#cNombre').value || '—'; });
 });
 </script>
 </body>
