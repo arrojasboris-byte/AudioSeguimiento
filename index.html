@@ -6,48 +6,28 @@
   <title>SEGUIMIENTO AUDIO · Acceso</title>
   <meta name="theme-color" content="#c82727"/>
   <style>
-    :root{
-      --rojo:#c82727; --rojo2:#a71f1f; --bg:#f6f7fb; --line:#e6e7ee;
-      --shadow:0 4px 14px rgba(0,0,0,.06);
-      --fs:12px;
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%}
+    :root{--rojo:#c82727;--rojo2:#a71f1f;--bg:#f6f7fb;--line:#e6e7ee;--shadow:0 4px 14px rgba(0,0,0,.06);--fs:12px}
+    *{box-sizing:border-box} html,body{height:100%}
     body{margin:0;background:var(--bg);font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;font-size:var(--fs);color:#222}
-
-    /* Topbar */
-    .topbar{position:sticky;top:0;z-index:10;width:100%;
-      background:linear-gradient(180deg,var(--rojo),var(--rojo2));color:#fff;
-      box-shadow:var(--shadow)}
+    .topbar{position:sticky;top:0;z-index:10;width:100%;background:linear-gradient(180deg,var(--rojo),var(--rojo2));color:#fff;box-shadow:var(--shadow)}
     .bar-inner{padding:.85rem 12px;display:flex;align-items:center;justify-content:center}
     .brand{display:flex;gap:.6rem;align-items:center;font-weight:900;letter-spacing:.4px;font-size:22px}
     .brand i{font-style:normal}
-
-    /* Contenedor del iframe */
     #appwrap{position:relative;width:100%;height:calc(100vh - 66px);background:#fff;border-top:1px solid var(--line)}
     #appframe{width:100%;height:100%;border:0;display:none}
-
-    /* Modal PIN */
-    #gate{position:fixed;inset:0;background:rgba(0,0,0,.72);
-      display:flex;align-items:center;justify-content:center;z-index:9999}
-    .gate-card{background:#111;color:#fff;border-radius:12px;box-shadow:var(--shadow);
-      padding:18px 16px;min-width:300px;border:1px solid #2a2a2a}
+    #gate{position:fixed;inset:0;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;z-index:9999}
+    .gate-card{background:#111;color:#fff;border-radius:12px;box-shadow:var(--shadow);padding:18px 16px;min-width:300px;border:1px solid #2a2a2a}
     .gate-card h3{margin:.2rem 0 1rem}
-    .pin{width:100%;letter-spacing:.35rem;font-size:1rem;text-align:center;background:#000;color:#fff;
-      border:1px solid #444;border-radius:8px;padding:.5rem}
+    .pin{width:100%;letter-spacing:.35rem;font-size:1rem;text-align:center;background:#000;color:#fff;border:1px solid #444;border-radius:8px;padding:.5rem}
     .btn{border:0;border-radius:9px;padding:.5rem .9rem;cursor:pointer;box-shadow:var(--shadow);font-weight:800}
     .btn-primary{background:#fff;color:#7b0e0e}
     .btn-ghost{background:transparent;border:1px solid #ffffff33;color:#fff}
     .actions{display:flex;gap:.5rem;margin-top:.8rem}
     .msg{display:none;color:#ff7b7b;margin-top:.6rem;font-size:.92em}
-
-    /* Aviso por si app.html no existe o tarda */
-    #loadingNote{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-      color:#666;font-size:.95rem}
+    #loadingNote{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#666;font-size:.95rem}
   </style>
 </head>
 <body>
-
   <header class="topbar">
     <div class="bar-inner">
       <div class="brand"><i>🎧</i> SEGUIMIENTO AUDIO</div>
@@ -59,7 +39,6 @@
     <iframe id="appframe" title="SEGUIMIENTO AUDIO"></iframe>
   </main>
 
-  <!-- Modal PIN -->
   <div id="gate" aria-modal="true" role="dialog">
     <div class="gate-card">
       <h3>Acceso</h3>
@@ -74,13 +53,9 @@
   </div>
 
   <script>
-    // ====== Config ======
-    // SHA-256 de "4321"
-    const PIN_SHA256='fe2592b42a727e977f055947385b709cc82b16b9a87f88c6abf3900d65d0cdc3';
-    // Archivo con tu app real (tu index antiguo copiado sin cambios):
-    const APP_FILE = 'app.html';
+    const PIN_SHA256='fe2592b42a727e977f055947385b709cc82b16b9a87f88c6abf3900d65d0cdc3'; // "4321"
+    const APP_FILE='app.html'; // tu app original
 
-    // ====== Utiles ======
     const $=(s,r=document)=>r.querySelector(s);
     async function sha256Hex(str){
       const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str));
@@ -92,36 +67,26 @@
       if(!s) return false;
       try{ return (await sha256Hex(s))===PIN_SHA256; }catch(_){ return false; }
     }
-
     function showApp(){
-      try{
-        $('#gate').style.display='none';
-        const f=$('#appframe');
-        const note=$('#loadingNote');
-        f.style.display='block';
-        f.src = APP_FILE + '?nc=' + Date.now();   // by-pass caché
-        if(note) note.textContent='Cargando…';
-        // ocultar aviso cuando cargue
-        f.addEventListener('load',()=>{ if(note) note.style.display='none'; });
-      }catch(e){
-        console.error('Error mostrando app:',e);
-      }
+      $('#gate').style.display='none';
+      const f=$('#appframe'), note=$('#loadingNote');
+      f.style.display='block';
+      f.src=APP_FILE+'?nc='+Date.now();
+      if(note) note.textContent='Cargando…';
+      f.addEventListener('load',()=>{ if(note) note.style.display='none'; });
     }
-
     async function handleEnter(){
       $('#pinMsg').style.display='none';
       const ok=await checkPin($('#pin').value);
       if(!ok){ $('#pinMsg').style.display='block'; return; }
       showApp();
     }
-
-    // Wire UI
     window.addEventListener('DOMContentLoaded',()=>{
       const pin=$('#pin'), enter=$('#enter'), clear=$('#clear');
       enter.addEventListener('click',handleEnter);
       clear.addEventListener('click',()=>{ pin.value=''; $('#pinMsg').style.display='none'; pin.focus(); });
       pin.addEventListener('keydown',(e)=>{ if(e.key==='Enter') handleEnter(); });
-      setTimeout(()=>{ try{ pin.focus(); }catch(_){} },50);
+      setTimeout(()=>{ try{ pin.focus(); }catch(_){ } },50);
     });
   </script>
 </body>
