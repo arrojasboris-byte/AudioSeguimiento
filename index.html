@@ -6,94 +6,223 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
 <meta http-equiv="Pragma" content="no-cache"/>
 <meta http-equiv="Expires" content="0"/>
-<title>SEGUIMIENTO AUDIO · Local</title>
+<title>SEGUIMIENTO AUDIO</title>
 <meta name="theme-color" content="#c82727"/>
 <style>
-:root{--rojo:#c82727;--rojo2:#a71f1f;--line:#e8e8ee;--bg:#f6f7fb;--sh:0 4px 14px rgba(0,0,0,.06);
---col-ex:#fde2e4;--col-fl:#e2f0cb;--col-va:#cde7f0;--col-fm:#f9e5c9;--col-ta:#eadcf8;--col-eq:#e8f1ff;--col-sv:#ffe9cc;--fs:12px;--fs-sm:11px}
-*{box-sizing:border-box} html,body{height:100%} body{margin:0;background:var(--bg);font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;font-size:var(--fs)}
-.topbar{position:sticky;top:0;z-index:30;background:linear-gradient(180deg,var(--rojo),var(--rojo2));box-shadow:var(--sh)}
-.topbar .inner{display:grid;grid-template-columns:1fr auto 1fr;gap:.6rem;align-items:center;padding:.9rem .8rem}
-.brand{justify-self:center;display:flex;gap:.6rem;align-items:center;color:#fff;font-weight:900}
-.brand i{font-style:normal;font-size:20px}.brand span{font-size:22px}
-.actions{justify-self:start;display:flex;gap:.35rem}.actions button{background:#fff;border:0;border-radius:9px;padding:.42rem .75rem;font-weight:800;cursor:pointer;box-shadow:var(--sh)}
+:root{
+  --rojo:#c82727; --rojo2:#a71f1f; --bg:#f6f7fb; --line:#e8e8ee; --sh:0 4px 14px rgba(0,0,0,.06);
+  --col-sv:#ffe9cc; --col-ex:#fde2e4; --col-fl:#e2f0cb; --col-va:#cde7f0; --col-fm:#f9e5c9; --col-ta:#eadcf8; --col-eq:#e8f1ff;
+  --fs:12px; --fs-sm:11px;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;color:#222;font-size:var(--fs);line-height:1.16}
+
+/* Topbar */
+.topbar{position:sticky;top:0;z-index:30;width:100%;
+  background:linear-gradient(180deg,var(--rojo),var(--rojo2)); box-shadow:var(--sh)}
+.topbar .inner{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:.6rem;padding:1rem .9rem}
+.brand{justify-self:center;display:flex;align-items:center;gap:.6rem;color:#fff}
+.brand i{font-style:normal;font-size:22px}
+.brand span{font-weight:900;font-size:24px;letter-spacing:.3px}
+.actions{justify-self:start;display:flex;gap:.4rem}
+.actions .btn{background:#fff;border:0;border-radius:10px;padding:.46rem .8rem;cursor:pointer;font-weight:800;box-shadow:var(--sh)}
 .meta{justify-self:end;color:#fff;font-weight:700;opacity:.9}
-.wrapper{display:grid;grid-template-columns:210px minmax(0,1fr);gap:8px;padding:8px}
+
+/* Layout */
+.wrapper{display:grid;grid-template-columns:230px minmax(0,1fr);gap:8px;padding:8px}
 .sidebar{display:flex;flex-direction:column;gap:8px}
 .side-card{border:1px solid var(--line);border-radius:12px;background:#fff;box-shadow:var(--sh);overflow:hidden}
-.side-card .head{display:flex;justify-content:space-between;align-items:center;padding:.48rem .6rem;font-weight:900}
+.side-card .head{display:flex;justify-content:space-between;align-items:center;padding:.5rem .6rem;font-weight:900}
+.side-card .head .group{display:flex;gap:.35rem}
 .side-card .list{padding:.25rem .45rem .5rem;max-height:220px;overflow:auto}
-.side-card .item{display:flex;justify-content:space-between;align-items:center;gap:.35rem;padding:.32rem .38rem;margin:.22rem 0;border:1px solid var(--line);border-radius:9px;background:#fff}
-.side-card .item .name{font-weight:750}.side-card .btn{width:26px;height:22px;border:1px solid var(--line);border-radius:7px;background:#fff;cursor:pointer}
-.detail{border:1px solid var(--line);border-radius:12px;background:#fff;box-shadow:var(--sh);min-height:70vh;padding:.6rem}
-.detail .hdr{display:flex;gap:.6rem;align-items:center;margin:.2rem 0 .4rem}.detail .hdr h2{margin:0;font-size:18px}.badge{padding:.12rem .52rem;border-radius:999px;background:#0001}
-.table{border:1px solid var(--line);border-radius:10px;overflow:auto}.xscroll{overflow:auto}
-.grid{display:grid;gap:1px;background:var(--line)} .grid>div{background:#fff;padding:.35rem .4rem} .grid .head{background:#f7f8ff;font-weight:800}
-.num,.txt,.date,.sel{width:100%;border:1px solid var(--line);border-radius:6px;padding:.28rem .35rem;font-size:var(--fs-sm)}
-.ok{background:#eaf9f0!important;border:1px solid #bfe3cd}.bad{background:#ffe9e9!important;border:1px solid #f4c7c7}
-.gate{position:fixed;inset:0;background:#000;display:flex;align-items:center;justify-content:center;z-index:100}
-.card{background:#111;color:#fff;min-width:280px;border-radius:12px;border:1px solid #2a2a2a;padding:14px 12px;box-shadow:var(--sh)}
-.card h3{margin:.1rem 0 .5rem}.pin{width:100%;letter-spacing:.35rem;font-size:1rem;text-align:center;background:#000;color:#fff;border:1px solid #444;border-radius:8px;padding:.42rem}
-.btnRow{display:flex;gap:.45rem;margin-top:10px}.btnDark{flex:1;background:#fff;border:0;color:#111;font-weight:900;border-radius:10px;padding:.45rem .8rem;cursor:pointer}
-.btnGhost{flex:.9;background:transparent;color:#fff;border:1px solid #ffffff55;border-radius:10px;padding:.45rem .8rem;cursor:pointer}
-.msg{color:#ff8080;display:none;margin-top:.4rem}
+.item{display:flex;justify-content:space-between;align-items:center;gap:.35rem;padding:.32rem .38rem;margin:.22rem 0;border:1px solid var(--line);border-radius:9px;background:#fff}
+.item .name{font-weight:750}
+.btn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:.25rem .5rem;cursor:pointer}
+.i28{width:26px;height:22px;border:1px solid var(--line);border-radius:7px;background:#fff;cursor:pointer}
+
+/* Detail */
+.detail{border:1px solid var(--line);border-radius:12px;background:#fff;box-shadow:var(--sh);min-height:72vh;padding:.6rem}
+.hdr{display:flex;gap:.6rem;align-items:center;margin:.2rem 0 .5rem}
+.hdr h2{margin:0;font-size:18px}
+.badge{padding:.12rem .52rem;border-radius:999px;background:#0001}
+
+/* Tables / fields */
+.table{border:1px solid var(--line);border-radius:10px;overflow:auto}
+.xscroll{overflow:auto}
+.grid{display:grid;gap:1px;background:var(--line)}
+.grid>div{background:#fff;padding:.32rem .38rem}
+.grid .head{background:#f7f8ff;font-weight:800}
+.num,.txt,.date,.sel,textarea{width:100%;border:1px solid var(--line);border-radius:6px;padding:.26rem .35rem;font-size:var(--fs-sm)}
+.ok{background:#eaf9f0!important;border:1px solid #bfe3cd}
+.bad{background:#ffe9e9!important;border:1px solid #f4c7c7}
+.small{font-size:10px;opacity:.75}
+
+/* Sales panel layout: table + chart */
+.sales-2col{display:grid;grid-template-columns:1fr 360px;gap:10px;align-items:start}
+.chartCard{border:1px solid var(--line);border-radius:10px;background:#fff;box-shadow:var(--sh);padding:.4rem}
+.chartTitle{font-weight:900;margin:.1rem 0 .35rem}
+svg{width:100%;height:260px}
+
+/* PIN */
+.gate{position:fixed;inset:0;background:#000a;display:flex;align-items:center;justify-content:center;z-index:100}
+.card{background:#111;color:#fff;min-width:300px;border-radius:12px;border:1px solid #2a2a2a;padding:16px 14px;box-shadow:var(--sh)}
+.card h3{margin:.1rem 0 .6rem}.pin{width:100%;letter-spacing:.35rem;font-size:1rem;text-align:center;background:#000;color:#fff;border:1px solid #444;border-radius:8px;padding:.46rem}
+.btnRow{display:flex;gap:.5rem;margin-top:10px}.btnDark{flex:1;background:#fff;border:0;color:#111;font-weight:900;border-radius:10px;padding:.5rem .85rem;cursor:pointer}
+.btnGhost{flex:.9;background:transparent;color:#fff;border:1px solid #ffffff55;border-radius:10px;padding:.5rem .85rem;cursor:pointer}
+.msg{color:#ff8080;display:none;margin-top:.45rem}
 </style>
 </head>
 <body>
-<header class="topbar"><div class="inner">
-  <div class="actions"><button id="btnLoad">Actualizar (local)</button><button id="btnSave">Guardar (local)</button></div>
-  <div class="brand"><i>🎧</i><span>SEGUIMIENTO AUDIO</span></div>
-  <div id="stamp" class="meta">Listo</div>
-</div></header>
+<header class="topbar">
+  <div class="inner">
+    <div class="actions">
+      <button id="btnLoad" class="btn">Actualizar (local)</button>
+      <button id="btnSave" class="btn">Guardar (local)</button>
+    </div>
+    <div class="brand"><i>🎧</i><span>SEGUIMIENTO AUDIO</span></div>
+    <div id="stamp" class="meta">Listo</div>
+  </div>
+</header>
 
 <main class="wrapper">
+  <!-- ========== LADO IZQUIERDO (editable/expandible) ========== -->
   <aside class="sidebar">
-    <!-- CIFRA DE VENTAS -->
+    <!-- Cifra de ventas -->
     <div class="side-card" style="background:var(--col-sv)">
-      <div class="head">📊 CIFRA DE VENTAS</div>
-      <div class="list" id="svList">
-        <div class="item">
-          <div class="name">🏢 Compañía</div>
-          <div><button class="btn" id="svOpenCompany" title="Abrir panel compañía">➡️</button></div>
-        </div>
-        <div class="item">
-          <div class="name">🏬 Centros exclusivos</div>
-          <div><button class="btn" id="svOpenCenters" title="Abrir panel centros exclusivos">➡️</button></div>
+      <div class="head">📊 CIFRA DE VENTAS
+        <div class="group">
+          <button class="i28" id="svOpenCompany" title="Compañía ➜">➡️</button>
+          <button class="i28" id="svOpenCenters"  title="Centros exclusivos ➜">➡️</button>
         </div>
       </div>
+      <div class="list small">Elige ➡️ para abrir el panel a la derecha.</div>
     </div>
 
-    <!-- Resto (placeholders para mantener estructura) -->
-    <div class="side-card" style="background:var(--col-ex)"><div class="head">📒 CENTROS EXCLUSIVOS<div></div></div><div class="list" id="ceList"></div></div>
-    <div class="side-card" style="background:var(--col-fl)"><div class="head">📒 CENTROS FLOP<div></div></div><div class="list" id="flList"></div></div>
-    <div class="side-card" style="background:var(--col-va)"><div class="head">📋 VISITAS AUDIO<div></div></div><div class="list"><div class="item"><div class="name">(Responsable Tec. Audio) —</div></div></div></div>
-    <div class="side-card" style="background:var(--col-fm)"><div class="head">🎓 FORMACIONES Y MENTORING<div><button class="btn" id="btnShowMent">🧭</button></div></div><div class="list" id="fmList"></div></div>
-    <div class="side-card" style="background:var(--col-ta)"><div class="head">📡 TELEAUDIOLOGIA<div></div></div><div class="list" id="taList"></div></div>
-    <div class="side-card" style="background:var(--col-eq)"><div class="head">🧰 EQUIPOS<div><button class="btn" id="eqAdd">＋</button></div></div><div class="list"><div class="item"><div class="name">Inventario de equipos</div></div></div></div>
+    <!-- Centros exclusivos -->
+    <div class="side-card" style="background:var(--col-ex)">
+      <div class="head">📒 CENTROS EXCLUSIVOS
+        <div class="group">
+          <button class="i28" id="ceToggle">▾</button>
+          <button class="i28" id="ceAdd">＋</button>
+        </div>
+      </div>
+      <div class="list" id="ceList"></div>
+    </div>
+
+    <!-- Centros flop -->
+    <div class="side-card" style="background:var(--col-fl)">
+      <div class="head">📒 CENTROS FLOP
+        <div class="group">
+          <button class="i28" id="flToggle">▾</button>
+          <button class="i28" id="flAdd">＋</button>
+        </div>
+      </div>
+      <div class="list" id="flList"></div>
+    </div>
+
+    <!-- Visitas -->
+    <div class="side-card" style="background:var(--col-va)">
+      <div class="head">📋 VISITAS AUDIO
+        <div class="group">
+          <button class="i28" id="vaToggle">▾</button>
+          <button class="i28" id="vaAdd">＋</button>
+        </div>
+      </div>
+      <div class="list" id="vaList"></div>
+    </div>
+
+    <!-- Formaciones y mentoring -->
+    <div class="side-card" style="background:var(--col-fm)">
+      <div class="head">🎓 FORMACIONES Y MENTORING
+        <div class="group">
+          <button class="i28" id="fmToggle">▾</button>
+          <button class="i28" id="fmAdd">＋</button>
+        </div>
+      </div>
+      <div class="list" id="fmList"></div>
+    </div>
+
+    <!-- Teleaudiología -->
+    <div class="side-card" style="background:var(--col-ta)">
+      <div class="head">📡 TELEAUDIOLOGIA
+        <div class="group">
+          <button class="i28" id="taToggle">▾</button>
+          <button class="i28" id="taAdd">＋</button>
+        </div>
+      </div>
+      <div class="list" id="taList"></div>
+    </div>
+
+    <!-- Equipos -->
+    <div class="side-card" style="background:var(--col-eq)">
+      <div class="head">🧰 EQUIPOS
+        <div class="group">
+          <button class="i28" id="eqToggle">▾</button>
+          <button class="i28" id="eqAdd">＋</button>
+        </div>
+      </div>
+      <div class="list" id="eqList"></div>
+    </div>
   </aside>
 
+  <!-- ========== DETALLE DERECHA ========== -->
   <section class="detail">
-    <div class="hdr"><h2 id="detTitle">Detalle</h2><span id="detTag" class="badge">—</span></div>
-
-    <!-- Panel: CIFRA VENTAS · Compañía -->
-    <div id="panelSalesCompany" style="display:none" class="table xscroll"><div class="grid" id="gridSalesCompany"></div></div>
-
-    <!-- Panel: CIFRA VENTAS · Centros exclusivos -->
-    <div id="panelSalesCenters"  style="display:none">
-      <div class="table xscroll">
-        <div class="grid" id="gridSalesCenters"></div>
-      </div>
-      <div class="tools"><button class="btn" id="svCentersAdd">＋ Añadir fila</button></div>
+    <div class="hdr">
+      <h2 id="detTitle">Detalle</h2>
+      <span id="detTag" class="badge">—</span>
     </div>
 
-    <!-- Panel: Mentoring general -->
-    <div id="panelMentoring"     style="display:none" class="table xscroll"><div class="grid" id="gridMentoring"></div></div>
+    <!-- Cifra ventas: Compañía -->
+    <div id="panelSalesCompany" style="display:none" class="sales-2col">
+      <div class="table xscroll"><div class="grid" id="gridSalesCompany"></div></div>
+      <div class="chartCard">
+        <div class="chartTitle">Objetivos vs Real — Compañía</div>
+        <svg id="chartCompany" viewBox="0 0 360 260" preserveAspectRatio="xMidYMid meet"></svg>
+        <div class="small">Verde: CV mes · Gris: Previsto</div>
+      </div>
+    </div>
 
-    <div id="panelPlaceholder" style="opacity:.7">Selecciona una sección en el lateral.</div>
+    <!-- Cifra ventas: Centros exclusivos -->
+    <div id="panelSalesCenters" style="display:none" class="sales-2col">
+      <div>
+        <div class="table xscroll"><div class="grid" id="gridSalesCenters"></div></div>
+        <div class="small" style="margin:.35rem 0">Totales al final. <button class="btn" id="svCentersAdd">＋ Añadir fila</button></div>
+      </div>
+      <div class="chartCard">
+        <div class="chartTitle">Objetivos vs Real — Centros exclusivos</div>
+        <svg id="chartCenters" viewBox="0 0 360 260" preserveAspectRatio="xMidYMid meet"></svg>
+        <div class="small">Verde: Mes · Gris: Previsto</div>
+      </div>
+    </div>
+
+    <!-- Detalle Centros (EX/FLOP) -->
+    <div id="panelCentro" style="display:none">
+      <div class="table xscroll" style="margin:.25rem 0 .5rem">
+        <div class="grid" id="gridCentroInfo"></div>
+      </div>
+
+      <h4 style="margin:.4rem 0 .2rem">ACCIONES</h4>
+      <div class="table xscroll"><div class="grid" id="gridAcciones"></div></div>
+
+      <h4 style="margin:.6rem 0 .2rem">FORMACIÓN</h4>
+      <div class="table xscroll"><div class="grid" id="gridFormacion"></div></div>
+
+      <h4 style="margin:.6rem 0 .2rem">PROCESOS</h4>
+      <div class="table xscroll"><div class="grid" id="gridProcesos"></div></div>
+    </div>
+
+    <!-- Otros paneles (placeholders compactos) -->
+    <div id="panelVisitas" style="display:none" class="table xscroll"><div class="grid" id="gridVisitas"></div></div>
+    <div id="panelFM"      style="display:none" class="table xscroll"><div class="grid" id="gridFM"></div></div>
+    <div id="panelTA"      style="display:none" class="table xscroll"><div class="grid" id="gridTA"></div></div>
+    <div id="panelEQ"      style="display:none" class="table xscroll"><div class="grid" id="gridEQ"></div></div>
+
+    <div id="panelPlaceholder" style="opacity:.75">Selecciona en la izquierda para editar.</div>
   </section>
 </main>
 
-<!-- Gate -->
+<!-- ===== PIN ===== -->
 <div class="gate" id="gate">
   <div class="card">
     <h3>Acceso</h3>
@@ -105,128 +234,329 @@
 </div>
 
 <script>
-/* ---------- Datos ---------- */
-const MONTHS_25_26=['Ago-2025','Sep-2025','Oct-2025','Nov-2025','Dic-2025','Ene-2026','Feb-2026','Mar-2026','Abr-2026','May-2026','Jun-2026','Jul-2026'];
-const LSKEY='seguimiento_audio_vlocal_v2';
-const $=s=>document.querySelector(s); const $$=s=>Array.from(document.querySelectorAll(s));
+/* ========== Utils ========== */
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
 const money=v=>isFinite(+v)?(+v).toLocaleString('es-ES'):'';
-let state={sales:{company:MONTHS_25_26.map(m=>({mes:m,previsto:null,cv:null})),centers:[/* {centro:'',mes:null,previsto:null} */]},mentoring:[]};
+const MONTHS=['Ago-2025','Sep-2025','Oct-2025','Nov-2025','Dic-2025','Ene-2026','Feb-2026','Mar-2026','Abr-2026','May-2026','Jun-2026','Jul-2026'];
+const LSKEY='seguimiento_audio_full';
 
-/* ---------- Persistencia ---------- */
-function stamp(t){ const s=$('#stamp'); if(s) s.textContent=t+' · '+new Date().toLocaleString(); }
+/* ========== Estado (con ejemplo mínimo) ========== */
+let state={
+  selected:{section:null,index:null,type:null}, // type: EX|FLOP
+  sales:{
+    company: MONTHS.map(m=>({mes:m,previsto:null,cv:null})),
+    centers: [] // {centro:'',mes:null,previsto:null}
+  },
+  centros:{
+    ex:[{nombre:'Reina Mercedes',delegado:'',audiologo:'',tipo:'Franquicia',
+        acciones:Array.from({length:6},()=>({fecha:'',paquete:'1',tipo:'Azafata',derivacion:null,citas:null,venta:null,obs:''})),
+        formacion:Array.from({length:4},()=>({curso:'',realizado:false,aplica:false,obs:''})),
+        procesos:Array.from({length:3},()=>({fecha:'',puntuacion:null,hit:false,rt:false,pruebas:null,venta:null,colab:'',obs:''}))}],
+    flop:[]
+  },
+  visitas:[{centro:'',delegado:'',audiologo:'',tipo:'Sucursal',fecha:'',puntuacion:null,hit:false,conv_prueba:null,conv_venta:null}],
+  fm:{mentoring:[]},
+  ta:[{centro:'',delegado:'',rol:'Audiólogo',persona:'',formacion:false,practicas:false,certificado:false,pruebas:false,ventas:false,obs:''}],
+  eq:[{equipo:'',serie:'',persona:'',fecha:'',centro:'',en:false,sede:false}]
+};
+
+/* ========== Persistencia ========== */
+function stamp(t){ $('#stamp').textContent = t+' · '+new Date().toLocaleString(); }
 function save(){ localStorage.setItem(LSKEY, JSON.stringify(state)); stamp('Guardado local'); }
 function load(){ try{ const raw=localStorage.getItem(LSKEY); if(raw) state=JSON.parse(raw);}catch{} stamp('Cargado local'); }
 
-/* ---------- Apertura / Paneles ---------- */
-function openPanel(which){
-  $('#panelPlaceholder').style.display='none';
-  $('#panelSalesCompany').style.display=(which==='company')?'block':'none';
-  $('#panelSalesCenters').style.display=(which==='centers')?'block':'none';
-  $('#panelMentoring').style.display=(which==='mentoring')?'block':'none';
-  if(which==='company'){ $('#detTitle').textContent='Detalle — Cifra de ventas (Compañía)'; $('#detTag').textContent='CIFRA DE VENTAS'; renderSalesCompany(); }
-  if(which==='centers'){ $('#detTitle').textContent='Detalle — Cifra de ventas (Centros exclusivos)'; $('#detTag').textContent='CIFRA DE VENTAS'; renderSalesCenters(); }
-  if(which==='mentoring'){ $('#detTitle').textContent='Detalle — Mentoring general'; $('#detTag').textContent='FORMACIONES Y MENTORING'; renderMentoring(); }
+/* ========== Sidebar render (editable/expandible) ========== */
+function renderSidebar(){
+  // Centros EX
+  const ceList=$('#ceList'); ceList.innerHTML='';
+  state.centros.ex.forEach((c,i)=>{
+    const el=document.createElement('div'); el.className='item';
+    el.innerHTML=`<div class="name">${c.nombre||'(nuevo centro)'}</div>
+      <div><button class="i28" title="Editar">✏️</button><button class="i28" title="Borrar">🗑️</button></div>`;
+    el.querySelectorAll('button')[0].onclick=()=>{ state.selected={section:'CENTROS',index:i,type:'EX'}; openCentro('EX'); };
+    el.querySelectorAll('button')[1].onclick=()=>{ if(confirm('¿Eliminar centro?')){ state.centros.ex.splice(i,1); renderSidebar(); if(state.selected?.index===i) showPlaceholder(); save(); } };
+    ceList.appendChild(el);
+  });
+  $('#ceAdd').onclick=()=>{ state.centros.ex.push({nombre:'(nuevo centro)',delegado:'',audiologo:'',tipo:'Franquicia',acciones:[],formacion:[],procesos:[]}); renderSidebar(); save(); };
+
+  // Centros FLOP
+  const flList=$('#flList'); flList.innerHTML='';
+  state.centros.flop.forEach((c,i)=>{
+    const el=document.createElement('div'); el.className='item';
+    el.innerHTML=`<div class="name">${c.nombre||'(nuevo centro)'}</div>
+      <div><button class="i28" title="Editar">✏️</button><button class="i28" title="Borrar">🗑️</button></div>`;
+    el.querySelectorAll('button')[0].onclick=()=>{ state.selected={section:'CENTROS',index:i,type:'FLOP'}; openCentro('FLOP'); };
+    el.querySelectorAll('button')[1].onclick=()=>{ if(confirm('¿Eliminar centro?')){ state.centros.flop.splice(i,1); renderSidebar(); if(state.selected?.index===i) showPlaceholder(); save(); } };
+    flList.appendChild(el);
+  });
+  $('#flAdd').onclick=()=>{ state.centros.flop.push({nombre:'(nuevo flop)',delegado:'',audiologo:'',tipo:'Franquicia',acciones:[],formacion:[],procesos:[]}); renderSidebar(); save(); };
+
+  // Visitas (solo índice)
+  const vaList=$('#vaList'); vaList.innerHTML='';
+  state.visitas.forEach((v,i)=>{
+    const el=document.createElement('div'); el.className='item';
+    el.innerHTML=`<div class="name">${v.centro||'(centro)'} — ${v.delegado||'Resp. Tec. Audio'}</div>
+      <div><button class="i28" title="Editar">✏️</button><button class="i28" title="Borrar">🗑️</button></div>`;
+    el.querySelectorAll('button')[0].onclick=()=>openVisitas();
+    el.querySelectorAll('button')[1].onclick=()=>{ if(confirm('¿Eliminar registro?')){ state.visitas.splice(i,1); renderSidebar(); showPlaceholder(); save(); } };
+    vaList.appendChild(el);
+  });
+  $('#vaAdd').onclick=()=>{ state.visitas.push({centro:'',delegado:'',audiologo:'',tipo:'Sucursal',fecha:'',puntuacion:null,hit:false,conv_prueba:null,conv_venta:null}); renderSidebar(); save(); };
+
+  // Formaciones y mentoring
+  const fmList=$('#fmList'); fmList.innerHTML='';
+  const ment=document.createElement('div'); ment.className='item';
+  ment.innerHTML=`<div class="name">🧭 Mentoring general</div><div><button class="i28" title="Abrir">➡️</button></div>`;
+  ment.querySelector('button').onclick=()=>openFM();
+  fmList.appendChild(ment);
+  $('#fmAdd').onclick=()=>openFM();
+
+  // Tele
+  const taList=$('#taList'); taList.innerHTML='';
+  const ta=document.createElement('div'); ta.className='item';
+  ta.innerHTML=`<div class="name">Listado</div><div><button class="i28" title="Abrir">➡️</button></div>`;
+  ta.querySelector('button').onclick=()=>openTA();
+  taList.appendChild(ta);
+
+  // Equipos
+  const eqList=$('#eqList'); eqList.innerHTML='';
+  const eq=document.createElement('div'); eq.className='item';
+  eq.innerHTML=`<div class="name">Inventario</div><div><button class="i28" title="Abrir">➡️</button></div>`;
+  eq.querySelector('button').onclick=()=>openEQ();
+  eqList.appendChild(eq);
 }
 
-/* ---------- Compañía ---------- */
+/* ========== Panel switchers ========== */
+function hideAll(){
+  ['panelSalesCompany','panelSalesCenters','panelCentro','panelVisitas','panelFM','panelTA','panelEQ','panelPlaceholder']
+    .forEach(id=>$('#'+id).style.display='none');
+}
+function showPlaceholder(){ hideAll(); $('#panelPlaceholder').style.display='block'; $('#detTitle').textContent='Detalle'; $('#detTag').textContent='—'; }
+function openSalesCompany(){ hideAll(); $('#panelSalesCompany').style.display='grid'; $('#detTitle').textContent='Detalle — Cifra de ventas (Compañía)'; $('#detTag').textContent='CIFRA DE VENTAS'; renderSalesCompany(); drawCompanyChart(); }
+function openSalesCenters(){ hideAll(); $('#panelSalesCenters').style.display='grid'; $('#detTitle').textContent='Detalle — Cifra de ventas (Centros exclusivos)'; $('#detTag').textContent='CIFRA DE VENTAS'; renderSalesCenters(); drawCentersChart(); }
+function openCentro(kind){ hideAll(); $('#panelCentro').style.display='block'; const idx=state.selected.index; const it=(kind==='EX')?state.centros.ex[idx]:state.centros.flop[idx];
+  $('#detTitle').textContent=`Detalle — ${it?.nombre||'—'}`; $('#detTag').textContent= kind==='EX'?'CENTROS EXCLUSIVOS':'CENTROS FLOP';
+  renderCentroInfo(it); renderAcciones(it); renderFormacion(it); renderProcesos(it);
+}
+function openVisitas(){ hideAll(); $('#panelVisitas').style.display='block'; $('#detTitle').textContent='Detalle — Visitas'; $('#detTag').textContent='VISITAS AUDIO'; renderVisitas(); }
+function openFM(){ hideAll(); $('#panelFM').style.display='block'; $('#detTitle').textContent='Detalle — Mentoring general'; $('#detTag').textContent='FORMACIONES Y MENTORING'; renderFM(); }
+function openTA(){ hideAll(); $('#panelTA').style.display='block'; $('#detTitle').textContent='Detalle — Teleaudiología'; $('#detTag').textContent='TELEAUDIOLOGIA'; renderTA(); }
+function openEQ(){ hideAll(); $('#panelEQ').style.display='block'; $('#detTitle').textContent='Detalle — Equipos'; $('#detTag').textContent='EQUIPOS'; renderEQ(); }
+
+/* ========== CIFRA DE VENTAS ========== */
+const MONTHS_LIST=[...MONTHS];
 function renderSalesCompany(){
-  const g=$('#gridSalesCompany'); g.innerHTML=''; g.style.gridTemplateColumns='180px 140px 140px 120px 120px';
+  const g=$('#gridSalesCompany'); g.innerHTML=''; g.style.gridTemplateColumns='160px 140px 140px 100px 100px';
   ['Mes','Previsto (€)','CV mes (€)','Dif.','Estado'].forEach(h=>{const d=document.createElement('div');d.className='head';d.textContent=h;g.appendChild(d);});
   let totP=0, totC=0;
   state.sales.company.forEach(r=>{
     const dM=document.createElement('div'); dM.textContent=r.mes; g.appendChild(dM);
-    const p=document.createElement('input'); p.type='number'; p.className='num'; p.step='0.01'; p.value=r.previsto??''; p.oninput=()=>{r.previsto=p.value===''?null:+p.value; paint(); save();}; g.appendChild(p);
-    const c=document.createElement('input'); c.type='number'; c.className='num'; c.step='0.01'; c.value=r.cv??''; c.oninput=()=>{r.cv=c.value===''?null:+c.value; paint(); save();}; g.appendChild(c);
+    const p=document.createElement('input'); p.type='number'; p.className='num'; p.step='0.01'; p.value=r.previsto??''; p.oninput=()=>{r.previsto=p.value===''?null:+p.value; paint(); save(); drawCompanyChart();}; g.appendChild(p);
+    const c=document.createElement('input'); c.type='number'; c.className='num'; c.step='0.01'; c.value=r.cv??''; c.oninput=()=>{r.cv=c.value===''?null:+c.value; paint(); save(); drawCompanyChart();}; g.appendChild(c);
     const d=document.createElement('div'); g.appendChild(d);
     const e=document.createElement('div'); g.appendChild(e);
     function paint(){ const pv=+r.previsto||0, cv=+r.cv||0; d.textContent=money(cv-pv); e.textContent=cv>=pv?'OK':'Bajo'; c.classList.remove('ok','bad'); if(!isNaN(pv)&&!isNaN(cv)) c.classList.add(cv>=pv?'ok':'bad'); drawTotals(); }
     function drawTotals(){ const olds=$$('#gridSalesCompany .totline'); olds.forEach(x=>x.remove()); totP=state.sales.company.reduce((s,x)=>s+(+x.previsto||0),0); totC=state.sales.company.reduce((s,x)=>s+(+x.cv||0),0);
-      ['TOTAL',money(totP),money(totC),money(totC-totP),totC>=totP?'OK':'Bajo'].forEach((t,ix)=>{const dd=document.createElement('div');dd.className='totline head';dd.textContent=t;g.appendChild(dd);});
+      ['TOTAL',money(totP),money(totC),money(totC-totP),totC>=totP?'OK':'Bajo'].forEach(t=>{const dd=document.createElement('div');dd.className='totline head';dd.textContent=t;g.appendChild(dd);});
     }
     paint();
   });
 }
-
-/* ---------- Centros exclusivos ---------- */
 function renderSalesCenters(){
-  const g=$('#gridSalesCenters'); g.innerHTML='';
-  // Columnas: Centro, Mes, Previsto, Diferencia
-  g.style.gridTemplateColumns='1.6fr 140px 140px 120px';
+  const g=$('#gridSalesCenters'); g.innerHTML=''; g.style.gridTemplateColumns='1.6fr 140px 140px 120px';
   ['Centro','Mes (€)','Previsto (€)','Diferencia'].forEach(h=>{const d=document.createElement('div');d.className='head';d.textContent=h;g.appendChild(d);});
-
-  let totMes=0, totPrev=0;
-
   state.sales.centers.forEach((r,idx)=>{
-    const c=document.createElement('input'); c.className='txt'; c.value=r.centro||''; c.oninput=()=>{r.centro=c.value; save();}; g.appendChild(c);
-
-    const m=document.createElement('input'); m.type='number'; m.step='0.01'; m.className='num'; m.value=r.mes??''; 
-    m.oninput=()=>{r.mes=m.value===''?null:+m.value; paint(); save();}; g.appendChild(m);
-
-    const p=document.createElement('input'); p.type='number'; p.step='0.01'; p.className='num'; p.value=r.previsto??''; 
-    p.oninput=()=>{r.previsto=p.value===''?null:+p.value; paint(); save();}; g.appendChild(p);
-
+    const c=document.createElement('input'); c.className='txt'; c.placeholder='Nombre del centro'; c.value=r.centro||''; c.oninput=()=>{r.centro=c.value; save(); drawCentersChart();}; g.appendChild(c);
+    const m=document.createElement('input'); m.type='number'; m.step='0.01'; m.className='num'; m.value=r.mes??''; m.oninput=()=>{r.mes=m.value===''?null:+m.value; paint(); save(); drawCentersChart();}; g.appendChild(m);
+    const p=document.createElement('input'); p.type='number'; p.step='0.01'; p.className='num'; p.value=r.previsto??''; p.oninput=()=>{r.previsto=p.value===''?null:+p.value; paint(); save(); drawCentersChart();}; g.appendChild(p);
     const d=document.createElement('div'); g.appendChild(d);
-
-    function paint(){
-      const mv=+r.mes||0, pv=+r.previsto||0;
-      d.textContent = money(mv-pv);
-      m.classList.remove('ok','bad');
-      if(!isNaN(mv)&&!isNaN(pv)) m.classList.add(mv>=pv?'ok':'bad');
-      drawTotals();
-    }
+    function paint(){ const mv=+r.mes||0, pv=+r.previsto||0; d.textContent=money(mv-pv); m.classList.remove('ok','bad'); if(!isNaN(mv)&&!isNaN(pv)) m.classList.add(mv>=pv?'ok':'bad'); }
     paint();
   });
-
-  function drawTotals(){
-    const olds=$$('#gridSalesCenters .totline'); olds.forEach(x=>x.remove());
-    totMes = state.sales.centers.reduce((s,x)=>s+(+x.mes||0),0);
-    totPrev= state.sales.centers.reduce((s,x)=>s+(+x.previsto||0),0);
-    ['TOTAL', money(totMes), money(totPrev), money(totMes-totPrev)].forEach((t,ix)=>{
-      const dd=document.createElement('div'); dd.className='totline head'; dd.textContent=t; g.appendChild(dd);
-    });
-  }
-
-  // botón añadir fila (a la derecha)
-  $('#svCentersAdd').onclick=()=>{ state.sales.centers.push({centro:'',mes:null,previsto:null}); renderSalesCenters(); save(); };
-
-  // Asegura que siempre haya al menos 1 fila
-  if(state.sales.centers.length===0){ state.sales.centers.push({centro:'',mes:null,previsto:null}); }
-  // Forzar totales
-  const ev=new Event('input'); const anyNum=g.querySelector('.num'); if(anyNum) anyNum.dispatchEvent(ev);
+  // Totales
+  const olds=$$('#gridSalesCenters .totline'); olds.forEach(x=>x.remove());
+  const totMes=state.sales.centers.reduce((s,x)=>s+(+x.mes||0),0);
+  const totPre=state.sales.centers.reduce((s,x)=>s+(+x.previsto||0),0);
+  ['TOTAL', money(totMes), money(totPre), money(totMes-totPre)].forEach(t=>{const dd=document.createElement('div');dd.className='totline head';dd.textContent=t;g.appendChild(dd);});
+  // Botón añadir
+  $('#svCentersAdd').onclick=()=>{ state.sales.centers.push({centro:'',mes:null,previsto:null}); renderSalesCenters(); save(); drawCentersChart(); };
 }
 
-/* ---------- Mentoring general ---------- */
-function renderMentoring(){
-  const g=$('#gridMentoring'); g.innerHTML=''; g.style.gridTemplateColumns='140px 1.1fr 120px 1.6fr';
+/* ========== Gráficos (SVG puros, sin librerías) ========== */
+function drawBars(svgId, labels, seriesA, seriesB, colorA='#2ecc71', colorB='#9aa1b1'){
+  const svg=$( '#'+svgId ); if(!svg) return; const W=360, H=260, pad=28, base=H-30;
+  svg.innerHTML='';
+  const maxV=Math.max(1, ...seriesA, ...seriesB);
+  const bw=Math.max(8, Math.floor((W-2*pad)/(labels.length*2 + labels.length))); // par barras + espacio
+  let x=pad;
+  // ejes
+  svg.innerHTML+=`<line x1="${pad}" y1="${base}" x2="${W-pad}" y2="${base}" stroke="#ccd1d9"/>`;
+  // barras
+  labels.forEach((lab,i)=>{
+    const a=seriesA[i]||0, b=seriesB[i]||0;
+    const ha = Math.round((a/maxV)*(base-pad));
+    const hb = Math.round((b/maxV)*(base-pad));
+    // Previsto (gris)
+    svg.innerHTML+=`<rect x="${x}" y="${base-hb}" width="${bw}" height="${hb}" fill="${colorB}"/>`;
+    // Mes/CV (verde)
+    svg.innerHTML+=`<rect x="${x+bw+4}" y="${base-ha}" width="${bw}" height="${ha}" fill="${colorA}"/>`;
+    // etiqueta (cada 2 para legibilidad)
+    if(i%2===0){
+      svg.innerHTML+=`<text x="${x+bw}" y="${base+12}" font-size="9" text-anchor="middle" fill="#6b7280">${lab.split('-')[0]}</text>`;
+    }
+    x += (bw*2 + 12);
+  });
+}
+function drawCompanyChart(){
+  const labels = state.sales.company.map(r=>r.mes);
+  const prev   = state.sales.company.map(r=>+r.previsto||0);
+  const cv     = state.sales.company.map(r=>+r.cv||0);
+  drawBars('chartCompany', labels, cv, prev);
+}
+function drawCentersChart(){
+  const labels = state.sales.centers.map(r=>r.centro||'—');
+  const mes    = state.sales.centers.map(r=>+r.mes||0);
+  const prev   = state.sales.centers.map(r=>+r.previsto||0);
+  drawBars('chartCenters', labels, mes, prev);
+}
+
+/* ========== Detalle CENTROS (EX/FLOP) ========== */
+function renderCentroInfo(it){
+  const g=$('#gridCentroInfo'); g.innerHTML=''; g.style.gridTemplateColumns='1.2fr 1fr 1fr 1fr';
+  ['Nombre','Delegado','Audiólogo','Franquicia/Sucursal'].forEach(h=>{const d=document.createElement('div');d.className='head';d.textContent=h;g.appendChild(d);});
+  const n=document.createElement('input'); n.className='txt'; n.value=it.nombre||''; n.oninput=()=>{it.nombre=n.value; renderSidebar(); save();}; g.appendChild(n);
+  const d=document.createElement('input'); d.className='txt'; d.value=it.delegado||''; d.oninput=()=>{it.delegado=d.value; save();}; g.appendChild(d);
+  const a=document.createElement('input'); a.className='txt'; a.value=it.audiologo||''; a.oninput=()=>{it.audiologo=a.value; save();}; g.appendChild(a);
+  const t=document.createElement('select'); t.className='sel'; t.innerHTML='<option>Franquicia</option><option>Sucursal</option>'; t.value=it.tipo||'Franquicia'; t.onchange=()=>{it.tipo=t.value; save();}; g.appendChild(t);
+}
+function renderAcciones(it){
+  const g=$('#gridAcciones'); g.innerHTML=''; g.style.gridTemplateColumns='110px 80px 180px 100px 90px 90px 1fr 40px';
+  ['Fecha','Paquete','Tipo de acción','Derivación','Citas','Ventas','Observaciones',''].forEach(h=>{const d=document.createElement('div');d.className='head';d.textContent=h;g.appendChild(d);});
+  if(!Array.isArray(it.acciones)) it.acciones=[];
+  it.acciones.forEach((r,idx)=>{
+    const f=document.createElement('input'); f.type='date'; f.className='date'; f.value=r.fecha||''; f.oninput=()=>{r.fecha=f.value; save();}; g.appendChild(f);
+    const p=document.createElement('select'); p.className='sel'; p.innerHTML='<option>1</option><option>2</option><option>3</option>'; p.value=r.paquete||'1'; p.onchange=()=>{r.paquete=p.value; save();}; g.appendChild(p);
+    const ta=document.createElement('select'); ta.className='sel';
+    ta.innerHTML=['Azafata','Buzoneo','Mailing','Ruleta','Stand','Cashback','Otros'].map(x=>`<option>${x}</option>`).join('');
+    ta.value=r.tipo||'Azafata'; ta.onchange=()=>{r.tipo=ta.value; save();}; g.appendChild(ta);
+    const de=document.createElement('input'); de.type='number'; de.className='num'; de.value=r.derivacion??''; de.oninput=()=>{r.derivacion=de.value===''?null:+de.value; save();}; g.appendChild(de);
+    const ci=document.createElement('input'); ci.type='number'; ci.className='num'; ci.value=r.citas??''; ci.oninput=()=>{r.citas=ci.value===''?null:+ci.value; save();}; g.appendChild(ci);
+    const ve=document.createElement('input'); ve.type='number'; ve.className='num'; ve.value=r.venta??''; ve.oninput=()=>{r.venta=ve.value===''?null:+ve.value; save();}; g.appendChild(ve);
+    const ob=document.createElement('input'); ob.className='txt'; ob.value=r.obs||''; ob.oninput=()=>{r.obs=ob.value; save();}; g.appendChild(ob);
+    const del=document.createElement('button'); del.className='btn'; del.textContent='—'; del.title='Eliminar fila'; del.onclick=()=>{it.acciones.splice(idx,1); renderAcciones(it); save();}; g.appendChild(del);
+  });
+  // 5 líneas por defecto si no hay
+  while(it.acciones.length<5){ it.acciones.push({fecha:'',paquete:'1',tipo:'Azafata',derivacion:null,citas:null,venta:null,obs:''}); }
+}
+function renderFormacion(it){
+  const g=$('#gridFormacion'); g.innerHTML=''; g.style.gridTemplateColumns='1fr 120px 120px 1fr 40px';
+  ['Curso','Realizado','Aplica','Observaciones',''].forEach(h=>{const d=document.createElement('div');d.className='head';d.textContent=h;g.appendChild(d);});
+  if(!Array.isArray(it.formacion)) it.formacion=[];
+  it.formacion.forEach((r,idx)=>{
+    const c=document.createElement('input'); c.className='txt'; c.value=r.curso||''; c.oninput=()=>{r.curso=c.value; save();}; g.appendChild(c);
+    const re=document.createElement('input'); re.type='checkbox'; re.checked=!!r.realizado; re.onchange=()=>{r.realizado=re.checked; save();}; g.appendChild(re);
+    const ap=document.createElement('input'); ap.type='checkbox'; ap.checked=!!r.aplica; ap.onchange=()=>{r.aplica=ap.checked; save();}; g.appendChild(ap);
+    const o=document.createElement('input'); o.className='txt'; o.value=r.obs||''; o.oninput=()=>{r.obs=o.value; save();}; g.appendChild(o);
+    const del=document.createElement('button'); del.className='btn'; del.textContent='—'; del.title='Eliminar fila'; del.onclick=()=>{it.formacion.splice(idx,1); renderFormacion(it); save();}; g.appendChild(del);
+  });
+  while(it.formacion.length<4){ it.formacion.push({curso:'',realizado:false,aplica:false,obs:''}); }
+}
+function renderProcesos(it){
+  const g=$('#gridProcesos'); g.innerHTML=''; g.style.gridTemplateColumns='120px 130px 70px 70px 110px 110px 1fr';
+  ['Fecha visita','Puntuación (%)','HIT','Pruebas RT','% Pruebas','% Venta','Observaciones'].forEach(h=>{const d=document.createElement('div');d.className='head';d.textContent=h;g.appendChild(d);});
+  if(!Array.isArray(it.procesos)) it.procesos=[];
+  it.procesos.forEach((r,idx)=>{
+    const f=document.createElement('input'); f.type='date'; f.className='date'; f.value=r.fecha||''; f.oninput=()=>{r.fecha=f.value; save();}; g.appendChild(f);
+    const pu=document.createElement('input'); pu.type='number'; pu.min=0; pu.max=100; pu.className='num'; pu.value=r.puntuacion??''; pu.oninput=()=>{r.puntuacion=pu.value===''?null:+pu.value; colorP(); save();}; g.appendChild(pu);
+    const hi=document.createElement('input'); hi.type='checkbox'; hi.checked=!!r.hit; hi.onchange=()=>{r.hit=hi.checked; save();}; g.appendChild(hi);
+    const rt=document.createElement('input'); rt.type='checkbox'; rt.checked=!!r.rt; rt.onchange=()=>{r.rt=rt.checked; save();}; g.appendChild(rt);
+    const pr=document.createElement('input'); pr.type='number'; pr.min=0; pr.max=100; pr.className='num'; pr.value=r.pruebas??''; pr.oninput=()=>{r.pruebas=pr.value===''?null:+pr.value; colorC(pr); save();}; g.appendChild(pr);
+    const ve=document.createElement('input'); ve.type='number'; ve.min=0; ve.max=100; ve.className='num'; ve.value=r.venta??''; ve.oninput=()=>{r.venta=ve.value===''?null:+ve.value; colorC(ve); save();}; g.appendChild(ve);
+    const ob=document.createElement('input'); ob.className='txt'; ob.value=r.obs||''; ob.oninput=()=>{r.obs=ob.value; save();}; g.appendChild(ob);
+    function colorP(){ pu.classList.remove('ok','bad'); const v=+pu.value; if(!isNaN(v)) pu.classList.add(v>=95?'ok':'bad'); }
+    function colorC(el){ el.classList.remove('ok','bad'); const v=+el.value; if(!isNaN(v)) el.classList.add(v>=80?'ok':'bad'); }
+    colorP(); colorC(pr); colorC(ve);
+  });
+  while(it.procesos.length<3){ it.procesos.push({fecha:'',puntuacion:null,hit:false,rt:false,pruebas:null,venta:null,obs:''}); }
+}
+
+/* ========== Otros paneles mínimos ========== */
+function renderVisitas(){
+  const g=$('#gridVisitas'); g.innerHTML=''; g.style.gridTemplateColumns='1.2fr 1fr 1fr 110px 110px 80px 80px 80px 80px';
+  ['Centro','Delegado','Audiólogo','Tipo','Fecha','Puntuación','HIT','%Prueba','%Venta'].forEach(h=>{const d=document.createElement('div');d.className='head';d.textContent=h;g.appendChild(d);});
+  state.visitas.forEach((r,i)=>{
+    const c=document.createElement('input'); c.className='txt'; c.value=r.centro||''; c.oninput=()=>{r.centro=c.value; save();}; g.appendChild(c);
+    const d=document.createElement('input'); d.className='txt'; d.value=r.delegado||''; d.oninput=()=>{r.delegado=d.value; save();}; g.appendChild(d);
+    const a=document.createElement('input'); a.className='txt'; a.value=r.audiologo||''; a.oninput=()=>{r.audiologo=a.value; save();}; g.appendChild(a);
+    const t=document.createElement('select'); t.className='sel'; t.innerHTML='<option>Sucursal</option><option>Franquicia</option>'; t.value=r.tipo||'Sucursal'; t.onchange=()=>{r.tipo=t.value; save();}; g.appendChild(t);
+    const f=document.createElement('input'); f.type='date'; f.className='date'; f.value=r.fecha||''; f.oninput=()=>{r.fecha=f.value; save();}; g.appendChild(f);
+    const p=document.createElement('input'); p.type='number'; p.min=0;p.max=100; p.className='num'; p.value=r.puntuacion??''; p.oninput=()=>{r.puntuacion=p.value===''?null:+p.value; color(p,85); save();}; g.appendChild(p);
+    const h=document.createElement('input'); h.type='checkbox'; h.checked=!!r.hit; h.onchange=()=>{r.hit=h.checked; save();}; g.appendChild(h);
+    const cp=document.createElement('input'); cp.type='number'; cp.min=0; cp.max=100; cp.className='num'; cp.value=r.conv_prueba??''; cp.oninput=()=>{r.conv_prueba=cp.value===''?null:+cp.value; color(cp,80); save();}; g.appendChild(cp);
+    const cv=document.createElement('input'); cv.type='number'; cv.min=0; cv.max=100; cv.className='num'; cv.value=r.conv_venta??''; cv.oninput=()=>{r.conv_venta=cv.value===''?null:+cv.value; color(cv,80); save();}; g.appendChild(cv);
+    function color(el,thr){ el.classList.remove('ok','bad'); const v=+el.value; if(!isNaN(v)) el.classList.add(v>=thr?'ok':'bad'); }
+    color(p,85); color(cp,80); color(cv,80);
+  });
+}
+function renderFM(){
+  const g=$('#gridFM'); g.innerHTML=''; g.style.gridTemplateColumns='120px 1.2fr 160px 1.6fr';
   ['Fecha','Tema','Asistencia','Observaciones'].forEach(h=>{const d=document.createElement('div');d.className='head';d.textContent=h;g.appendChild(d);});
-  state.mentoring.forEach((r,idx)=>{
+  state.fm.mentoring.forEach((r,i)=>{
     const f=document.createElement('input'); f.type='date'; f.className='date'; f.value=r.fecha||''; f.oninput=()=>{r.fecha=f.value; save();}; g.appendChild(f);
     const t=document.createElement('input'); t.className='txt'; t.value=r.tema||''; t.oninput=()=>{r.tema=t.value; save();}; g.appendChild(t);
     const a=document.createElement('input'); a.className='txt'; a.placeholder='Nº / lista'; a.value=r.asistencia||''; a.oninput=()=>{r.asistencia=a.value; save();}; g.appendChild(a);
     const o=document.createElement('input'); o.className='txt'; o.value=r.obs||''; o.oninput=()=>{r.obs=o.value; save();}; g.appendChild(o);
   });
+  // siempre una fila visible
+  if(state.fm.mentoring.length===0){ state.fm.mentoring.push({fecha:'',tema:'',asistencia:'',obs:''}); }
 }
-$('#btnShowMent')?.addEventListener('click',()=>openPanel('mentoring'));
-
-/* ---------- Botones sidebar de ventas ---------- */
-document.getElementById('svOpenCompany').onclick=()=>openPanel('company');
-document.getElementById('svOpenCenters').onclick=()=>openPanel('centers');
-
-/* ---------- Topbar ---------- */
-document.getElementById('btnSave').onclick=save;
-document.getElementById('btnLoad').onclick=()=>{load(); openPanel('company');};
-
-/* ---------- PIN ---------- */
-function enter(){ const v=document.getElementById('pin').value.trim();
-  if(v==='4321' || /^AR4321$/i.test(v)){ document.getElementById('gate').style.display='none'; }
-  else{ document.getElementById('pinMsg').style.display='block'; }
+function renderTA(){
+  const g=$('#gridTA'); g.innerHTML=''; g.style.gridTemplateColumns='1.2fr 1fr 110px 1.1fr 60px 60px 60px 60px 60px 1.6fr';
+  ['Centro','Delegado','Rol','Persona','Form.','Prác.','Cert.','Pruebas','Ventas','Obs.'].forEach(h=>{const d=document.createElement('div');d.className='head';d.textContent=h;g.appendChild(d);});
+  state.ta.forEach(r=>{
+    const c=document.createElement('input'); c.className='txt'; c.value=r.centro||''; c.oninput=()=>{r.centro=c.value; save();}; g.appendChild(c);
+    const d=document.createElement('input'); d.className='txt'; d.value=r.delegado||''; d.oninput=()=>{r.delegado=d.value; save();}; g.appendChild(d);
+    const ro=document.createElement('select'); ro.className='sel'; ro.innerHTML='<option>Audiólogo</option><option>Técnico</option>'; ro.value=r.rol||'Audiólogo'; ro.onchange=()=>{r.rol=ro.value; save();}; g.appendChild(ro);
+    const p=document.createElement('input'); p.className='txt'; p.placeholder='Nombre'; p.value=r.persona||''; p.oninput=()=>{r.persona=p.value; save();}; g.appendChild(p);
+    ['formacion','practicas','certificado','pruebas','ventas'].forEach(k=>{ const x=document.createElement('input'); x.type='checkbox'; x.checked=!!r[k]; x.onchange=()=>{r[k]=x.checked; save();}; g.appendChild(x); });
+    const o=document.createElement('input'); o.className='txt'; o.value=r.obs||''; o.oninput=()=>{r.obs=o.value; save();}; g.appendChild(o);
+  });
 }
-document.getElementById('enter').onclick=enter;
-document.getElementById('clearPin').onclick=()=>{document.getElementById('pin').value='';document.getElementById('pinMsg').style.display='none';};
-document.getElementById('pin').addEventListener('keydown',e=>{ if(e.key==='Enter') enter(); });
+function renderEQ(){
+  const g=$('#gridEQ'); g.innerHTML=''; g.style.gridTemplateColumns='1.2fr 1fr 1fr 110px 1.2fr 70px 70px';
+  ['Equipo','Nº serie','Persona envía','Fecha','Centro','C','S'].forEach(h=>{const d=document.createElement('div');d.className='head';d.textContent=h;g.appendChild(d);});
+  state.eq.forEach(r=>{
+    const e=document.createElement('input'); e.className='txt'; e.value=r.equipo||''; e.oninput=()=>{r.equipo=e.value; save();}; g.appendChild(e);
+    const s=document.createElement('input'); s.className='txt'; s.value=r.serie||''; s.oninput=()=>{r.serie=s.value; save();}; g.appendChild(s);
+    const p=document.createElement('input'); p.className='txt'; p.value=r.persona||''; p.oninput=()=>{r.persona=p.value; save();}; g.appendChild(p);
+    const f=document.createElement('input'); f.type='date'; f.className='date'; f.value=r.fecha||''; f.oninput=()=>{r.fecha=f.value; save();}; g.appendChild(f);
+    const c=document.createElement('input'); c.className='txt'; c.value=r.centro||''; c.oninput=()=>{r.centro=c.value; save();}; g.appendChild(c);
+    ['en','sede'].forEach(k=>{ const x=document.createElement('input'); x.type='checkbox'; x.checked=!!r[k]; x.onchange=()=>{r[k]=x.checked; save();}; g.appendChild(x); });
+  });
+}
 
-/* ---------- Boot ---------- */
-window.addEventListener('load',()=>{ load(); openPanel('company'); });
+/* ========== Botones de navegación ventas ========== */
+$('#svOpenCompany').onclick=openSalesCompany;
+$('#svOpenCenters').onclick=openSalesCenters;
+
+/* ========== Toggles (colapsar listas) ========== */
+function toggleList(btnId, listId){ const btn=$(btnId), list=$(listId); btn.onclick=()=>{ list.style.display = list.style.display==='none' ? '' : 'none'; if(list.style.display==='none') showPlaceholder(); }; }
+toggleList('#ceToggle','#ceList'); toggleList('#flToggle','#flList'); toggleList('#vaToggle','#vaList'); toggleList('#fmToggle','#fmList'); toggleList('#taToggle','#taList'); toggleList('#eqToggle','#eqList');
+
+/* ========== Topbar acciones ========== */
+$('#btnSave').onclick=save;
+$('#btnLoad').onclick=()=>{ load(); renderSidebar(); showPlaceholder(); };
+
+/* ========== PIN ========== */
+function enter(){ const v=$('#pin').value.trim(); if(v==='4321' || /^AR4321$/i.test(v)){ $('#gate').style.display='none'; } else { $('#pinMsg').style.display='block'; } }
+$('#enter').onclick=enter; $('#clearPin').onclick=()=>{$('#pin').value='';$('#pinMsg').style.display='none';}; $('#pin').addEventListener('keydown',e=>{ if(e.key==='Enter') enter(); });
+
+/* ========== Boot ========== */
+window.addEventListener('load',()=>{
+  load();
+  renderSidebar();
+  showPlaceholder();
+});
 </script>
 </body>
 </html>
