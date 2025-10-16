@@ -72,6 +72,7 @@ svg{width:100%;height:260px}
 .card h3{margin:.1rem 0 .6rem}.pin{width:100%;letter-spacing:.35rem;font-size:1rem;text-align:center;background:#000;color:#fff;border:1px solid #444;border-radius:8px;padding:.46rem}
 .btnRow{display:flex;gap:.5rem;margin-top:10px}.btnDark{flex:1;background:#fff;border:0;color:#111;font-weight:900;border-radius:10px;padding:.5rem .85rem;cursor:pointer}
 .msg{color:#ff8080;display:none;margin-top:.45rem}
+.pill{display:inline-block;border:1px solid #0002;border-radius:999px;padding:.1rem .5rem;font-size:11px;background:#00000008}
 </style>
 </head>
 <body>
@@ -87,7 +88,7 @@ svg{width:100%;height:260px}
 </header>
 
 <main class="wrapper">
-  <!-- ========== LADO IZQUIERDO (editable y expandible) ========== -->
+  <!-- ========== LADO IZQUIERDO ========== -->
   <aside class="sidebar">
     <!-- CIFRA DE VENTAS -->
     <div class="side-card" style="background:var(--col-sv)">
@@ -97,7 +98,7 @@ svg{width:100%;height:260px}
           <button class="i28" id="svOpenCenters"  title="Centros exclusivos ➜">➡️</button>
         </div>
       </div>
-      <div class="list small">Abre con ➡️. El formato de tabla es idéntico en ambos paneles.</div>
+      <div class="list small">Abre con ➡️. Estructura de tabla idéntica en ambos paneles.</div>
     </div>
 
     <!-- Centros exclusivos -->
@@ -174,12 +175,12 @@ svg{width:100%;height:260px}
       <span id="detTag" class="badge">—</span>
     </div>
 
-    <!-- Cifra ventas: Compañía (misma estructura que Centros) -->
+    <!-- Cifra ventas: Compañía -->
     <div id="panelSalesCompany" style="display:none" class="sales-2col">
       <div>
         <div class="search">
-          <input id="svcSearch" class="txt" placeholder="Buscar mes…"/>
-          <div class="tools"><button class="i28" id="svcAdd">＋</button></div>
+          <input id="svcSearchCompany" class="txt" placeholder="Buscar mes…"/>
+          <div class="tools"><button class="i28" id="svcAddCompany">＋</button></div>
         </div>
         <div class="table xscroll"><div class="grid" id="gridSalesCompany"></div></div>
       </div>
@@ -194,8 +195,8 @@ svg{width:100%;height:260px}
     <div id="panelSalesCenters" style="display:none" class="sales-2col">
       <div>
         <div class="search">
-          <input id="svcSearch" class="txt" placeholder="Buscar centro…"/>
-          <div class="tools"><button class="i28" id="svcAdd">＋</button></div>
+          <input id="svcSearchCenters" class="txt" placeholder="Buscar centro…"/>
+          <div class="tools"><button class="i28" id="svcAddCenters">＋</button></div>
         </div>
         <div class="table xscroll"><div class="grid" id="gridSalesCenters"></div></div>
       </div>
@@ -206,7 +207,7 @@ svg{width:100%;height:260px}
       </div>
     </div>
 
-    <!-- Detalle Centros (EX/FLOP): Info + Acciones + Formación + Procesos -->
+    <!-- Detalle Centros (EX/FLOP) -->
     <div id="panelCentro" style="display:none">
       <div class="table xscroll" style="margin:.25rem 0 .5rem">
         <div class="grid" id="gridCentroInfo"></div>
@@ -244,7 +245,7 @@ svg{width:100%;height:260px}
           <option>Mentoring por delegados</option>
           <option>Coaching por delegado</option>
         </select>
-        <input id="fmSearch" class="txt" placeholder="Buscar tema/persona…"/>
+        <input id="fmSearch" class="txt" placeholder="Buscar tema/delegado/persona…"/>
         <div class="tools"><button class="i28" id="fmAddRow">＋</button></div>
       </div>
       <div class="table xscroll"><div class="grid" id="gridFM"></div></div>
@@ -254,15 +255,20 @@ svg{width:100%;height:260px}
     <div id="panelTA" style="display:none">
       <div class="search">
         <input id="taSearch" class="txt" placeholder="Buscar centro/persona…"/>
-        <div class="tools"><button class="i28" id="taAddRow">＋</button></div>
+        <div class="tools">
+          <span class="pill" id="taCertPill">Certificadas: 0</span>
+          <button class="i28" id="taAddRow">＋</button>
+        </div>
       </div>
       <div class="table xscroll"><div class="grid" id="gridTA"></div></div>
     </div>
 
-    <!-- EQUIPOS -->
+    <!-- EQUIPOS (7 packs) -->
     <div id="panelEQ" style="display:none">
       <div class="search">
+        <select id="eqPackSel" class="sel"></select>
         <input id="eqSearch" class="txt" placeholder="Buscar equipo/serie/centro…"/>
+        <label class="small" style="display:flex;align-items:center;gap:.35rem"><input id="eqAllPacks" type="checkbox"/> Buscar en todos los packs</label>
         <div class="tools"><button class="i28" id="eqAddRow">＋</button></div>
       </div>
       <div class="table xscroll"><div class="grid" id="gridEQ"></div></div>
@@ -288,13 +294,13 @@ svg{width:100%;height:260px}
 const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
 const money=v=>isFinite(+v)?(+v).toLocaleString('es-ES'):'';
 const MONTHS=['Ago-2025','Sep-2025','Oct-2025','Nov-2025','Dic-2025','Ene-2026','Feb-2026','Mar-2026','Abr-2026','May-2026','Jun-2026','Jul-2026'];
-const LSKEY='seguimiento_audio_full_v2';
+const LSKEY='seguimiento_audio_full_v3';
 
 /* ===== Estado ===== */
 let state={
   sales:{
     company: MONTHS.map(m=>({label:m,mes:null,previsto:null,adj:null})),
-    centers: [] // {label: centro, mes, previsto, adj}
+    centers: [] // {label (centro), mes, previsto, adj}
   },
   centros:{
     ex:[{nombre:'Reina Mercedes',delegado:'',audiologo:'',tipo:'Franquicia',
@@ -305,12 +311,14 @@ let state={
   },
   visitas: Array.from({length:250},()=>({centro:'',delegado:'',audiologo:'',tipo:'Sucursal',fecha:'',puntuacion:null,hit:false,conv_prueba:null,conv_venta:null,adj:null})),
   fm:{
-    'Mentoring general': [{fecha:'',tema:'',asistencia:'',obs:'',adj:null}],
+    'Mentoring general': [{fecha:'',tema:'',delegado:'',asistencia:'',obs:'',adj:null}],
     'Mentoring por delegados': [],
     'Coaching por delegado': []
   },
-  ta:[{centro:'',delegado:'',rol:'Audiólogo',persona:'',formacion:false,practicas:false,certificado:false,pruebas:false,ventas:false,obs:'',adj:null}],
-  eq:[{equipo:'',serie:'',persona:'',fecha:'',centro:'',en:false,sede:false,adj:null}],
+  ta: Array.from({length:100},()=>({centro:'',delegado:'',rol:'Audiólogo',persona:'',formacion:false,practicas:false,certificado:false,pruebas:false,ventas:false,obs:'',adj:null})),
+  eqPacks: Array.from({length:7},()=>({
+    rows:[{equipo:'',serie:'',persona:'',fecha:'',centro:'',en:false,sede:false,adj:null}]
+  })),
   meta:{vaRol:'Responsable Tec. Audio',vaNombre:''}
 };
 
@@ -377,10 +385,10 @@ function renderSidebar(){
   // Equipos
   const eqList=$('#eqList'); eqList.innerHTML='';
   const eqBtn=document.createElement('div'); eqBtn.className='item';
-  eqBtn.innerHTML=`<div class="name">Inventario</div><div><button class="i28">➡️</button></div>`;
+  eqBtn.innerHTML=`<div class="name">Packs de equipos (7)</div><div><button class="i28">➡️</button></div>`;
   eqBtn.querySelector('button').onclick=openEQ; eqList.appendChild(eqBtn);
   $('#eqOpen').onclick=openEQ;
-  $('#eqAdd').onclick=()=>{ state.eq.push({equipo:'',serie:'',persona:'',fecha:'',centro:'',en:false,sede:false,adj:null}); save(); openEQ(); };
+  $('#eqAdd').onclick=openEQ; // abre gestión por packs
 }
 
 /* ===== Panel switching ===== */
@@ -397,14 +405,14 @@ function openCentro(kind){ hideAll(); $('#panelCentro').style.display='block'; c
   renderCentroInfo(it); renderAcciones(it); renderFormacion(it); renderProcesos(it);
 }
 function openVisitas(){ hideAll(); $('#panelVisitas').style.display='block'; $('#detTitle').textContent='Detalle — Visitas'; $('#detTag').textContent='VISITAS AUDIO'; renderVisitas(); }
+let currentFmCat='Mentoring general';
 function openFM(cat='Mentoring general'){ hideAll(); $('#panelFM').style.display='block'; $('#detTitle').textContent='Detalle — Formaciones y Mentoring'; $('#detTag').textContent='FORMACIONES'; currentFmCat=cat; renderFM(); $('#fmCat').value=cat; }
 function openTA(){ hideAll(); $('#panelTA').style.display='block'; $('#detTitle').textContent='Detalle — Teleaudiología'; $('#detTag').textContent='TELEAUDIOLOGIA'; renderTA(); }
 function openEQ(){ hideAll(); $('#panelEQ').style.display='block'; $('#detTitle').textContent='Detalle — Equipos'; $('#detTag').textContent='EQUIPOS'; renderEQ(); }
 
-/* ===== CIFRA: render genérico (misma estructura) ===== */
-// Fila: {label, mes, previsto, adj}
+/* ===== CIFRA ===== */
 function renderSalesCompany(){
-  const g=$('#gridSalesCompany'); const q=($('#svcSearch').value||'').toLowerCase(); g.innerHTML='';
+  const g=$('#gridSalesCompany'); const q=($('#svcSearchCompany').value||'').toLowerCase(); g.innerHTML='';
   g.style.gridTemplateColumns='1.2fr 140px 140px 120px 40px';
   ['Mes','Mes (€)','Previsto (€)','Diferencia',''].forEach(h=>{const d=document.createElement('div');d.className='head';d.textContent=h;g.appendChild(d);});
   let totMes=0, totPre=0;
@@ -427,18 +435,16 @@ function renderSalesCompany(){
     function paint(){ const mv=+r.mes||0, pv=+r.previsto||0; d.textContent=money(mv-pv); m.classList.remove('ok','bad'); if(!isNaN(mv)&&!isNaN(pv)) m.classList.add(mv>=pv?'ok':'bad'); }
     paint(); totMes+=+r.mes||0; totPre+=+r.previsto||0;
   });
-  // Totales
   ['TOTAL', money(totMes), money(totPre), money(totMes-totPre), ''].forEach(t=>{const dd=document.createElement('div');dd.className='totline head';dd.textContent=t;g.appendChild(dd);});
 }
 function renderSalesCenters(){
-  const g=$('#gridSalesCenters'); const q=($('#svcSearch').value||'').toLowerCase(); g.innerHTML='';
+  const g=$('#gridSalesCenters'); const q=($('#svcSearchCenters').value||'').toLowerCase(); g.innerHTML='';
   g.style.gridTemplateColumns='1.4fr 140px 140px 120px 40px';
   ['Centro','Mes (€)','Previsto (€)','Diferencia',''].forEach(h=>{const d=document.createElement('div');d.className='head';d.textContent=h;g.appendChild(d);});
   let totMes=0, totPre=0;
   state.sales.centers.forEach((r,idx)=>{
     if(q && !(r.label||'').toLowerCase().includes(q)) return;
     const c=document.createElement('input'); c.className='txt'; c.placeholder='Nombre del centro'; c.value=r.label||''; c.oninput=()=>{r.label=c.value; save(); drawCentersChart();}; g.appendChild(c);
-
     const m=document.createElement('input'); m.type='number'; m.step='0.01'; m.className='num'; m.value=r.mes??''; m.oninput=()=>{r.mes=m.value===''?null:+m.value; paint(); save(); drawCentersChart();}; g.appendChild(m);
     const p=document.createElement('input'); p.type='number'; p.step='0.01'; p.className='num'; p.value=r.previsto??''; p.oninput=()=>{r.previsto=p.value===''?null:+p.value; paint(); save(); drawCentersChart();}; g.appendChild(p);
     const d=document.createElement('div'); g.appendChild(d);
@@ -453,11 +459,10 @@ function renderSalesCenters(){
     function paint(){ const mv=+r.mes||0, pv=+r.previsto||0; d.textContent=money(mv-pv); m.classList.remove('ok','bad'); if(!isNaN(mv)&&!isNaN(pv)) m.classList.add(mv>=pv?'ok':'bad'); }
     paint(); totMes+=+r.mes||0; totPre+=+r.previsto||0;
   });
-  // Totales
   ['TOTAL', money(totMes), money(totPre), money(totMes-totPre), ''].forEach(t=>{const dd=document.createElement('div');dd.className='totline head';dd.textContent=t;g.appendChild(dd);});
 }
 
-/* ===== Gráficos (SVG) ===== */
+/* ===== Gráficos ===== */
 function drawBars(svgId, labels, seriesA, seriesB, colorA='#2ecc71', colorB='#9aa1b1'){
   const svg=$( '#'+svgId ); if(!svg) return; const W=360, H=260, pad=28, base=H-30;
   svg.innerHTML='';
@@ -511,14 +516,12 @@ function renderAcciones(it){
     const ci=document.createElement('input'); ci.type='number'; ci.className='num'; ci.value=r.citas??''; ci.oninput=()=>{r.citas=ci.value===''?null:+ci.value; save();}; g.appendChild(ci);
     const ve=document.createElement('input'); ve.type='number'; ve.className='num'; ve.value=r.venta??''; ve.oninput=()=>{r.venta=ve.value===''?null:+ve.value; save();}; g.appendChild(ve);
     const ob=document.createElement('input'); ob.className='txt'; ob.value=r.obs||''; ob.oninput=()=>{r.obs=ob.value; save();}; g.appendChild(ob);
-    // adjunto
     const slot=document.createElement('div'); slot.style.textAlign='center';
     slot.innerHTML=`<button class="i28" title="Adjuntar">📎</button>${r.adj?`<a class="i28" style="text-decoration:none;text-align:center" href="${r.adj.data}" download="${r.adj.name}" target="_blank">🔗</a>`:''}`;
     const file=document.createElement('input'); file.type='file'; file.accept=".xls,.xlsx,.csv,.pdf,.png,.jpg,.jpeg"; file.style.display='none';
     slot.querySelector('button').onclick=()=>file.click();
     file.onchange=()=>{ const f=file.files[0]; if(!f) return; const rd=new FileReader(); rd.onload=()=>{ r.adj={name:f.name,data:rd.result}; save(); renderAcciones(it); }; rd.readAsDataURL(f); };
     slot.appendChild(file); g.appendChild(slot);
-    // borrar
     const del=document.createElement('button'); del.className='i28'; del.textContent='—'; del.title='Eliminar fila'; del.onclick=()=>{it.acciones.splice(idx,1); renderAcciones(it); save();}; g.appendChild(del);
   });
   $('#accAdd').onclick=()=>{ it.acciones.push({fecha:'',paquete:'1',tipo:'Azafata',derivacion:null,citas:null,venta:null,obs:'',adj:null}); renderAcciones(it); save(); };
@@ -532,7 +535,6 @@ function renderFormacion(it){
     const re=document.createElement('input'); re.type='checkbox'; re.checked=!!r.realizado; re.onchange=()=>{r.realizado=re.checked; save();}; g.appendChild(re);
     const ap=document.createElement('input'); ap.type='checkbox'; ap.checked=!!r.aplica; ap.onchange=()=>{r.aplica=ap.checked; save();}; g.appendChild(ap);
     const o=document.createElement('input'); o.className='txt'; o.value=r.obs||''; o.oninput=()=>{r.obs=o.value; save();}; g.appendChild(o);
-    // adjunto
     const slot=document.createElement('div'); slot.innerHTML=`<button class="i28">📎</button>${r.adj?`<a class="i28" href="${r.adj.data}" download="${r.adj.name}" target="_blank">🔗</a>`:''}`;
     const file=document.createElement('input'); file.type='file'; file.accept=".pdf,.png,.jpg,.jpeg,.doc,.docx"; file.style.display='none';
     slot.querySelector('button').onclick=()=>file.click();
@@ -599,20 +601,20 @@ function renderVisitas(){
   $('#vaSearch').oninput=()=>renderVisitas();
 }
 
-/* ===== FM ===== */
-let currentFmCat='Mentoring general';
+/* ===== FM (con Delegado) ===== */
 function renderFM(){
   const cat=$('#fmCat').value = currentFmCat;
   $('#fmCat').onchange=e=>{ currentFmCat=e.target.value; renderFM(); };
   $('#fmSearch').oninput=()=>renderFM();
   const q=($('#fmSearch').value||'').toLowerCase();
   const arr = state.fm[currentFmCat] || (state.fm[currentFmCat]=[]);
-  const g=$('#gridFM'); g.innerHTML=''; g.style.gridTemplateColumns='120px 1.2fr 160px 1.6fr 40px';
-  ['Fecha','Tema','Asistencia','Observaciones','📎'].forEach(h=>{const d=document.createElement('div');d.className='head';d.textContent=h;g.appendChild(d);});
+  const g=$('#gridFM'); g.innerHTML=''; g.style.gridTemplateColumns='120px 1.1fr 1fr 1fr 1.6fr 40px';
+  ['Fecha','Tema','Delegado','Asistencia','Observaciones','📎'].forEach(h=>{const d=document.createElement('div');d.className='head';d.textContent=h;g.appendChild(d);});
   arr.forEach((r,idx)=>{
-    if(q && !((r.tema||'').toLowerCase().includes(q))) return;
+    if(q && ![(r.tema||''),(r.delegado||''),(r.asistencia||'')].join(' ').toLowerCase().includes(q)) return;
     const f=document.createElement('input'); f.type='date'; f.className='date'; f.value=r.fecha||''; f.oninput=()=>{r.fecha=f.value; save();}; g.appendChild(f);
     const t=document.createElement('input'); t.className='txt'; t.value=r.tema||''; t.oninput=()=>{r.tema=t.value; save();}; g.appendChild(t);
+    const d=document.createElement('input'); d.className='txt'; d.value=r.delegado||''; d.oninput=()=>{r.delegado=d.value; save();}; g.appendChild(d);
     const a=document.createElement('input'); a.className='txt'; a.placeholder='Nº / lista'; a.value=r.asistencia||''; a.oninput=()=>{r.asistencia=a.value; save();}; g.appendChild(a);
     const o=document.createElement('input'); o.className='txt'; o.value=r.obs||''; o.oninput=()=>{r.obs=o.value; save();}; g.appendChild(o);
     const slot=document.createElement('div'); slot.innerHTML=`<button class="i28">📎</button>${r.adj?`<a class="i28" href="${r.adj.data}" download="${r.adj.name}" target="_blank">🔗</a>`:''}`;
@@ -621,21 +623,25 @@ function renderFM(){
     file.onchange=()=>{ const f=file.files[0]; if(!f) return; const rd=new FileReader(); rd.onload=()=>{ r.adj={name:f.name,data:rd.result}; save(); renderFM(); }; rd.readAsDataURL(f); };
     slot.appendChild(file); g.appendChild(slot);
   });
-  $('#fmAddRow').onclick=()=>{ arr.push({fecha:'',tema:'',asistencia:'',obs:'',adj:null}); renderFM(); save(); };
+  $('#fmAddRow').onclick=()=>{ arr.push({fecha:'',tema:'',delegado:'',asistencia:'',obs:'',adj:null}); renderFM(); save(); };
 }
 
-/* ===== Teleaudiología ===== */
+/* ===== Teleaudiología (100 filas + contador certificados) ===== */
+function updateTaCertPill(){
+  const n = state.ta.filter(r=>!!r.certificado).length;
+  $('#taCertPill').textContent = 'Certificadas: '+n;
+}
 function renderTA(){
   const g=$('#gridTA'); const q=($('#taSearch').value||'').toLowerCase(); g.innerHTML='';
   g.style.gridTemplateColumns='1.2fr 1fr 110px 1.1fr 60px 60px 60px 60px 60px 1.2fr 40px';
   ['Centro','Delegado','Rol','Persona','Form.','Prác.','Cert.','Pruebas','Ventas','Obs.','📎'].forEach(h=>{const d=document.createElement('div');d.className='head';d.textContent=h;g.appendChild(d);});
   state.ta.forEach((r,idx)=>{
-    if(q && ![(r.centro||''),(r.persona||'')].join(' ').toLowerCase().includes(q)) return;
+    if(q && ![(r.centro||''),(r.persona||''),(r.delegado||'')].join(' ').toLowerCase().includes(q)) return;
     const c=document.createElement('input'); c.className='txt'; c.value=r.centro||''; c.oninput=()=>{r.centro=c.value; save();}; g.appendChild(c);
     const d=document.createElement('input'); d.className='txt'; d.value=r.delegado||''; d.oninput=()=>{r.delegado=d.value; save();}; g.appendChild(d);
     const ro=document.createElement('select'); ro.className='sel'; ro.innerHTML='<option>Audiólogo</option><option>Técnico</option>'; ro.value=r.rol||'Audiólogo'; ro.onchange=()=>{r.rol=ro.value; save();}; g.appendChild(ro);
     const p=document.createElement('input'); p.className='txt'; p.placeholder='Nombre'; p.value=r.persona||''; p.oninput=()=>{r.persona=p.value; save();}; g.appendChild(p);
-    ['formacion','practicas','certificado','pruebas','ventas'].forEach(k=>{ const x=document.createElement('input'); x.type='checkbox'; x.checked=!!r[k]; x.onchange=()=>{r[k]=x.checked; save();}; g.appendChild(x); });
+    ['formacion','practicas','certificado','pruebas','ventas'].forEach(k=>{ const x=document.createElement('input'); x.type='checkbox'; x.checked=!!r[k]; x.onchange=()=>{r[k]=x.checked; save(); updateTaCertPill();}; g.appendChild(x); });
     const o=document.createElement('input'); o.className='txt'; o.value=r.obs||''; o.oninput=()=>{r.obs=o.value; save();}; g.appendChild(o);
     const slot=document.createElement('div'); slot.innerHTML=`<button class="i28">📎</button>${r.adj?`<a class="i28" href="${r.adj.data}" download="${r.adj.name}" target="_blank">🔗</a>`:''}`;
     const file=document.createElement('input'); file.type='file'; file.accept=".xls,.xlsx,.csv,.pdf"; file.style.display='none';
@@ -643,31 +649,55 @@ function renderTA(){
     file.onchange=()=>{ const f=file.files[0]; if(!f) return; const rd=new FileReader(); rd.onload=()=>{ r.adj={name:f.name,data:rd.result}; save(); renderTA(); }; rd.readAsDataURL(f); };
     slot.appendChild(file); g.appendChild(slot);
   });
-  $('#taAddRow').onclick=()=>{ state.ta.push({centro:'',delegado:'',rol:'Audiólogo',persona:'',formacion:false,practicas:false,certificado:false,pruebas:false,ventas:false,obs:'',adj:null}); renderTA(); save(); };
+  $('#taAddRow').onclick=()=>{ state.ta.push({centro:'',delegado:'',rol:'Audiólogo',persona:'',formacion:false,practicas:false,certificado:false,pruebas:false,ventas:false,obs:'',adj:null}); renderTA(); save(); updateTaCertPill(); };
   $('#taSearch').oninput=()=>renderTA();
+  updateTaCertPill();
 }
 
-/* ===== Equipos ===== */
+/* ===== Equipos: 7 packs + búsqueda global ===== */
+function renderEqPackSelector(){
+  const sel=$('#eqPackSel'); sel.innerHTML='';
+  for(let i=0;i<state.eqPacks.length;i++){ const o=document.createElement('option'); o.textContent='Pack '+(i+1); o.value=String(i); sel.appendChild(o); }
+  if(sel.dataset.init!=='1'){ sel.value='0'; sel.dataset.init='1'; }
+}
+function currentPackIndex(){ return +($('#eqPackSel').value||0); }
+function rowsInScope(){
+  if($('#eqAllPacks').checked){
+    // retorna pares {pi, ri, ref} para editar cross-pack
+    const out=[];
+    state.eqPacks.forEach((pk,pi)=>{
+      pk.rows.forEach((r,ri)=>out.push({pi,ri,ref:r}));
+    });
+    return out;
+  }else{
+    const pi=currentPackIndex();
+    return (state.eqPacks[pi].rows||[]).map((r,ri)=>({pi,ri,ref:r}));
+  }
+}
 function renderEQ(){
+  renderEqPackSelector();
   const g=$('#gridEQ'); const q=($('#eqSearch').value||'').toLowerCase(); g.innerHTML='';
   g.style.gridTemplateColumns='1.2fr 1fr 1fr 110px 1.2fr 60px 60px 40px';
   ['Equipo','Nº serie','Persona envía','Fecha','Centro','C','S','📎'].forEach(h=>{const d=document.createElement('div');d.className='head';d.textContent=h;g.appendChild(d);});
-  state.eq.forEach((r,idx)=>{
-    if(q && ![(r.equipo||''),(r.serie||''),(r.centro||'')].join(' ').toLowerCase().includes(q)) return;
-    const e=document.createElement('input'); e.className='txt'; e.value=r.equipo||''; e.oninput=()=>{r.equipo=e.value; save();}; g.appendChild(e);
-    const s=document.createElement('input'); s.className='txt'; s.value=r.serie||''; s.oninput=()=>{r.serie=s.value; save();}; g.appendChild(s);
-    const p=document.createElement('input'); p.className='txt'; p.value=r.persona||''; p.oninput=()=>{r.persona=p.value; save();}; g.appendChild(p);
-    const f=document.createElement('input'); f.type='date'; f.className='date'; f.value=r.fecha||''; f.oninput=()=>{r.fecha=f.value; save();}; g.appendChild(f);
-    const c=document.createElement('input'); c.className='txt'; c.value=r.centro||''; c.oninput=()=>{r.centro=c.value; save();}; g.appendChild(c);
-    ['en','sede'].forEach(k=>{ const x=document.createElement('input'); x.type='checkbox'; x.checked=!!r[k]; x.onchange=()=>{r[k]=x.checked; save();}; g.appendChild(x); });
-    const slot=document.createElement('div'); slot.innerHTML=`<button class="i28">📎</button>${r.adj?`<a class="i28" href="${r.adj.data}" download="${r.adj.name}" target="_blank">🔗</a>`:''}`;
+  rowsInScope().forEach(({pi,ri,ref})=>{
+    const hayQ = q && ![(ref.equipo||''),(ref.serie||''),(ref.centro||'')].join(' ').toLowerCase().includes(q);
+    if(hayQ) return;
+    const e=document.createElement('input'); e.className='txt'; e.value=ref.equipo||''; e.oninput=()=>{ref.equipo=e.value; save();}; g.appendChild(e);
+    const s=document.createElement('input'); s.className='txt'; s.value=ref.serie||''; s.oninput=()=>{ref.serie=s.value; save();}; g.appendChild(s);
+    const p=document.createElement('input'); p.className='txt'; p.value=ref.persona||''; p.oninput=()=>{ref.persona=p.value; save();}; g.appendChild(p);
+    const f=document.createElement('input'); f.type='date'; f.className='date'; f.value=ref.fecha||''; f.oninput=()=>{ref.fecha=f.value; save();}; g.appendChild(f);
+    const c=document.createElement('input'); c.className='txt'; c.value=ref.centro||''; c.oninput=()=>{ref.centro=c.value; save();}; g.appendChild(c);
+    ['en','sede'].forEach(k=>{ const x=document.createElement('input'); x.type='checkbox'; x.checked=!!ref[k]; x.onchange=()=>{ref[k]=x.checked; save();}; g.appendChild(x); });
+    const slot=document.createElement('div'); slot.innerHTML=`<button class="i28">📎</button>${ref.adj?`<a class="i28" href="${ref.adj.data}" download="${ref.adj.name}" target="_blank">🔗</a>`:''}`;
     const file=document.createElement('input'); file.type='file'; file.accept=".xls,.xlsx,.csv,.pdf,.png,.jpg,.jpeg"; file.style.display='none';
     slot.querySelector('button').onclick=()=>file.click();
-    file.onchange=()=>{ const f=file.files[0]; if(!f) return; const rd=new FileReader(); rd.onload=()=>{ r.adj={name:f.name,data:rd.result}; save(); renderEQ(); }; rd.readAsDataURL(f); };
+    file.onchange=()=>{ const f=file.files[0]; if(!f) return; const rd=new FileReader(); rd.onload=()=>{ ref.adj={name:f.name,data:rd.result}; save(); renderEQ(); }; rd.readAsDataURL(f); };
     slot.appendChild(file); g.appendChild(slot);
   });
-  $('#eqAddRow').onclick=()=>{ state.eq.push({equipo:'',serie:'',persona:'',fecha:'',centro:'',en:false,sede:false,adj:null}); renderEQ(); save(); };
+  $('#eqAddRow').onclick=()=>{ const pi=currentPackIndex(); state.eqPacks[pi].rows.push({equipo:'',serie:'',persona:'',fecha:'',centro:'',en:false,sede:false,adj:null}); renderEQ(); save(); };
   $('#eqSearch').oninput=()=>renderEQ();
+  $('#eqPackSel').onchange=()=>renderEQ();
+  $('#eqAllPacks').onchange=()=>renderEQ();
 }
 
 /* ===== Eventos sidebar de ventas ===== */
@@ -683,9 +713,9 @@ function doEnter(){ const v=$('#pin').value.trim(); if(v==='4321' || /^AR4321$/i
 $('#enterBtn').onclick=doEnter;
 $('#pin').addEventListener('keydown',e=>{ if(e.key==='Enter') doEnter(); });
 
-/* ===== Buscadores ventas ===== */
-$('#svcSearch')?.addEventListener('input',renderSalesCompany);
-$('#svcSearch')?.addEventListener('input',renderSalesCenters);
+/* ===== Sales search bindings ===== */
+$('#svcSearchCompany')?.addEventListener('input',renderSalesCompany);
+$('#svcSearchCenters')?.addEventListener('input',renderSalesCenters);
 
 /* ===== Boot ===== */
 window.addEventListener('load',()=>{
