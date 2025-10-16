@@ -1,736 +1,128 @@
 <!doctype html>
 <html lang="es">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
-<meta http-equiv="Pragma" content="no-cache"/>
-<meta http-equiv="Expires" content="0"/>
-<title>SEGUIMIENTO AUDIO</title>
-<meta name="theme-color" content="#c82727"/>
-<style>
-:root{
-  --rojo:#c82727; --rojo2:#a71f1f; --bg:#f6f7fb; --line:#e8e8ee; --sh:0 4px 14px rgba(0,0,0,.06);
-  --col-sv:#ffe9cc; --col-ex:#fde2e4; --col-fl:#e2f0cb; --col-va:#cde7f0; --col-fm:#f9e5c9; --col-ta:#eadcf8; --col-eq:#e8f1ff;
-  --fs:12px; --fs-sm:11px;
-}
-*{box-sizing:border-box} html,body{height:100%}
-body{margin:0;background:var(--bg);font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;color:#222;font-size:var(--fs);line-height:1.16}
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>SEGUIMIENTO AUDIO · Acceso</title>
+  <meta name="theme-color" content="#c82727"/>
+  <style>
+    :root{
+      --rojo:#c82727; --rojo2:#a71f1f; --bg:#f6f7fb; --line:#e6e7ee;
+      --shadow:0 4px 14px rgba(0,0,0,.06);
+      --fs:12px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;background:var(--bg);font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;font-size:var(--fs);color:#222}
 
-/* Topbar */
-.topbar{position:sticky;top:0;z-index:30;width:100%;background:linear-gradient(180deg,var(--rojo),var(--rojo2));box-shadow:var(--sh)}
-.topbar .inner{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:.6rem;padding:1rem .9rem}
-.brand{justify-self:center;display:flex;align-items:center;gap:.6rem;color:#fff}
-.brand i{font-style:normal;font-size:22px}
-.brand span{font-weight:900;font-size:24px;letter-spacing:.3px}
-.actions{justify-self:start;display:flex;gap:.4rem}
-.actions .btn{background:#fff;border:0;border-radius:10px;padding:.46rem .8rem;cursor:pointer;font-weight:800;box-shadow:var(--sh)}
-.meta{justify-self:end;color:#fff;font-weight:700;opacity:.9}
+    /* Topbar */
+    .topbar{position:sticky;top:0;z-index:10;width:100%;
+      background:linear-gradient(180deg,var(--rojo),var(--rojo2));color:#fff;
+      box-shadow:var(--shadow)}
+    .bar-inner{padding:.85rem 12px;display:flex;align-items:center;justify-content:center}
+    .brand{display:flex;gap:.6rem;align-items:center;font-weight:900;letter-spacing:.4px;font-size:22px}
+    .brand i{font-style:normal}
 
-/* Layout */
-.wrapper{display:grid;grid-template-columns:240px minmax(0,1fr);gap:8px;padding:8px}
-.sidebar{display:flex;flex-direction:column;gap:8px}
-.side-card{border:1px solid var(--line);border-radius:12px;background:#fff;box-shadow:var(--sh);overflow:hidden}
-.side-card .head{display:flex;justify-content:space-between;align-items:center;padding:.5rem .6rem;font-weight:900}
-.side-card .head .group{display:flex;gap:.35rem}
-.side-card .list{padding:.25rem .45rem .5rem;max-height:230px;overflow:auto}
-.item{display:flex;justify-content:space-between;align-items:center;gap:.35rem;padding:.32rem .38rem;margin:.22rem 0;border:1px solid var(--line);border-radius:9px;background:#fff}
-.item .name{font-weight:750}
-.i28{width:26px;height:22px;border:1px solid var(--line);border-radius:7px;background:#fff;cursor:pointer}
+    /* Contenedor del iframe */
+    #appwrap{position:relative;width:100%;height:calc(100vh - 66px);background:#fff;border-top:1px solid var(--line)}
+    #appframe{width:100%;height:100%;border:0;display:none}
 
-/* Detail */
-.detail{border:1px solid var(--line);border-radius:12px;background:#fff;box-shadow:var(--sh);min-height:72vh;padding:.6rem}
-.hdr{display:flex;gap:.6rem;align-items:center;margin:.2rem 0 .5rem}
-.hdr h2{margin:0;font-size:18px}
-.badge{padding:.12rem .52rem;border-radius:999px;background:#0001}
+    /* Modal PIN */
+    #gate{position:fixed;inset:0;background:rgba(0,0,0,.72);
+      display:flex;align-items:center;justify-content:center;z-index:9999}
+    .gate-card{background:#111;color:#fff;border-radius:12px;box-shadow:var(--shadow);
+      padding:18px 16px;min-width:300px;border:1px solid #2a2a2a}
+    .gate-card h3{margin:.2rem 0 1rem}
+    .pin{width:100%;letter-spacing:.35rem;font-size:1rem;text-align:center;background:#000;color:#fff;
+      border:1px solid #444;border-radius:8px;padding:.5rem}
+    .btn{border:0;border-radius:9px;padding:.5rem .9rem;cursor:pointer;box-shadow:var(--shadow);font-weight:800}
+    .btn-primary{background:#fff;color:#7b0e0e}
+    .btn-ghost{background:transparent;border:1px solid #ffffff33;color:#fff}
+    .actions{display:flex;gap:.5rem;margin-top:.8rem}
+    .msg{display:none;color:#ff7b7b;margin-top:.6rem;font-size:.92em}
 
-/* Search + fields */
-.search{display:flex;gap:.4rem;align-items:end;margin:.2rem 0}
-.search .txt{flex:1}
-.num,.txt,.date,.sel,textarea{width:100%;border:1px solid var(--line);border-radius:6px;padding:.26rem .35rem;font-size:var(--fs-sm)}
-.small{font-size:10px;opacity:.75}
-
-/* Tables */
-.table{border:1px solid var(--line);border-radius:10px;overflow:auto}
-.xscroll{overflow:auto}
-.grid{display:grid;gap:1px;background:var(--line)}
-.grid>div{background:#fff;padding:.32rem .38rem}
-.grid .head{background:#f7f8ff;font-weight:800}
-.ok{background:#eaf9f0!important;border:1px solid #bfe3cd}
-.bad{background:#ffe9e9!important;border:1px solid #f4c7c7}
-
-/* Sales layout: table + chart */
-.sales-2col{display:grid;grid-template-columns:1fr 360px;gap:10px;align-items:start}
-.chartCard{border:1px solid var(--line);border-radius:10px;background:#fff;box-shadow:var(--sh);padding:.4rem}
-.chartTitle{font-weight:900;margin:.1rem 0 .35rem}
-svg{width:100%;height:260px}
-
-/* Packs (equipos) */
-.pack{border:1px solid var(--line);border-radius:10px;background:#fff;box-shadow:var(--sh);margin:.4rem 0}
-.packHead{display:flex;align-items:center;gap:.5rem;padding:.45rem .6rem;cursor:pointer;background:#f9fbff}
-.packHead strong{flex:1}
-.packBody{padding:.45rem .6rem;display:none}
-.pack.open .packBody{display:block}
-
-/* PIN */
-.gate{position:fixed;inset:0;background:#000a;display:flex;align-items:center;justify-content:center;z-index:100}
-.card{background:#111;color:#fff;min-width:300px;border-radius:12px;border:1px solid #2a2a2a;padding:16px 14px;box-shadow:var(--sh)}
-.card h3{margin:.1rem 0 .6rem}.pin{width:100%;letter-spacing:.35rem;font-size:1rem;text-align:center;background:#000;color:#fff;border:1px solid #444;border-radius:8px;padding:.46rem}
-.btnRow{display:flex;gap:.5rem;margin-top:10px}.btnDark{flex:1;background:#fff;border:0;color:#111;font-weight:900;border-radius:10px;padding:.5rem .85rem;cursor:pointer}
-.msg{color:#ff8080;display:none;margin-top:.45rem}
-.pill{display:inline-block;border:1px solid #0002;border-radius:999px;padding:.1rem .5rem;font-size:11px;background:#00000008}
-</style>
+    /* Aviso por si app.html no existe o tarda */
+    #loadingNote{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+      color:#666;font-size:.95rem}
+  </style>
 </head>
 <body>
-<header class="topbar">
-  <div class="inner">
-    <div class="actions">
-      <button id="btnLoad" class="btn">Actualizar (local)</button>
-      <button id="btnSave" class="btn">Guardar (local)</button>
+
+  <header class="topbar">
+    <div class="bar-inner">
+      <div class="brand"><i>🎧</i> SEGUIMIENTO AUDIO</div>
     </div>
-    <div class="brand"><i>🎧</i><span>SEGUIMIENTO AUDIO</span></div>
-    <div id="stamp" class="meta">Listo</div>
+  </header>
+
+  <main id="appwrap">
+    <div id="loadingNote">Esperando acceso…</div>
+    <iframe id="appframe" title="SEGUIMIENTO AUDIO"></iframe>
+  </main>
+
+  <!-- Modal PIN -->
+  <div id="gate" aria-modal="true" role="dialog">
+    <div class="gate-card">
+      <h3>Acceso</h3>
+      <p style="opacity:.85;margin-top:0">Introduce el PIN para editar:</p>
+      <input id="pin" class="pin" type="password" inputmode="numeric" maxlength="6" placeholder="••••"/>
+      <div class="actions">
+        <button id="enter" class="btn btn-primary" style="flex:1">Acceder</button>
+        <button id="clear" class="btn btn-ghost" style="flex:.8">Limpiar</button>
+      </div>
+      <p id="pinMsg" class="msg">PIN incorrecto</p>
+    </div>
   </div>
-</header>
 
-<main class="wrapper">
-  <!-- ========== LADO IZQUIERDO ========== -->
-  <aside class="sidebar">
-    <!-- CIFRA DE VENTAS -->
-    <div class="side-card" style="background:var(--col-sv)">
-      <div class="head">📊 CIFRA DE VENTAS
-        <div class="group">
-          <button class="i28" id="svOpenCompany" title="Compañía ➜">➡️</button>
-          <button class="i28" id="svOpenCenters"  title="Centros exclusivos ➜">➡️</button>
-        </div>
-      </div>
-      <div class="list small">Abre con ➡️. (＋ añade filas)</div>
-    </div>
+  <script>
+    // ====== Config ======
+    // SHA-256 de "4321"
+    const PIN_SHA256='fe2592b42a727e977f055947385b709cc82b16b9a87f88c6abf3900d65d0cdc3';
+    // Archivo con tu app real (tu index antiguo copiado sin cambios):
+    const APP_FILE = 'app.html';
 
-    <!-- Centros exclusivos -->
-    <div class="side-card" style="background:var(--col-ex)">
-      <div class="head">📒 CENTROS EXCLUSIVOS
-        <div class="group">
-          <button class="i28" id="ceToggle">▾</button>
-          <button class="i28" id="ceAdd">＋</button>
-        </div>
-      </div>
-      <div class="list" id="ceList"></div>
-    </div>
+    // ====== Utiles ======
+    const $=(s,r=document)=>r.querySelector(s);
+    async function sha256Hex(str){
+      const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str));
+      return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+    }
+    async function checkPin(val){
+      let s=(val||'').trim();
+      if(/^AR/i.test(s)) s=s.slice(2);
+      if(!s) return false;
+      try{ return (await sha256Hex(s))===PIN_SHA256; }catch(_){ return false; }
+    }
 
-    <!-- Centros flop -->
-    <div class="side-card" style="background:var(--col-fl)">
-      <div class="head">📒 CENTROS FLOP
-        <div class="group">
-          <button class="i28" id="flToggle">▾</button>
-          <button class="i28" id="flAdd">＋</button>
-        </div>
-      </div>
-      <div class="list" id="flList"></div>
-    </div>
+    function showApp(){
+      try{
+        $('#gate').style.display='none';
+        const f=$('#appframe');
+        const note=$('#loadingNote');
+        f.style.display='block';
+        f.src = APP_FILE + '?nc=' + Date.now();   // by-pass caché
+        if(note) note.textContent='Cargando…';
+        // ocultar aviso cuando cargue
+        f.addEventListener('load',()=>{ if(note) note.style.display='none'; });
+      }catch(e){
+        console.error('Error mostrando app:',e);
+      }
+    }
 
-    <!-- Visitas -->
-    <div class="side-card" style="background:var(--col-va)">
-      <div class="head">📋 VISITAS AUDIO
-        <div class="group">
-          <button class="i28" id="vaOpen">➡️</button>
-          <button class="i28" id="vaAdd">＋</button>
-        </div>
-      </div>
-      <div class="list" id="vaList"></div>
-    </div>
+    async function handleEnter(){
+      $('#pinMsg').style.display='none';
+      const ok=await checkPin($('#pin').value);
+      if(!ok){ $('#pinMsg').style.display='block'; return; }
+      showApp();
+    }
 
-    <!-- Formaciones y mentoring -->
-    <div class="side-card" style="background:var(--col-fm)">
-      <div class="head">🎓 FORMACIONES Y MENTORING
-        <div class="group">
-          <button class="i28" id="fmOpen">➡️</button>
-          <button class="i28" id="fmAddCat">＋</button>
-        </div>
-      </div>
-      <div class="list" id="fmList"></div>
-    </div>
-
-    <!-- Teleaudiología -->
-    <div class="side-card" style="background:var(--col-ta)">
-      <div class="head">📡 TELEAUDIOLOGIA
-        <div class="group">
-          <button class="i28" id="taOpen">➡️</button>
-          <button class="i28" id="taAdd">＋</button>
-        </div>
-      </div>
-      <div class="list" id="taList"></div>
-    </div>
-
-    <!-- Equipos -->
-    <div class="side-card" style="background:var(--col-eq)">
-      <div class="head">🧰 EQUIPOS
-        <div class="group">
-          <button class="i28" id="eqOpen">➡️</button>
-        </div>
-      </div>
-      <div class="list" id="eqList"></div>
-    </div>
-  </aside>
-
-  <!-- ========== DETALLE DERECHA ========== -->
-  <section class="detail">
-    <div class="hdr">
-      <h2 id="detTitle">Detalle</h2>
-      <span id="detTag" class="badge">—</span>
-    </div>
-
-    <!-- Cifra ventas: Compañía -->
-    <div id="panelSalesCompany" style="display:none" class="sales-2col">
-      <div>
-        <div class="search">
-          <input id="svcSearchCompany" class="txt" placeholder="Buscar mes…"/>
-          <div class="tools"><button class="i28" id="svcAddCompany">＋</button></div>
-        </div>
-        <div class="table xscroll"><div class="grid" id="gridSalesCompany"></div></div>
-      </div>
-      <div class="chartCard">
-        <div class="chartTitle">Objetivos vs Real — Compañía</div>
-        <svg id="chartCompany" viewBox="0 0 360 260" preserveAspectRatio="xMidYMid meet"></svg>
-        <div class="small">Verde: Mes · Gris: Previsto</div>
-      </div>
-    </div>
-
-    <!-- Cifra ventas: Centros exclusivos -->
-    <div id="panelSalesCenters" style="display:none" class="sales-2col">
-      <div>
-        <div class="search">
-          <input id="svcSearchCenters" class="txt" placeholder="Buscar centro…"/>
-          <div class="tools"><button class="i28" id="svcAddCenters">＋</button></div>
-        </div>
-        <div class="table xscroll"><div class="grid" id="gridSalesCenters"></div></div>
-      </div>
-      <div class="chartCard">
-        <div class="chartTitle">Objetivos vs Real — Centros exclusivos</div>
-        <svg id="chartCenters" viewBox="0 0 360 260" preserveAspectRatio="xMidYMid meet"></svg>
-        <div class="small">Verde: Mes · Gris: Previsto</div>
-      </div>
-    </div>
-
-    <!-- Detalle Centros (EX/FLOP) -->
-    <div id="panelCentro" style="display:none">
-      <div class="table xscroll" style="margin:.25rem 0 .5rem">
-        <div class="grid" id="gridCentroInfo"></div>
-      </div>
-      <h4 style="margin:.4rem 0 .2rem">ACCIONES</h4>
-      <div class="tools"><button class="i28" id="accAdd">＋</button></div>
-      <div class="table xscroll"><div class="grid" id="gridAcciones"></div></div>
-
-      <h4 style="margin:.6rem 0 .2rem">FORMACIÓN</h4>
-      <div class="tools"><button class="i28" id="frmAdd">＋</button></div>
-      <div class="table xscroll"><div class="grid" id="gridFormacion"></div></div>
-
-      <h4 style="margin:.6rem 0 .2rem">PROCESOS</h4>
-      <div class="tools"><button class="i28" id="procAdd">＋</button></div>
-      <div class="table xscroll"><div class="grid" id="gridProcesos"></div></div>
-    </div>
-
-    <!-- VISITAS -->
-    <div id="panelVisitas" style="display:none">
-      <div class="search">
-        <input id="vaSearch" class="txt" placeholder="Buscar centro…"/>
-        <select id="vaRol" class="sel"><option>Responsable Tec. Audio</option><option>Delegado de Audio</option></select>
-        <input id="vaNombre" class="txt" placeholder="Nombre (delegado o resp. tec)"/>
-        <div class="tools"><button class="i28" id="vaAddRow">＋</button></div>
-      </div>
-      <div class="table xscroll"><div class="grid" id="gridVisitas"></div></div>
-      <div class="small">250 líneas disponibles; adjunta Excel por fila con 📎.</div>
-    </div>
-
-    <!-- FORMACIONES & MENTORING -->
-    <div id="panelFM" style="display:none">
-      <div class="search">
-        <select id="fmCat" class="sel">
-          <option>Mentoring general</option>
-          <option>Mentoring por delegados</option>
-          <option>Coaching por delegado</option>
-        </select>
-        <input id="fmSearch" class="txt" placeholder="Buscar tema/delegado/persona…"/>
-        <div class="tools"><button class="i28" id="fmAddRow">＋</button></div>
-      </div>
-      <div class="table xscroll"><div class="grid" id="gridFM"></div></div>
-    </div>
-
-    <!-- TELEAUDIOLOGIA -->
-    <div id="panelTA" style="display:none">
-      <div class="search">
-        <input id="taSearch" class="txt" placeholder="Buscar centro/persona…"/>
-        <label class="small" style="display:flex;align-items:center;gap:.35rem"><input id="taShowEmpty" type="checkbox"/> Mostrar vacíos</label>
-        <div class="tools">
-          <span class="pill" id="taCertPill">Certificadas: 0</span>
-          <button class="i28" id="taAddRow">＋</button>
-        </div>
-      </div>
-      <div class="table xscroll"><div class="grid" id="gridTA"></div></div>
-    </div>
-
-    <!-- EQUIPOS (7 packs visibles) -->
-    <div id="panelEQ" style="display:none">
-      <div class="search">
-        <input id="eqSearch" class="txt" placeholder="Buscar equipo/serie/centro en todos los packs…"/>
-      </div>
-      <div id="eqPacksWrap"></div>
-    </div>
-
-    <div id="panelPlaceholder" style="opacity:.75">Selecciona en la izquierda para editar.</div>
-  </section>
-</main>
-
-<!-- ===== PIN ===== -->
-<div class="gate" id="gate">
-  <div class="card">
-    <h3>Acceso</h3>
-    <p>Introduce el PIN para editar:</p>
-    <input id="pin" class="pin" type="password" inputmode="numeric" maxlength="6" placeholder="••••"/>
-    <div class="btnRow"><button class="btnDark" id="enterBtn">Acceder</button></div>
-    <p id="pinMsg" class="msg">PIN incorrecto</p>
-  </div>
-</div>
-
-<script>
-/* ===== Utils ===== */
-const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
-const money=v=>isFinite(+v)?(+v).toLocaleString('es-ES'):'';
-const MONTHS=['Ago-2025','Sep-2025','Oct-2025','Nov-2025','Dic-2025','Ene-2026','Feb-2026','Mar-2026','Abr-2026','May-2026','Jun-2026','Jul-2026'];
-const LSKEY='seguimiento_audio_full_v4';
-
-/* ===== Estado ===== */
-let state={
-  sales:{
-    company: MONTHS.map(m=>({label:m,mes:null,previsto:null,adj:null})),
-    centers: [] // {label (centro), mes, previsto, adj}
-  },
-  centros:{
-    ex:[{nombre:'Reina Mercedes',delegado:'',audiologo:'',tipo:'Franquicia',
-        acciones:Array.from({length:5},()=>({fecha:'',paquete:'1',tipo:'Azafata',derivacion:null,citas:null,venta:null,obs:'',adj:null})),
-        formacion:Array.from({length:4},()=>({curso:'',realizado:false,aplica:false,obs:'',adj:null})),
-        procesos:Array.from({length:3},()=>({fecha:'',puntuacion:null,hit:false,rt:false,pruebas:null,venta:null,obs:'',adj:null}))}],
-    flop:[]
-  },
-  visitas: Array.from({length:250},()=>({centro:'',delegado:'',audiologo:'',tipo:'Sucursal',fecha:'',puntuacion:null,hit:false,conv_prueba:null,conv_venta:null,adj:null})),
-  fm:{
-    'Mentoring general': [{fecha:'',tema:'',delegado:'',asistencia:'',obs:'',adj:null}],
-    'Mentoring por delegados': [],
-    'Coaching por delegado': []
-  },
-  ta: Array.from({length:100},()=>({centro:'',delegado:'',rol:'Audiólogo',persona:'',formacion:false,practicas:false,certificado:false,pruebas:false,ventas:false,obs:'',adj:null})),
-  eqPacks: Array.from({length:7},()=>({
-    open:false,
-    rows:[{equipo:'',serie:'',persona:'',fecha:'',centro:'',en:false,sede:false,adj:null}]
-  })),
-  meta:{vaRol:'Responsable Tec. Audio',vaNombre:''}
-};
-
-/* ===== Persistencia ===== */
-function stamp(t){ $('#stamp').textContent = t+' · '+new Date().toLocaleString(); }
-function save(){ localStorage.setItem(LSKEY, JSON.stringify(state)); stamp('Guardado local'); }
-function load(){ try{ const raw=localStorage.getItem(LSKEY); if(raw) state=JSON.parse(raw);}catch{} stamp('Cargado local'); }
-
-/* ===== Sidebar ===== */
-function renderSidebar(){
-  // Centros EX
-  const ceList=$('#ceList'); ceList.innerHTML='';
-  state.centros.ex.forEach((c,i)=>{
-    const el=document.createElement('div'); el.className='item';
-    el.innerHTML=`<div class="name">${c.nombre||'(nuevo centro)'}</div>
-      <div><button class="i28" title="Editar">✏️</button><button class="i28" title="Borrar">🗑️</button></div>`;
-    el.querySelectorAll('button')[0].onclick=()=>{ selected={kind:'EX',index:i}; openCentro('EX'); };
-    el.querySelectorAll('button')[1].onclick=()=>{ if(confirm('¿Eliminar centro?')){ state.centros.ex.splice(i,1); renderSidebar(); showPlaceholder(); save(); } };
-    ceList.appendChild(el);
-  });
-  $('#ceAdd').onclick=()=>{ state.centros.ex.push({nombre:'(nuevo centro)',delegado:'',audiologo:'',tipo:'Franquicia',acciones:[],formacion:[],procesos:[]}); renderSidebar(); save(); };
-  $('#ceToggle').onclick=()=>{ ceList.style.display = ceList.style.display==='none'?'':'none'; if(ceList.style.display==='none') showPlaceholder(); };
-
-  // Centros FLOP
-  const flList=$('#flList'); flList.innerHTML='';
-  state.centros.flop.forEach((c,i)=>{
-    const el=document.createElement('div'); el.className='item';
-    el.innerHTML=`<div class="name">${c.nombre||'(nuevo flop)'}</div>
-      <div><button class="i28" title="Editar">✏️</button><button class="i28" title="Borrar">🗑️</button></div>`;
-    el.querySelectorAll('button')[0].onclick=()=>{ selected={kind:'FLOP',index:i}; openCentro('FLOP'); };
-    el.querySelectorAll('button')[1].onclick=()=>{ if(confirm('¿Eliminar centro?')){ state.centros.flop.splice(i,1); renderSidebar(); showPlaceholder(); save(); } };
-    flList.appendChild(el);
-  });
-  $('#flAdd').onclick=()=>{ state.centros.flop.push({nombre:'(nuevo flop)',delegado:'',audiologo:'',tipo:'Franquicia',acciones:[],formacion:[],procesos:[]}); renderSidebar(); save(); };
-  $('#flToggle').onclick=()=>{ flList.style.display = flList.style.display==='none'?'':'none'; if(flList.style.display==='none') showPlaceholder(); };
-
-  // Visitas índice
-  const vaList=$('#vaList'); vaList.innerHTML='';
-  const nFilled = state.visitas.filter(v=> (v.centro||v.fecha)).length;
-  const el=document.createElement('div'); el.className='item';
-  el.innerHTML=`<div class="name">Registros de visitas (${nFilled}/250)</div><div><button class="i28">➡️</button></div>`;
-  el.querySelector('button').onclick=openVisitas; vaList.appendChild(el);
-  $('#vaAdd').onclick=openVisitas;
-
-  // Formaciones & Mentoring categorías
-  const fmList=$('#fmList'); fmList.innerHTML='';
-  Object.keys(state.fm).forEach(cat=>{
-    const li=document.createElement('div'); li.className='item';
-    li.innerHTML=`<div class="name">${cat}</div><div><button class="i28">➡️</button></div>`;
-    li.querySelector('button').onclick=()=>openFM(cat);
-    fmList.appendChild(li);
-  });
-  $('#fmOpen').onclick=()=>openFM('Mentoring general');
-  $('#fmAddCat').onclick=()=>{ const n=prompt('Nueva categoría (p.ej. "Coaching por delegado - Norte")'); if(!n) return; if(!state.fm[n]) state.fm[n]=[]; renderSidebar(); save(); };
-
-  // Teleaudiología
-  const taList=$('#taList'); taList.innerHTML='';
-  const taBtn=document.createElement('div'); taBtn.className='item';
-  taBtn.innerHTML=`<div class="name">Listado</div><div><button class="i28">➡️</button></div>`;
-  taBtn.querySelector('button').onclick=openTA; taList.appendChild(taBtn);
-  $('#taOpen').onclick=openTA;
-  $('#taAdd').onclick=()=>{ state.ta.push({centro:'',delegado:'',rol:'Audiólogo',persona:'',formacion:false,practicas:false,certificado:false,pruebas:false,ventas:false,obs:'',adj:null}); save(); openTA(); };
-
-  // Equipos
-  const eqList=$('#eqList'); eqList.innerHTML='';
-  const eqBtn=document.createElement('div'); eqBtn.className='item';
-  eqBtn.innerHTML=`<div class="name">Packs de equipos (7)</div><div><button class="i28">➡️</button></div>`;
-  eqBtn.querySelector('button').onclick=openEQ; eqList.appendChild(eqBtn);
-  $('#eqOpen').onclick=openEQ;
-}
-
-/* ===== Panel switching ===== */
-let selected={kind:null,index:null};
-function hideAll(){
-  ['panelSalesCompany','panelSalesCenters','panelCentro','panelVisitas','panelFM','panelTA','panelEQ','panelPlaceholder']
-    .forEach(id=>$('#'+id).style.display='none');
-}
-function showPlaceholder(){ hideAll(); $('#panelPlaceholder').style.display='block'; $('#detTitle').textContent='Detalle'; $('#detTag').textContent='—'; }
-function openSalesCompany(){ hideAll(); $('#panelSalesCompany').style.display='grid'; $('#detTitle').textContent='Detalle — Cifra de ventas (Compañía)'; $('#detTag').textContent='CIFRA DE VENTAS'; renderSalesCompany(); drawCompanyChart(); }
-function openSalesCenters(){ hideAll(); $('#panelSalesCenters').style.display='grid'; $('#detTitle').textContent='Detalle — Cifra de ventas (Centros exclusivos)'; $('#detTag').textContent='CIFRA DE VENTAS'; renderSalesCenters(); drawCentersChart(); }
-function openCentro(kind){ hideAll(); $('#panelCentro').style.display='block'; const it=(kind==='EX')?state.centros.ex[selected.index]:state.centros.flop[selected.index];
-  $('#detTitle').textContent=`Detalle — ${it?.nombre||'—'}`; $('#detTag').textContent= kind==='EX'?'CENTROS EXCLUSIVOS':'CENTROS FLOP';
-  renderCentroInfo(it); renderAcciones(it); renderFormacion(it); renderProcesos(it);
-}
-function openVisitas(){ hideAll(); $('#panelVisitas').style.display='block'; $('#detTitle').textContent='Detalle — Visitas'; $('#detTag').textContent='VISITAS AUDIO'; renderVisitas(); }
-let currentFmCat='Mentoring general';
-function openFM(cat='Mentoring general'){ hideAll(); $('#panelFM').style.display='block'; $('#detTitle').textContent='Detalle — Formaciones y Mentoring'; $('#detTag').textContent='FORMACIONES'; currentFmCat=cat; renderFM(); $('#fmCat').value=cat; }
-function openTA(){ hideAll(); $('#panelTA').style.display='block'; $('#detTitle').textContent='Detalle — Teleaudiología'; $('#detTag').textContent='TELEAUDIOLOGIA'; renderTA(); }
-function openEQ(){ hideAll(); $('#panelEQ').style.display='block'; $('#detTitle').textContent='Detalle — Equipos'; $('#detTag').textContent='EQUIPOS'; renderEQ(); }
-
-/* ===== CIFRA ===== */
-function renderSalesCompany(){
-  const g=$('#gridSalesCompany'); const q=($('#svcSearchCompany').value||'').toLowerCase(); g.innerHTML='';
-  g.style.gridTemplateColumns='1.2fr 140px 140px 120px 40px';
-  ['Mes','Mes (€)','Previsto (€)','Diferencia',''].forEach(h=>{const d=document.createElement('div');d.className='head';d.textContent=h;g.appendChild(d);});
-  let totMes=0, totPre=0;
-  state.sales.company.forEach((r,idx)=>{
-    if(q && !(r.label||'').toLowerCase().includes(q)) return;
-    const lab=document.createElement('select'); lab.className='sel'; lab.innerHTML=MONTHS.map(m=>`<option>${m}</option>`).join('');
-    lab.value=r.label||MONTHS[0]; lab.onchange=()=>{r.label=lab.value; save(); drawCompanyChart();}; g.appendChild(lab);
-
-    const m=document.createElement('input'); m.type='number'; m.step='0.01'; m.className='num'; m.value=r.mes??''; m.oninput=()=>{r.mes=m.value===''?null:+m.value; paint(); save(); drawCompanyChart();}; g.appendChild(m);
-    const p=document.createElement('input'); p.type='number'; p.step='0.01'; p.className='num'; p.value=r.previsto??''; p.oninput=()=>{r.previsto=p.value===''?null:+p.value; paint(); save(); drawCompanyChart();}; g.appendChild(p);
-    const d=document.createElement('div'); g.appendChild(d);
-
-    const slot=document.createElement('div'); slot.style.display='flex'; slot.style.gap='.3rem'; slot.style.alignItems='center';
-    slot.innerHTML=`<button class="i28" title="Adjuntar">📎</button>${r.adj?`<a class="i28" style="text-decoration:none;text-align:center" href="${r.adj.data}" download="${r.adj.name}" target="_blank">🔗</a>`:''}`;
-    const file=document.createElement('input'); file.type='file'; file.accept=".xls,.xlsx,.csv,.pdf,.png,.jpg,.jpeg"; file.style.display='none';
-    slot.querySelector('button').onclick=()=>file.click();
-    file.onchange=()=>{ const f=file.files[0]; if(!f) return; const rd=new FileReader(); rd.onload=()=>{ r.adj={name:f.name,data:rd.result}; save(); renderSalesCompany(); }; rd.readAsDataURL(f); };
-    slot.appendChild(file); g.appendChild(slot);
-
-    function paint(){ const mv=+r.mes||0, pv=+r.previsto||0; d.textContent=money(mv-pv); m.classList.remove('ok','bad'); if(!isNaN(mv)&&!isNaN(pv)) m.classList.add(mv>=pv?'ok':'bad'); }
-    paint(); totMes+=+r.mes||0; totPre+=+r.previsto||0;
-  });
-  ['TOTAL', money(totMes), money(totPre), money(totMes-totPre), ''].forEach(t=>{const dd=document.createElement('div');dd.className='totline head';dd.textContent=t;g.appendChild(dd);});
-}
-function renderSalesCenters(){
-  const g=$('#gridSalesCenters'); const q=($('#svcSearchCenters').value||'').toLowerCase(); g.innerHTML='';
-  g.style.gridTemplateColumns='1.4fr 140px 140px 120px 40px';
-  ['Centro','Mes (€)','Previsto (€)','Diferencia',''].forEach(h=>{const d=document.createElement('div');d.className='head';d.textContent=h;g.appendChild(d);});
-  let totMes=0, totPre=0;
-  state.sales.centers.forEach((r,idx)=>{
-    if(q && !(r.label||'').toLowerCase().includes(q)) return;
-    const c=document.createElement('input'); c.className='txt'; c.placeholder='Nombre del centro'; c.value=r.label||''; c.oninput=()=>{r.label=c.value; save(); drawCentersChart();}; g.appendChild(c);
-    const m=document.createElement('input'); m.type='number'; m.step='0.01'; m.className='num'; m.value=r.mes??''; m.oninput=()=>{r.mes=m.value===''?null:+m.value; paint(); save(); drawCentersChart();}; g.appendChild(m);
-    const p=document.createElement('input'); p.type='number'; p.step='0.01'; p.className='num'; p.value=r.previsto??''; p.oninput=()=>{r.previsto=p.value===''?null:+p.value; paint(); save(); drawCentersChart();}; g.appendChild(p);
-    const d=document.createElement('div'); g.appendChild(d);
-
-    const slot=document.createElement('div'); slot.style.display='flex'; slot.style.gap='.3rem'; slot.style.alignItems='center';
-    slot.innerHTML=`<button class="i28" title="Adjuntar">📎</button>${r.adj?`<a class="i28" style="text-decoration:none;text-align:center" href="${r.adj.data}" download="${r.adj.name}" target="_blank">🔗</a>`:''}`;
-    const file=document.createElement('input'); file.type='file'; file.accept=".xls,.xlsx,.csv,.pdf,.png,.jpg,.jpeg"; file.style.display='none';
-    slot.querySelector('button').onclick=()=>file.click();
-    file.onchange=()=>{ const f=file.files[0]; if(!f) return; const rd=new FileReader(); rd.onload=()=>{ r.adj={name:f.name,data:rd.result}; save(); renderSalesCenters(); }; rd.readAsDataURL(f); };
-    slot.appendChild(file); g.appendChild(slot);
-
-    function paint(){ const mv=+r.mes||0, pv=+r.previsto||0; d.textContent=money(mv-pv); m.classList.remove('ok','bad'); if(!isNaN(mv)&&!isNaN(pv)) m.classList.add(mv>=pv?'ok':'bad'); }
-    paint(); totMes+=+r.mes||0; totPre+=+r.previsto||0;
-  });
-  ['TOTAL', money(totMes), money(totPre), money(totMes-totPre), ''].forEach(t=>{const dd=document.createElement('div');dd.className='totline head';dd.textContent=t;g.appendChild(dd);});
-}
-
-/* ===== Gráficos ===== */
-function drawBars(svgId, labels, seriesA, seriesB, colorA='#2ecc71', colorB='#9aa1b1'){
-  const svg=$( '#'+svgId ); if(!svg) return; const W=360, H=260, pad=28, base=H-30;
-  svg.innerHTML='';
-  const maxV=Math.max(1, ...seriesA, ...seriesB);
-  const n=labels.length; const gap=12; const bw=Math.max(8, Math.floor((W-2*pad - (n*gap))/(n*2)));
-  let x=pad;
-  svg.innerHTML+=`<line x1="${pad}" y1="${base}" x2="${W-pad}" y2="${base}" stroke="#ccd1d9"/>`;
-  labels.forEach((lab,i)=>{
-    const a=seriesA[i]||0, b=seriesB[i]||0;
-    const ha = Math.round((a/maxV)*(base-pad));
-    const hb = Math.round((b/maxV)*(base-pad));
-    svg.innerHTML+=`<rect x="${x}" y="${base-hb}" width="${bw}" height="${hb}" fill="${colorB}"/>`;
-    svg.innerHTML+=`<rect x="${x+bw+4}" y="${base-ha}" width="${bw}" height="${ha}" fill="${colorA}"/>`;
-    if(i%2===0){ svg.innerHTML+=`<text x="${x+bw}" y="${base+12}" font-size="9" text-anchor="middle" fill="#6b7280">${(lab||'').split('-')[0]}</text>`; }
-    x += (bw*2 + gap);
-  });
-}
-function drawCompanyChart(){
-  const labels = state.sales.company.map(r=>r.label);
-  const mes    = state.sales.company.map(r=>+r.mes||0);
-  const prev   = state.sales.company.map(r=>+r.previsto||0);
-  drawBars('chartCompany', labels, mes, prev);
-}
-function drawCentersChart(){
-  const labels = state.sales.centers.map(r=>r.label||'—');
-  const mes    = state.sales.centers.map(r=>+r.mes||0);
-  const prev   = state.sales.centers.map(r=>+r.previsto||0);
-  drawBars('chartCenters', labels, mes, prev);
-}
-
-/* ===== Detalle Centro (EX/FLOP) ===== */
-function renderCentroInfo(it){
-  const g=$('#gridCentroInfo'); g.innerHTML=''; g.style.gridTemplateColumns='1.2fr 1fr 1fr 1fr';
-  ['Nombre','Delegado','Audiólogo','Franquicia/Sucursal'].forEach(h=>{const d=document.createElement('div');d.className='head';d.textContent=h;g.appendChild(d);});
-  const n=document.createElement('input'); n.className='txt'; n.value=it.nombre||''; n.oninput=()=>{it.nombre=n.value; renderSidebar(); save();}; g.appendChild(n);
-  const d=document.createElement('input'); d.className='txt'; d.value=it.delegado||''; d.oninput=()=>{it.delegado=d.value; save();}; g.appendChild(d);
-  const a=document.createElement('input'); a.className='txt'; a.value=it.audiologo||''; a.oninput=()=>{it.audiologo=a.value; save();}; g.appendChild(a);
-  const t=document.createElement('select'); t.className='sel'; t.innerHTML='<option>Franquicia</option><option>Sucursal</option>'; t.value=it.tipo||'Franquicia'; t.onchange=()=>{it.tipo=t.value; save();}; g.appendChild(t);
-}
-function renderAcciones(it){
-  const g=$('#gridAcciones'); g.innerHTML=''; g.style.gridTemplateColumns='110px 80px 180px 100px 90px 90px 1fr 40px 40px';
-  ['Fecha','Paquete','Tipo de acción','Derivación','Citas','Ventas','Observaciones','📎',''].forEach(h=>{const d=document.createElement('div');d.className='head';d.textContent=h;g.appendChild(d);});
-  if(!Array.isArray(it.acciones)) it.acciones=[];
-  it.acciones.forEach((r,idx)=>{
-    const f=document.createElement('input'); f.type='date'; f.className='date'; f.value=r.fecha||''; f.oninput=()=>{r.fecha=f.value; save();}; g.appendChild(f);
-    const p=document.createElement('select'); p.className='sel'; p.innerHTML='<option>1</option><option>2</option><option>3</option>'; p.value=r.paquete||'1'; p.onchange=()=>{r.paquete=p.value; save();}; g.appendChild(p);
-    const ta=document.createElement('select'); ta.className='sel';
-    ta.innerHTML=['Azafata','Buzoneo','Mailing','Ruleta','Stand','Cashback','Otros'].map(x=>`<option>${x}</option>`).join('');
-    ta.value=r.tipo||'Azafata'; ta.onchange=()=>{r.tipo=ta.value; save();}; g.appendChild(ta);
-    const de=document.createElement('input'); de.type='number'; de.className='num'; de.value=r.derivacion??''; de.oninput=()=>{r.derivacion=de.value===''?null:+de.value; save();}; g.appendChild(de);
-    const ci=document.createElement('input'); ci.type='number'; ci.className='num'; ci.value=r.citas??''; ci.oninput=()=>{r.citas=ci.value===''?null:+ci.value; save();}; g.appendChild(ci);
-    const ve=document.createElement('input'); ve.type='number'; ve.className='num'; ve.value=r.venta??''; ve.oninput=()=>{r.venta=ve.value===''?null:+ve.value; save();}; g.appendChild(ve);
-    const ob=document.createElement('input'); ob.className='txt'; ob.value=r.obs||''; ob.oninput=()=>{r.obs=ob.value; save();}; g.appendChild(ob);
-    const slot=document.createElement('div'); slot.style.textAlign='center';
-    slot.innerHTML=`<button class="i28" title="Adjuntar">📎</button>${r.adj?`<a class="i28" style="text-decoration:none;text-align:center" href="${r.adj.data}" download="${r.adj.name}" target="_blank">🔗</a>`:''}`;
-    const file=document.createElement('input'); file.type='file'; file.accept=".xls,.xlsx,.csv,.pdf,.png,.jpg,.jpeg"; file.style.display='none';
-    slot.querySelector('button').onclick=()=>file.click();
-    file.onchange=()=>{ const f=file.files[0]; if(!f) return; const rd=new FileReader(); rd.onload=()=>{ r.adj={name:f.name,data:rd.result}; save(); renderAcciones(it); }; rd.readAsDataURL(f); };
-    slot.appendChild(file); g.appendChild(slot);
-    const del=document.createElement('button'); del.className='i28'; del.textContent='—'; del.title='Eliminar fila'; del.onclick=()=>{it.acciones.splice(idx,1); renderAcciones(it); save();}; g.appendChild(del);
-  });
-  $('#accAdd').onclick=()=>{ it.acciones.push({fecha:'',paquete:'1',tipo:'Azafata',derivacion:null,citas:null,venta:null,obs:'',adj:null}); renderAcciones(it); save(); };
-}
-function renderFormacion(it){
-  const g=$('#gridFormacion'); g.innerHTML=''; g.style.gridTemplateColumns='1fr 120px 120px 1fr 40px 40px';
-  ['Curso','Realizado','Aplica','Observaciones','📎',''].forEach(h=>{const d=document.createElement('div');d.className='head';d.textContent=h;g.appendChild(d);});
-  if(!Array.isArray(it.formacion)) it.formacion=[];
-  it.formacion.forEach((r,idx)=>{
-    const c=document.createElement('input'); c.className='txt'; c.value=r.curso||''; c.oninput=()=>{r.curso=c.value; save();}; g.appendChild(c);
-    const re=document.createElement('input'); re.type='checkbox'; re.checked=!!r.realizado; re.onchange=()=>{r.realizado=re.checked; save();}; g.appendChild(re);
-    const ap=document.createElement('input'); ap.type='checkbox'; ap.checked=!!r.aplica; ap.onchange=()=>{r.aplica=ap.checked; save();}; g.appendChild(ap);
-    const o=document.createElement('input'); o.className='txt'; o.value=r.obs||''; o.oninput=()=>{r.obs=o.value; save();}; g.appendChild(o);
-    const slot=document.createElement('div'); slot.innerHTML=`<button class="i28">📎</button>${r.adj?`<a class="i28" href="${r.adj.data}" download="${r.adj.name}" target="_blank">🔗</a>`:''}`;
-    const file=document.createElement('input'); file.type='file'; file.accept=".pdf,.png,.jpg,.jpeg,.doc,.docx"; file.style.display='none';
-    slot.querySelector('button').onclick=()=>file.click();
-    file.onchange=()=>{ const f=file.files[0]; if(!f) return; const rd=new FileReader(); rd.onload=()=>{ r.adj={name:f.name,data:rd.result}; save(); renderFormacion(it); }; rd.readAsDataURL(f); };
-    slot.appendChild(file); g.appendChild(slot);
-    const del=document.createElement('button'); del.className='i28'; del.textContent='—'; del.title='Eliminar fila'; del.onclick=()=>{it.formacion.splice(idx,1); renderFormacion(it); save();}; g.appendChild(del);
-  });
-  $('#frmAdd').onclick=()=>{ it.formacion.push({curso:'',realizado:false,aplica:false,obs:'',adj:null}); renderFormacion(it); save(); };
-}
-function renderProcesos(it){
-  const g=$('#gridProcesos'); g.innerHTML=''; g.style.gridTemplateColumns='120px 130px 70px 70px 110px 110px 1fr 40px';
-  ['Fecha visita','Puntuación (%)','HIT','Pruebas RT','% Pruebas','% Venta','Observaciones','📎'].forEach(h=>{const d=document.createElement('div');d.className='head';d.textContent=h;g.appendChild(d);});
-  if(!Array.isArray(it.procesos)) it.procesos=[];
-  it.procesos.forEach((r,idx)=>{
-    const f=document.createElement('input'); f.type='date'; f.className='date'; f.value=r.fecha||''; f.oninput=()=>{r.fecha=f.value; save();}; g.appendChild(f);
-    const pu=document.createElement('input'); pu.type='number'; pu.min=0; pu.max=100; pu.className='num'; pu.value=r.puntuacion??''; pu.oninput=()=>{r.puntuacion=pu.value===''?null:+pu.value; colorP(); save();}; g.appendChild(pu);
-    const hi=document.createElement('input'); hi.type='checkbox'; hi.checked=!!r.hit; hi.onchange=()=>{r.hit=hi.checked; save();}; g.appendChild(hi);
-    const rt=document.createElement('input'); rt.type='checkbox'; rt.checked=!!r.rt; rt.onchange=()=>{r.rt=rt.checked; save();}; g.appendChild(rt);
-    const pr=document.createElement('input'); pr.type='number'; pr.min=0; pr.max=100; pr.className='num'; pr.value=r.pruebas??''; pr.oninput=()=>{r.pruebas=pr.value===''?null:+pr.value; color80(pr); save();}; g.appendChild(pr);
-    const ve=document.createElement('input'); ve.type='number'; ve.min=0; ve.max=100; ve.className='num'; ve.value=r.venta??''; ve.oninput=()=>{r.venta=ve.value===''?null:+ve.value; color80(ve); save();}; g.appendChild(ve);
-    const ob=document.createElement('input'); ob.className='txt'; ob.value=r.obs||''; ob.oninput=()=>{r.obs=ob.value; save();}; g.appendChild(ob);
-    const slot=document.createElement('div'); slot.innerHTML=`<button class="i28">📎</button>${r.adj?`<a class="i28" href="${r.adj.data}" download="${r.adj.name}" target="_blank">🔗</a>`:''}`;
-    const file=document.createElement('input'); file.type='file'; file.accept=".xls,.xlsx,.csv,.pdf,.png,.jpg,.jpeg"; file.style.display='none';
-    slot.querySelector('button').onclick=()=>file.click();
-    file.onchange=()=>{ const f=file.files[0]; if(!f) return; const rd=new FileReader(); rd.onload=()=>{ r.adj={name:f.name,data:rd.result}; save(); renderProcesos(it); }; rd.readAsDataURL(f); };
-    slot.appendChild(file); g.appendChild(slot);
-    function colorP(){ pu.classList.remove('ok','bad'); const v=+pu.value; if(!isNaN(v)) pu.classList.add(v>=95?'ok':'bad'); }
-    function color80(el){ el.classList.remove('ok','bad'); const v=+el.value; if(!isNaN(v)) el.classList.add(v>=80?'ok':'bad'); }
-    colorP(); color80(pr); color80(ve);
-  });
-  $('#procAdd').onclick=()=>{ it.procesos.push({fecha:'',puntuacion:null,hit:false,rt:false,pruebas:null,venta:null,obs:'',adj:null}); renderProcesos(it); save(); };
-}
-
-/* ===== VISITAS ===== */
-function renderVisitas(){
-  $('#vaRol').value = state.meta.vaRol || 'Responsable Tec. Audio';
-  $('#vaNombre').value = state.meta.vaNombre || '';
-  $('#vaRol').onchange=e=>{ state.meta.vaRol=e.target.value; save(); };
-  $('#vaNombre').oninput=e=>{ state.meta.vaNombre=e.target.value; save(); };
-
-  const g=$('#gridVisitas'); const q=($('#vaSearch').value||'').toLowerCase(); g.innerHTML='';
-  g.style.gridTemplateColumns='1.2fr 1fr 1fr 110px 110px 80px 80px 80px 40px 40px';
-  ['Centro','Delegado','Audiólogo','Tipo','Fecha','Puntuación','%Prueba','%Venta','HIT','📎'].forEach(h=>{const d=document.createElement('div');d.className='head';d.textContent=h;g.appendChild(d);});
-  state.visitas.forEach((r,idx)=>{
-    if(q && !(r.centro||'').toLowerCase().includes(q)) return;
-    const c=document.createElement('input'); c.className='txt'; c.value=r.centro||''; c.oninput=()=>{r.centro=c.value; save();}; g.appendChild(c);
-    const d=document.createElement('input'); d.className='txt'; d.value=r.delegado||''; d.oninput=()=>{r.delegado=d.value; save();}; g.appendChild(d);
-    const a=document.createElement('input'); a.className='txt'; a.value=r.audiologo||''; a.oninput=()=>{r.audiologo=a.value; save();}; g.appendChild(a);
-    const t=document.createElement('select'); t.className='sel'; t.innerHTML='<option>Sucursal</option><option>Franquicia</option>'; t.value=r.tipo||'Sucursal'; t.onchange=()=>{r.tipo=t.value; save();}; g.appendChild(t);
-    const f=document.createElement('input'); f.type='date'; f.className='date'; f.value=r.fecha||''; f.oninput=()=>{r.fecha=f.value; save();}; g.appendChild(f);
-    const p=document.createElement('input'); p.type='number'; p.min=0;p.max=100; p.className='num'; p.value=r.puntuacion??''; p.oninput=()=>{r.puntuacion=p.value===''?null:+p.value; color(p,85); save();}; g.appendChild(p);
-    const cp=document.createElement('input'); cp.type='number'; cp.min=0; cp.max=100; cp.className='num'; cp.value=r.conv_prueba??''; cp.oninput=()=>{r.conv_prueba=cp.value===''?null:+cp.value; color(cp,80); save();}; g.appendChild(cp);
-    const cv=document.createElement('input'); cv.type='number'; cv.min=0; cv.max=100; cv.className='num'; cv.value=r.conv_venta??''; cv.oninput=()=>{r.conv_venta=cv.value===''?null:+cv.value; color(cv,80); save();}; g.appendChild(cv);
-    const hit=document.createElement('input'); hit.type='checkbox'; hit.checked=!!r.hit; hit.onchange=()=>{r.hit=hit.checked; save();}; g.appendChild(hit);
-    const slot=document.createElement('div'); slot.innerHTML=`<button class="i28">📎</button>${r.adj?`<a class="i28" href="${r.adj.data}" download="${r.adj.name}" target="_blank">🔗</a>`:''}`;
-    const file=document.createElement('input'); file.type='file'; file.accept=".xls,.xlsx,.csv,.pdf"; file.style.display='none';
-    slot.querySelector('button').onclick=()=>file.click();
-    file.onchange=()=>{ const f=file.files[0]; if(!f) return; const rd=new FileReader(); rd.onload=()=>{ r.adj={name:f.name,data:rd.result}; save(); renderVisitas(); }; rd.readAsDataURL(f); };
-    slot.appendChild(file); g.appendChild(slot);
-    function color(el,thr){ el.classList.remove('ok','bad'); const v=+el.value; if(!isNaN(v)) el.classList.add(v>=thr?'ok':'bad'); }
-    color(p,85); color(cp,80); color(cv,80);
-  });
-  $('#vaAddRow').onclick=()=>{ state.visitas.push({centro:'',delegado:'',audiologo:'',tipo:'Sucursal',fecha:'',puntuacion:null,hit:false,conv_prueba:null,conv_venta:null,adj:null}); renderVisitas(); save(); };
-  $('#vaSearch').oninput=()=>renderVisitas();
-}
-
-/* ===== FM ===== */
-let currentFmCat='Mentoring general';
-function renderFM(){
-  const cat=$('#fmCat').value = currentFmCat;
-  $('#fmCat').onchange=e=>{ currentFmCat=e.target.value; renderFM(); };
-  $('#fmSearch').oninput=()=>renderFM();
-  const q=($('#fmSearch').value||'').toLowerCase();
-  const arr = state.fm[currentFmCat] || (state.fm[currentFmCat]=[]);
-  const g=$('#gridFM'); g.innerHTML=''; g.style.gridTemplateColumns='120px 1.1fr 1fr 1fr 1.6fr 40px';
-  ['Fecha','Tema','Delegado','Asistencia','Observaciones','📎'].forEach(h=>{const d=document.createElement('div');d.className='head';d.textContent=h;g.appendChild(d);});
-  arr.forEach((r,idx)=>{
-    if(q && ![(r.tema||''),(r.delegado||''),(r.asistencia||'')].join(' ').toLowerCase().includes(q)) return;
-    const f=document.createElement('input'); f.type='date'; f.className='date'; f.value=r.fecha||''; f.oninput=()=>{r.fecha=f.value; save();}; g.appendChild(f);
-    const t=document.createElement('input'); t.className='txt'; t.value=r.tema||''; t.oninput=()=>{r.tema=t.value; save();}; g.appendChild(t);
-    const d=document.createElement('input'); d.className='txt'; d.value=r.delegado||''; d.oninput=()=>{r.delegado=d.value; save();}; g.appendChild(d);
-    const a=document.createElement('input'); a.className='txt'; a.placeholder='Nº / lista'; a.value=r.asistencia||''; a.oninput=()=>{r.asistencia=a.value; save();}; g.appendChild(a);
-    const o=document.createElement('input'); o.className='txt'; o.value=r.obs||''; o.oninput=()=>{r.obs=o.value; save();}; g.appendChild(o);
-    const slot=document.createElement('div'); slot.innerHTML=`<button class="i28">📎</button>${r.adj?`<a class="i28" href="${r.adj.data}" download="${r.adj.name}" target="_blank">🔗</a>`:''}`;
-    const file=document.createElement('input'); file.type='file'; file.accept=".xls,.xlsx,.csv,.pdf"; file.style.display='none';
-    slot.querySelector('button').onclick=()=>file.click();
-    file.onchange=()=>{ const f=file.files[0]; if(!f) return; const rd=new FileReader(); rd.onload=()=>{ r.adj={name:f.name,data:rd.result}; save(); renderFM(); }; rd.readAsDataURL(f); };
-    slot.appendChild(file); g.appendChild(slot);
-  });
-  $('#fmAddRow').onclick=()=>{ arr.push({fecha:'',tema:'',delegado:'',asistencia:'',obs:'',adj:null}); renderFM(); save(); };
-}
-
-/* ===== Teleaudiología (ocultar vacíos) ===== */
-function updateTaCertPill(){
-  const n = state.ta.filter(r=>!!r.certificado).length;
-  $('#taCertPill').textContent = 'Certificadas: '+n;
-}
-function isTaEmpty(r){
-  return ![(r.centro||''),(r.delegado||''),(r.persona||'')].join('').trim()
-         && !r.formacion && !r.practicas && !r.certificado && !r.pruebas && !r.ventas && !(r.obs||'').trim();
-}
-function renderTA(){
-  const g=$('#gridTA'); const q=($('#taSearch').value||'').toLowerCase(); const showEmpty=$('#taShowEmpty').checked; g.innerHTML='';
-  g.style.gridTemplateColumns='1.2fr 1fr 110px 1.1fr 60px 60px 60px 60px 60px 1.2fr 40px';
-  ['Centro','Delegado','Rol','Persona','Form.','Prác.','Cert.','Pruebas','Ventas','Obs.','📎'].forEach(h=>{const d=document.createElement('div');d.className='head';d.textContent=h;g.appendChild(d);});
-  state.ta.forEach((r,idx)=>{
-    if(!showEmpty && isTaEmpty(r)) return;
-    if(q && ![(r.centro||''),(r.persona||''),(r.delegado||'')].join(' ').toLowerCase().includes(q)) return;
-    const c=document.createElement('input'); c.className='txt'; c.value=r.centro||''; c.oninput=()=>{r.centro=c.value; save();}; g.appendChild(c);
-    const d=document.createElement('input'); d.className='txt'; d.value=r.delegado||''; d.oninput=()=>{r.delegado=d.value; save();}; g.appendChild(d);
-    const ro=document.createElement('select'); ro.className='sel'; ro.innerHTML='<option>Audiólogo</option><option>Técnico</option>'; ro.value=r.rol||'Audiólogo'; ro.onchange=()=>{r.rol=ro.value; save();}; g.appendChild(ro);
-    const p=document.createElement('input'); p.className='txt'; p.placeholder='Nombre'; p.value=r.persona||''; p.oninput=()=>{r.persona=p.value; save();}; g.appendChild(p);
-    ['formacion','practicas','certificado','pruebas','ventas'].forEach(k=>{ const x=document.createElement('input'); x.type='checkbox'; x.checked=!!r[k]; x.onchange=()=>{r[k]=x.checked; save(); updateTaCertPill();}; g.appendChild(x); });
-    const o=document.createElement('input'); o.className='txt'; o.value=r.obs||''; o.oninput=()=>{r.obs=o.value; save();}; g.appendChild(o);
-    const slot=document.createElement('div'); slot.innerHTML=`<button class="i28">📎</button>${r.adj?`<a class="i28" href="${r.adj.data}" download="${r.adj.name}" target="_blank">🔗</a>`:''}`;
-    const file=document.createElement('input'); file.type='file'; file.accept=".xls,.xlsx,.csv,.pdf"; file.style.display='none';
-    slot.querySelector('button').onclick=()=>file.click();
-    file.onchange=()=>{ const f=file.files[0]; if(!f) return; const rd=new FileReader(); rd.onload=()=>{ r.adj={name:f.name,data:rd.result}; save(); renderTA(); }; rd.readAsDataURL(f); };
-    slot.appendChild(file); g.appendChild(slot);
-  });
-  $('#taAddRow').onclick=()=>{ state.ta.push({centro:'',delegado:'',rol:'Audiólogo',persona:'',formacion:false,practicas:false,certificado:false,pruebas:false,ventas:false,obs:'',adj:null}); renderTA(); save(); updateTaCertPill(); };
-  $('#taSearch').oninput=()=>renderTA();
-  $('#taShowEmpty').onchange=()=>renderTA();
-  updateTaCertPill();
-}
-
-/* ===== Equipos: 7 packs visibles con desplegable + buscador global ===== */
-function renderPack(i){
-  const wrap=document.createElement('div'); wrap.className='pack'; if(state.eqPacks[i].open) wrap.classList.add('open');
-  const head=document.createElement('div'); head.className='packHead'; head.innerHTML=`<strong>Pack ${i+1}</strong><button class="i28" title="Añadir fila">＋</button>`;
-  const body=document.createElement('div'); body.className='packBody';
-  const search=($('#eqSearch').value||'').toLowerCase();
-
-  const table=document.createElement('div'); table.className='table xscroll';
-  const grid=document.createElement('div'); grid.className='grid'; grid.style.gridTemplateColumns='1.2fr 1fr 1fr 110px 1.2fr 60px 60px 40px';
-  ;['Equipo','Nº serie','Persona envía','Fecha','Centro','C','S','📎'].forEach(h=>{const d=document.createElement('div');d.className='head';d.textContent=h;grid.appendChild(d);});
-  state.eqPacks[i].rows.forEach((r,ri)=>{
-    if(search && ![(r.equipo||''),(r.serie||''),(r.centro||'')].join(' ').toLowerCase().includes(search)) return;
-    const e=document.createElement('input'); e.className='txt'; e.value=r.equipo||''; e.oninput=()=>{r.equipo=e.value; save();}; grid.appendChild(e);
-    const s=document.createElement('input'); s.className='txt'; s.value=r.serie||''; s.oninput=()=>{r.serie=s.value; save();}; grid.appendChild(s);
-    const p=document.createElement('input'); p.className='txt'; p.value=r.persona||''; p.oninput=()=>{r.persona=p.value; save();}; grid.appendChild(p);
-    const f=document.createElement('input'); f.type='date'; f.className='date'; f.value=r.fecha||''; f.oninput=()=>{r.fecha=f.value; save();}; grid.appendChild(f);
-    const c=document.createElement('input'); c.className='txt'; c.value=r.centro||''; c.oninput=()=>{r.centro=c.value; save();}; grid.appendChild(c);
-    ;['en','sede'].forEach(k=>{ const x=document.createElement('input'); x.type='checkbox'; x.checked=!!r[k]; x.onchange=()=>{r[k]=x.checked; save();}; grid.appendChild(x); });
-    const slot=document.createElement('div'); slot.innerHTML=`<button class="i28">📎</button>${r.adj?`<a class="i28" href="${r.adj.data}" download="${r.adj.name}" target="_blank">🔗</a>`:''}`;
-    const file=document.createElement('input'); file.type='file'; file.accept=".xls,.xlsx,.csv,.pdf,.png,.jpg,.jpeg"; file.style.display='none';
-    slot.querySelector('button').onclick=()=>file.click();
-    file.onchange=()=>{ const f=file.files[0]; if(!f) return; const rd=new FileReader(); rd.onload=()=>{ r.adj={name:f.name,data:rd.result}; save(); renderEQ(); }; rd.readAsDataURL(f); };
-    slot.appendChild(file); grid.appendChild(slot);
-  });
-  table.appendChild(grid);
-  body.appendChild(table);
-
-  // eventos pack
-  head.onclick=(e)=>{ if(e.target.tagName==='BUTTON') return; state.eqPacks[i].open=!state.eqPacks[i].open; renderEQ(); save(); };
-  head.querySelector('button').onclick=(e)=>{ e.stopPropagation(); state.eqPacks[i].rows.push({equipo:'',serie:'',persona:'',fecha:'',centro:'',en:false,sede:false,adj:null}); renderEQ(); save(); };
-
-  wrap.appendChild(head); wrap.appendChild(body);
-  return wrap;
-}
-function renderEQ(){
-  const cont=$('#eqPacksWrap'); cont.innerHTML='';
-  for(let i=0;i<state.eqPacks.length;i++){ cont.appendChild(renderPack(i)); }
-  $('#eqSearch').oninput=()=>renderEQ();
-}
-
-/* ===== Eventos sidebar de ventas ===== */
-$('#svOpenCompany').onclick=openSalesCompany;
-$('#svOpenCenters').onclick=openSalesCenters;
-
-/* ===== Botones + en Cifra ===== */
-$('#svcAddCompany').onclick=()=>{ state.sales.company.push({label:MONTHS[(state.sales.company.length)%MONTHS.length]||'Mes',mes:null,previsto:null,adj:null}); renderSalesCompany(); save(); drawCompanyChart(); };
-$('#svcAddCenters').onclick=()=>{ state.sales.centers.push({label:'(nuevo centro)',mes:null,previsto:null,adj:null}); renderSalesCenters(); save(); drawCentersChart(); };
-
-/* ===== Topbar ===== */
-$('#btnSave').onclick=save;
-$('#btnLoad').onclick=()=>{ load(); renderSidebar(); showPlaceholder(); };
-
-/* ===== PIN ===== */
-function doEnter(){ const v=$('#pin').value.trim(); if(v==='4321' || /^AR4321$/i.test(v)){ $('#gate').style.display='none'; } else { $('#pinMsg').style.display='block'; } }
-$('#enterBtn').onclick=doEnter;
-$('#pin').addEventListener('keydown',e=>{ if(e.key==='Enter') doEnter(); });
-
-/* ===== Sales search bindings ===== */
-$('#svcSearchCompany')?.addEventListener('input',renderSalesCompany);
-$('#svcSearchCenters')?.addEventListener('input',renderSalesCenters);
-
-/* ===== Boot ===== */
-window.addEventListener('load',()=>{
-  load();
-  renderSidebar();
-  showPlaceholder();
-});
-</script>
+    // Wire UI
+    window.addEventListener('DOMContentLoaded',()=>{
+      const pin=$('#pin'), enter=$('#enter'), clear=$('#clear');
+      enter.addEventListener('click',handleEnter);
+      clear.addEventListener('click',()=>{ pin.value=''; $('#pinMsg').style.display='none'; pin.focus(); });
+      pin.addEventListener('keydown',(e)=>{ if(e.key==='Enter') handleEnter(); });
+      setTimeout(()=>{ try{ pin.focus(); }catch(_){} },50);
+    });
+  </script>
 </body>
 </html>
