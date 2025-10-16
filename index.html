@@ -43,7 +43,6 @@ body{margin:0;background:var(--bg);font-family:Inter,system-ui,Segoe UI,Roboto,A
 .hdr{display:flex;gap:.6rem;align-items:center;margin:.2rem 0 .5rem}
 .hdr h2{margin:0;font-size:18px}
 .badge{padding:.12rem .52rem;border-radius:999px;background:#0001}
-.tools{display:flex;gap:.4rem;align-items:center;margin:.25rem 0 .35rem}
 
 /* Search + fields */
 .search{display:flex;gap:.4rem;align-items:end;margin:.2rem 0}
@@ -65,6 +64,13 @@ body{margin:0;background:var(--bg);font-family:Inter,system-ui,Segoe UI,Roboto,A
 .chartCard{border:1px solid var(--line);border-radius:10px;background:#fff;box-shadow:var(--sh);padding:.4rem}
 .chartTitle{font-weight:900;margin:.1rem 0 .35rem}
 svg{width:100%;height:260px}
+
+/* Packs (equipos) */
+.pack{border:1px solid var(--line);border-radius:10px;background:#fff;box-shadow:var(--sh);margin:.4rem 0}
+.packHead{display:flex;align-items:center;gap:.5rem;padding:.45rem .6rem;cursor:pointer;background:#f9fbff}
+.packHead strong{flex:1}
+.packBody{padding:.45rem .6rem;display:none}
+.pack.open .packBody{display:block}
 
 /* PIN */
 .gate{position:fixed;inset:0;background:#000a;display:flex;align-items:center;justify-content:center;z-index:100}
@@ -98,7 +104,7 @@ svg{width:100%;height:260px}
           <button class="i28" id="svOpenCenters"  title="Centros exclusivos ➜">➡️</button>
         </div>
       </div>
-      <div class="list small">Abre con ➡️. Estructura de tabla idéntica en ambos paneles.</div>
+      <div class="list small">Abre con ➡️. (＋ añade filas)</div>
     </div>
 
     <!-- Centros exclusivos -->
@@ -161,7 +167,6 @@ svg{width:100%;height:260px}
       <div class="head">🧰 EQUIPOS
         <div class="group">
           <button class="i28" id="eqOpen">➡️</button>
-          <button class="i28" id="eqAdd">＋</button>
         </div>
       </div>
       <div class="list" id="eqList"></div>
@@ -230,7 +235,7 @@ svg{width:100%;height:260px}
       <div class="search">
         <input id="vaSearch" class="txt" placeholder="Buscar centro…"/>
         <select id="vaRol" class="sel"><option>Responsable Tec. Audio</option><option>Delegado de Audio</option></select>
-        <input id="vaNombre" class="txt" placeholder="Visitador de audio (nombre)"/>
+        <input id="vaNombre" class="txt" placeholder="Nombre (delegado o resp. tec)"/>
         <div class="tools"><button class="i28" id="vaAddRow">＋</button></div>
       </div>
       <div class="table xscroll"><div class="grid" id="gridVisitas"></div></div>
@@ -255,6 +260,7 @@ svg{width:100%;height:260px}
     <div id="panelTA" style="display:none">
       <div class="search">
         <input id="taSearch" class="txt" placeholder="Buscar centro/persona…"/>
+        <label class="small" style="display:flex;align-items:center;gap:.35rem"><input id="taShowEmpty" type="checkbox"/> Mostrar vacíos</label>
         <div class="tools">
           <span class="pill" id="taCertPill">Certificadas: 0</span>
           <button class="i28" id="taAddRow">＋</button>
@@ -263,15 +269,12 @@ svg{width:100%;height:260px}
       <div class="table xscroll"><div class="grid" id="gridTA"></div></div>
     </div>
 
-    <!-- EQUIPOS (7 packs) -->
+    <!-- EQUIPOS (7 packs visibles) -->
     <div id="panelEQ" style="display:none">
       <div class="search">
-        <select id="eqPackSel" class="sel"></select>
-        <input id="eqSearch" class="txt" placeholder="Buscar equipo/serie/centro…"/>
-        <label class="small" style="display:flex;align-items:center;gap:.35rem"><input id="eqAllPacks" type="checkbox"/> Buscar en todos los packs</label>
-        <div class="tools"><button class="i28" id="eqAddRow">＋</button></div>
+        <input id="eqSearch" class="txt" placeholder="Buscar equipo/serie/centro en todos los packs…"/>
       </div>
-      <div class="table xscroll"><div class="grid" id="gridEQ"></div></div>
+      <div id="eqPacksWrap"></div>
     </div>
 
     <div id="panelPlaceholder" style="opacity:.75">Selecciona en la izquierda para editar.</div>
@@ -294,7 +297,7 @@ svg{width:100%;height:260px}
 const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
 const money=v=>isFinite(+v)?(+v).toLocaleString('es-ES'):'';
 const MONTHS=['Ago-2025','Sep-2025','Oct-2025','Nov-2025','Dic-2025','Ene-2026','Feb-2026','Mar-2026','Abr-2026','May-2026','Jun-2026','Jul-2026'];
-const LSKEY='seguimiento_audio_full_v3';
+const LSKEY='seguimiento_audio_full_v4';
 
 /* ===== Estado ===== */
 let state={
@@ -317,6 +320,7 @@ let state={
   },
   ta: Array.from({length:100},()=>({centro:'',delegado:'',rol:'Audiólogo',persona:'',formacion:false,practicas:false,certificado:false,pruebas:false,ventas:false,obs:'',adj:null})),
   eqPacks: Array.from({length:7},()=>({
+    open:false,
     rows:[{equipo:'',serie:'',persona:'',fecha:'',centro:'',en:false,sede:false,adj:null}]
   })),
   meta:{vaRol:'Responsable Tec. Audio',vaNombre:''}
@@ -388,7 +392,6 @@ function renderSidebar(){
   eqBtn.innerHTML=`<div class="name">Packs de equipos (7)</div><div><button class="i28">➡️</button></div>`;
   eqBtn.querySelector('button').onclick=openEQ; eqList.appendChild(eqBtn);
   $('#eqOpen').onclick=openEQ;
-  $('#eqAdd').onclick=openEQ; // abre gestión por packs
 }
 
 /* ===== Panel switching ===== */
@@ -601,7 +604,8 @@ function renderVisitas(){
   $('#vaSearch').oninput=()=>renderVisitas();
 }
 
-/* ===== FM (con Delegado) ===== */
+/* ===== FM ===== */
+let currentFmCat='Mentoring general';
 function renderFM(){
   const cat=$('#fmCat').value = currentFmCat;
   $('#fmCat').onchange=e=>{ currentFmCat=e.target.value; renderFM(); };
@@ -626,16 +630,21 @@ function renderFM(){
   $('#fmAddRow').onclick=()=>{ arr.push({fecha:'',tema:'',delegado:'',asistencia:'',obs:'',adj:null}); renderFM(); save(); };
 }
 
-/* ===== Teleaudiología (100 filas + contador certificados) ===== */
+/* ===== Teleaudiología (ocultar vacíos) ===== */
 function updateTaCertPill(){
   const n = state.ta.filter(r=>!!r.certificado).length;
   $('#taCertPill').textContent = 'Certificadas: '+n;
 }
+function isTaEmpty(r){
+  return ![(r.centro||''),(r.delegado||''),(r.persona||'')].join('').trim()
+         && !r.formacion && !r.practicas && !r.certificado && !r.pruebas && !r.ventas && !(r.obs||'').trim();
+}
 function renderTA(){
-  const g=$('#gridTA'); const q=($('#taSearch').value||'').toLowerCase(); g.innerHTML='';
+  const g=$('#gridTA'); const q=($('#taSearch').value||'').toLowerCase(); const showEmpty=$('#taShowEmpty').checked; g.innerHTML='';
   g.style.gridTemplateColumns='1.2fr 1fr 110px 1.1fr 60px 60px 60px 60px 60px 1.2fr 40px';
   ['Centro','Delegado','Rol','Persona','Form.','Prác.','Cert.','Pruebas','Ventas','Obs.','📎'].forEach(h=>{const d=document.createElement('div');d.className='head';d.textContent=h;g.appendChild(d);});
   state.ta.forEach((r,idx)=>{
+    if(!showEmpty && isTaEmpty(r)) return;
     if(q && ![(r.centro||''),(r.persona||''),(r.delegado||'')].join(' ').toLowerCase().includes(q)) return;
     const c=document.createElement('input'); c.className='txt'; c.value=r.centro||''; c.oninput=()=>{r.centro=c.value; save();}; g.appendChild(c);
     const d=document.createElement('input'); d.className='txt'; d.value=r.delegado||''; d.oninput=()=>{r.delegado=d.value; save();}; g.appendChild(d);
@@ -651,58 +660,57 @@ function renderTA(){
   });
   $('#taAddRow').onclick=()=>{ state.ta.push({centro:'',delegado:'',rol:'Audiólogo',persona:'',formacion:false,practicas:false,certificado:false,pruebas:false,ventas:false,obs:'',adj:null}); renderTA(); save(); updateTaCertPill(); };
   $('#taSearch').oninput=()=>renderTA();
+  $('#taShowEmpty').onchange=()=>renderTA();
   updateTaCertPill();
 }
 
-/* ===== Equipos: 7 packs + búsqueda global ===== */
-function renderEqPackSelector(){
-  const sel=$('#eqPackSel'); sel.innerHTML='';
-  for(let i=0;i<state.eqPacks.length;i++){ const o=document.createElement('option'); o.textContent='Pack '+(i+1); o.value=String(i); sel.appendChild(o); }
-  if(sel.dataset.init!=='1'){ sel.value='0'; sel.dataset.init='1'; }
-}
-function currentPackIndex(){ return +($('#eqPackSel').value||0); }
-function rowsInScope(){
-  if($('#eqAllPacks').checked){
-    // retorna pares {pi, ri, ref} para editar cross-pack
-    const out=[];
-    state.eqPacks.forEach((pk,pi)=>{
-      pk.rows.forEach((r,ri)=>out.push({pi,ri,ref:r}));
-    });
-    return out;
-  }else{
-    const pi=currentPackIndex();
-    return (state.eqPacks[pi].rows||[]).map((r,ri)=>({pi,ri,ref:r}));
-  }
-}
-function renderEQ(){
-  renderEqPackSelector();
-  const g=$('#gridEQ'); const q=($('#eqSearch').value||'').toLowerCase(); g.innerHTML='';
-  g.style.gridTemplateColumns='1.2fr 1fr 1fr 110px 1.2fr 60px 60px 40px';
-  ['Equipo','Nº serie','Persona envía','Fecha','Centro','C','S','📎'].forEach(h=>{const d=document.createElement('div');d.className='head';d.textContent=h;g.appendChild(d);});
-  rowsInScope().forEach(({pi,ri,ref})=>{
-    const hayQ = q && ![(ref.equipo||''),(ref.serie||''),(ref.centro||'')].join(' ').toLowerCase().includes(q);
-    if(hayQ) return;
-    const e=document.createElement('input'); e.className='txt'; e.value=ref.equipo||''; e.oninput=()=>{ref.equipo=e.value; save();}; g.appendChild(e);
-    const s=document.createElement('input'); s.className='txt'; s.value=ref.serie||''; s.oninput=()=>{ref.serie=s.value; save();}; g.appendChild(s);
-    const p=document.createElement('input'); p.className='txt'; p.value=ref.persona||''; p.oninput=()=>{ref.persona=p.value; save();}; g.appendChild(p);
-    const f=document.createElement('input'); f.type='date'; f.className='date'; f.value=ref.fecha||''; f.oninput=()=>{ref.fecha=f.value; save();}; g.appendChild(f);
-    const c=document.createElement('input'); c.className='txt'; c.value=ref.centro||''; c.oninput=()=>{ref.centro=c.value; save();}; g.appendChild(c);
-    ['en','sede'].forEach(k=>{ const x=document.createElement('input'); x.type='checkbox'; x.checked=!!ref[k]; x.onchange=()=>{ref[k]=x.checked; save();}; g.appendChild(x); });
-    const slot=document.createElement('div'); slot.innerHTML=`<button class="i28">📎</button>${ref.adj?`<a class="i28" href="${ref.adj.data}" download="${ref.adj.name}" target="_blank">🔗</a>`:''}`;
+/* ===== Equipos: 7 packs visibles con desplegable + buscador global ===== */
+function renderPack(i){
+  const wrap=document.createElement('div'); wrap.className='pack'; if(state.eqPacks[i].open) wrap.classList.add('open');
+  const head=document.createElement('div'); head.className='packHead'; head.innerHTML=`<strong>Pack ${i+1}</strong><button class="i28" title="Añadir fila">＋</button>`;
+  const body=document.createElement('div'); body.className='packBody';
+  const search=($('#eqSearch').value||'').toLowerCase();
+
+  const table=document.createElement('div'); table.className='table xscroll';
+  const grid=document.createElement('div'); grid.className='grid'; grid.style.gridTemplateColumns='1.2fr 1fr 1fr 110px 1.2fr 60px 60px 40px';
+  ;['Equipo','Nº serie','Persona envía','Fecha','Centro','C','S','📎'].forEach(h=>{const d=document.createElement('div');d.className='head';d.textContent=h;grid.appendChild(d);});
+  state.eqPacks[i].rows.forEach((r,ri)=>{
+    if(search && ![(r.equipo||''),(r.serie||''),(r.centro||'')].join(' ').toLowerCase().includes(search)) return;
+    const e=document.createElement('input'); e.className='txt'; e.value=r.equipo||''; e.oninput=()=>{r.equipo=e.value; save();}; grid.appendChild(e);
+    const s=document.createElement('input'); s.className='txt'; s.value=r.serie||''; s.oninput=()=>{r.serie=s.value; save();}; grid.appendChild(s);
+    const p=document.createElement('input'); p.className='txt'; p.value=r.persona||''; p.oninput=()=>{r.persona=p.value; save();}; grid.appendChild(p);
+    const f=document.createElement('input'); f.type='date'; f.className='date'; f.value=r.fecha||''; f.oninput=()=>{r.fecha=f.value; save();}; grid.appendChild(f);
+    const c=document.createElement('input'); c.className='txt'; c.value=r.centro||''; c.oninput=()=>{r.centro=c.value; save();}; grid.appendChild(c);
+    ;['en','sede'].forEach(k=>{ const x=document.createElement('input'); x.type='checkbox'; x.checked=!!r[k]; x.onchange=()=>{r[k]=x.checked; save();}; grid.appendChild(x); });
+    const slot=document.createElement('div'); slot.innerHTML=`<button class="i28">📎</button>${r.adj?`<a class="i28" href="${r.adj.data}" download="${r.adj.name}" target="_blank">🔗</a>`:''}`;
     const file=document.createElement('input'); file.type='file'; file.accept=".xls,.xlsx,.csv,.pdf,.png,.jpg,.jpeg"; file.style.display='none';
     slot.querySelector('button').onclick=()=>file.click();
-    file.onchange=()=>{ const f=file.files[0]; if(!f) return; const rd=new FileReader(); rd.onload=()=>{ ref.adj={name:f.name,data:rd.result}; save(); renderEQ(); }; rd.readAsDataURL(f); };
-    slot.appendChild(file); g.appendChild(slot);
+    file.onchange=()=>{ const f=file.files[0]; if(!f) return; const rd=new FileReader(); rd.onload=()=>{ r.adj={name:f.name,data:rd.result}; save(); renderEQ(); }; rd.readAsDataURL(f); };
+    slot.appendChild(file); grid.appendChild(slot);
   });
-  $('#eqAddRow').onclick=()=>{ const pi=currentPackIndex(); state.eqPacks[pi].rows.push({equipo:'',serie:'',persona:'',fecha:'',centro:'',en:false,sede:false,adj:null}); renderEQ(); save(); };
+  table.appendChild(grid);
+  body.appendChild(table);
+
+  // eventos pack
+  head.onclick=(e)=>{ if(e.target.tagName==='BUTTON') return; state.eqPacks[i].open=!state.eqPacks[i].open; renderEQ(); save(); };
+  head.querySelector('button').onclick=(e)=>{ e.stopPropagation(); state.eqPacks[i].rows.push({equipo:'',serie:'',persona:'',fecha:'',centro:'',en:false,sede:false,adj:null}); renderEQ(); save(); };
+
+  wrap.appendChild(head); wrap.appendChild(body);
+  return wrap;
+}
+function renderEQ(){
+  const cont=$('#eqPacksWrap'); cont.innerHTML='';
+  for(let i=0;i<state.eqPacks.length;i++){ cont.appendChild(renderPack(i)); }
   $('#eqSearch').oninput=()=>renderEQ();
-  $('#eqPackSel').onchange=()=>renderEQ();
-  $('#eqAllPacks').onchange=()=>renderEQ();
 }
 
 /* ===== Eventos sidebar de ventas ===== */
 $('#svOpenCompany').onclick=openSalesCompany;
 $('#svOpenCenters').onclick=openSalesCenters;
+
+/* ===== Botones + en Cifra ===== */
+$('#svcAddCompany').onclick=()=>{ state.sales.company.push({label:MONTHS[(state.sales.company.length)%MONTHS.length]||'Mes',mes:null,previsto:null,adj:null}); renderSalesCompany(); save(); drawCompanyChart(); };
+$('#svcAddCenters').onclick=()=>{ state.sales.centers.push({label:'(nuevo centro)',mes:null,previsto:null,adj:null}); renderSalesCenters(); save(); drawCentersChart(); };
 
 /* ===== Topbar ===== */
 $('#btnSave').onclick=save;
