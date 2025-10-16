@@ -88,6 +88,29 @@
       pin.addEventListener('keydown',(e)=>{ if(e.key==='Enter') handleEnter(); });
       setTimeout(()=>{ try{ pin.focus(); }catch(_){ } },50);
     });
-  </script>
+  </<!-- === Parche anti-duplicados (no toca tu contenido) === -->
+<style>
+  /* Si por cualquier motivo se generan varias topbars, solo se muestra la primera */
+  .topbar:not(:first-of-type){display:none !important}
+</style>
+<script>
+  // Evitar segunda inicialización (por recargas, SW, etc.)
+  if (window.__SEGUI_AUDIO_INITED__) {
+    console.warn('UI ya inicializada — evitando duplicación');
+  } else {
+    window.__SEGUI_AUDIO_INITED__ = true;
+  }
+
+  // Por si ya se pintó doble, limpiar extras al cargar:
+  document.addEventListener('DOMContentLoaded', () => {
+    const bars = document.querySelectorAll('.topbar');
+    if (bars.length > 1) {
+      for (let i = 1; i < bars.length; i++) bars[i].remove();
+      console.info('Se eliminaron topbars duplicadas:', bars.length - 1);
+    }
+  });
+</script>
+<!-- === Fin parche === -->
+script>
 </body>
 </html>
