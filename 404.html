@@ -1,1 +1,38 @@
+<!doctype html>
+<html lang="es">
+<meta charset="utf-8">
+<title>Redirigiendo…</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+  html,body{height:100%}
+  body{margin:0;display:grid;place-items:center;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#333}
+  .card{padding:16px 20px;border:1px solid #e5e7eb;border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.06)}
+</style>
+
+<body>
+  <div class="card">
+    <strong>SEGUIMIENTO AUDIO</strong><br>
+    Redirigiendo a la aplicación…
+  </div>
+
+  <script>
+    (function () {
+      // Nombre del repositorio (carpeta de GitHub Pages)
+      var repo = 'AudioSeguimiento';
+      // Destino estándar de la SPA / web
+      var dest = '/' + repo + '/index.html';
+      // Conserva query string si la hubiera
+      var qs = window.location.search || '';
+      // Redirige
+      window.location.replace(dest + qs);
+    })();
+  </script>
+
+  <!-- Fallback para navegadores sin JS -->
+  <noscript>
+    <meta http-equiv="refresh" content="0; url=/AudioSeguimiento/index.html">
+  </noscript>
+</body>
+</html>
 
