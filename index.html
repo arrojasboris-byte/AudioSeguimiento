@@ -8,801 +8,738 @@
 
 <style>
 :root{
-  --rojo:#c82727; --rojo2:#a71f1f; --bg:#f6f7fb; --line:#e6e7ee; --sh:0 4px 14px rgba(0,0,0,.06);
-  --col-ex:#fde2e4; --col-fl:#e2f0cb; --col-va:#cde7f0; --col-fm:#f9e5c9; --col-ta:#eadcf8; --col-eq:#e8f1ff; --col-cv:#fff0d8;
-  --fs:11.2px; --fs-sm:10.4px;
+  --rojo:#c82727; --rojo2:#a71f1f;
+  --bg:#f6f7fb; --line:#e6e7ee; --shadow:0 4px 14px rgba(0,0,0,.06);
+  --col-ex:#fde2e4; --col-fl:#e2f0cb; --col-az:#cde7f0; --col-ta:#eadcf8; --col-eq:#e8f1ff; --col-am:#fff4cc;
+  --fs:11.5px;
 }
 *{box-sizing:border-box}
 html,body{height:100%}
-body{margin:0;background:var(--bg);font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;color:#222;font-size:var(--fs);line-height:1.18;overflow-x:auto}
+body{margin:0;background:var(--bg);font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;font-size:var(--fs);color:#222;line-height:1.18}
 
-/* Topbar (faldón protagonista más alto) */
-.topbar{position:sticky;top:0;z-index:99;width:100%;
-  background:linear-gradient(180deg,var(--rojo),var(--rojo2));
-  color:#fff;box-shadow:var(--sh)}
-.bar-inner{padding:12px 10px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:.5rem}
-.brand{display:flex;align-items:center;gap:.48rem;justify-content:center;font-weight:900;letter-spacing:.4px;font-size:26px}
-.brand i{font-style:normal}
-.subbrand{display:block;font-size:11px;opacity:.95;margin-top:2px}
-.action-group{justify-self:start;display:flex;gap:.35rem}
-.meta{justify-self:end;display:flex;align-items:center;gap:.35rem}
-.btn{border:0;border-radius:9px;padding:.38rem .7rem;cursor:pointer;box-shadow:var(--sh);font-weight:800;font-size:10.6px}
-.btn-lite{background:#fff;color:#7b0e0e}
-.btn-save{background:#fff;color:#7b0e0e}
-.btn-ghost{background:transparent;border:1px solid #ffffff66;color:#fff}
-.btn-id{background:#fff;color:#7b0e0e;border-radius:999px;padding:.38rem .7rem;font-weight:900}
-.pill{display:inline-flex;gap:.24rem;align-items:center;border:1px solid #ffffff2f;background:#ffffff1c;padding:.14rem .46rem;border-radius:999px;white-space:nowrap;font-size:10.3px}
+/* Topbar rojo ancho */
+.topbar{position:sticky;top:0;z-index:999;width:100%;
+  background:linear-gradient(180deg,var(--rojo),var(--rojo2));color:#fff;box-shadow:var(--shadow)}
+.topbar .row{display:grid;grid-template-columns:1fr auto 1fr;gap:.5rem;align-items:center;padding:.65rem .85rem}
+.topbar h1{margin:0;font-size:22px;letter-spacing:.3px;display:flex;gap:.5rem;align-items:center}
+.topbar h1 .brand{font-weight:900}
+.btn{border:1px solid #0001;background:#fff;border-radius:999px;padding:.28rem .6rem;font-weight:700;cursor:pointer}
+.btn.primary{background:#fff;color:#c22727;border-color:#fff}
+.btn.ghost{background:#ffffff10;color:#fff;border-color:#ffffff50}
+.badge{background:#ffe7e7;border:1px solid #ffd9d9;padding:.12rem .5rem;border-radius:999px}
+.pill{border:1px solid #0002;background:#fff;border-radius:999px;padding:.18rem .5rem}
+.small{font-size:.92em}
+.right{justify-self:end}
 
 /* Layout */
-.main{display:grid;grid-template-columns:210px minmax(0,1fr);gap:8px;padding:8px}
-@media (max-width:1200px){.main{grid-template-columns:1fr}}
-.sidebar{display:flex;flex-direction:column;gap:8px}
-.side-card{border:1px solid var(--line);border-radius:10px;background:#fff;box-shadow:var(--sh);display:flex;flex-direction:column}
-.side-head{display:flex;justify-content:space-between;align-items:center;padding:.38rem .5rem;font-weight:900;border-bottom:1px solid var(--line);font-size:11px}
-.side-actions{display:flex;gap:.25rem}
-.side-list{padding:.28rem .36rem .4rem;overflow:auto;max-height:220px}
-.side-row{display:flex;justify-content:space-between;gap:.3rem;align-items:center;background:#fff;border:1px solid var(--line);border-radius:8px;padding:.26rem .34rem;margin:.22rem 0}
-.side-row .name{font-weight:750;font-size:11px}
-.side-row small{font-size:10px;opacity:.82}
-.side-btn{width:24px;height:20px;border-radius:6px;border:1px solid var(--line);background:#fff;cursor:pointer;font-size:10px}
+.layout{display:grid;grid-template-columns:240px 1fr;gap:10px;padding:10px;max-width:1400px;margin:0 auto}
+.side{display:flex;flex-direction:column;gap:10px}
+.side-card{background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow)}
+.side-head{display:flex;justify-content:space-between;align-items:center;padding:.55rem .6rem;border-bottom:1px solid var(--line);font-weight:800}
+.side-list{padding:.5rem .6rem;display:flex;flex-direction:column;gap:.45rem}
+.side-btn{border:1px solid #0001;background:#fff;border-radius:8px;padding:.1rem .4rem;font-weight:800;cursor:pointer}
 
-/* Detalle */
-.detail{padding:.6rem .6rem;border-radius:8px;border:1px solid var(--line);background:#fff;min-height:66vh;box-shadow:var(--sh);position:relative}
-.header-row{display:flex;align-items:center;gap:.7rem;margin-bottom:.35rem}
-.header-row h2{margin:0;font-size:17px;letter-spacing:.2px}
-.badge{padding:.08rem .5rem;border-radius:999px;background:#00000010;font-size:10.6px}
-.header-row .spacer{flex:1}
-.save-small{font-size:10.4px;padding:.36rem .72rem;border-radius:999px;background:#1f6feb;color:#fff;border:0;box-shadow:var(--sh);cursor:pointer}
+.main{background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);min-height:70vh}
+.main-head{display:flex;justify-content:space-between;align-items:center;padding:.6rem .8rem;border-bottom:1px solid var(--line)}
+.main-body{padding:.6rem .8rem}
 
-/* Tablas compactas */
-.table-wrap{border:1px solid var(--line);border-radius:8px;background:#fff;box-shadow:var(--sh);padding:.2rem;margin-top:.22rem}
-.xscroll{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;padding-bottom:3px}
-.table{display:block;width:max-content;min-width:780px}
-.table input,.table select,.table textarea{padding:.15rem .22rem;font-size:var(--fs-sm)}
-.row{display:grid;gap:.1rem;align-items:center;margin:.08rem 0}
-.row > div:first-child{opacity:.7}
+/* Tabla base */
+.table{width:100%;border-collapse:separate;border-spacing:0;min-width:820px}
+.table th,.table td{border:1px solid var(--line);padding:.35rem .4rem;vertical-align:middle}
+.table th{background:#fafbff;text-align:left;position:sticky;top:0;z-index:1}
+.table tfoot td{font-weight:800;background:#fcfcff}
+.table input[type="text"], .table input[type="number"], .table input[type="date"], .table select{
+  width:100%;border:1px solid var(--line);padding:.22rem .32rem;border-radius:6px;background:#fff;font-size:inherit
+}
 
-/* Grids por panel */
-.grid-cv {grid-template-columns:110px 90px 90px 90px}      /* mes, previsto, cv, dif – campos estrechos */
-.grid-cv tfoot .row {font-weight:900}
-.cv-bar{height:6px;background:#e9ecef;border-radius:999px;overflow:hidden}
-.cv-bar>div{height:100%;background:#1f6feb;width:0%}
-.cv-bad{background:#ffdedb} .cv-good{background:#e8ffe9}
+/* Contenedores scroll */
+.table-wrap{overflow:auto;max-height:66vh}
+.row{display:flex;gap:.4rem;align-items:center;flex-wrap:wrap}
+.col{display:flex;flex-direction:column;gap:.35rem}
 
-/* Centros – subpaneles */
-.grid-centro-info {grid-template-columns:160px 130px 130px 140px}
-.grid-acciones    {grid-template-columns:92px 150px 96px 84px 84px 1.3fr}
-.grid-form-obli   {grid-template-columns:92px 130px 130px 80px 80px 1.2fr}
-.grid-procesos    {grid-template-columns:110px 90px 110px 110px 120px 110px 110px 1.4fr 160px}
+/* Indicadores */
+.kpi{display:flex;gap:.5rem;align-items:center}
+.kpi .dot{width:.65rem;height:.65rem;border-radius:999px;background:#eee;border:1px solid #0002}
+.kpi.green .dot{background:#c7f7d3;border-color:#96ddab}
+.kpi.orange .dot{background:#ffe6c5;border-color:#ffcf91}
 
-/* Visitas */
-.grid-visitas     {grid-template-columns:90px 220px 120px 140px 110px 110px 84px 110px 120px}
+/* Colores CV */
+.cv-good{color:#1b5e20}
+.cv-bad{color:#c62828}
 
-/* Formaciones globales */
-.grid-fm          {grid-template-columns:100px 200px 140px 140px 1.2fr 90px}
+/* Puntuación procesos */
+.score-ok{background:#e7f8ec}
+.score-warn{background:#fff2e0}
+.score-bad{background:#ffe8e8}
+.pct-ok{background:#e7f8ec}
+.pct-bad{background:#ffe8e8}
 
-/* Equipos */
-.grid-eq          {grid-template-columns:150px 150px 200px 80px 80px 1.2fr}
+/* HIT */
+.hitbox{display:flex;justify-content:center;align-items:center;border-radius:6px;padding:.05rem .1rem;border:1px solid #0002}
+.hit-off{background:#ffe8e8}
+.hit-on{background:#e7f8ec}
 
-.search{border:1px solid var(--line);border-radius:7px;padding:.2rem .35rem;font-size:var(--fs-sm);width:240px}
+/* Modal PIN */
+#pinModal{position:fixed;inset:0;background:rgba(0,0,0,.67);display:flex;align-items:center;justify-content:center;z-index:9999}
+.pin-card{background:#111;color:#fff;border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,.5);width:min(92vw,420px);padding:1.2rem}
+.pin-card h3{margin:.2rem 0 1rem}
+.pin-row{display:flex;gap:.45rem;align-items:center}
+.pin-row input{flex:1;border-radius:8px;border:1px solid #333;background:#000;color:#fff;padding:.5rem .6rem;letter-spacing:.35rem}
+.pin-actions{display:flex;gap:.5rem;margin-top:.8rem}
+.topbar.dedup-hide{display:none}
 
-/* PIN gate */
-.gate{position:fixed;inset:0;background:#000a;display:flex;align-items:center;justify-content:center;z-index:1000}
-.gate-card{background:#111;color:#fff;border-radius:10px;box-shadow:var(--sh);padding:16px 14px;min-width:280px;border:1px solid #2a2a2a}
-.pin{letter-spacing:.3rem;font-size:.95rem;text-align:center;background:#000;color:#fff;border:1px solid #444;border-radius:7px;padding:.38rem}
-.gate .btn{font-weight:800}
+/* Chips/tags */
+.tag{display:inline-flex;gap:.35rem;align-items:center;background:#f5f6ff;border:1px solid #e5e6f8;padding:.12rem .45rem;border-radius:999px}
 
-/* anti-duplicados (si hubiera SW) */
-.topbar:not(:first-of-type){display:none !important}
+/* Ayudas */
+.note{opacity:.7}
 </style>
 </head>
-<body class="locked">
+<body>
 
-<header class="topbar">
-  <div class="bar-inner">
-    <div class="action-group">
-      <button id="btnFetch" class="btn btn-lite">Actualizar (nube)</button>
-      <button id="btnSaveTop" class="btn btn-save">Guardar (nube)</button>
-      <button id="btnReset" class="btn btn-ghost">Resetear</button>
+<!-- ===== TOPBAR ===== -->
+<div class="topbar" id="appTop">
+  <div class="row">
+    <div class="left">
+      <button class="btn ghost small" id="btnRefresh" title="Recargar">Actualizar</button>
+      <button class="btn ghost small" id="btnSaveLocal" title="Guardar en este navegador">Guardar (local)</button>
+      <button class="btn primary small" id="btnSaveCloud" title="Guardar en la nube (Apps Script)">Guardar (nube)</button>
     </div>
-    <div class="brand"><i>🎧</i> SEGUIMIENTO AUDIO</div>
-    <div class="meta">
-      <button class="btn-ghost" id="btnCfg" title="Configurar endpoint">⚙️ Configurar</button>
-      <button class="btn-id" title="Identidad">AROJAS</button>
-      <span id="stamp" class="pill">Cloud · Cargando…</span>
+    <h1><span>🎧</span><span class="brand">SEGUIMIENTO AUDIO</span></h1>
+    <div class="right">
+      <span class="badge small" id="statusTag">Local · listo</span>
     </div>
   </div>
-</header>
+</div>
 
-<main>
-  <section class="main">
-    <!-- ===== SIDEBAR ===== -->
-    <aside class="sidebar">
-      <!-- CIFRA DE VENTAS -->
-      <div class="side-card" data-panel="CIFRA DE VENTAS" style="background:var(--col-cv)">
-        <div class="side-head">
-          <div>📈 CIFRA DE VENTAS</div>
-          <div class="side-actions">
-            <button class="side-btn" data-act="add-cv">＋</button>
-          </div>
-        </div>
-        <div class="side-list" id="cvList">
-          <!-- Fijos -->
-          <div class="side-row" data-cv="compania">
-            <div><div class="name">Compañía</div><small>Agosto 2025 → Julio 2026</small></div>
-            <div><button class="side-btn" data-open="cv-compania">▸</button></div>
-          </div>
-          <div class="side-row" style="border-top:1px dashed #ddd;padding-top:.5rem;margin-top:.3rem">
-            <div><div class="name">Centros exclusivos</div><small>Agregar centros</small></div>
-          </div>
-          <!-- dinámicos centros exclusivos -->
-          <div id="cvCentros"></div>
-        </div>
+<!-- ===== LAYOUT ===== -->
+<div class="layout">
+  <!-- SIDEBAR -->
+  <aside class="side">
+
+    <!-- CIFRA DE VENTAS -->
+    <div class="side-card" style="background:var(--col-ex)">
+      <div class="side-head">
+        <div>🧾 CIFRA DE VENTAS</div>
+        <div><button class="side-btn" data-open="cv">▸</button></div>
       </div>
-
-      <!-- CENTROS EXCLUSIVOS -->
-      <div class="side-card" data-panel="CENTROS EXCLUSIVOS" style="background:var(--col-ex)">
-        <div class="side-head"><div>📒 CENTROS EXCLUSIVOS</div><div class="side-actions">
-          <button class="side-btn" data-section="ex" data-act="add">＋</button></div></div>
-        <div class="side-list" id="listEx"></div>
+      <div class="side-list" style="gap:.55rem">
+        <div class="row"><strong>Compañía</strong><button class="btn pill" id="cvOpenComp">Abrir</button></div>
+        <hr style="border:none;border-top:1px solid #0001">
+        <div class="row" style="justify-content:space-between;align-items:center">
+          <strong>Centros exclusivos</strong><button class="btn pill" id="cvAddEx">＋</button>
+        </div>
+        <select id="cvSelEx"><option value="">— Selecciona un centro —</option></select>
+        <div id="cvListEx"></div>
       </div>
-
-      <!-- CENTROS FLOP -->
-      <div class="side-card" data-panel="CENTROS FLOP" style="background:var(--col-fl)">
-        <div class="side-head"><div>📒 CENTROS FLOP</div><div class="side-actions">
-          <button class="side-btn" data-section="flop" data-act="add">＋</button></div></div>
-        <div class="side-list" id="listFlop"></div>
-      </div>
-
-      <!-- VISITAS -->
-      <div class="side-card" data-panel="VISITAS AUDIO" style="background:var(--col-va)">
-        <div class="side-head"><div>📋 VISITAS AUDIO</div><div class="side-actions">
-          <button class="side-btn" data-section="vis" data-act="open">▸</button></div></div>
-        <div class="side-list" style="padding:.4rem">
-          <small>Hasta 250 centros. Admite pegado desde Excel.</small>
-        </div>
-      </div>
-
-      <!-- FORMACIONES & MENTORING -->
-      <div class="side-card" data-panel="FORMACIONES Y MENTORING" style="background:var(--col-fm)">
-        <div class="side-head"><div>🎓 FORMACIONES Y MENTORING</div></div>
-        <div class="side-list" id="fmList">
-          <div class="side-row"><div><div class="name">Mentoring</div></div><div><button class="side-btn" data-open="fm-mentoring">▸</button></div></div>
-          <div class="side-row"><div><div class="name">Coaching</div></div><div><button class="side-btn" data-open="fm-coaching">▸</button></div></div>
-          <div class="side-row"><div><div class="name">Formaciones generales</div></div><div><button class="side-btn" data-open="fm-generales">▸</button></div></div>
-        </div>
-      </div>
-
-      <!-- EQUIPOS -->
-      <div class="side-card" data-panel="EQUIPOS" style="background:var(--col-eq)">
-        <div class="side-head"><div>🧰 EQUIPOS</div><div class="side-actions"><button class="side-btn" data-open="equipos">▸</button></div></div>
-        <div class="side-list" style="padding:.4rem">
-          <small>7 paquetes visibles con su tabla.</small>
-        </div>
-      </div>
-    </aside>
-
-    <!-- ===== DETALLE ===== -->
-    <section class="detail" id="detail">
-      <div class="header-row">
-        <h2 id="detTitle">Detalle — </h2>
-        <span id="detTag" class="badge">—</span>
-        <div class="spacer"></div>
-        <input id="globalSearch" class="search" placeholder="Buscar en panel…">
-        <button id="saveBtnActive" class="save-small" title="Guardar panel">💾 Guardar</button>
-      </div>
-
-      <div id="hint">Selecciona en la izquierda (▸ o ＋) para abrir los paneles.</div>
-
-      <!-- ======= CIFRA DE VENTAS ======= -->
-      <div id="panel-cv" style="display:none">
-        <div id="cvHeader" style="display:flex;align-items:center;gap:.6rem;margin-bottom:.25rem">
-          <strong id="cvWhat">Compañía</strong>
-          <button class="btn" id="cvAddCentro" title="Añadir centro exclusivo a CV" style="display:none">＋ Añadir centro</button>
-        </div>
-
-        <div class="table-wrap">
-          <div class="xscroll">
-            <div class="table" id="cvTable">
-              <div class="row grid-cv" style="font-weight:800;opacity:.85">
-                <div>Mes</div><div>Previsto</div><div>CV Mes</div><div>Dif.</div>
-              </div>
-              <div id="cvBody"></div>
-              <div class="row grid-cv" style="font-weight:900;border-top:1px solid var(--line);padding-top:.25rem">
-                <div>Total</div><div id="cvTotPrev">0</div><div id="cvTotMes">0</div><div id="cvTotDif">0</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div style="margin-top:.5rem;display:flex;gap:12px;align-items:center">
-          <div style="flex:1">
-            <div style="font-weight:800;margin-bottom:4px">Objetivo alcanzado</div>
-            <div class="cv-bar"><div id="cvProg"></div></div>
-          </div>
-          <div id="cvBadge" class="badge">0%</div>
-        </div>
-      </div>
-
-      <!-- ======= CENTROS (EXCLUSIVOS / FLOP) ======= -->
-      <div id="panel-centro" style="display:none">
-        <div class="table-wrap">
-          <div class="xscroll">
-            <div class="table">
-              <div class="row grid-centro-info" style="font-weight:800;opacity:.85">
-                <div>Nombre</div><div>Delegado</div><div>Audiólogo</div><div>Tipo (Suc/Fran/Excl)</div>
-              </div>
-              <div id="centroInfo"></div>
-            </div>
-          </div>
-        </div>
-
-        <h4 style="margin:.5rem 0 .2rem">Acciones</h4>
-        <div class="table-wrap">
-          <div class="xscroll">
-            <div class="table">
-              <div class="row grid-acciones" style="font-weight:800;opacity:.85">
-                <div>Fecha</div><div>Acción</div><div>Derivaciones</div><div>Citas</div><div>Ventas</div><div>Observaciones</div>
-              </div>
-              <div id="accionesBody"></div>
-            </div>
-          </div>
-        </div>
-
-        <h4 style="margin:.5rem 0 .2rem">Formaciones obligatorias</h4>
-        <div class="table-wrap">
-          <div class="xscroll">
-            <div class="table">
-              <div class="row grid-form-obli" style="font-weight:800;opacity:.85">
-                <div>Fecha</div><div>Delegado</div><div>Audiólogo</div><div>Asist.</div><div>Aplica</div><div>Observaciones</div>
-              </div>
-              <div id="formObliBody"></div>
-            </div>
-          </div>
-        </div>
-
-        <h4 style="margin:.5rem 0 .2rem">Procesos</h4>
-        <div class="table-wrap">
-          <div class="xscroll">
-            <div class="table">
-              <div class="row grid-procesos" style="font-weight:800;opacity:.85">
-                <div>Fecha visita</div><div>Visitados</div><div>Proc. %</div><div>% Conv. prueba</div><div>% Conv. venta</div><div>Der. óptica</div><div>HIT aplicada</div><div>Observaciones</div><div>Enlace Excel</div>
-              </div>
-              <div id="procesosBody"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ======= VISITAS ======= -->
-      <div id="panel-visitas" style="display:none">
-        <div style="display:flex;gap:.6rem;align-items:center;margin-bottom:.3rem;flex-wrap:wrap">
-          <select id="visRol">
-            <option>Delegado audio</option>
-            <option>Responsable Tec Audio</option>
-          </select>
-          <input id="visVisitador" class="search" style="width:200px" placeholder="Nombre visitador…">
-          <input id="visDelegadoZona" class="search" style="width:220px" placeholder="Delegado de zona…">
-          <input id="visSearch" class="search" placeholder="Buscar centro…">
-          <button id="visAdd" class="btn">＋ Añadir filas</button>
-          <button id="visPaste" class="btn">📋 Pegar (Excel)</button>
-        </div>
-
-        <div class="table-wrap">
-          <div class="xscroll">
-            <div class="table">
-              <div class="row grid-visitas" style="font-weight:800;opacity:.85">
-                <div>Fecha</div><div>Centro</div><div>Tipo</div><div>Delegado</div><div>% Prueba</div><div>% Venta</div><div>HIT</div><div>Pruebas RT</div><div>Primeros aux.</div>
-              </div>
-              <div id="visBody"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ======= FORMACIONES & MENTORING ======= -->
-      <div id="panel-fm" style="display:none">
-        <div style="display:flex;gap:.6rem;align-items:center;margin-bottom:.3rem;flex-wrap:wrap">
-          <strong id="fmWhat">Mentoring</strong>
-          <input id="fmSearch" class="search" placeholder="Buscar…">
-          <button id="fmAdd" class="btn">＋ Añadir fila</button>
-        </div>
-        <div class="table-wrap">
-          <div class="xscroll">
-            <div class="table">
-              <div class="row grid-fm" style="font-weight:800;opacity:.85">
-                <div>Fecha</div><div>Centro</div><div>Delegado</div><div>Audiólogo</div><div>Tema</div><div>Asist.</div>
-              </div>
-              <div id="fmBody"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ======= EQUIPOS ======= -->
-      <div id="panel-eq" style="display:none">
-        <div style="display:flex;gap:.6rem;align-items:center;margin-bottom:.3rem;flex-wrap:wrap">
-          <input id="eqSearch" class="search" placeholder="Buscar equipo/serie/centro…">
-        </div>
-
-        <div id="eqPaquetes"></div>
-      </div>
-
-    </section>
-  </section>
-</main>
-
-<!-- ===== PIN ===== -->
-<div id="gate" class="gate" aria-modal="true" role="dialog">
-  <div class="gate-card">
-    <h3 style="margin:.1rem 0 .35rem">Acceso</h3>
-    <p style="opacity:.85">Introduce el PIN para editar:</p>
-    <input id="pin" class="pin" type="password" inputmode="numeric" maxlength="6" placeholder="••••"/>
-    <div style="display:flex;gap:.3rem;margin-top:10px">
-      <button id="enter" class="btn btn-lite" style="flex:1">Acceder</button>
-      <button id="clear" class="btn btn-ghost" style="flex:.8">Limpiar</button>
     </div>
-    <p id="pinMsg" style="color:#ff7b7b;margin:.45rem 0 0;display:none">PIN incorrecto</p>
+
+    <!-- CENTROS EXCLUSIVOS -->
+    <div class="side-card" style="background:var(--col-ex)">
+      <div class="side-head"><div>🏬 CENTROS EXCLUSIVOS</div><div><button class="side-btn" data-open="ex">▸</button></div></div>
+      <div class="side-list">
+        <div class="row"><button class="btn pill small" id="exAdd">＋ Añadir</button><input id="exSearch" placeholder="Buscar..."/></div>
+        <div id="exList"></div>
+      </div>
+    </div>
+
+    <!-- CENTROS FLOP -->
+    <div class="side-card" style="background:var(--col-fl)">
+      <div class="side-head"><div>🏷️ CENTROS FLOP</div><div><button class="side-btn" data-open="flop">▸</button></div></div>
+      <div class="side-list">
+        <div class="row"><button class="btn pill small" id="flopAdd">＋ Añadir</button><input id="flopSearch" placeholder="Buscar..."/></div>
+        <div id="flopList"></div>
+      </div>
+    </div>
+
+    <!-- VISITAS AUDIO -->
+    <div class="side-card" style="background:var(--col-az)">
+      <div class="side-head"><div>📋 VISITAS AUDIO</div><div><button class="side-btn" data-open="va">▸</button></div></div>
+      <div class="side-list"><div class="small note">Hasta 250 filas, se puede pegar desde Excel.</div></div>
+    </div>
+
+    <!-- FORMACIONES Y MENTORING -->
+    <div class="side-card" style="background:var(--col-am)">
+      <div class="side-head"><div>🎓 FORMACIONES Y MENTORING</div><div><button class="side-btn" data-open="fm">▸</button></div></div>
+      <div class="side-list">
+        <button class="btn pill" data-fm="mentoring">Mentoring</button>
+        <button class="btn pill" data-fm="coaching">Coaching</button>
+        <button class="btn pill" data-fm="generales">Generales</button>
+      </div>
+    </div>
+
+    <!-- TELEAUDIOLOGÍA -->
+    <div class="side-card" style="background:var(--col-ta)">
+      <div class="side-head"><div>🖥️ TELEAUDIOLOGÍA</div><div><button class="side-btn" data-open="ta">▸</button></div></div>
+      <div class="side-list"><div class="kpi green"><div class="dot"></div> Certificados</div><div class="kpi orange"><div class="dot"></div> Formaciones</div></div>
+    </div>
+
+    <!-- EQUIPOS -->
+    <div class="side-card" style="background:var(--col-eq)">
+      <div class="side-head"><div>🧰 EQUIPOS</div><div><button class="side-btn" data-open="eq">▸</button></div></div>
+      <div class="side-list"><div class="small">7 packs, buscador y “＋” por pack.</div></div>
+    </div>
+
+  </aside>
+
+  <!-- MAIN -->
+  <section class="main">
+    <div class="main-head">
+      <div class="row"><strong id="detTag">Detalle</strong></div>
+      <div class="row small" id="cvHeaderMeta" style="display:none;gap:.35rem"><span class="tag">CIFRA</span></div>
+    </div>
+    <div class="main-body" id="detBody"><div class="small note">Selecciona una opción a la izquierda.</div></div>
+  </section>
+</div>
+
+<!-- PIN -->
+<div id="pinModal" aria-modal="true" role="dialog">
+  <div class="pin-card">
+    <h3>Acceso</h3>
+    <div class="small" style="opacity:.9">Introduce el PIN para editar:</div>
+    <div class="pin-row" style="margin-top:.45rem"><input id="pin" type="password" maxlength="4" inputmode="numeric" placeholder="••••"/></div>
+    <div class="pin-actions"><button class="btn primary" id="enter">Acceder</button><button class="btn" id="clear">Limpiar</button></div>
+    <div id="pinMsg" class="small" style="color:#ffb3b3;margin-top:.4rem;display:none">PIN incorrecto</div>
   </div>
 </div>
 
 <script>
-/* ===================== CONFIG + UTILS ===================== */
-const $=(s,r=document)=>r.querySelector(s); const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
-const esc=s=>(s??'').toString().replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const now=()=>new Date().toLocaleString();
-const monthsCv = [
-  ['2025-08','Agosto 2025'],['2025-09','Septiembre 2025'],['2025-10','Octubre 2025'],['2025-11','Noviembre 2025'],['2025-12','Diciembre 2025'],
-  ['2026-01','Enero 2026'],['2026-02','Febrero 2026'],['2026-03','Marzo 2026'],['2026-04','Abril 2026'],['2026-05','Mayo 2026'],['2026-06','Junio 2026'],['2026-07','Julio 2026']
-];
+/* ===== CONFIG ===== */
+const GAS_URL = 'PEGAR_AQUI_TU_URL_EXEC'; // ← Pega aquí tu /exec de Apps Script
+const PIN_CODE = '4321';
 
-// Endpoint Apps Script
-let GAS_URL = localStorage.getItem('GAS_URL') || 'PEGAR_AQUI_TU_URL_EXEC';
-$('#btnCfg').onclick=()=>{
-  const v = prompt('Pega aquí tu URL /exec del despliegue de Google Apps Script:', GAS_URL || '');
-  if(v && /^https?:\/\//.test(v)){ GAS_URL=v.trim(); localStorage.setItem('GAS_URL',GAS_URL); alert('Guardado.'); }
-};
+/* ===== ESTADO Y DATOS ===== */
+const state = { panel:null, cvTarget:null, fmMode:'mentoring' };
+let data = window.data || {};
+data.cv ||= {compania:[], exclusivos:[], flop:[]};
+data.ex ||= []; data.flop ||= [];
+data.va ||= { rol:'Delegado de Audio', visitador:'', rows:[] };
+data.fm ||= { mentoring:[], coaching:[], generales:[] };
+data.ta ||= { rows:[] };
+data.eq ||= { packs: Array.from({length:7},()=>({rows:[]})) };
 
-// estado app
-const state = { section:null,  // 'cv', 'ex','flop','vis','fm','eq'
-                cvTarget:{kind:'compania',index:null},
-                centroSel:{bucket:null,index:null}, // bucket: 'ex'|'flop'
-                fmKind:'mentoring'
-              };
-
-// datos
-let data = {
-  cv: {
-    compania: monthsCv.map(([id,mes])=>({id,mes,previsto:null,mescv:null})),
-    exclusivos: [] // {nombre:'Centro X', meses:[...] }
-  },
-  centros: { // comunes a exclusivos/flop
-    ex: [], // {nombre, delegado, audiologo, tipo:'Sucursal'|'Franquicia'|'Exclusivo', acciones:[...], form:[...], procesos:[...] }
-    flop: []
-  },
-  visitas: {
-    rol:'Delegado audio', visitador:'', delegado_zona:'',
-    rows:[]
-  },
-  fm: { mentoring:[], coaching:[], generales:[] }, // {fecha, centro, delegado, audiologo, tema, asist}
-  eq: { paquetes: Array.from({length:7}, (_,i)=>({nombre:`Paquete ${i+1}`, abierto:true, rows:[]})) }
-};
-
-// helpers
-function stamp(t){ $('#stamp').textContent='Cloud · '+t; }
-function toast(m){const t=document.createElement('div');t.textContent=m;Object.assign(t.style,{position:'fixed',bottom:'12px',left:'50%',transform:'translateX(-50%)',background:'#111',color:'#fff',padding:'7px 10px',borderRadius:'8px',zIndex:90,opacity:.95,fontSize:'11px'});document.body.appendChild(t);setTimeout(()=>t.remove(),1400);}
-
-/* ===================== BACKEND (Apps Script) ===================== */
-async function apiLoad(){
-  if(!/^https?:\/\//.test(GAS_URL)) throw new Error('Configura el endpoint (⚙️).');
-  const r = await fetch(GAS_URL+'?action=load'); // devuelve string JSON o "{}"
-  const txt = await r.text();
-  return txt || '{}';
-}
-async function apiSave(payload){
-  if(!/^https?:\/\//.test(GAS_URL)) throw new Error('Configura el endpoint (⚙️).');
-  const r = await fetch(GAS_URL, {method:'POST',headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({action:'save', data: typeof payload==='string'? payload : JSON.stringify(payload)})});
-  return await r.json();
+/* ===== UTILS ===== */
+const $ = (s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+function toast(msg){const t=document.createElement('div'); t.textContent=msg;
+  Object.assign(t.style,{position:'fixed',bottom:'10px',left:'50%',transform:'translateX(-50%)',background:'#111',color:'#fff',padding:'6px 9px',borderRadius:'8px',zIndex:9999,fontSize:'11px',opacity:.96});
+  document.body.appendChild(t); setTimeout(()=>t.remove(),1200);
 }
 
-/* ===================== PIN ===================== */
-const PIN_SHA256='fe2592b42a727e977f055947385b709cc82b16b9a87f88c6abf3900d65d0cdc3'; // 4321
-async function sha256Hex(str){const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str));return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');}
-async function checkPin(val){let s=(val||'').trim(); if(/^AR/i.test(s)) s=s.slice(2); if(!s) return false; try{return (await sha256Hex(s))===PIN_SHA256;}catch(_){return false;}}
-async function handleEnter(){
+/* ===== PIN ===== */
+function checkPin(v){ return v===PIN_CODE; }
+function handleEnter(){
   $('#pinMsg').style.display='none';
-  const ok=await checkPin($('#pin').value);
-  if(!ok){ $('#pinMsg').style.display='block'; return; }
-  document.body.classList.remove('locked'); $('#gate').style.display='none';
-  try{ await loadCloud(); }catch(e){ console.warn(e); }
+  if(!checkPin($('#pin').value)){ $('#pinMsg').style.display='block'; return; }
+  $('#pinModal').style.display='none';
 }
 $('#enter').onclick=handleEnter;
-$('#clear').onclick=()=>{$('#pin').value='';$('#pinMsg').style.display='none';};
-$('#pin').addEventListener('keydown',e=>{if(e.key==='Enter') handleEnter();});
+$('#clear').onclick=()=>$('#pin').value='';
+$('#pin').addEventListener('keydown',e=>{ if(e.key==='Enter') handleEnter(); });
 
-/* ===================== UI NAVEGACIÓN ===================== */
-function openPanel(key){
-  $('#hint').style.display='none';
-  $('#panel-cv').style.display= key==='cv'?'block':'none';
-  $('#panel-centro').style.display= (key==='ex'||key==='flop')?'block':'none';
-  $('#panel-visitas').style.display= key==='vis'?'block':'none';
-  $('#panel-fm').style.display= key==='fm'?'block':'none';
-  $('#panel-eq').style.display= key==='eq'?'block':'none';
-  state.section=key;
-  $('#detTag').textContent = key==='cv'?'CIFRA DE VENTAS'
-    : key==='ex'?'CENTROS EXCLUSIVOS'
-    : key==='flop'?'CENTROS FLOP'
-    : key==='vis'?'VISITAS AUDIO'
-    : key==='fm'?'FORMACIONES Y MENTORING'
-    : key==='eq'?'EQUIPOS':'—';
+/* ===== NAV ===== */
+function openPanel(id){
+  state.panel = id;
+  $('#detBody').innerHTML = '';
+  $('#cvHeaderMeta').style.display = (id==='cv') ? 'flex' : 'none';
+  if(id==='cv') drawCvLanding();
+  if(id==='ex') drawCentrosPanel('ex');
+  if(id==='flop') drawCentrosPanel('flop');
+  if(id==='va') drawVisitas();
+  if(id==='fm') drawFormaciones();
+  if(id==='ta') drawTeleaudiologia();
+  if(id==='eq') drawEquipos();
 }
 
-/* ===================== CIFRA DE VENTAS ===================== */
-function ensureCvCentro(index){
-  if(index==null) return;
-  if(!data.cv.exclusivos[index]) data.cv.exclusivos[index]={nombre:`Centro ${index+1}`, meses: monthsCv.map(([id,mes])=>({id,mes,previsto:null,mescv:null}))};
+/* ===== CIFRA – MESES ===== */
+const CV_MESES=['Ago-25','Sep-25','Oct-25','Nov-25','Dic-25','Ene-26','Feb-26','Mar-26','Abr-26','May-26','Jun-26','Jul-26'];
+const blankCvMeses=()=>CV_MESES.map(m=>({mes:m,previsto:'',mescv:'',dif:0}));
+function ensureCvCentro(o){o.meta||={};o.meta.nombre??='';o.meta.delegado??='';o.meta.tipo??='Sucursal';o.meta.audiologo??='';o.meses||=blankCvMeses();return o;}
+
+/* ===== CIFRA – SIDEBAR ===== */
+function renderCvSidebar(){
+  const sel=$('#cvSelEx'); if(!sel) return;
+  sel.innerHTML='<option value="">— Selecciona un centro —</option>';
+  data.cv.exclusivos.forEach((c,i)=> sel.innerHTML+=`<option value="${i}">${esc(c.meta?.nombre||('Centro '+(i+1)))}</option>`);
+  const list=$('#cvListEx');
+  if(list) list.innerHTML = data.cv.exclusivos.map((c,i)=>`
+    <div class="row" style="justify-content:space-between">
+      <span>${esc(c.meta?.nombre||('Centro '+(i+1)))}</span>
+      <button class="btn pill small" data-cvex="${i}">Abrir</button>
+    </div>`).join('');
 }
-function renderCvList(){
-  const wrap=$('#cvCentros'); wrap.innerHTML='';
-  data.cv.exclusivos.forEach((c,i)=>{
-    const row=document.createElement('div'); row.className='side-row';
-    row.innerHTML=`<div><div class="name">${esc(c.nombre||'(sin nombre)')}</div><small>Agosto 2025 → Julio 2026</small></div>
-      <div>
-        <button class="side-btn" data-open="cv-centro" data-idx="${i}">▸</button>
-        <button class="side-btn" data-delcv="${i}" title="Eliminar">🗑️</button>
-      </div>`;
-    wrap.appendChild(row);
-  });
+$('#cvAddEx')?.addEventListener('click',()=>{
+  const n=prompt('Nombre del centro exclusivo:',''); if(n===null) return;
+  data.cv.exclusivos.push(ensureCvCentro({meta:{nombre:n,delegado:'',tipo:'Sucursal',audiologo:''}}));
+  renderCvSidebar(); $('#cvSelEx').value=String(data.cv.exclusivos.length-1);
+  openCvCentro('ex', data.cv.exclusivos.length-1);
+});
+$('#cvSelEx')?.addEventListener('change',e=>{
+  const i=e.target.value===''?null:Number(e.target.value); if(i==null) return; openCvCentro('ex', i);
+});
+$('#cvListEx')?.addEventListener('click',e=>{
+  const i=e.target?.dataset?.cvex; if(i!=null) openCvCentro('ex', Number(i));
+});
+$('#cvOpenComp')?.addEventListener('click', ()=> openCvCompania());
+
+/* ===== CIFRA – LANDING/TABLAS ===== */
+function drawCvLanding(){
+  $('#detTag').textContent='CIFRA DE VENTAS';
+  $('#detBody').innerHTML=
+    `<div class="col" style="gap:.6rem">
+       <div class="row" style="gap:.6rem">
+         <button class="btn pill" id="goComp">Abrir Compañía</button>
+         <button class="btn pill" id="goFirstEx">Abrir primer Centro exclusivo</button>
+       </div>
+       <div class="note small">Usa la izquierda para crear/abrir centros exclusivos.</div>
+     </div>`;
+  $('#goComp').onclick=openCvCompania;
+  $('#goFirstEx').onclick=()=>{ if(data.cv.exclusivos.length) openCvCentro('ex',0); else toast('Añade un centro en la izquierda'); };
 }
-function renderCv(){
+function openCvCompania(){ openPanel('cv'); state.cvTarget={kind:'compania'}; $('#detTag').textContent='CIFRA — COMPAÑÍA'; drawCvTable(null, data.cv.compania); }
+function openCvCentro(kind,index){
   openPanel('cv');
-  const isComp = state.cvTarget.kind==='compania';
-  $('#detTitle').textContent = 'Detalle — Cifra de ventas';
-  $('#cvWhat').textContent = isComp ? 'Compañía' : (data.cv.exclusivos[state.cvTarget.index]?.nombre || 'Centro');
-  $('#cvAddCentro').style.display = isComp ? 'inline-flex' : 'none';
-
-  const arr = isComp ? data.cv.compania : (data.cv.exclusivos[state.cvTarget.index]?.meses || []);
-  const body=$('#cvBody'); body.innerHTML='';
-  let totPrev=0, totMes=0;
-  arr.forEach((r,idx)=>{
-    const row=document.createElement('div'); row.className='row grid-cv';
-    row.innerHTML=`<div>${esc(r.mes)}</div>
-      <input type="number" step="1" value="${r.previsto??''}" data-i="${idx}" data-k="previsto">
-      <input type="number" step="1" value="${r.mescv??''}" data-i="${idx}" data-k="mescv">
-      <div id="cv-dif-${idx}">${fmtNum((r.mescv??0)-(r.previsto??0))}</div>`;
-    body.appendChild(row);
-  });
-  // listeners
-  body.oninput=(e)=>{
-    const i=+e.target.dataset.i, k=e.target.dataset.k;
-    if(isNaN(i)||!k) return;
-    if(isComp){ data.cv.compania[i][k]= numOrNull(e.target.value); }
-    else{ data.cv.exclusivos[state.cvTarget.index].meses[i][k]= numOrNull(e.target.value); }
-    updateCvTotals();
-  };
-  updateCvTotals();
+  const arr=(kind==='ex')?data.cv.exclusivos:data.cv.flop;
+  ensureCvCentro(arr[index]); state.cvTarget={kind,index};
+  const m=arr[index].meta; $('#detTag').textContent=(kind==='ex'?'CIFRA — CENTRO EXCLUSIVO':'CIFRA — CENTRO FLOP')+' · '+(m.nombre||('Centro '+(index+1)));
+  drawCvTable(arr[index], arr[index].meses, m);
 }
-function numOrNull(v){ return v===''?null:Number(v); }
-function fmtNum(n){ if(n==null||isNaN(+n)) return ''; return String(Math.round(+n)); }
-function updateCvTotals(){
-  const isComp = state.cvTarget.kind==='compania';
-  const arr = isComp ? data.cv.compania : data.cv.exclusivos[state.cvTarget.index].meses;
-  let totPrev=0, totMes=0;
-  arr.forEach((r,i)=>{
-    const dif=(r.mescv??0)-(r.previsto??0);
-    const cell=$(`#cv-dif-${i}`); if(cell) cell.textContent=fmtNum(dif);
-    if(Number.isFinite(+r.previsto)) totPrev+=+r.previsto;
-    if(Number.isFinite(+r.mescv)) totMes+=+r.mescv;
-  });
-  $('#cvTotPrev').textContent=fmtNum(totPrev);
-  $('#cvTotMes').textContent=fmtNum(totMes);
-  $('#cvTotDif').textContent=fmtNum(totMes-totPrev);
-  // barra
-  const pct = totPrev>0? Math.max(0, Math.min(100, Math.round(totMes*100/totPrev))):0;
-  $('#cvProg').style.width=pct+'%';
-  $('#cvBadge').textContent=pct+'%';
-  $('#cvBody').querySelectorAll('.row').forEach((row,idx)=>{
-    const r=arr[idx]; const dif=(r.mescv??0)-(r.previsto??0);
-    const difCell=row.children[3];
-    difCell.className= dif>=0?'cv-good':'cv-bad';
-  });
-}
-
-/* eventos sidebar CV */
-$('#cvList').addEventListener('click',e=>{
-  const b=e.target.closest('button'); if(!b) return;
-  if(b.dataset.open==='cv-compania'){ state.cvTarget={kind:'compania',index:null}; renderCv(); }
-  if(b.dataset.open==='cv-centro'){ state.cvTarget={kind:'centro',index:+b.dataset.idx}; renderCv(); }
-});
-$('[data-act="add-cv"]').onclick=()=>{
-  data.cv.exclusivos.push({nombre:`Centro exclusivo ${data.cv.exclusivos.length+1}`, meses: monthsCv.map(([id,mes])=>({id,mes,previsto:null,mescv:null}))});
-  renderCvList();
-};
-$('#cvAddCentro').onclick=$('[data-act="add-cv"]').onclick;
-$('#cvCentros').addEventListener('click',e=>{
-  const i=e.target.dataset.delcv; if(i!=null){ data.cv.exclusivos.splice(+i,1); renderCvList(); if(state.cvTarget.kind!=='compania') {state.cvTarget={kind:'compania'}; renderCv();} }
-});
-
-/* ===================== CENTROS (EX / FLOP) ===================== */
-function sideRenderCentros(bucket){
-  const list = bucket==='ex'? $('#listEx') : $('#listFlop'); list.innerHTML='';
-  data.centros[bucket].forEach((c,i)=>{
-    const row=document.createElement('div'); row.className='side-row';
-    row.innerHTML=`<div><div class="name">${esc(c.nombre||'(nuevo)')}</div><small>Delegado: ${esc(c.delegado||'—')} · Aud.: ${esc(c.audiologo||'—')}</small></div>
-    <div><button class="side-btn" data-open="${bucket}" data-i="${i}">✏️</button>
-    <button class="side-btn" data-del="${bucket}" data-i="${i}">🗑️</button></div>`;
-    list.appendChild(row);
-  });
-}
-function openCentro(bucket, i){
-  state.centroSel={bucket,index:i};
-  openPanel(bucket);
-  $('#detTitle').textContent='Detalle — Centro';
-  const c = data.centros[bucket][i];
-  // info
-  const info=$('#centroInfo'); info.innerHTML='';
-  const infoRow=document.createElement('div'); infoRow.className='row grid-centro-info';
-  infoRow.innerHTML=`<input value="${esc(c.nombre||'')}" data-k="nombre">
-  <input value="${esc(c.delegado||'')} " data-k="delegado">
-  <input value="${esc(c.audiologo||'')}" data-k="audiologo">
-  <select data-k="tipo">
-    <option ${c.tipo==='Sucursal'?'selected':''}>Sucursal</option>
-    <option ${c.tipo==='Franquicia'?'selected':''}>Franquicia</option>
-    <option ${c.tipo==='Exclusivo'?'selected':''}>Exclusivo</option>
-  </select>`;
-  info.appendChild(infoRow);
-  info.oninput=(e)=>{ c[e.target.dataset.k]= e.target.value; sideRenderCentros(bucket); };
-
-  // acciones
-  const accBody=$('#accionesBody'); accBody.innerHTML=''; c.acciones=c.acciones||[];
-  if(c.acciones.length<8) c.acciones.push(...Array.from({length:8-c.acciones.length},()=>({fecha:'',accion:'Azafata',deriv:null,citas:null,venta:null,obs:''})));
-  c.acciones.forEach((r,idx)=>{
-    const row=document.createElement('div'); row.className='row grid-acciones';
-    row.innerHTML=`<input type="date" value="${r.fecha||''}" data-k="fecha" data-i="${idx}">
-      <select data-k="accion" data-i="${idx}">
-        ${['Azafata','Mailing','Ruleta','Stand','Cashback','Otros'].map(v=>`<option ${r.accion===v?'selected':''}>${v}</option>`).join('')}
+function drawCvTable(centro, mesesArr, meta){
+  mesesArr ||= blankCvMeses();
+  const metaHtml = centro ? `
+    <div class="row" style="flex-wrap:wrap;margin-bottom:.4rem">
+      <input id="cvMetaNombre"  class="pill" value="${esc(meta?.nombre||'')}"   placeholder="Nombre del centro"/>
+      <input id="cvMetaDelegado"class="pill" value="${esc(meta?.delegado||'')}" placeholder="Delegado"/>
+      <select id="cvMetaTipo" class="pill">
+        <option ${meta?.tipo==='Sucursal'?'selected':''}>Sucursal</option>
+        <option ${meta?.tipo==='Franquicia'?'selected':''}>Franquicia</option>
+        <option ${meta?.tipo==='Propio'?'selected':''}>Propio</option>
       </select>
-      <input type="number" min="0" step="1" value="${r.deriv??''}" data-k="deriv" data-i="${idx}">
-      <input type="number" min="0" step="1" value="${r.citas??''}" data-k="citas" data-i="${idx}">
-      <input type="number" min="0" step="1" value="${r.venta??''}" data-k="venta" data-i="${idx}">
-      <input value="${esc(r.obs||'')}" data-k="obs" data-i="${idx}">`;
-    accBody.appendChild(row);
-  });
-  accBody.oninput=(e)=>{ const i=+e.target.dataset.i,k=e.target.dataset.k; c.acciones[i][k] = (e.target.type==='number'&&e.target.value!=='')? Number(e.target.value) : e.target.value; };
+      <input id="cvMetaAudiologo"class="pill" value="${esc(meta?.audiologo||'')}" placeholder="Audiólogo"/>
+    </div>` : '';
 
-  // formaciones obligatorias
-  const foBody=$('#formObliBody'); foBody.innerHTML=''; c.form=c.form||[];
-  if(c.form.length<6) c.form.push(...Array.from({length:6-c.form.length},()=>({fecha:'',delegado:'',audiologo:'',asist:false,aplica:false,obs:''})));
-  c.form.forEach((r,idx)=>{
-    const row=document.createElement('div'); row.className='row grid-form-obli';
-    row.innerHTML=`<input type="date" value="${r.fecha||''}" data-k="fecha" data-i="${idx}">
-      <input value="${esc(r.delegado||'')}" data-k="delegado" data-i="${idx}">
-      <input value="${esc(r.audiologo||'')}" data-k="audiologo" data-i="${idx}">
-      <input type="checkbox" ${r.asist?'checked':''} data-k="asist" data-i="${idx}">
-      <input type="checkbox" ${r.aplica?'checked':''} data-k="aplica" data-i="${idx}">
-      <input value="${esc(r.obs||'')}" data-k="obs" data-i="${idx}">`;
-    foBody.appendChild(row);
-  });
-  foBody.oninput=(e)=>{ const i=+e.target.dataset.i,k=e.target.dataset.k; c.form[i][k] = e.target.type==='checkbox'? e.target.checked : e.target.value; };
+  $('#detBody').innerHTML =
+    metaHtml +
+    `<div class="table-wrap">
+      <table class="table" id="cvTable">
+        <thead><tr><th>Mes</th><th>Previsto</th><th>CV mes</th><th>Dif.</th></tr></thead>
+        <tbody>
+          ${mesesArr.map((r,i)=>`
+            <tr>
+              <td>${esc(r.mes)}</td>
+              <td><input type="number" step="any" value="${esc(r.previsto)}" data-cv="prev" data-i="${i}"/></td>
+              <td><input type="number" step="any" value="${esc(r.mescv)}" data-cv="mes"  data-i="${i}"/></td>
+              <td id="cv-dif-${i}">0</td>
+            </tr>`).join('')}
+        </tbody>
+        <tfoot><tr><td>Total</td><td id="cv-t-prev">0</td><td id="cv-t-mes">0</td><td id="cv-t-dif">0</td></tr></tfoot>
+      </table>
+    </div>`;
 
-  // procesos
-  const prBody=$('#procesosBody'); prBody.innerHTML=''; c.procesos=c.procesos||[];
-  if(c.procesos.length<6) c.procesos.push(...Array.from({length:6-c.procesos.length},()=>({fecha:'',visitados:null,proc:null,convp:null,convv:null,derop:false,hit:false,obs:'',enlace:''})));
-  c.procesos.forEach((r,idx)=>{
-    const row=document.createElement('div'); row.className='row grid-procesos';
-    row.innerHTML=`<input type="date" value="${r.fecha||''}" data-k="fecha" data-i="${idx}">
-      <input type="number" min="0" step="1" value="${r.visitados??''}" data-k="visitados" data-i="${idx}">
-      <input type="number" min="0" max="100" step="1" value="${r.proc??''}" data-k="proc" data-i="${idx}" style="border:2px solid transparent">
-      <input type="number" min="0" max="100" step="1" value="${r.convp??''}" data-k="convp" data-i="${idx}">
-      <input type="number" min="0" max="100" step="1" value="${r.convv??''}" data-k="convv" data-i="${idx}">
-      <input type="checkbox" ${r.derop?'checked':''} data-k="derop" data-i="${idx}">
-      <input type="checkbox" ${r.hit?'checked':''} data-k="hit" data-i="${idx}">
-      <input value="${esc(r.obs||'')}" data-k="obs" data-i="${idx}">
-      <input value="${esc(r.enlace||'')}" data-k="enlace" data-i="${idx}" placeholder="https://…">`;
-    prBody.appendChild(row);
-    tintProc(row.children[2], r.proc);
+  if(centro){
+    $('#cvMetaNombre').oninput   = e=>{ centro.meta.nombre   = e.target.value; renderCvSidebar(); };
+    $('#cvMetaDelegado').oninput = e=>{ centro.meta.delegado = e.target.value; };
+    $('#cvMetaTipo').oninput     = e=>{ centro.meta.tipo     = e.target.value; };
+    $('#cvMetaAudiologo').oninput= e=>{ centro.meta.audiologo= e.target.value; };
+  }
+  $('#cvTable').addEventListener('input',e=>{
+    const i=+e.target.dataset.i; if(Number.isNaN(i)) return;
+    const k=e.target.dataset.cv; if(k==='prev') mesesArr[i].previsto=e.target.value; if(k==='mes') mesesArr[i].mescv=e.target.value;
+    updateCvTotals(mesesArr);
   });
-  prBody.oninput=(e)=>{
-    const i=+e.target.dataset.i,k=e.target.dataset.k;
-    c.procesos[i][k] = (e.target.type==='number'&&e.target.value!=='')? Number(e.target.value)
-      : (e.target.type==='checkbox'? e.target.checked : e.target.value);
-    if(k==='proc') tintProc(e.target, c.procesos[i][k]);
+  updateCvTotals(mesesArr);
+}
+function updateCvTotals(mesesArr){
+  let tP=0,tM=0,tD=0;
+  mesesArr.forEach((r,i)=>{
+    const p=Number(r.previsto||0), m=Number(r.mescv||0), d=m-p;
+    tP+=p; tM+=m; tD+=d;
+    const cell=$('#cv-dif-'+i); if(cell){ cell.textContent=d.toFixed(2); cell.className=(m<p)?'cv-bad':'cv-good'; }
+  });
+  $('#cv-t-prev').textContent=tP.toFixed(2);
+  $('#cv-t-mes').textContent=tM.toFixed(2);
+  $('#cv-t-dif').textContent=tD.toFixed(2);
+}
+
+/* ===== CENTROS EXCLUSIVOS / FLOP ===== */
+function drawCentrosPanel(kind){
+  $('#detTag').textContent=(kind==='ex'?'CENTROS EXCLUSIVOS':'CENTROS FLOP');
+  const store = (kind==='ex')? data.ex : data.flop;
+  $('#detBody').innerHTML =
+    `<div class="col" style="gap:.6rem">
+      <div class="row"><button class="btn pill small" id="${kind}AddRow">＋ Añadir centro</button><input id="${kind}Search" placeholder="Buscar centro, delegado, audiólogo..."></div>
+      <div class="table-wrap"><table class="table" id="${kind}Tbl"><thead>
+        <tr><th>Nombre</th><th>Delegado</th><th>Audiólogo</th><th>Sucursal/Franquicia</th></tr>
+      </thead><tbody></tbody></table></div>
+      <hr/>
+      <div class="row" style="gap:.6rem;flex-wrap:wrap">
+        <button class="btn pill" data-sub="acc">Acciones</button>
+        <button class="btn pill" data-sub="form">Formaciones y mentoring</button>
+        <button class="btn pill" data-sub="proc">Procesos</button>
+      </div>
+      <div id="${kind}Sub" class="col"></div>
+    </div>`;
+
+  const search = $('#'+kind+'Search');
+  const tbody  = $('#'+kind+'Tbl tbody');
+  function render(){
+    const q=(search.value||'').toLowerCase();
+    tbody.innerHTML = store
+      .filter(r=>!q || [r.nombre,r.delegado,r.audiologo,r.tipo].join(' ').toLowerCase().includes(q))
+      .map((r,i)=>`
+        <tr>
+          <td><input value="${esc(r?.nombre||'')}" data-i="${i}" data-k="nombre"></td>
+          <td><input value="${esc(r?.delegado||'')}" data-i="${i}" data-k="delegado"></td>
+          <td><input value="${esc(r?.audiologo||'')}" data-i="${i}" data-k="audiologo"></td>
+          <td>
+            <select data-i="${i}" data-k="tipo">
+              <option ${r?.tipo==='Sucursal'?'selected':''}>Sucursal</option>
+              <option ${r?.tipo==='Franquicia'?'selected':''}>Franquicia</option>
+              <option ${r?.tipo==='Propio'?'selected':''}>Propio</option>
+            </select>
+          </td>
+        </tr>`).join('');
+  }
+  $('#'+kind+'AddRow').onclick=()=>{ store.push({nombre:'',delegado:'',audiologo:'',tipo:'Sucursal'}); render(); };
+  search.oninput=render;
+  tbody.addEventListener('input',e=>{
+    const i=+e.target.dataset.i, k=e.target.dataset.k; if(Number.isNaN(i)||!k) return;
+    store[i] ||= {}; store[i][k] = (e.target.type==='checkbox')? e.target.checked : e.target.value;
+  });
+  render();
+
+  const sub = $('#'+kind+'Sub');
+  $('[data-sub="acc"]').onclick = ()=> subAcciones(sub);
+  $('[data-sub="form"]').onclick= ()=> subForm(sub);
+  $('[data-sub="proc"]').onclick= ()=> subProc(sub);
+}
+function subAcciones(root){
+  root.innerHTML =
+   `<div class="table-wrap"><table class="table" id="tbAcc">
+      <thead><tr><th>Fecha</th><th>Tipo de acción</th><th>Derivaciones</th><th>Citas</th><th>Ventas</th><th>Observaciones</th></tr></thead>
+      <tbody></tbody></table></div>
+    <button class="btn pill" id="accAdd">＋ Añadir</button>`;
+  const get=()=> (data.cxAcc ||= []);
+  const render=()=> $('#tbAcc tbody').innerHTML = get().map((r,i)=>`
+    <tr>
+      <td><input type="date" value="${esc(r.fecha||'')}" data-i="${i}" data-k="fecha"></td>
+      <td>
+        <select data-i="${i}" data-k="accion">
+          ${['azafata','buzoneo','mailing','ruleta','stand','cashback','otros'].map(x=>`<option ${r.accion===x?'selected':''}>${x}</option>`).join('')}
+        </select>
+      </td>
+      <td><input type="number" value="${esc(r.der||'')}"   data-i="${i}" data-k="der"></td>
+      <td><input type="number" value="${esc(r.cita||'')}"  data-i="${i}" data-k="cita"></td>
+      <td><input type="number" value="${esc(r.venta||'')}" data-i="${i}" data-k="venta"></td>
+      <td><input type="text"   value="${esc(r.obs||'')}"   data-i="${i}" data-k="obs"></td>
+    </tr>`).join('');
+  $('#accAdd').onclick=()=>{ get().push({}); render(); };
+  $('#tbAcc').addEventListener('input',e=>{const i=+e.target.dataset.i,k=e.target.dataset.k; if(Number.isNaN(i))return; get()[i][k]=(e.target.type==='checkbox')?e.target.checked:e.target.value;});
+  render();
+}
+function subForm(root){
+  root.innerHTML =
+   `<div class="table-wrap"><table class="table" id="tbForm">
+      <thead><tr><th>Fecha</th><th>Tema</th><th>Asistencia</th><th>Aplicado</th><th>Observaciones</th></tr></thead>
+      <tbody></tbody></table></div>
+    <button class="btn pill" id="formAdd">＋ Añadir</button>`;
+  const get=()=> (data.cxForm ||= []);
+  const render=()=> $('#tbForm tbody').innerHTML = get().map((r,i)=>`
+    <tr>
+      <td><input type="date" value="${esc(r.fecha||'')}" data-i="${i}" data-k="fecha"></td>
+      <td><input type="text"  value="${esc(r.tema||'')}"  data-i="${i}" data-k="tema"></td>
+      <td style="text-align:center"><input type="checkbox" ${r.asis?'checked':''} data-i="${i}" data-k="asis"></td>
+      <td style="text-align:center"><input type="checkbox" ${r.apli?'checked':''} data-i="${i}" data-k="apli"></td>
+      <td><input type="text"  value="${esc(r.obs||'')}"   data-i="${i}" data-k="obs"></td>
+    </tr>`).join('');
+  $('#formAdd').onclick=()=>{ get().push({}); render(); };
+  $('#tbForm').addEventListener('input',e=>{const i=+e.target.dataset.i,k=e.target.dataset.k; const t=get()[i]; t[k]=(e.target.type==='checkbox')?e.target.checked:e.target.value;});
+  render();
+}
+function colorPunt(v){const n=Number(v||0); if(n>=95) return 'score-ok'; if(n>=85) return 'score-warn'; return 'score-bad';}
+function colorPct(v){return Number(v||0)>=80 ? 'pct-ok' : 'pct-bad';}
+function subProc(root){
+  root.innerHTML =
+   `<div class="table-wrap"><table class="table" id="tbProc">
+      <thead><tr>
+        <th>Fecha visita</th><th>Puntuación %</th><th>% Pruebas</th><th>% Ventas</th>
+        <th>Deriv. óptica</th><th>Observaciones</th><th>Excel (enlace)</th>
+      </tr></thead><tbody></tbody></table></div>
+    <button class="btn pill" id="procAdd">＋ Añadir</button>`;
+  const get=()=> (data.cxProc ||= []);
+  function render(){
+    $('#tbProc tbody').innerHTML = get().map((r,i)=>`
+      <tr>
+        <td><input type="date" value="${esc(r.fecha||'')}" data-i="${i}" data-k="fecha"></td>
+        <td class="${colorPunt(r.punt)}"><input type="number" value="${esc(r.punt||'')}" data-i="${i}" data-k="punt"></td>
+        <td class="${colorPct (r.prue)}"><input type="number" value="${esc(r.prue||'')}" data-i="${i}" data-k="prue"></td>
+        <td class="${colorPct (r.vent)}"><input type="number" value="${esc(r.vent||'')}" data-i="${i}" data-k="vent"></td>
+        <td style="text-align:center"><input type="checkbox" ${r.optica?'checked':''} data-i="${i}" data-k="optica"></td>
+        <td><input type="text" value="${esc(r.obs||'')}" data-i="${i}" data-k="obs"></td>
+        <td><input type="text" value="${esc(r.xlsx||'')}" data-i="${i}" data-k="xlsx" placeholder="https://…"></td>
+      </tr>`).join('');
+  }
+  $('#procAdd').onclick=()=>{ get().push({}); render(); };
+  $('#tbProc').addEventListener('input',e=>{
+    const i=+e.target.dataset.i,k=e.target.dataset.k; const t=get()[i];
+    t[k]=(e.target.type==='checkbox')?e.target.checked:e.target.value; render(); // repintar para recolores
+  });
+  render();
+}
+
+/* ===== VISITAS AUDIO ===== */
+function drawVisitas(){
+  $('#detTag').textContent='VISITAS AUDIO';
+  const rows=data.va.rows ||= Array.from({length:250},()=>({}));
+  $('#detBody').innerHTML =
+    `<div class="col" style="gap:.6rem">
+      <div class="row" style="gap:.6rem">
+        <label class="pill">Visitador
+          <select id="vaRol">
+            <option ${data.va.rol==='Delegado de Audio'?'selected':''}>Delegado de Audio</option>
+            <option ${data.va.rol==='Responsable Tec. Audio'?'selected':''}>Responsable Tec. Audio</option>
+          </select>
+        </label>
+        <input id="vaVisitador" class="pill" placeholder="Nombre del visitador" value="${esc(data.va.visitador||'')}">
+        <input id="vaFilter" class="pill" placeholder="Buscar centro, delegado…">
+      </div>
+      <div class="table-wrap"><table class="table" id="tbVa">
+        <thead><tr>
+          <th>#</th><th>Fecha</th><th>Centro</th><th>Franquicia/Sucursal</th><th>Delegado</th>
+          <th>% Pruebas</th><th>% Ventas</th><th>HIT</th><th>Pruebas RT</th><th>Primeros aux.</th><th>Excel</th>
+        </tr></thead><tbody></tbody></table></div>
+      <button class="btn pill" id="vaAdd">＋ Añadir fila</button>
+    </div>`;
+  function render(){
+    const q=($('#vaFilter').value||'').toLowerCase();
+    $('#tbVa tbody').innerHTML = rows
+      .map((r,i)=>({r,i}))
+      .filter(o=>!q || [o.r.centro,o.r.delegado,o.r.tipo].join(' ').toLowerCase().includes(q))
+      .map(o=>`
+        <tr>
+          <td>${o.i+1}</td>
+          <td><input type="date" value="${esc(o.r.fecha||'')}" data-i="${o.i}" data-k="fecha"></td>
+          <td><input type="text"  value="${esc(o.r.centro||'')}" data-i="${o.i}" data-k="centro"></td>
+          <td>
+            <select data-i="${o.i}" data-k="tipo">
+              <option ${o.r.tipo==='Sucursal'?'selected':''}>Sucursal</option>
+              <option ${o.r.tipo==='Franquicia'?'selected':''}>Franquicia</option>
+            </select>
+          </td>
+          <td><input type="text"  value="${esc(o.r.delegado||'')}" data-i="${o.i}" data-k="delegado"></td>
+          <td class="${colorPct(o.r.pctPrue)}"><input type="number" value="${esc(o.r.pctPrue||'')}" data-i="${o.i}" data-k="pctPrue"></td>
+          <td class="${colorPct(o.r.pctVent)}"><input type="number" value="${esc(o.r.pctVent||'')}" data-i="${o.i}" data-k="pctVent"></td>
+          <td><div class="hitbox ${o.r.hit?'hit-on':'hit-off'}"><input type="checkbox" ${o.r.hit?'checked':''} data-i="${o.i}" data-k="hit"></div></td>
+          <td style="text-align:center"><input type="checkbox" ${o.r.rt?'checked':''} data-i="${o.i}" data-k="rt"></td>
+          <td style="text-align:center"><input type="checkbox" ${o.r.pa?'checked':''} data-i="${o.i}" data-k="pa"></td>
+          <td><input type="text" value="${esc(o.r.xlsx||'')}" data-i="${o.i}" data-k="xlsx" placeholder="https://…"></td>
+        </tr>`).join('');
+  }
+  $('#tbVa').addEventListener('input',e=>{
+    const i=+e.target.dataset.i,k=e.target.dataset.k; if(Number.isNaN(i))return;
+    const t=rows[i]; if(e.target.type==='checkbox'){ t[k]=e.target.checked; if(k==='hit') render(); } else t[k]=e.target.value;
+  });
+  $('#vaAdd').onclick=()=>{ rows.push({}); render(); };
+  $('#vaRol').onchange=e=>{ data.va.rol=e.target.value; };
+  $('#vaVisitador').oninput=e=>{ data.va.visitador=e.target.value; };
+  $('#vaFilter').oninput=render;
+  render();
+}
+
+/* ===== FORMACIONES Y MENTORING ===== */
+function drawFormaciones(){
+  $('#detTag').textContent='FORMACIONES Y MENTORING';
+  $('#detBody').innerHTML =
+   `<div class="row" style="gap:.6rem;margin-bottom:.6rem">
+      <button class="btn pill ${state.fmMode==='mentoring'?'primary':''}" data-fm="mentoring">Mentoring</button>
+      <button class="btn pill ${state.fmMode==='coaching'?'primary':''}" data-fm="coaching">Coaching</button>
+      <button class="btn pill ${state.fmMode==='generales'?'primary':''}" data-fm="generales">Generales</button>
+    </div>
+    <div class="table-wrap"><table class="table" id="tbFm">
+      <thead><tr><th>Fecha</th><th>Centro</th><th>Delegado</th><th>Audiólogo</th><th>Tema</th><th>Asistió</th><th>Aplicado</th><th>Observaciones</th></tr></thead>
+      <tbody></tbody></table></div>
+    <button class="btn pill" id="fmAdd">＋ Añadir</button>`;
+  const arr = data.fm[state.fmMode] ||= [];
+  function render(){
+    $('#tbFm tbody').innerHTML = arr.map((r,i)=>`
+      <tr>
+        <td><input type="date" value="${esc(r.fecha||'')}" data-i="${i}" data-k="fecha"></td>
+        <td><input type="text"  value="${esc(r.centro||'')}" data-i="${i}" data-k="centro"></td>
+        <td><input type="text"  value="${esc(r.delegado||'')}" data-i="${i}" data-k="delegado"></td>
+        <td><input type="text"  value="${esc(r.audiologo||'')}" data-i="${i}" data-k="audiologo"></td>
+        <td><input type="text"  value="${esc(r.tema||'')}" data-i="${i}" data-k="tema"></td>
+        <td style="text-align:center"><input type="checkbox" ${r.asis?'checked':''} data-i="${i}" data-k="asis"></td>
+        <td style="text-align:center"><input type="checkbox" ${r.apli?'checked':''} data-i="${i}" data-k="apli"></td>
+        <td><input type="text"  value="${esc(r.obs||'')}" data-i="${i}" data-k="obs"></td>
+      </tr>`).join('');
+  }
+  $('#tbFm').addEventListener('input',e=>{
+    const i=+e.target.dataset.i,k=e.target.dataset.k; const t=arr[i];
+    t[k]=(e.target.type==='checkbox')?e.target.checked:e.target.value;
+  });
+  $('#fmAdd').onclick=()=>{ arr.push({}); render(); };
+  $$('[data-fm]').forEach(b=> b.onclick=()=>{ state.fmMode=b.dataset.fm; drawFormaciones(); });
+  render();
+}
+
+/* ===== TELEAUDIOLOGÍA ===== */
+function drawTeleaudiologia(){
+  $('#detTag').textContent='TELEAUDIOLOGÍA';
+  const arr=data.ta.rows ||= [];
+  $('#detBody').innerHTML =
+   `<div class="row" style="gap:1rem;margin-bottom:.5rem">
+      <div class="kpi green"><div class="dot"></div> <b id="taCert">0</b> cert.</div>
+      <div class="kpi orange"><div class="dot"></div> <b id="taForm">0</b> form.</div>
+      <input id="taSearch" class="pill" placeholder="Buscar por centro o persona…">
+    </div>
+    <div class="table-wrap"><table class="table" id="tbTa">
+      <thead><tr>
+        <th>Centro</th><th>Delegado</th><th>Rol</th><th>Persona</th>
+        <th>Form.</th><th>Prác.</th><th>Cert.</th><th>Pruebas</th><th>Ventas</th><th>Observaciones</th>
+      </tr></thead><tbody></tbody></table></div>
+    <button class="btn pill" id="taAdd">＋ Añadir</button>`;
+  function render(){
+    const q=($('#taSearch').value||'').toLowerCase();
+    $('#tbTa tbody').innerHTML = arr
+      .filter(r=>!q || [r.centro,r.persona].join(' ').toLowerCase().includes(q))
+      .map((r,i)=>`
+        <tr>
+          <td><input value="${esc(r.centro||'')}"   data-i="${i}" data-k="centro"></td>
+          <td><input value="${esc(r.delegado||'')}" data-i="${i}" data-k="delegado"></td>
+          <td>
+            <select data-i="${i}" data-k="rol">
+              <option ${r.rol!=='Técnico'?'selected':''}>Audiólogo</option>
+              <option ${r.rol==='Técnico'?'selected':''}>Técnico</option>
+            </select>
+          </td>
+          <td><input value="${esc(r.persona||'')}"  data-i="${i}" data-k="persona" placeholder="Nombre"></td>
+          <td style="text-align:center"><input type="checkbox" ${r.form?'checked':''}       data-i="${i}" data-k="form"></td>
+          <td style="text-align:center"><input type="checkbox" ${r.pract?'checked':''}      data-i="${i}" data-k="pract"></td>
+          <td style="text-align:center"><input type="checkbox" ${r.cert?'checked':''}       data-i="${i}" data-k="cert"></td>
+          <td style="text-align:center"><input type="checkbox" ${r.pruebas?'checked':''}    data-i="${i}" data-k="pruebas"></td>
+          <td style="text-align:center"><input type="checkbox" ${r.ventas?'checked':''}     data-i="${i}" data-k="ventas"></td>
+          <td><input value="${esc(r.obs||'')}"      data-i="${i}" data-k="obs"></td>
+        </tr>`).join('');
+    $('#taCert').textContent = arr.filter(r=>r.cert).length;
+    $('#taForm').textContent = arr.filter(r=>r.form).length;
+  }
+  $('#tbTa').addEventListener('input',e=>{
+    const i=+e.target.dataset.i,k=e.target.dataset.k; const t=arr[i]; if(!t) return;
+    t[k]=(e.target.type==='checkbox')?e.target.checked:e.target.value; render();
+  });
+  $('#taAdd').onclick=()=>{ arr.push({}); render(); };
+  $('#taSearch').oninput=render;
+  render();
+}
+
+/* ===== EQUIPOS ===== */
+function drawEquipos(){
+  $('#detTag').textContent='EQUIPOS';
+  const packs=data.eq.packs ||= Array.from({length:7},()=>({rows:[]}));
+  $('#detBody').innerHTML =
+    `<div class="row" style="gap:.6rem;margin-bottom:.5rem">
+       <input id="eqSearch" class="pill" placeholder="Buscar por equipo, Nº de serie o centro…">
+     </div>` +
+    packs.map((p,pi)=>`
+      <details ${pi<2?'open':''} style="margin-bottom:.6rem">
+        <summary class="row" style="gap:.5rem"><strong>Pack ${pi+1}</strong> <button class="btn pill small" data-pack="${pi}">＋</button></summary>
+        <div class="table-wrap" style="margin-top:.4rem">
+          <table class="table" data-tb="${pi}">
+            <thead><tr><th>Equipo</th><th>Nº serie</th><th>Centro</th><th>Persona que envía</th><th>Fecha</th></tr></thead>
+            <tbody>${
+              (p.rows||[]).map((r,ri)=>`
+              <tr>
+                <td><input value="${esc(r.eq||'')}"     data-p="${pi}" data-i="${ri}" data-k="eq"></td>
+                <td><input value="${esc(r.sn||'')}"     data-p="${pi}" data-i="${ri}" data-k="sn"></td>
+                <td><input value="${esc(r.centro||'')}" data-p="${pi}" data-i="${ri}" data-k="centro"></td>
+                <td><input value="${esc(r.envia||'')}"  data-p="${pi}" data-i="${ri}" data-k="envia"></td>
+                <td><input type="date" value="${esc(r.fecha||'')}" data-p="${pi}" data-i="${ri}" data-k="fecha"></td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </details>`).join('');
+
+  // + por pack
+  $('#detBody').addEventListener('click',e=>{
+    const p=e.target.dataset.pack; if(p==null) return;
+    packs[+p].rows ||=([]); packs[+p].rows.push({}); drawEquipos();
+  });
+  // edición
+  $('#detBody').addEventListener('input',e=>{
+    const p=e.target.dataset.p,i=e.target.dataset.i,k=e.target.dataset.k;
+    if(p==null||i==null||!k) return; (packs[+p].rows[+i] ||= {})[k]=e.target.value;
+  });
+  // buscador
+  $('#eqSearch').oninput=(e)=>{
+    const q=(e.target.value||'').toLowerCase();
+    $$('table[data-tb]').forEach(t=>{
+      const pi=+t.dataset.tb; const rows=packs[pi].rows||[];
+      t.tBodies[0].innerHTML = rows
+        .filter(r=>!q || [r.eq,r.sn,r.centro].join(' ').toLowerCase().includes(q))
+        .map((r,ri)=>`
+          <tr>
+            <td><input value="${esc(r.eq||'')}"     data-p="${pi}" data-i="${ri}" data-k="eq"></td>
+            <td><input value="${esc(r.sn||'')}"     data-p="${pi}" data-i="${ri}" data-k="sn"></td>
+            <td><input value="${esc(r.centro||'')}" data-p="${pi}" data-i="${ri}" data-k="centro"></td>
+            <td><input value="${esc(r.envia||'')}"  data-p="${pi}" data-i="${ri}" data-k="envia"></td>
+            <td><input type="date" value="${esc(r.fecha||'')}" data-p="${pi}" data-i="${ri}" data-k="fecha"></td>
+          </tr>`).join('');
+    });
   };
 }
-function tintProc(el, v){ const n=Number(v); el.style.background=''; el.style.borderColor='transparent';
-  if(Number.isFinite(n)){ if(n>=95){ el.style.background='#e8ffe9'; el.style.borderColor='#2ecc71aa'; }
-  else if(n<85){ el.style.background='#fff5e0'; el.style.borderColor='#ffb74d'; } }
-}
 
-/* eventos sidebar centros */
-$('.sidebar').addEventListener('click',e=>{
-  const b=e.target.closest('button'); if(!b) return;
-  if(b.dataset.section==='ex' && b.dataset.act==='add'){ data.centros.ex.push({nombre:'(nuevo centro)',delegado:'',audiologo:'',tipo:'Sucursal'}); sideRenderCentros('ex'); }
-  if(b.dataset.section==='flop' && b.dataset.act==='add'){ data.centros.flop.push({nombre:'(nuevo centro)',delegado:'',audiologo:'',tipo:'Sucursal'}); sideRenderCentros('flop'); }
-  if(b.dataset.open==='ex'){ openCentro('ex', +b.dataset.i); }
-  if(b.dataset.open==='flop'){ openCentro('flop', +b.dataset.i); }
-  if(b.dataset.del==='ex'){ data.centros.ex.splice(+b.dataset.i,1); sideRenderCentros('ex'); }
-  if(b.dataset.del==='flop'){ data.centros.flop.splice(+b.dataset.i,1); sideRenderCentros('flop'); }
-});
-
-/* ===================== VISITAS ===================== */
-function renderVisitas(){
-  openPanel('vis');
-  $('#detTitle').textContent='Detalle — VISITAS';
-  $('#visRol').value = data.visitas.rol||'Delegado audio';
-  $('#visVisitador').value = data.visitas.visitador||'';
-  $('#visDelegadoZona').value = data.visitas.delegado_zona||'';
-  if(!data.visitas.rows.length) data.visitas.rows = Array.from({length:60},()=>({fecha:'',centro:'',tipo:'Sucursal',delegado:'',ppru:null,pven:null,hit:false,rt:false,aux:false}));
-  drawVisRows();
-}
-function drawVisRows(filter=''){
-  const body=$('#visBody'); body.innerHTML='';
-  const f=(filter||$('#visSearch').value||'').toLowerCase();
-  data.visitas.rows.forEach((r,idx)=>{
-    if(f && !((r.centro||'').toLowerCase().includes(f))) return;
-    const row=document.createElement('div'); row.className='row grid-visitas';
-    row.innerHTML=`<input type="date" value="${r.fecha||''}" data-i="${idx}" data-k="fecha">
-      <input value="${esc(r.centro||'')}" data-i="${idx}" data-k="centro">
-      <select data-i="${idx}" data-k="tipo"><option ${r.tipo==='Sucursal'?'selected':''}>Sucursal</option><option ${r.tipo==='Franquicia'?'selected':''}>Franquicia</option></select>
-      <input value="${esc(r.delegado||'')}" data-i="${idx}" data-k="delegado">
-      <input type="number" min="0" max="100" step="1" value="${r.ppru??''}" data-i="${idx}" data-k="ppru">
-      <input type="number" min="0" max="100" step="1" value="${r.pven??''}" data-i="${idx}" data-k="pven">
-      <input type="checkbox" ${r.hit?'checked':''} data-i="${idx}" data-k="hit">
-      <input type="checkbox" ${r.rt?'checked':''} data-i="${idx}" data-k="rt">
-      <input type="checkbox" ${r.aux?'checked':''} data-i="${idx}" data-k="aux">`;
-    body.appendChild(row);
-  });
-  body.oninput=(e)=>{ const i=+e.target.dataset.i,k=e.target.dataset.k; data.visitas.rows[i][k] = e.target.type==='checkbox'? e.target.checked : (e.target.type==='number'&&e.target.value!==''?Number(e.target.value):e.target.value); };
-}
-$('#visSearch').oninput=()=>drawVisRows();
-$('#visRol').onchange=e=>{data.visitas.rol=e.target.value;};
-$('#visVisitador').oninput=e=>{data.visitas.visitador=e.target.value;};
-$('#visDelegadoZona').oninput=e=>{data.visitas.delegado_zona=e.target.value;};
-$('#visAdd').onclick=()=>{ data.visitas.rows.push(...Array.from({length:20},()=>({fecha:'',centro:'',tipo:'Sucursal',delegado:'',ppru:null,pven:null,hit:false,rt:false,aux:false}))); drawVisRows(); };
-$('#visPaste').onclick=()=>{
-  navigator.clipboard.readText().then(txt=>{
-    if(!txt) return alert('No hay texto en el portapapeles');
-    const rows = txt.trim().split(/\r?\n/).map(l=>l.split('\t'));
-    rows.forEach((cols,ix)=>{
-      const o={fecha:'',centro:'',tipo:'Sucursal',delegado:'',ppru:null,pven:null,hit:false,rt:false,aux:false};
-      if(cols[0]) o.fecha = cols[0].replace(/(\d{2})\/(\d{2})\/(\d{4})/,'$3-$2-$1'); // dd/mm/yyyy -> yyyy-mm-dd
-      if(cols[1]) o.centro = cols[1];
-      if(cols[2]) o.tipo = /fra/i.test(cols[2])?'Franquicia':'Sucursal';
-      if(cols[3]) o.delegado = cols[3];
-      if(cols[4]) o.ppru = Number(cols[4])||null;
-      if(cols[5]) o.pven = Number(cols[5])||null;
-      data.visitas.rows.push(o);
-    });
-    drawVisRows();
-    toast('Pegado desde Excel');
-  });
-};
-
-/* ===================== FORMACIONES & MENTORING ===================== */
-function openFm(kind){
-  state.fmKind=kind; openPanel('fm');
-  $('#detTitle').textContent='Detalle — FORMACIONES';
-  $('#fmWhat').textContent= kind==='mentoring'?'Mentoring':(kind==='coaching'?'Coaching':'Formaciones generales');
-  const arr = data.fm[kind] || (data.fm[kind]=[]);
-  if(arr.length<20) arr.push(...Array.from({length:20-arr.length},()=>({fecha:'',centro:'',delegado:'',audiologo:'',tema:'',asist:false})));
-  drawFmRows();
-}
-function drawFmRows(){
-  const kind=state.fmKind, arr=data.fm[kind];
-  const body=$('#fmBody'); body.innerHTML='';
-  const f=($('#fmSearch').value||'').toLowerCase();
-  arr.forEach((r,idx)=>{
-    if(f && !(`${r.centro||''} ${r.delegado||''} ${r.audiologo||''} ${r.tema||''}`.toLowerCase().includes(f))) return;
-    const row=document.createElement('div'); row.className='row grid-fm';
-    row.innerHTML=`<input type="date" value="${r.fecha||''}" data-k="fecha" data-i="${idx}">
-      <input value="${esc(r.centro||'')}" data-k="centro" data-i="${idx}">
-      <input value="${esc(r.delegado||'')}" data-k="delegado" data-i="${idx}">
-      <input value="${esc(r.audiologo||'')}" data-k="audiologo" data-i="${idx}">
-      <input value="${esc(r.tema||'')}" data-k="tema" data-i="${idx}">
-      <input type="checkbox" ${r.asist?'checked':''} data-k="asist" data-i="${idx}">`;
-    body.appendChild(row);
-  });
-  body.oninput=(e)=>{ const i=+e.target.dataset.i,k=e.target.dataset.k; arr[i][k] = e.target.type==='checkbox'? e.target.checked : e.target.value; };
-}
-$('#fmSearch').oninput=drawFmRows;
-$('#fmAdd').onclick=()=>{ data.fm[state.fmKind].push({fecha:'',centro:'',delegado:'',audiologo:'',tema:'',asist:false}); drawFmRows(); };
-
-/* ===================== EQUIPOS ===================== */
-function renderEquipos(){
-  openPanel('eq');
-  $('#detTitle').textContent='Detalle — EQUIPOS';
-  const cont=$('#eqPaquetes'); cont.innerHTML='';
-  data.eq.paquetes.forEach((p,pi)=>{
-    const box=document.createElement('div'); box.className='table-wrap'; box.style.marginBottom='.45rem';
-    box.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;margin:.1rem .2rem .3rem">
-      <strong>${esc(p.nombre)}</strong>
-      <div style="display:flex;gap:.4rem;align-items:center">
-        <button class="btn" data-addrow="${pi}">＋ Añadir fila</button>
-      </div>
-    </div>
-    <div class="xscroll">
-      <div class="table">
-        <div class="row grid-eq" style="font-weight:800;opacity:.85">
-          <div>Equipo</div><div>Nº serie</div><div>Centro envío</div><div>Enviado</div><div>Sede</div><div>Observaciones</div>
-        </div>
-        <div id="eqBody-${pi}"></div>
-      </div>
-    </div>`;
-    cont.appendChild(box);
-    if(!p.rows.length) p.rows.push({equipo:'',serie:'',centro:'',env:false,sede:false,obs:''});
-    drawEqRows(pi);
-  });
-  $('#eqPaquetes').querySelectorAll('[data-addrow]').forEach(b=>{
-    b.onclick=()=>{ data.eq.paquetes[+b.dataset.addrow].rows.push({equipo:'',serie:'',centro:'',env:false,sede:false,obs:''}); drawEqRows(+b.dataset.addrow); };
-  });
-  $('#eqSearch').oninput=()=>{ data.eq._filter=$('#eqSearch').value.toLowerCase(); data.eq.paquetes.forEach((_,i)=>drawEqRows(i)); };
-}
-function drawEqRows(pi){
-  const p=data.eq.paquetes[pi]; const body=$(`#eqBody-${pi}`); body.innerHTML='';
-  const f=(data.eq._filter||'').toLowerCase();
-  p.rows.forEach((r,ri)=>{
-    const txt=`${r.equipo||''} ${r.serie||''} ${r.centro||''}`.toLowerCase();
-    if(f && !txt.includes(f)) return;
-    const row=document.createElement('div'); row.className='row grid-eq';
-    row.innerHTML=`<input value="${esc(r.equipo||'')}" data-p="${pi}" data-i="${ri}" data-k="equipo">
-      <input value="${esc(r.serie||'')}" data-p="${pi}" data-i="${ri}" data-k="serie">
-      <input value="${esc(r.centro||'')}" data-p="${pi}" data-i="${ri}" data-k="centro">
-      <input type="checkbox" ${r.env?'checked':''} data-p="${pi}" data-i="${ri}" data-k="env">
-      <input type="checkbox" ${r.sede?'checked':''} data-p="${pi}" data-i="${ri}" data-k="sede">
-      <input value="${esc(r.obs||'')}" data-p="${pi}" data-i="${ri}" data-k="obs">`;
-    body.appendChild(row);
-  });
-  body.oninput=(e)=>{ const p=+e.target.dataset.p,i=+e.target.dataset.i,k=e.target.dataset.k; const r=data.eq.paquetes[p].rows[i]; r[k]= e.target.type==='checkbox'? e.target.checked : e.target.value; };
-}
-
-/* ===================== SIDEBAR INICIAL ===================== */
-function renderSidebar(){
-  renderCvList();
-  sideRenderCentros('ex');
-  sideRenderCentros('flop');
-  // acciones
-  $('[data-panel="VISITAS AUDIO"] [data-act="open"]').onclick=renderVisitas;
-  // FM
-  $('#fmList').addEventListener('click',e=>{
-    const b=e.target.closest('button'); if(!b) return;
-    if(b.dataset.open==='fm-mentoring') openFm('mentoring');
-    if(b.dataset.open==='fm-coaching')  openFm('coaching');
-    if(b.dataset.open==='fm-generales') openFm('generales');
-  });
-  // Equipos
-  $('[data-open="equipos"]').onclick=renderEquipos;
-}
-
-/* ===================== GUARDAR / CARGAR ===================== */
-async function loadCloud(){
-  try{
-    const raw = await apiLoad();
-    if(raw){ try{ data = Object.assign(data, JSON.parse(raw)); }catch(e){ console.warn('JSON inválido remoto'); } }
-    renderSidebar();
-    stamp('Cargado: '+now());
-  }catch(e){ console.warn(e); stamp('Local (configurar ⚙️)'); }
-  $('#detTitle').textContent='Detalle —'; $('#detTag').textContent='—';
+/* ===== GUARDAR / CARGAR ===== */
+function saveLocal(){
+  try{ localStorage.setItem('audioSeguimientoCloud', JSON.stringify(data)); $('#statusTag').textContent='Local · guardado'; toast('Guardado local'); }
+  catch(e){ alert('No se pudo guardar en local: '+e.message); }
 }
 async function saveCloud(){
-  await apiSave(JSON.stringify(data));
-  stamp('Guardado: '+now());
-  toast('Guardado en nube');
+  if(!/^https:\/\/script\.google/.test(GAS_URL)){ alert('Configura GAS_URL con tu /exec de Apps Script'); return; }
+  $('#statusTag').textContent='Nube · guardando…';
+  try{
+    const res=await fetch(GAS_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'save',data})});
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    $('#statusTag').textContent='Nube · guardado'; toast('Guardado en nube');
+  }catch(e){ $('#statusTag').textContent='Error nube'; alert('Error guardando en nube: '+e.message); }
 }
-$('#btnSaveTop').onclick=saveCloud;
-$('#btnFetch').onclick=loadCloud;
-$('#btnReset').onclick=loadCloud;
-$('#saveBtnActive').onclick=saveCloud;
+async function loadCloud(){
+  if(!/^https:\/\/script\.google/.test(GAS_URL)){
+    const raw=localStorage.getItem('audioSeguimientoCloud'); if(raw){ try{ data=JSON.parse(raw); }catch{} }
+    afterLoad(); return;
+  }
+  try{
+    const res=await fetch(GAS_URL+'?action=load',{cache:'no-store'}); const txt=await res.text();
+    let json={}; try{ json=JSON.parse(txt||'{}'); }catch{}
+    if(json && typeof json==='object' && Object.keys(json).length) data=json;
+  }catch{}
+  afterLoad();
+}
+function afterLoad(){
+  // estructuras base
+  data.cv ||= {compania:[], exclusivos:[], flop:[]};
+  data.ex ||= []; data.flop ||= []; data.va ||= {rol:'Delegado de Audio',visitador:'',rows:[]};
+  data.fm ||= {mentoring:[],coaching:[],generales:[]}; data.ta ||= {rows:[]};
+  data.eq ||= {packs:Array.from({length:7},()=>({rows:[]}))};
+  renderCvSidebar(); openPanel('cv'); // inicio en CV
+}
 
-/* ===================== BUSCADOR GLOBAL PANEL ===================== */
-$('#globalSearch').addEventListener('input',()=>{
-  const q=$('#globalSearch').value.trim().toLowerCase();
-  if(state.section==='vis'){ drawVisRows(q); }
-  if(state.section==='fm'){ drawFmRows(); }
+/* ===== TOPBAR ===== */
+$('#btnRefresh').onclick = ()=> location.reload();
+$('#btnSaveLocal').onclick = saveLocal;
+$('#btnSaveCloud').onclick = saveCloud;
+
+/* ===== INICIO ===== */
+document.addEventListener('DOMContentLoaded', ()=>{
+  // evita duplicaciones si hay SW
+  if(window.__SEGUI_AUDIO_INITED__){ $('#appTop')?.classList.add('dedup-hide'); } else { window.__SEGUI_AUDIO_INITED__=true; }
+  // side opens
+  $$('[data-open]').forEach(b=> b.addEventListener('click',()=> openPanel(b.dataset.open)));
+  $$('[data-fm]').forEach(b=> b.addEventListener('click',()=>{ state.fmMode=b.dataset.fm; openPanel('fm'); }));
+  renderCvSidebar();
+  loadCloud();
 });
-
-/* ===================== INIT ===================== */
-window.addEventListener('load',()=>{ stamp('Listo'); });
 </script>
 </body>
 </html>
