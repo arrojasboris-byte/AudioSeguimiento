@@ -2,10 +2,11 @@
 <html lang="es">
 <head>
 <meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>SEGUIMIENTO AUDIO · Cloud</title>
 <meta name="theme-color" content="#c82727"/>
-
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1"></script>
 <style>
 :root{
   --rojo:#c82727; --rojo2:#a71f1f;
@@ -17,7 +18,7 @@
 html,body{height:100%}
 body{margin:0;background:var(--bg);font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;font-size:var(--fs);color:#222;line-height:1.18}
 
-/* Topbar rojo ancho */
+/* Topbar */
 .topbar{position:sticky;top:0;z-index:999;width:100%;
   background:linear-gradient(180deg,var(--rojo),var(--rojo2));color:#fff;box-shadow:var(--shadow)}
 .topbar .row{display:grid;grid-template-columns:1fr auto 1fr;gap:.5rem;align-items:center;padding:.65rem .85rem}
@@ -32,7 +33,7 @@ body{margin:0;background:var(--bg);font-family:Inter,system-ui,Segoe UI,Roboto,A
 .right{justify-self:end}
 
 /* Layout */
-.layout{display:grid;grid-template-columns:240px 1fr;gap:10px;padding:10px;max-width:1400px;margin:0 auto}
+.layout{display:grid;grid-template-columns:260px 1fr;gap:10px;padding:10px;max-width:1400px;margin:0 auto}
 .side{display:flex;flex-direction:column;gap:10px}
 .side-card{background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow)}
 .side-head{display:flex;justify-content:space-between;align-items:center;padding:.55rem .6rem;border-bottom:1px solid var(--line);font-weight:800}
@@ -43,19 +44,17 @@ body{margin:0;background:var(--bg);font-family:Inter,system-ui,Segoe UI,Roboto,A
 .main-head{display:flex;justify-content:space-between;align-items:center;padding:.6rem .8rem;border-bottom:1px solid var(--line)}
 .main-body{padding:.6rem .8rem}
 
-/* Tabla base */
-.table{width:100%;border-collapse:separate;border-spacing:0;min-width:820px}
+/* Tabla */
+.table{width:100%;border-collapse:separate;border-spacing:0;min-width:900px}
 .table th,.table td{border:1px solid var(--line);padding:.35rem .4rem;vertical-align:middle}
 .table th{background:#fafbff;text-align:left;position:sticky;top:0;z-index:1}
 .table tfoot td{font-weight:800;background:#fcfcff}
 .table input[type="text"], .table input[type="number"], .table input[type="date"], .table select{
   width:100%;border:1px solid var(--line);padding:.22rem .32rem;border-radius:6px;background:#fff;font-size:inherit
 }
-
-/* Contenedores scroll */
 .table-wrap{overflow:auto;max-height:66vh}
-.row{display:flex;gap:.4rem;align-items:center;flex-wrap:wrap}
-.col{display:flex;flex-direction:column;gap:.35rem}
+.row{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+.col{display:flex;flex-direction:column;gap:.5rem}
 
 /* Indicadores */
 .kpi{display:flex;gap:.5rem;align-items:center}
@@ -63,13 +62,10 @@ body{margin:0;background:var(--bg);font-family:Inter,system-ui,Segoe UI,Roboto,A
 .kpi.green .dot{background:#c7f7d3;border-color:#96ddab}
 .kpi.orange .dot{background:#ffe6c5;border-color:#ffcf91}
 
-/* Colores CV */
+/* Colores */
 .cv-good{color:#1b5e20}
 .cv-bad{color:#c62828}
-
-/* Puntuación procesos */
 .score-ok{background:#e7f8ec}
-.score-warn{background:#fff2e0}
 .score-bad{background:#ffe8e8}
 .pct-ok{background:#e7f8ec}
 .pct-bad{background:#ffe8e8}
@@ -79,26 +75,22 @@ body{margin:0;background:var(--bg);font-family:Inter,system-ui,Segoe UI,Roboto,A
 .hit-off{background:#ffe8e8}
 .hit-on{background:#e7f8ec}
 
-/* Modal PIN */
+/* PIN */
 #pinModal{position:fixed;inset:0;background:rgba(0,0,0,.67);display:flex;align-items:center;justify-content:center;z-index:9999}
 .pin-card{background:#111;color:#fff;border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,.5);width:min(92vw,420px);padding:1.2rem}
 .pin-card h3{margin:.2rem 0 1rem}
 .pin-row{display:flex;gap:.45rem;align-items:center}
 .pin-row input{flex:1;border-radius:8px;border:1px solid #333;background:#000;color:#fff;padding:.5rem .6rem;letter-spacing:.35rem}
 .pin-actions{display:flex;gap:.5rem;margin-top:.8rem}
-.topbar.dedup-hide{display:none}
 
-/* Chips/tags */
-.tag{display:inline-flex;gap:.35rem;align-items:center;background:#f5f6ff;border:1px solid #e5e6f8;padding:.12rem .45rem;border-radius:999px}
-
-/* Ayudas */
-.note{opacity:.7}
+/* Helpers */
+.note{opacity:.72}
 </style>
 </head>
 <body>
 
-<!-- ===== TOPBAR ===== -->
-<div class="topbar" id="appTop">
+<!-- TOPBAR -->
+<div class="topbar">
   <div class="row">
     <div class="left">
       <button class="btn ghost small" id="btnRefresh" title="Recargar">Actualizar</button>
@@ -112,7 +104,7 @@ body{margin:0;background:var(--bg);font-family:Inter,system-ui,Segoe UI,Roboto,A
   </div>
 </div>
 
-<!-- ===== LAYOUT ===== -->
+<!-- LAYOUT -->
 <div class="layout">
   <!-- SIDEBAR -->
   <aside class="side">
@@ -124,17 +116,21 @@ body{margin:0;background:var(--bg);font-family:Inter,system-ui,Segoe UI,Roboto,A
         <div><button class="side-btn" data-open="cv">▸</button></div>
       </div>
       <div class="side-list" style="gap:.55rem">
-        <div class="row"><strong>Compañía</strong><button class="btn pill" id="cvOpenComp">Abrir</button></div>
+        <div class="row" style="justify-content:space-between;align-items:center">
+          <strong>Compañía</strong>
+          <button class="btn pill" id="cvOpenComp">Abrir</button>
+        </div>
         <hr style="border:none;border-top:1px solid #0001">
         <div class="row" style="justify-content:space-between;align-items:center">
-          <strong>Centros exclusivos</strong><button class="btn pill" id="cvAddEx">＋</button>
+          <strong>Centros exclusivos</strong>
+          <button class="btn pill" id="cvAddEx">＋</button>
         </div>
-        <select id="cvSelEx"><option value="">— Selecciona un centro —</option></select>
+        <input id="cvSearchEx" placeholder="Buscar centro exclusivo…"/>
         <div id="cvListEx"></div>
       </div>
     </div>
 
-    <!-- CENTROS EXCLUSIVOS -->
+    <!-- CENTROS EXCLUSIVOS (general) -->
     <div class="side-card" style="background:var(--col-ex)">
       <div class="side-head"><div>🏬 CENTROS EXCLUSIVOS</div><div><button class="side-btn" data-open="ex">▸</button></div></div>
       <div class="side-list">
@@ -155,7 +151,7 @@ body{margin:0;background:var(--bg);font-family:Inter,system-ui,Segoe UI,Roboto,A
     <!-- VISITAS AUDIO -->
     <div class="side-card" style="background:var(--col-az)">
       <div class="side-head"><div>📋 VISITAS AUDIO</div><div><button class="side-btn" data-open="va">▸</button></div></div>
-      <div class="side-list"><div class="small note">Hasta 250 filas, se puede pegar desde Excel.</div></div>
+      <div class="side-list"><div class="small note">Hasta 250 filas, admite pegado desde Excel.</div></div>
     </div>
 
     <!-- FORMACIONES Y MENTORING -->
@@ -186,7 +182,7 @@ body{margin:0;background:var(--bg);font-family:Inter,system-ui,Segoe UI,Roboto,A
   <section class="main">
     <div class="main-head">
       <div class="row"><strong id="detTag">Detalle</strong></div>
-      <div class="row small" id="cvHeaderMeta" style="display:none;gap:.35rem"><span class="tag">CIFRA</span></div>
+      <div class="row small" id="cvHeaderMeta" style="display:none;gap:.35rem"><span class="pill">CIFRA</span></div>
     </div>
     <div class="main-body" id="detBody"><div class="small note">Selecciona una opción a la izquierda.</div></div>
   </section>
@@ -204,12 +200,13 @@ body{margin:0;background:var(--bg);font-family:Inter,system-ui,Segoe UI,Roboto,A
 </div>
 
 <script>
-/* ===== CONFIG ===== */
+/* ========= CONFIG ========= */
 const GAS_URL = 'PEGAR_AQUI_TU_URL_EXEC'; // ← Pega aquí tu /exec de Apps Script
 const PIN_CODE = '4321';
 
-/* ===== ESTADO Y DATOS ===== */
-const state = { panel:null, cvTarget:null, fmMode:'mentoring' };
+/* ========= ESTADO/DATOS ========= */
+const state = { panel:null, cvTarget:null, fmMode:'mentoring', chart:null };
+window._bulkPaste = false; // ← bandera para desactivar rerender durante pegados
 let data = window.data || {};
 data.cv ||= {compania:[], exclusivos:[], flop:[]};
 data.ex ||= []; data.flop ||= [];
@@ -218,7 +215,7 @@ data.fm ||= { mentoring:[], coaching:[], generales:[] };
 data.ta ||= { rows:[] };
 data.eq ||= { packs: Array.from({length:7},()=>({rows:[]})) };
 
-/* ===== UTILS ===== */
+/* ========= UTILS ========= */
 const $ = (s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
@@ -227,7 +224,7 @@ function toast(msg){const t=document.createElement('div'); t.textContent=msg;
   document.body.appendChild(t); setTimeout(()=>t.remove(),1200);
 }
 
-/* ===== PIN ===== */
+/* ========= PIN ========= */
 function checkPin(v){ return v===PIN_CODE; }
 function handleEnter(){
   $('#pinMsg').style.display='none';
@@ -238,7 +235,7 @@ $('#enter').onclick=handleEnter;
 $('#clear').onclick=()=>$('#pin').value='';
 $('#pin').addEventListener('keydown',e=>{ if(e.key==='Enter') handleEnter(); });
 
-/* ===== NAV ===== */
+/* ========= NAV ========= */
 function openPanel(id){
   state.panel = id;
   $('#detBody').innerHTML = '';
@@ -252,52 +249,46 @@ function openPanel(id){
   if(id==='eq') drawEquipos();
 }
 
-/* ===== CIFRA – MESES ===== */
+/* ========= CIFRA: meses/plantillas ========= */
 const CV_MESES=['Ago-25','Sep-25','Oct-25','Nov-25','Dic-25','Ene-26','Feb-26','Mar-26','Abr-26','May-26','Jun-26','Jul-26'];
 const blankCvMeses=()=>CV_MESES.map(m=>({mes:m,previsto:'',mescv:'',dif:0}));
 function ensureCvCentro(o){o.meta||={};o.meta.nombre??='';o.meta.delegado??='';o.meta.tipo??='Sucursal';o.meta.audiologo??='';o.meses||=blankCvMeses();return o;}
 
-/* ===== CIFRA – SIDEBAR ===== */
+/* ========= CIFRA: Sidebar Exclusivos ========= */
 function renderCvSidebar(){
-  const sel=$('#cvSelEx'); if(!sel) return;
-  sel.innerHTML='<option value="">— Selecciona un centro —</option>';
-  data.cv.exclusivos.forEach((c,i)=> sel.innerHTML+=`<option value="${i}">${esc(c.meta?.nombre||('Centro '+(i+1)))}</option>`);
-  const list=$('#cvListEx');
-  if(list) list.innerHTML = data.cv.exclusivos.map((c,i)=>`
-    <div class="row" style="justify-content:space-between">
-      <span>${esc(c.meta?.nombre||('Centro '+(i+1)))}</span>
-      <button class="btn pill small" data-cvex="${i}">Abrir</button>
-    </div>`).join('');
+  const inp=$('#cvSearchEx'), list=$('#cvListEx'); if(!list) return;
+  const q=(inp?.value||'').toLowerCase();
+  const items = data.cv.exclusivos.map((c,i)=>({c,i})).filter(o=>!q || (o.c.meta?.nombre||'').toLowerCase().includes(q));
+  list.innerHTML = items.map(o=>`
+    <div class="row" style="justify-content:space-between;align-items:center">
+      <span>${esc(o.c.meta?.nombre||('Centro '+(o.i+1)))}</span>
+      <button class="btn pill small" data-cvex="${o.i}">Abrir ▸</button>
+    </div>`).join('') || '<div class="note small">No hay centros aún.</div>';
 }
 $('#cvAddEx')?.addEventListener('click',()=>{
   const n=prompt('Nombre del centro exclusivo:',''); if(n===null) return;
   data.cv.exclusivos.push(ensureCvCentro({meta:{nombre:n,delegado:'',tipo:'Sucursal',audiologo:''}}));
-  renderCvSidebar(); $('#cvSelEx').value=String(data.cv.exclusivos.length-1);
-  openCvCentro('ex', data.cv.exclusivos.length-1);
+  renderCvSidebar();
 });
-$('#cvSelEx')?.addEventListener('change',e=>{
-  const i=e.target.value===''?null:Number(e.target.value); if(i==null) return; openCvCentro('ex', i);
-});
+$('#cvSearchEx')?.addEventListener('input',renderCvSidebar);
 $('#cvListEx')?.addEventListener('click',e=>{
   const i=e.target?.dataset?.cvex; if(i!=null) openCvCentro('ex', Number(i));
 });
 $('#cvOpenComp')?.addEventListener('click', ()=> openCvCompania());
 
-/* ===== CIFRA – LANDING/TABLAS ===== */
+/* ========= CIFRA: Landing / Compañía / Centro ========= */
 function drawCvLanding(){
   $('#detTag').textContent='CIFRA DE VENTAS';
   $('#detBody').innerHTML=
     `<div class="col" style="gap:.6rem">
        <div class="row" style="gap:.6rem">
          <button class="btn pill" id="goComp">Abrir Compañía</button>
-         <button class="btn pill" id="goFirstEx">Abrir primer Centro exclusivo</button>
        </div>
-       <div class="note small">Usa la izquierda para crear/abrir centros exclusivos.</div>
+       <div class="note small">Usa la izquierda para crear/abrir centros exclusivos y editar su tabla mensual.</div>
      </div>`;
   $('#goComp').onclick=openCvCompania;
-  $('#goFirstEx').onclick=()=>{ if(data.cv.exclusivos.length) openCvCentro('ex',0); else toast('Añade un centro en la izquierda'); };
 }
-function openCvCompania(){ openPanel('cv'); state.cvTarget={kind:'compania'}; $('#detTag').textContent='CIFRA — COMPAÑÍA'; drawCvTable(null, data.cv.compania); }
+function openCvCompania(){ openPanel('cv'); state.cvTarget={kind:'compania'}; $('#detTag').textContent='CIFRA — COMPAÑÍA'; drawCvTable(null, data.cv.compania || blankCvMeses()); }
 function openCvCentro(kind,index){
   openPanel('cv');
   const arr=(kind==='ex')?data.cv.exclusivos:data.cv.flop;
@@ -305,6 +296,8 @@ function openCvCentro(kind,index){
   const m=arr[index].meta; $('#detTag').textContent=(kind==='ex'?'CIFRA — CENTRO EXCLUSIVO':'CIFRA — CENTRO FLOP')+' · '+(m.nombre||('Centro '+(index+1)));
   drawCvTable(arr[index], arr[index].meses, m);
 }
+
+/* ========= CIFRA: Tabla + Gráfico ========= */
 function drawCvTable(centro, mesesArr, meta){
   mesesArr ||= blankCvMeses();
   const metaHtml = centro ? `
@@ -321,20 +314,27 @@ function drawCvTable(centro, mesesArr, meta){
 
   $('#detBody').innerHTML =
     metaHtml +
-    `<div class="table-wrap">
-      <table class="table" id="cvTable">
-        <thead><tr><th>Mes</th><th>Previsto</th><th>CV mes</th><th>Dif.</th></tr></thead>
-        <tbody>
-          ${mesesArr.map((r,i)=>`
-            <tr>
-              <td>${esc(r.mes)}</td>
-              <td><input type="number" step="any" value="${esc(r.previsto)}" data-cv="prev" data-i="${i}"/></td>
-              <td><input type="number" step="any" value="${esc(r.mescv)}" data-cv="mes"  data-i="${i}"/></td>
-              <td id="cv-dif-${i}">0</td>
-            </tr>`).join('')}
-        </tbody>
-        <tfoot><tr><td>Total</td><td id="cv-t-prev">0</td><td id="cv-t-mes">0</td><td id="cv-t-dif">0</td></tr></tfoot>
-      </table>
+    `<div class="row" style="align-items:flex-start;gap:1rem">
+      <div style="flex:1 1 560px;min-width:560px">
+        <div class="table-wrap">
+          <table class="table" id="cvTable">
+            <thead><tr><th>Mes</th><th>Previsto</th><th>CV mes</th><th>Dif.</th></tr></thead>
+            <tbody>
+              ${mesesArr.map((r,i)=>`
+                <tr>
+                  <td>${esc(r.mes)}</td>
+                  <td><input type="number" step="any" value="${esc(r.previsto)}" data-cv="prev" data-i="${i}"/></td>
+                  <td><input type="number" step="any" value="${esc(r.mescv)}" data-cv="mes"  data-i="${i}"/></td>
+                  <td id="cv-dif-${i}">0</td>
+                </tr>`).join('')}
+            </tbody>
+            <tfoot><tr><td>Total</td><td id="cv-t-prev">0</td><td id="cv-t-mes">0</td><td id="cv-t-dif">0</td></tr></tfoot>
+          </table>
+        </div>
+      </div>
+      <div style="flex:1 1 340px;min-width:320px">
+        <canvas id="cvChart" height="260"></canvas>
+      </div>
     </div>`;
 
   if(centro){
@@ -346,9 +346,9 @@ function drawCvTable(centro, mesesArr, meta){
   $('#cvTable').addEventListener('input',e=>{
     const i=+e.target.dataset.i; if(Number.isNaN(i)) return;
     const k=e.target.dataset.cv; if(k==='prev') mesesArr[i].previsto=e.target.value; if(k==='mes') mesesArr[i].mescv=e.target.value;
-    updateCvTotals(mesesArr);
+    updateCvTotals(mesesArr); drawCvChart(mesesArr);
   });
-  updateCvTotals(mesesArr);
+  updateCvTotals(mesesArr); drawCvChart(mesesArr);
 }
 function updateCvTotals(mesesArr){
   let tP=0,tM=0,tD=0;
@@ -361,17 +361,32 @@ function updateCvTotals(mesesArr){
   $('#cv-t-mes').textContent=tM.toFixed(2);
   $('#cv-t-dif').textContent=tD.toFixed(2);
 }
+function drawCvChart(mesesArr){
+  const ctx=$('#cvChart'); if(!ctx) return;
+  const labels=mesesArr.map(r=>r.mes);
+  const previsto=mesesArr.map(r=>Number(r.previsto||0));
+  const mes=mesesArr.map(r=>Number(r.mescv||0));
+  if(state.chart){ state.chart.data.labels=labels; state.chart.data.datasets[0].data=previsto; state.chart.data.datasets[1].data=mes; state.chart.update(); return; }
+  state.chart = new Chart(ctx,{type:'line',data:{
+    labels, datasets:[
+      {label:'Previsto', data:previsto, tension:.2},
+      {label:'CV mes',   data:mes,      tension:.2}
+    ]},
+    options:{responsive:true,plugins:{legend:{position:'bottom'}},scales:{y:{beginAtZero:true}}}
+  });
+}
 
-/* ===== CENTROS EXCLUSIVOS / FLOP ===== */
+/* ========= CENTROS EXCLUSIVOS / FLOP (general) ========= */
 function drawCentrosPanel(kind){
   $('#detTag').textContent=(kind==='ex'?'CENTROS EXCLUSIVOS':'CENTROS FLOP');
   const store = (kind==='ex')? data.ex : data.flop;
   $('#detBody').innerHTML =
     `<div class="col" style="gap:.6rem">
-      <div class="row"><button class="btn pill small" id="${kind}AddRow">＋ Añadir centro</button><input id="${kind}Search" placeholder="Buscar centro, delegado, audiólogo..."></div>
+      <div class="row"><button class="btn pill small" id="${kind}AddRow" data-add-for="${kind}Tbl">＋ Añadir</button><input id="${kind}Search" placeholder="Buscar centro, delegado, audiólogo..."></div>
       <div class="table-wrap"><table class="table" id="${kind}Tbl"><thead>
         <tr><th>Nombre</th><th>Delegado</th><th>Audiólogo</th><th>Sucursal/Franquicia</th></tr>
       </thead><tbody></tbody></table></div>
+
       <hr/>
       <div class="row" style="gap:.6rem;flex-wrap:wrap">
         <button class="btn pill" data-sub="acc">Acciones</button>
@@ -410,85 +425,86 @@ function drawCentrosPanel(kind){
   render();
 
   const sub = $('#'+kind+'Sub');
+  subAcciones(sub); // abre por defecto
+  function subAcciones(root){
+    root.innerHTML =
+     `<div class="table-wrap"><table class="table" id="tbAcc">
+        <thead><tr><th>Fecha</th><th>Tipo de acción</th><th>Derivaciones</th><th>Citas</th><th>Ventas</th><th>Observaciones</th></tr></thead>
+        <tbody></tbody></table></div>
+      <button class="btn pill" id="accAdd" data-add-for="tbAcc">＋ Añadir</button>`;
+    const get=()=> (data.cxAcc ||= []);
+    const render=()=> $('#tbAcc tbody').innerHTML = get().map((r,i)=>`
+      <tr>
+        <td><input type="date" value="${esc(r.fecha||'')}" data-i="${i}" data-k="fecha"></td>
+        <td>
+          <select data-i="${i}" data-k="accion">
+            ${['azafata','buzoneo','mailing','ruleta','stand','cashback','otros'].map(x=>`<option ${r.accion===x?'selected':''}>${x}</option>`).join('')}
+          </select>
+        </td>
+        <td><input type="number" value="${esc(r.der||'')}"   data-i="${i}" data-k="der"></td>
+        <td><input type="number" value="${esc(r.cita||'')}"  data-i="${i}" data-k="cita"></td>
+        <td><input type="number" value="${esc(r.venta||'')}" data-i="${i}" data-k="venta"></td>
+        <td><input type="text"   value="${esc(r.obs||'')}"   data-i="${i}" data-k="obs"></td>
+      </tr>`).join('');
+    $('#accAdd').onclick=()=>{ get().push({}); render(); };
+    $('#tbAcc').addEventListener('input',e=>{const i=+e.target.dataset.i,k=e.target.dataset.k; if(Number.isNaN(i))return; get()[i][k]=(e.target.type==='checkbox')?e.target.checked:e.target.value;});
+    render();
+  }
+  function subForm(root){
+    root.innerHTML =
+     `<div class="table-wrap"><table class="table" id="tbForm">
+        <thead><tr><th>Fecha</th><th>Tema</th><th>Asistencia</th><th>Aplicado</th><th>Observaciones</th></tr></thead>
+        <tbody></tbody></table></div>
+      <button class="btn pill" id="formAdd" data-add-for="tbForm">＋ Añadir</button>`;
+    const get=()=> (data.cxForm ||= []);
+    const render=()=> $('#tbForm tbody').innerHTML = get().map((r,i)=>`
+      <tr>
+        <td><input type="date" value="${esc(r.fecha||'')}" data-i="${i}" data-k="fecha"></td>
+        <td><input type="text"  value="${esc(r.tema||'')}"  data-i="${i}" data-k="tema"></td>
+        <td style="text-align:center"><input type="checkbox" ${r.asis?'checked':''} data-i="${i}" data-k="asis"></td>
+        <td style="text-align:center"><input type="checkbox" ${r.apli?'checked':''} data-i="${i}" data-k="apli"></td>
+        <td><input type="text"  value="${esc(r.obs||'')}"   data-i="${i}" data-k="obs"></td>
+      </tr>`).join('');
+    $('#formAdd').onclick=()=>{ get().push({}); render(); };
+    $('#tbForm').addEventListener('input',e=>{const i=+e.target.dataset.i,k=e.target.dataset.k; const t=get()[i]; t[k]=(e.target.type==='checkbox')?e.target.checked:e.target.value;});
+    render();
+  }
+  function subProc(root){
+    root.innerHTML =
+     `<div class="table-wrap"><table class="table" id="tbProc">
+        <thead><tr>
+          <th>Fecha visita</th><th>Puntuación %</th><th>% Pruebas</th><th>% Ventas</th>
+          <th>Deriv. óptica</th><th>Observaciones</th><th>Excel (enlace)</th>
+        </tr></thead><tbody></tbody></table></div>
+      <button class="btn pill" id="procAdd" data-add-for="tbProc">＋ Añadir</button>`;
+    const get=()=> (data.cxProc ||= []);
+    function colorPunt(v){return Number(v||0)>=95?'score-ok':(Number(v||0)>=85?'':'score-bad');}
+    function colorPct(v){return Number(v||0)>=80?'pct-ok':'pct-bad';}
+    function render(){
+      $('#tbProc tbody').innerHTML = get().map((r,i)=>`
+        <tr>
+          <td><input type="date" value="${esc(r.fecha||'')}" data-i="${i}" data-k="fecha"></td>
+          <td class="${colorPunt(r.punt)}"><input type="number" value="${esc(r.punt||'')}" data-i="${i}" data-k="punt"></td>
+          <td class="${colorPct (r.prue)}"><input type="number" value="${esc(r.prue||'')}" data-i="${i}" data-k="prue"></td>
+          <td class="${colorPct (r.vent)}"><input type="number" value="${esc(r.vent||'')}" data-i="${i}" data-k="vent"></td>
+          <td style="text-align:center"><input type="checkbox" ${r.optica?'checked':''} data-i="${i}" data-k="optica"></td>
+          <td><input type="text" value="${esc(r.obs||'')}" data-i="${i}" data-k="obs"></td>
+          <td><input type="text" value="${esc(r.xlsx||'')}" data-i="${i}" data-k="xlsx" placeholder="https://…"></td>
+        </tr>`).join('');
+    }
+    $('#procAdd').onclick=()=>{ get().push({}); render(); };
+    $('#tbProc').addEventListener('input',e=>{
+      const i=+e.target.dataset.i,k=e.target.dataset.k; const t=get()[i];
+      t[k]=(e.target.type==='checkbox')?e.target.checked:e.target.value; if(!window._bulkPaste) render();
+    });
+    render();
+  }
   $('[data-sub="acc"]').onclick = ()=> subAcciones(sub);
   $('[data-sub="form"]').onclick= ()=> subForm(sub);
   $('[data-sub="proc"]').onclick= ()=> subProc(sub);
 }
-function subAcciones(root){
-  root.innerHTML =
-   `<div class="table-wrap"><table class="table" id="tbAcc">
-      <thead><tr><th>Fecha</th><th>Tipo de acción</th><th>Derivaciones</th><th>Citas</th><th>Ventas</th><th>Observaciones</th></tr></thead>
-      <tbody></tbody></table></div>
-    <button class="btn pill" id="accAdd">＋ Añadir</button>`;
-  const get=()=> (data.cxAcc ||= []);
-  const render=()=> $('#tbAcc tbody').innerHTML = get().map((r,i)=>`
-    <tr>
-      <td><input type="date" value="${esc(r.fecha||'')}" data-i="${i}" data-k="fecha"></td>
-      <td>
-        <select data-i="${i}" data-k="accion">
-          ${['azafata','buzoneo','mailing','ruleta','stand','cashback','otros'].map(x=>`<option ${r.accion===x?'selected':''}>${x}</option>`).join('')}
-        </select>
-      </td>
-      <td><input type="number" value="${esc(r.der||'')}"   data-i="${i}" data-k="der"></td>
-      <td><input type="number" value="${esc(r.cita||'')}"  data-i="${i}" data-k="cita"></td>
-      <td><input type="number" value="${esc(r.venta||'')}" data-i="${i}" data-k="venta"></td>
-      <td><input type="text"   value="${esc(r.obs||'')}"   data-i="${i}" data-k="obs"></td>
-    </tr>`).join('');
-  $('#accAdd').onclick=()=>{ get().push({}); render(); };
-  $('#tbAcc').addEventListener('input',e=>{const i=+e.target.dataset.i,k=e.target.dataset.k; if(Number.isNaN(i))return; get()[i][k]=(e.target.type==='checkbox')?e.target.checked:e.target.value;});
-  render();
-}
-function subForm(root){
-  root.innerHTML =
-   `<div class="table-wrap"><table class="table" id="tbForm">
-      <thead><tr><th>Fecha</th><th>Tema</th><th>Asistencia</th><th>Aplicado</th><th>Observaciones</th></tr></thead>
-      <tbody></tbody></table></div>
-    <button class="btn pill" id="formAdd">＋ Añadir</button>`;
-  const get=()=> (data.cxForm ||= []);
-  const render=()=> $('#tbForm tbody').innerHTML = get().map((r,i)=>`
-    <tr>
-      <td><input type="date" value="${esc(r.fecha||'')}" data-i="${i}" data-k="fecha"></td>
-      <td><input type="text"  value="${esc(r.tema||'')}"  data-i="${i}" data-k="tema"></td>
-      <td style="text-align:center"><input type="checkbox" ${r.asis?'checked':''} data-i="${i}" data-k="asis"></td>
-      <td style="text-align:center"><input type="checkbox" ${r.apli?'checked':''} data-i="${i}" data-k="apli"></td>
-      <td><input type="text"  value="${esc(r.obs||'')}"   data-i="${i}" data-k="obs"></td>
-    </tr>`).join('');
-  $('#formAdd').onclick=()=>{ get().push({}); render(); };
-  $('#tbForm').addEventListener('input',e=>{const i=+e.target.dataset.i,k=e.target.dataset.k; const t=get()[i]; t[k]=(e.target.type==='checkbox')?e.target.checked:e.target.value;});
-  render();
-}
-function colorPunt(v){const n=Number(v||0); if(n>=95) return 'score-ok'; if(n>=85) return 'score-warn'; return 'score-bad';}
-function colorPct(v){return Number(v||0)>=80 ? 'pct-ok' : 'pct-bad';}
-function subProc(root){
-  root.innerHTML =
-   `<div class="table-wrap"><table class="table" id="tbProc">
-      <thead><tr>
-        <th>Fecha visita</th><th>Puntuación %</th><th>% Pruebas</th><th>% Ventas</th>
-        <th>Deriv. óptica</th><th>Observaciones</th><th>Excel (enlace)</th>
-      </tr></thead><tbody></tbody></table></div>
-    <button class="btn pill" id="procAdd">＋ Añadir</button>`;
-  const get=()=> (data.cxProc ||= []);
-  function render(){
-    $('#tbProc tbody').innerHTML = get().map((r,i)=>`
-      <tr>
-        <td><input type="date" value="${esc(r.fecha||'')}" data-i="${i}" data-k="fecha"></td>
-        <td class="${colorPunt(r.punt)}"><input type="number" value="${esc(r.punt||'')}" data-i="${i}" data-k="punt"></td>
-        <td class="${colorPct (r.prue)}"><input type="number" value="${esc(r.prue||'')}" data-i="${i}" data-k="prue"></td>
-        <td class="${colorPct (r.vent)}"><input type="number" value="${esc(r.vent||'')}" data-i="${i}" data-k="vent"></td>
-        <td style="text-align:center"><input type="checkbox" ${r.optica?'checked':''} data-i="${i}" data-k="optica"></td>
-        <td><input type="text" value="${esc(r.obs||'')}" data-i="${i}" data-k="obs"></td>
-        <td><input type="text" value="${esc(r.xlsx||'')}" data-i="${i}" data-k="xlsx" placeholder="https://…"></td>
-      </tr>`).join('');
-  }
-  $('#procAdd').onclick=()=>{ get().push({}); render(); };
-  $('#tbProc').addEventListener('input',e=>{
-    const i=+e.target.dataset.i,k=e.target.dataset.k; const t=get()[i];
-    t[k]=(e.target.type==='checkbox')?e.target.checked:e.target.value; render(); // repintar para recolores
-  });
-  render();
-}
 
-/* ===== VISITAS AUDIO ===== */
+/* ========= VISITAS AUDIO ========= */
 function drawVisitas(){
   $('#detTag').textContent='VISITAS AUDIO';
   const rows=data.va.rows ||= Array.from({length:250},()=>({}));
@@ -507,10 +523,12 @@ function drawVisitas(){
       <div class="table-wrap"><table class="table" id="tbVa">
         <thead><tr>
           <th>#</th><th>Fecha</th><th>Centro</th><th>Franquicia/Sucursal</th><th>Delegado</th>
-          <th>% Pruebas</th><th>% Ventas</th><th>HIT</th><th>Pruebas RT</th><th>Primeros aux.</th><th>Excel</th>
+          <th>Puntuación procesos %</th><th>% Conv. pruebas</th><th>% Conv. ventas</th><th>Excel</th>
         </tr></thead><tbody></tbody></table></div>
-      <button class="btn pill" id="vaAdd">＋ Añadir fila</button>
+      <button class="btn pill" id="vaAdd" data-add-for="tbVa">＋ Añadir fila</button>
     </div>`;
+  function colorScore(v){return Number(v||0)>=85?'score-ok':'score-bad';}
+  function colorPct(v){return Number(v||0)>=80?'pct-ok':'pct-bad';}
   function render(){
     const q=($('#vaFilter').value||'').toLowerCase();
     $('#tbVa tbody').innerHTML = rows
@@ -528,17 +546,15 @@ function drawVisitas(){
             </select>
           </td>
           <td><input type="text"  value="${esc(o.r.delegado||'')}" data-i="${o.i}" data-k="delegado"></td>
+          <td class="${colorScore(o.r.score)}"><input type="number" value="${esc(o.r.score||'')}" data-i="${o.i}" data-k="score"></td>
           <td class="${colorPct(o.r.pctPrue)}"><input type="number" value="${esc(o.r.pctPrue||'')}" data-i="${o.i}" data-k="pctPrue"></td>
           <td class="${colorPct(o.r.pctVent)}"><input type="number" value="${esc(o.r.pctVent||'')}" data-i="${o.i}" data-k="pctVent"></td>
-          <td><div class="hitbox ${o.r.hit?'hit-on':'hit-off'}"><input type="checkbox" ${o.r.hit?'checked':''} data-i="${o.i}" data-k="hit"></div></td>
-          <td style="text-align:center"><input type="checkbox" ${o.r.rt?'checked':''} data-i="${o.i}" data-k="rt"></td>
-          <td style="text-align:center"><input type="checkbox" ${o.r.pa?'checked':''} data-i="${o.i}" data-k="pa"></td>
           <td><input type="text" value="${esc(o.r.xlsx||'')}" data-i="${o.i}" data-k="xlsx" placeholder="https://…"></td>
         </tr>`).join('');
   }
   $('#tbVa').addEventListener('input',e=>{
     const i=+e.target.dataset.i,k=e.target.dataset.k; if(Number.isNaN(i))return;
-    const t=rows[i]; if(e.target.type==='checkbox'){ t[k]=e.target.checked; if(k==='hit') render(); } else t[k]=e.target.value;
+    const t=rows[i]; t[k]=e.target.value; if(!window._bulkPaste) render();
   });
   $('#vaAdd').onclick=()=>{ rows.push({}); render(); };
   $('#vaRol').onchange=e=>{ data.va.rol=e.target.value; };
@@ -547,7 +563,7 @@ function drawVisitas(){
   render();
 }
 
-/* ===== FORMACIONES Y MENTORING ===== */
+/* ========= FORMACIONES Y MENTORING ========= */
 function drawFormaciones(){
   $('#detTag').textContent='FORMACIONES Y MENTORING';
   $('#detBody').innerHTML =
@@ -559,7 +575,7 @@ function drawFormaciones(){
     <div class="table-wrap"><table class="table" id="tbFm">
       <thead><tr><th>Fecha</th><th>Centro</th><th>Delegado</th><th>Audiólogo</th><th>Tema</th><th>Asistió</th><th>Aplicado</th><th>Observaciones</th></tr></thead>
       <tbody></tbody></table></div>
-    <button class="btn pill" id="fmAdd">＋ Añadir</button>`;
+    <button class="btn pill" id="fmAdd" data-add-for="tbFm">＋ Añadir</button>`;
   const arr = data.fm[state.fmMode] ||= [];
   function render(){
     $('#tbFm tbody').innerHTML = arr.map((r,i)=>`
@@ -583,7 +599,7 @@ function drawFormaciones(){
   render();
 }
 
-/* ===== TELEAUDIOLOGÍA ===== */
+/* ========= TELEAUDIOLOGÍA ========= */
 function drawTeleaudiologia(){
   $('#detTag').textContent='TELEAUDIOLOGÍA';
   const arr=data.ta.rows ||= [];
@@ -598,7 +614,7 @@ function drawTeleaudiologia(){
         <th>Centro</th><th>Delegado</th><th>Rol</th><th>Persona</th>
         <th>Form.</th><th>Prác.</th><th>Cert.</th><th>Pruebas</th><th>Ventas</th><th>Observaciones</th>
       </tr></thead><tbody></tbody></table></div>
-    <button class="btn pill" id="taAdd">＋ Añadir</button>`;
+    <button class="btn pill" id="taAdd" data-add-for="tbTa">＋ Añadir</button>`;
   function render(){
     const q=($('#taSearch').value||'').toLowerCase();
     $('#tbTa tbody').innerHTML = arr
@@ -626,14 +642,14 @@ function drawTeleaudiologia(){
   }
   $('#tbTa').addEventListener('input',e=>{
     const i=+e.target.dataset.i,k=e.target.dataset.k; const t=arr[i]; if(!t) return;
-    t[k]=(e.target.type==='checkbox')?e.target.checked:e.target.value; render();
+    t[k]=(e.target.type==='checkbox')?e.target.checked:e.target.value; if(!window._bulkPaste) render();
   });
   $('#taAdd').onclick=()=>{ arr.push({}); render(); };
   $('#taSearch').oninput=render;
   render();
 }
 
-/* ===== EQUIPOS ===== */
+/* ========= EQUIPOS ========= */
 function drawEquipos(){
   $('#detTag').textContent='EQUIPOS';
   const packs=data.eq.packs ||= Array.from({length:7},()=>({rows:[]}));
@@ -643,9 +659,9 @@ function drawEquipos(){
      </div>` +
     packs.map((p,pi)=>`
       <details ${pi<2?'open':''} style="margin-bottom:.6rem">
-        <summary class="row" style="gap:.5rem"><strong>Pack ${pi+1}</strong> <button class="btn pill small" data-pack="${pi}">＋</button></summary>
+        <summary class="row" style="gap:.5rem"><strong>Pack ${pi+1}</strong> <button class="btn pill small" data-pack="${pi}" data-add-for="eqTbl-${pi}">＋</button></summary>
         <div class="table-wrap" style="margin-top:.4rem">
-          <table class="table" data-tb="${pi}">
+          <table class="table" id="eqTbl-${pi}" data-tb="${pi}">
             <thead><tr><th>Equipo</th><th>Nº serie</th><th>Centro</th><th>Persona que envía</th><th>Fecha</th></tr></thead>
             <tbody>${
               (p.rows||[]).map((r,ri)=>`
@@ -690,7 +706,7 @@ function drawEquipos(){
   };
 }
 
-/* ===== GUARDAR / CARGAR ===== */
+/* ========= GUARDAR / CARGAR ========= */
 function saveLocal(){
   try{ localStorage.setItem('audioSeguimientoCloud', JSON.stringify(data)); $('#statusTag').textContent='Local · guardado'; toast('Guardado local'); }
   catch(e){ alert('No se pudo guardar en local: '+e.message); }
@@ -717,27 +733,122 @@ async function loadCloud(){
   afterLoad();
 }
 function afterLoad(){
-  // estructuras base
-  data.cv ||= {compania:[], exclusivos:[], flop:[]};
+  data.cv ||= {compania:blankCvMeses(), exclusivos:[], flop:[]};
+  if(!Array.isArray(data.cv.compania) || data.cv.compania.length!==12) data.cv.compania=blankCvMeses();
   data.ex ||= []; data.flop ||= []; data.va ||= {rol:'Delegado de Audio',visitador:'',rows:[]};
   data.fm ||= {mentoring:[],coaching:[],generales:[]}; data.ta ||= {rows:[]};
   data.eq ||= {packs:Array.from({length:7},()=>({rows:[]}))};
-  renderCvSidebar(); openPanel('cv'); // inicio en CV
+  renderCvSidebar(); openPanel('cv');
 }
 
-/* ===== TOPBAR ===== */
+/* ========= TOPBAR ========= */
 $('#btnRefresh').onclick = ()=> location.reload();
 $('#btnSaveLocal').onclick = saveLocal;
 $('#btnSaveCloud').onclick = saveCloud;
 
-/* ===== INICIO ===== */
+/* ========= Pegado tipo Excel con AUTOFILAS ========= */
+(function enableExcelPasteWithAutoRows(){
+  function addRowsByCloning(tbody, count){
+    if(count<=0) return;
+    const sample = tbody.rows[tbody.rows.length-1] || null;
+    if(!sample) return;
+    for(let k=0;k<count;k++){
+      const tr = sample.cloneNode(true);
+      tr.querySelectorAll('input,select,textarea').forEach(el=>{
+        if(el.type==='checkbox') el.checked = false;
+        else el.value = '';
+      });
+      tbody.appendChild(tr);
+    }
+  }
+  function addRowsByButton(tableId, count){
+    if(count<=0) return Promise.resolve();
+    const btn = document.querySelector(`[data-add-for="${tableId}"]`);
+    if(!btn) return Promise.resolve();
+    return new Promise(resolve=>{
+      for(let i=0;i<count;i++) btn.click();
+      setTimeout(resolve, 60); // da tiempo a re-render si el botón redibuja
+    });
+  }
+  document.addEventListener('paste', async (e)=>{
+    const t = e.target;
+    if(!t || !t.closest('table')) return; // sólo dentro de tablas
+    if(!(t.tagName==='INPUT' || t.tagName==='SELECT' || t.tagName==='TEXTAREA')) return;
+
+    const dt = e.clipboardData || window.clipboardData;
+    const txt = dt && dt.getData('text');
+    if(!txt || (!txt.includes('\t') && !txt.includes('\n'))) return;
+    e.preventDefault();
+
+    const table = t.closest('table');
+    const tbody = table.tBodies[0];
+    if(!tbody) return;
+
+    // Índice dentro de TBODY (no usar rowIndex global)
+    const tbRows = Array.from(tbody.rows);
+    const startRowInBody = tbRows.indexOf(t.closest('tr'));
+    if(startRowInBody<0) return;
+
+    const rows = txt.replace(/\r/g,'').split('\n').filter(r=>r.length);
+    const colsFirst = rows[0].split('\t').length;
+
+    // Calcula cuántas filas faltan
+    const need = (startRowInBody + rows.length) - tbRows.length;
+
+    window._bulkPaste = true;
+    if(need>0 && table.id!=='cvTable'){
+      if(tbRows.length>0){
+        addRowsByCloning(tbody, need);
+      }else{
+        await addRowsByButton(table.id, need);
+      }
+    }
+
+    // Relee referencias de filas tras posible añadido/re-render
+    const tbRows2 = Array.from(table.tBodies[0].rows);
+
+    // Pegado real
+    for(let rIdx=0;rIdx<rows.length;rIdx++){
+      const tr = tbRows2[startRowInBody + rIdx];
+      if(!tr) break;
+      const cells = Array.from(tr.querySelectorAll('input,select,textarea'));
+      // Encuentra índice de inicio en esa fila
+      const inputsInRow = Array.from(t.closest('tr').querySelectorAll('input,select,textarea'));
+      const startColIndex = inputsInRow.indexOf(t);
+      const values = rows[rIdx].split('\t');
+      for(let cIdx=0;cIdx<values.length;cIdx++){
+        const el = cells[startColIndex + cIdx];
+        if(!el) break;
+        const val = values[cIdx];
+        if(el.tagName==='SELECT'){
+          const v = String(val).trim().toLowerCase();
+          const opt = Array.from(el.options).find(o=>o.text.toLowerCase()===v || String(o.value).toLowerCase()===v);
+          el.value = opt ? opt.value : val;
+          el.dispatchEvent(new Event('input',{bubbles:true}));
+          el.dispatchEvent(new Event('change',{bubbles:true}));
+        }else{
+          el.value = val;
+          el.dispatchEvent(new Event('input',{bubbles:true}));
+        }
+      }
+    }
+    window._bulkPaste = false;
+
+    // Si alguna tabla necesita refresco visual final, puedes forzarlo aquí según ID
+    if(table.id==='tbVa'){ /* render visual ya se mantiene por input con flag */ }
+    if(table.id==='tbProc'){ /* idem */ }
+  });
+})();
+
+/* ========= INICIO ========= */
 document.addEventListener('DOMContentLoaded', ()=>{
-  // evita duplicaciones si hay SW
-  if(window.__SEGUI_AUDIO_INITED__){ $('#appTop')?.classList.add('dedup-hide'); } else { window.__SEGUI_AUDIO_INITED__=true; }
-  // side opens
+  // manejar botones flecha (▸) de la izquierda
   $$('[data-open]').forEach(b=> b.addEventListener('click',()=> openPanel(b.dataset.open)));
+  // submodos FM
   $$('[data-fm]').forEach(b=> b.addEventListener('click',()=>{ state.fmMode=b.dataset.fm; openPanel('fm'); }));
+  // CV sidebar dinámico
   renderCvSidebar();
+  // carga datos
   loadCloud();
 });
 </script>
