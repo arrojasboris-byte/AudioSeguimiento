@@ -83,7 +83,28 @@
     }
     window.addEventListener('DOMContentLoaded',()=>{
       const pin=$('#pin'), enter=$('#enter'), clear=$('#clear');
-      enter.addEventListener('click',handleEnter);
+        enter.addEventListener('click', handleEnter);
+  clear.addEventListener('click', ()=>{ pin.value=''; $('#pinMsg').style.display='none'; pin.focus(); });
+  pin.addEventListener('keydown',(e)=>{ if(e.key==='Enter') handleEnter(); });
+  setTimeout(()=>{ try{ pin.focus(); }catch(_){} },50);
+});
+</script>
+
+<!-- === Parche anti-duplicados (no toca tu contenido) === -->
+<style>
+  /* Si por cualquier motivo se generan varias topbars, solo se muestra la primera */
+  .topbar:not(:first-of-type){display:none !important}
+</style>
+
+<script>
+// Evitar segunda inicialización (por recargas, SW, etc.)
+if (window.__SEGUI_AUDIO_INITED__) {
+  console.warn('UI ya inicializada — evitando duplicación');
+} else {
+  window.__SEGUI_AUDIO_INITED__ = true;
+}
+</script>
+enter.addEventListener('click',handleEnter);
       clear.addEventListener('click',()=>{ pin.value=''; $('#pinMsg').style.display='none'; pin.focus(); });
       pin.addEventListener('keydown',(e)=>{ if(e.key==='Enter') handleEnter(); });
       setTimeout(()=>{ try{ pin.focus(); }catch(_){ } },50);
