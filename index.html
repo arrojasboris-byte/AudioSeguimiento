@@ -2,203 +2,574 @@
 <html lang="es">
 <head>
 <meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>SEGUIMIENTO AUDIO · Cloud</title>
 <meta name="theme-color" content="#c82727"/>
 <style>
 :root{
-  --rojo:#c82727; --rojo2:#a71f1f; --bg:#f6f7fb; --line:#e8eaee; --sh:0 4px 14px rgba(0,0,0,.06);
-  --fs:12px; --mut:#6b7280;
+  --rojo:#c82727; --rojo2:#a71f1f; --bg:#f6f7fb; --line:#e6e7ee; --txt:#222;
+  --card:#fff; --sh:0 4px 14px rgba(0,0,0,.06);
+  --fs:12px; --fs-sm:11px;
+  --ok:#16a34a; --warn:#d97706; --err:#b91c1c;
 }
 *{box-sizing:border-box}
 html,body{height:100%}
-body{margin:0;background:var(--bg);font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;color:#111;font-size:var(--fs);line-height:1.25}
+body{margin:0;background:var(--bg);color:var(--txt);font:var(--fs)/1.25 Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif}
 
-/* Topbar rojo */
-.topbar{position:sticky;top:0;z-index:30;background:linear-gradient(180deg,var(--rojo),var(--rojo2));color:#fff;box-shadow:var(--sh)}
-.topbar .in{display:grid;grid-template-columns:1fr auto 1fr;gap:.6rem;align-items:center;padding:.7rem .8rem}
-.brand{font-weight:900;letter-spacing:.3px;display:flex;gap:.5rem;align-items:center;justify-content:center}
-.brand .logo{font-style:normal}
-.actions{display:flex;gap:.4rem;justify-content:flex-start}
-.meta{display:flex;gap:.4rem;justify-content:flex-end;align-items:center}
-.btn{border:0;border-radius:9px;padding:.38rem .7rem;cursor:pointer;box-shadow:var(--sh);font-weight:800;font-size:11px}
-.btn-lite{background:#fff;color:#7a0d0d}
-.btn-ghost{background:transparent;border:1px solid #ffffff66;color:#fff}
-.pill{border:1px solid #ffffff22;background:#ffffff19;padding:.16rem .5rem;border-radius:999px;font-size:11px;white-space:nowrap}
+/* Topbar */
+.topbar{position:sticky;top:0;z-index:50;width:100%;
+  background:linear-gradient(180deg,var(--rojo),var(--rojo2));color:#fff;box-shadow:var(--sh)}
+.topbar .wrap{display:grid;grid-template-columns:1fr auto auto;gap:.6rem;align-items:center;padding:.8rem .9rem}
+.brand{display:flex;gap:.6rem;align-items:center;font-weight:900;font-size:22px}
+.brand i{font-style:normal}
+.btn{border:0;border-radius:999px;padding:.42rem .82rem;font-weight:800;font-size:11px;cursor:pointer;box-shadow:var(--sh)}
+.btn.white{background:#fff;color:#111}
+.btn.ghost{background:transparent;border:1px solid #ffffff66;color:#fff}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.pill{border:1px solid #ffffff33;background:#ffffff1a;border-radius:999px;padding:.16rem .6rem;font-size:11px}
 
 /* Layout */
-.app{display:grid;grid-template-columns:320px minmax(0,1fr);gap:.6rem;padding:.6rem}
-@media (max-width:1000px){.app{grid-template-columns:1fr}}
-.card{background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:var(--sh)}
-.left{display:flex;flex-direction:column;min-height:70vh}
-.left .head{padding:.6rem .7rem;border-bottom:1px solid var(--line);font-weight:800}
-.left .body{padding:.6rem .7rem;display:flex;flex-direction:column;gap:.5rem}
-.stat{display:flex;justify-content:space-between;background:#f7f7fb;border:1px solid var(--line);border-radius:8px;padding:.36rem .5rem}
-.stat small{color:var(--mut)}
+.main{display:grid;grid-template-columns:260px 1fr;gap:10px;padding:10px;max-width:1400px;margin:8px auto}
+@media (max-width:1100px){.main{grid-template-columns:1fr}}
+.left .panel{background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--sh);padding:.6rem}
+.left h4{margin:.1rem .2rem .4rem;font-size:12px;font-weight:900;color:#6b7280;display:flex;justify-content:space-between;align-items:center}
+.item{display:flex;justify-content:space-between;align-items:center;background:#fafbff;border:1px solid var(--line);border-radius:10px;margin:.3rem 0;padding:.4rem .55rem}
+.item .t{font-weight:800}
+.iconbtn{border:1px solid var(--line);background:#fff;border-radius:9px;padding:.22rem .45rem;cursor:pointer;font-size:11px}
 
-.right{display:flex;flex-direction:column}
-.right .head{display:flex;justify-content:space-between;gap:.5rem;padding:.6rem .7rem;border-bottom:1px solid var(--line);align-items:center}
-.right .body{padding:.6rem .7rem}
-textarea.json{width:100%;height:60vh;border:1px solid var(--line);border-radius:10px;padding:.6rem;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;outline:none}
-.helper{font-size:11px;color:var(--mut);margin-top:.35rem}
+.right{background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--sh);padding:12px;min-height:72vh}
+.head{display:flex;align-items:center;gap:.6rem;border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:10px}
+.head h3{margin:0;font-size:18px}
+.helper{display:flex;gap:6px;align-items:center;font-size:11px;color:#6b7280}
+.dot{width:8px;height:8px;border-radius:50%}
+.dot.ok{background:#22c55e}.dot.warn{background:#f59e0b}.dot.err{background:#ef4444}
 
-/* Gate PIN */
-.gate{position:fixed;inset:0;background:#000000c9;display:flex;align-items:center;justify-content:center;z-index:1000}
-.gate .panel{background:#111;color:#fff;border:1px solid #2a2a2a;border-radius:12px;box-shadow:var(--sh);padding:16px 14px;min-width:280px}
-.pin{width:100%;letter-spacing:.3rem;text-align:center;background:#000;color:#fff;border:1px solid #444;border-radius:8px;padding:.5rem}
-.pinmsg{display:none;color:#ff7b7b;margin-top:.4rem}
+/* Forms & tables */
+.row{display:grid;grid-template-columns:repeat(12,1fr);gap:8px}
+.card{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px}
+input[type="text"],input[type="number"],input[type="month"],input[type="date"],textarea,select{
+  width:100%;padding:.36rem .5rem;border:1px solid var(--line);border-radius:9px;background:#fff;font-size:var(--fs-sm)
+}
+table{width:100%;border-collapse:collapse;min-width:840px}
+th,td{border:1px solid var(--line);padding:.35rem .45rem;font-size:var(--fs-sm)}
+th{background:#f3f4f6;text-align:left}
+
+/* Modals */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.65);display:none;align-items:center;justify-content:center;z-index:100}
+.modal.show{display:flex}
+.modal .box{background:#111;color:#fff;border-radius:14px;box-shadow:var(--sh);padding:16px;min-width:320px;max-width:92vw}
+.modal .box h3{margin:0 0 10px}
+
+/* Badges */
+.badge{display:inline-block;border-radius:999px;padding:.1rem .5rem;font-weight:900;font-size:11px}
+.badge.ok{background:#dcfce7;color:#166534}
+.badge.warn{background:#fef3c7;color:#92400e}
+
+/* Small helpers */
+.empty{padding:18px;border:1px dashed var(--line);border-radius:12px;text-align:center;color:#9ca3af}
+.mr{margin-right:.5rem}
 </style>
 </head>
+
 <body>
-
-<header class="topbar">
-  <div class="in">
-    <div class="actions">
-      <button id="btnLoad" class="btn btn-lite" title="Leer desde la nube">Actualizar (nube)</button>
-      <button id="btnSave" class="btn btn-lite" title="Guardar en la nube">Guardar (nube)</button>
-      <button id="btnReset" class="btn btn-ghost" title="Descartar cambios y recargar">Resetear</button>
-    </div>
-    <div class="brand"><span class="logo">🎧</span> SEGUIMIENTO AUDIO</div>
-    <div class="meta">
-      <span id="stamp" class="pill">Cloud · sin cargar</span>
+  <!-- TOP -->
+  <div class="topbar">
+    <div class="wrap">
+      <div class="brand"><i>🎧</i><span>SEGUIMIENTO AUDIO</span></div>
+      <div>
+        <button class="btn white" id="btnLoad">Actualizar (nube)</button>
+        <button class="btn white" id="btnSave" disabled>Guardar (nube)</button>
+      </div>
+      <div>
+        <button class="btn ghost" id="btnCfg">Configurar</button>
+        <span class="pill" id="cloudBadge">Cloud: sin configurar</span>
+      </div>
     </div>
   </div>
-</header>
 
-<main class="app">
-  <section class="left card">
-    <div class="head">Resumen</div>
-    <div class="body">
-      <div class="stat"><div>Última carga</div><small id="lastLoad">—</small></div>
-      <div class="stat"><div>Último guardado</div><small id="lastSave">—</small></div>
-      <div class="stat"><div>Tamaño JSON</div><small id="jsonSize">0 B</small></div>
+  <!-- MAIN -->
+  <div class="main">
+    <!-- LEFT -->
+    <div class="left">
+      <div class="panel">
+        <h4>CIFRA DE VENTAS <span class="mr"></span></h4>
+        <div class="item" data-open="cifra-compania"><div class="t">Compañía</div><button class="iconbtn">➔</button></div>
+        <div class="item" data-open="cifra-exclusivos"><div class="t">Centros exclusivos</div><button class="iconbtn">➔</button></div>
+      </div>
 
-      <div class="stat" style="background:#eef9f0;border-color:#d8f0db">
-        <div>Consejo</div>
-        <small>Trabaja libremente: todo se guarda en la nube (Google Sheets).</small>
+      <div class="panel">
+        <h4>CENTROS EXCLUSIVOS</h4>
+        <div class="item" data-open="centros-exclusivos"><div class="t">Panel</div><button class="iconbtn">✎</button></div>
+      </div>
+
+      <div class="panel">
+        <h4>CENTROS FLOP</h4>
+        <div class="item" data-open="centros-flop"><div class="t">Panel</div><button class="iconbtn">✎</button></div>
+      </div>
+
+      <div class="panel">
+        <h4>VISITAS AUDIO</h4>
+        <div class="item" data-open="visitas"><div class="t">Panel</div><button class="iconbtn">✎</button></div>
+      </div>
+
+      <div class="panel">
+        <h4>FORMACIONES Y MENTORING</h4>
+        <div class="item" data-open="formaciones"><div class="t">Panel</div><button class="iconbtn">✎</button></div>
+      </div>
+
+      <div class="panel">
+        <h4>TELEAUDIOLOGÍA</h4>
+        <div class="item" data-open="tele"><div class="t">Panel</div><button class="iconbtn">✎</button></div>
+      </div>
+
+      <div class="panel">
+        <h4>EQUIPOS</h4>
+        <div class="item" data-open="equipos"><div class="t">7 packs</div><button class="iconbtn">➔</button></div>
       </div>
     </div>
-  </section>
 
-  <section class="right card">
-    <div class="head">
-      <div style="font-weight:800">Editor de datos (JSON)</div>
-      <div style="display:flex;gap:.4rem">
-        <button id="btnPretty" class="btn btn-ghost" title="Formatear JSON">Formatear</button>
-        <button id="btnMin" class="btn btn-ghost" title="Compactar JSON">Compactar</button>
+    <!-- RIGHT -->
+    <div class="right">
+      <div class="head">
+        <h3 id="viewTitle">Selecciona un panel</h3>
+        <div class="helper">
+          <span>Estado nube:</span>
+          <span id="dot" class="dot warn"></span>
+        </div>
+      </div>
+
+      <div id="views">
+
+        <!-- CIFRA: COMPAÑÍA -->
+        <section data-view="cifra-compania" hidden>
+          <div class="row">
+            <div class="card" style="grid-column:span 12">
+              <div style="font-size:11px;color:#6b7280">Meses <b>ago/2025 → jul/2026</b>. Verde si CV mes ≥ Previsto; rojo si CV mes &lt; Previsto.</div>
+              <br/>
+              <table id="tblCComp">
+                <thead><tr><th>Mes</th><th>Previsto</th><th>CV mes</th><th>Δ</th></tr></thead>
+                <tbody></tbody>
+                <tfoot><tr><th>Total</th><th id="ccPrev">0</th><th id="ccMes">0</th><th id="ccDif">0</th></tr></tfoot>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- CIFRA: EXCLUSIVOS -->
+        <section data-view="cifra-exclusivos" hidden>
+          <div class="row">
+            <div class="card" style="grid-column:span 12">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <div style="font-size:11px;color:#6b7280">Añade centros y su cifra mes a mes.</div>
+                <button class="btn white" id="btnAddEx">+ Añadir línea</button>
+              </div>
+              <br/>
+              <table id="tblCEx">
+                <thead><tr><th>Centro</th><th>Mes</th><th>Previsto</th><th>CV mes</th><th>Δ</th><th></th></tr></thead>
+                <tbody></tbody>
+                <tfoot><tr><th colspan="2">Total</th><th id="exPrev">0</th><th id="exMes">0</th><th id="exDif">0</th><th></th></tr></tfoot>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- CENTROS EXCLUSIVOS -->
+        <section data-view="centros-exclusivos" hidden>
+          <div class="empty">Aquí puedes seguir con tu tabla detallada de Centros Exclusivos. (Se guardará en nube).</div>
+        </section>
+
+        <!-- CENTROS FLOP -->
+        <section data-view="centros-flop" hidden>
+          <div class="empty">Aquí puedes replicar la tabla de Flop. (Guardado en nube).</div>
+        </section>
+
+        <!-- VISITAS -->
+        <section data-view="visitas" hidden>
+          <div class="row">
+            <div class="card" style="grid-column:span 6">
+              <label>Buscador</label>
+              <input id="vsSearch" placeholder="Centro / visitador…"/>
+            </div>
+            <div class="card" style="grid-column:span 6;display:flex;justify-content:flex-end;align-items:flex-end">
+              <button class="btn white" id="btnAddVisita">+ Añadir visita</button>
+            </div>
+          </div>
+          <br/>
+          <table id="tblVisitas">
+            <thead><tr>
+              <th>#</th><th>Centro</th><th>Visitador</th><th>Rol</th><th>Fecha</th><th>Adjunto (URL)</th>
+            </tr></thead>
+            <tbody></tbody>
+          </table>
+        </section>
+
+        <!-- FORMACIONES -->
+        <section data-view="formaciones" hidden>
+          <div class="row">
+            <div class="card" style="grid-column:span 12;display:flex;justify-content:space-between;align-items:center">
+              <div style="font-size:11px;color:#6b7280">Mentoring general / por delegados (añade líneas). Se guarda en nube.</div>
+              <button class="btn white" id="btnAddForm">+ Añadir</button>
+            </div>
+            <div class="card" style="grid-column:span 12">
+              <table id="tblForm">
+                <thead><tr><th>Fecha</th><th>Delegado</th><th>Tema</th><th>Asistencia</th><th>Observaciones</th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- TELEAUDIOLOGÍA -->
+        <section data-view="tele" hidden>
+          <div class="row">
+            <div class="card" style="grid-column:span 3"><span class="badge ok" id="cntCert">Certificados: 0</span></div>
+            <div class="card" style="grid-column:span 3"><span class="badge warn" id="cntForm">Formaciones: 0</span></div>
+            <div class="card" style="grid-column:span 6;display:flex;justify-content:flex-end;align-items:center">
+              <button class="btn white" id="btnAddTele">+ Añadir fila</button>
+            </div>
+            <div class="card" style="grid-column:span 12">
+              <table id="tblTele">
+                <thead><tr><th>Centro</th><th>Tipo</th><th>Fecha</th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- EQUIPOS -->
+        <section data-view="equipos" hidden>
+          <div class="row">
+            <div class="card" style="grid-column:span 6">
+              <label>Buscador general (equipo / serie / centro)</label>
+              <input id="eqSearch" placeholder="Buscar en todos los packs…">
+            </div>
+          </div>
+          <br/>
+          <div id="packs"></div>
+        </section>
+
       </div>
     </div>
-    <div class="body">
-      <textarea id="jsonBox" class="json" spellcheck="false" placeholder='Pegue/edite su JSON aquí...'></textarea>
-      <div class="helper">
-        Sugerencia: si aún no tienes datos, pulsa **Actualizar (nube)** para cargar el JSON actual (o un esqueleto).
-      </div>
-    </div>
-  </section>
-</main>
-
-<!-- Acceso (PIN 4321 o AR4321) -->
-<div id="gate" class="gate" role="dialog" aria-modal="true">
-  <div class="panel">
-    <h3 style="margin:.1rem 0 .4rem">Acceso</h3>
-    <p style="opacity:.85;margin:.2rem 0">Introduce el PIN para editar:</p>
-    <input id="pin" class="pin" maxlength="6" inputmode="numeric" placeholder="••••"/>
-    <div style="display:flex;gap:.5rem;margin-top:10px">
-      <button id="enter" class="btn btn-lite" style="flex:1">Acceder</button>
-      <button id="clear" class="btn btn-ghost" style="flex:.8">Limpiar</button>
-    </div>
-    <div id="pinMsg" class="pinmsg">PIN incorrecto</div>
   </div>
-</div>
+
+  <!-- MODAL PIN -->
+  <div class="modal" id="mPin">
+    <div class="box">
+      <h3>Acceso</h3>
+      <div>Pulsa <b>Acceder</b> o Enter. PIN: <b>4321</b></div><br/>
+      <input id="inPin" type="password" inputmode="numeric" maxlength="6" placeholder="••••" style="width:100%;padding:.6rem;border-radius:10px;border:1px solid #333;background:#000;color:#fff"/>
+      <br/><br/>
+      <div style="display:flex;gap:8px">
+        <button class="btn white" id="btnEnter">Acceder</button>
+        <button class="btn ghost" id="btnPinClear">Limpiar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL CONFIG -->
+  <div class="modal" id="mCfg">
+    <div class="box">
+      <h3>Configurar nube</h3>
+      <div style="font-size:12px;color:#d1d5db">Pega aquí tu URL <code>/exec</code> del despliegue de Google Apps Script.</div>
+      <br/>
+      <input id="inUrl" type="url" placeholder="https://script.google.com/macros/s/…/exec" style="width:100%;padding:.6rem;border-radius:10px;border:1px solid #333;background:#000;color:#fff"/>
+      <br/><br/>
+      <div style="display:flex;gap:8px">
+        <button class="btn white" id="btnSaveUrl">Guardar</button>
+        <button class="btn ghost" id="btnCloseCfg">Cerrar</button>
+      </div>
+      <br/>
+      <div style="font-size:11px;color:#a1a1aa">Apps Script: Implementar → Nueva implementación → <b>Aplicación web</b> → Ejecutar como <b>tú</b> → Acceso <b>Cualquiera con el enlace</b> → Implementar.</div>
+    </div>
+  </div>
 
 <script>
-// ======== CONFIG =========
-const GAS_URL = 'PEGAR_AQUI_TU_URL_EXEC'; // <- REEMPLAZA por tu /exec de Apps Script
-const PIN_SHA256 = 'fe2592b42a727e977f055947385b709cc82b16b9a87f88c6abf3900d65d0cdc3'; // 4321
-const state = { lastLoad:null, lastSave:null };
+/* ======= Estado ======= */
+const months = ['2025-08','2025-09','2025-10','2025-11','2025-12','2026-01','2026-02','2026-03','2026-04','2026-05','2026-06','2026-07'];
 
-// ======== HELPERS ========
-const $ = (s, r=document)=>r.querySelector(s);
-function stamp(txt){ $('#stamp').textContent = 'Cloud · ' + txt; }
-function now(){ return new Date().toLocaleString(); }
-async function sha256Hex(str){
-  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
-  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
-}
-async function checkPin(val){ let s=(val||'').trim(); if(/^AR/i.test(s)) s=s.slice(2); if(!s) return false; try{return (await sha256Hex(s))===PIN_SHA256;}catch(_){return false;} }
-function setStats(size){
-  $('#jsonSize').textContent = (size>1024)? (Math.round(size/102.4)/10)+' KB' : size+' B';
-  if(state.lastLoad) $('#lastLoad').textContent = state.lastLoad;
-  if(state.lastSave) $('#lastSave').textContent = state.lastSave;
+let state = {
+  cifra: {
+    compania: months.map(m=>({mes:m, previsto:0, mescv:0})),
+    exclusivos: [] // {centro, mes, previsto, mescv}
+  },
+  visitas: [],     // {centro, visitador, rol, fecha, adj}
+  formaciones: [], // {fecha, delegado, tema, asis, obs}
+  tele: [],        // {centro, tipo(cert|form), fecha}
+  equipos: {       // 7 packs
+    packs: Array.from({length:7}, (_,i)=>({
+      nombre:'Pack '+(i+1),
+      filas: Array.from({length:5},()=>({
+        equipo:'', serie:'', persona:'', fecha:'',
+        pares:[{centro:'',c:false,s:false},{centro:'',c:false,s:false},{centro:'',c:false,s:false}]
+      }))
+    }))
+  }
+};
+
+/* ======= Util ======= */
+const $=s=>document.querySelector(s);
+const $$=s=>[...document.querySelectorAll(s)];
+function fmt(n){n=Number(n||0);return Intl.NumberFormat('es-ES').format(n)}
+function setDot(state){ $('#dot').className='dot '+state; $('#cloudBadge').textContent = 'Cloud: '+({ok:'lista',warn:'sin configurar',err:'error'}[state]||'') }
+function lsGet(k){try{return localStorage.getItem(k)||''}catch(_){return''}}
+function lsSet(k,v){try{localStorage.setItem(k,v)}catch(_){}}
+function gasUrl(){ const u=lsGet('GAS_URL'); return (u.startsWith('https://script.google.com/'))?u:''; }
+function openModal(id){ $(id).classList.add('show'); }
+function closeModal(id){ $(id).classList.remove('show'); }
+function toast(msg,type){ const el=document.createElement('div'); el.textContent=msg; el.style.cssText='position:fixed;top:14px;left:50%;transform:translateX(-50%);background:#111;color:#fff;padding:8px 12px;border-radius:999px;z-index:120';
+  if(type==='err') el.style.background='#b91c1c'; document.body.appendChild(el); setTimeout(()=>el.remove(),1600);}
+
+/* ======= Vistas ======= */
+function openView(id){
+  const titles={
+    'cifra-compania':'Cifra de ventas · Compañía',
+    'cifra-exclusivos':'Cifra de ventas · Centros exclusivos',
+    'centros-exclusivos':'Centros exclusivos',
+    'centros-flop':'Centros flop',
+    'visitas':'Visitas audio',
+    'formaciones':'Formaciones y mentoring',
+    'tele':'Teleaudiología',
+    'equipos':'Equipos'
+  };
+  $('#viewTitle').textContent = titles[id]||'Panel';
+  $$('#views > section').forEach(s=>s.hidden = s.dataset.view!==id);
 }
 
-// ======== CLOUD API ========
-async function apiLoad(){
-  const r = await fetch(GAS_URL + '?action=load');
-  const js = await r.json();
-  if(!js.ok) throw new Error(js.error||'load fail');
-  const raw = js.data || '{}';
-  $('#jsonBox').value = raw;
-  state.lastLoad = now();
-  stamp('cargado');
-  setStats(raw.length||0);
-}
-async function apiStatus(){
-  try{
-    const r = await fetch(GAS_URL+'?action=status');
-    const js = await r.json();
-    if(js.ok) setStats(js.size||0);
-  }catch(_){}
-}
-async function apiSave(){
-  const raw = $('#jsonBox').value.trim() || '{}';
-  const resp = await fetch(GAS_URL, {
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({ action:'save', data: raw })
+/* --- Cifra: compañía --- */
+function colorCell(td,d){ td.style.background = d<0?'#fee2e2':(d>0?'#dcfce7':'#fff'); }
+function renderCComp(){
+  const tb=$('#tblCComp tbody'); tb.innerHTML='';
+  let sP=0,sM=0,sD=0;
+  state.cifra.compania.forEach((r,idx)=>{
+    const d=Number(r.mescv||0)-Number(r.previsto||0);
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td><input type="month" value="${r.mes}"/></td>
+      <td><input type="number" min="0" value="${r.previsto}"/></td>
+      <td><input type="number" min="0" value="${r.mescv}"/></td>
+      <td class="d">${fmt(d)}</td>`;
+    tb.appendChild(tr);
+    colorCell(tr.querySelector('.d'), d);
+    const [m,p,v]=tr.querySelectorAll('input');
+    m.oninput=e=>{r.mes=e.target.value; renderCComp();}
+    p.oninput=e=>{r.previsto=+e.target.value||0; renderCComp();}
+    v.oninput=e=>{r.mescv=+e.target.value||0; renderCComp();}
+    sP+=+r.previsto||0; sM+=+r.mescv||0; sD+=d;
   });
-  const js = await resp.json();
-  if(!js.ok) throw new Error(js.error||'save fail');
-  state.lastSave = now();
-  stamp('guardado');
-  setStats(raw.length||0);
+  $('#ccPrev').textContent=fmt(sP);
+  $('#ccMes').textContent=fmt(sM);
+  $('#ccDif').textContent=fmt(sD);
 }
 
-// ======== UI ========
-$('#btnLoad').onclick = apiLoad;
-$('#btnSave').onclick = apiSave;
-$('#btnReset').onclick = async()=>{ await apiLoad(); };
-
-$('#btnPretty').onclick = ()=>{
-  try{
-    const o = JSON.parse($('#jsonBox').value || '{}');
-    $('#jsonBox').value = JSON.stringify(o, null, 2);
-  }catch(e){ alert('JSON inválido'); }
-};
-$('#btnMin').onclick = ()=>{
-  try{
-    const o = JSON.parse($('#jsonBox').value || '{}');
-    $('#jsonBox').value = JSON.stringify(o);
-  }catch(e){ alert('JSON inválido'); }
-};
-
-// ======== PIN GATE ========
-async function enter(){
-  $('#pinMsg').style.display='none';
-  const ok = await checkPin($('#pin').value);
-  if(!ok){ $('#pinMsg').style.display='block'; return; }
-  $('#gate').style.display='none';
-  stamp('inicializando…');
-  // carga inicial
-  try{ await apiLoad(); }catch(_){ $('#jsonBox').value='{}'; }
-  try{ await apiStatus(); }catch(_){}
+/* --- Cifra: exclusivos --- */
+function renderCEx(){
+  const tb=$('#tblCEx tbody'); tb.innerHTML='';
+  let sP=0,sM=0,sD=0;
+  state.cifra.exclusivos.forEach((r,i)=>{
+    const d=(+r.mescv||0)-(+r.previsto||0);
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td><input value="${r.centro||''}" placeholder="Centro"/></td>
+      <td><input type="month" value="${r.mes||''}"/></td>
+      <td><input type="number" min="0" value="${r.previsto||0}"/></td>
+      <td><input type="number" min="0" value="${r.mescv||0}"/></td>
+      <td class="d">${fmt(d)}</td>
+      <td><button class="iconbtn" data-del="${i}">🗑</button></td>`;
+    tb.appendChild(tr);
+    colorCell(tr.querySelector('.d'), d);
+    const [c,m,p,v]=tr.querySelectorAll('input');
+    c.oninput=e=>{r.centro=e.target.value;}
+    m.oninput=e=>{r.mes=e.target.value; renderCEx();}
+    p.oninput=e=>{r.previsto=+e.target.value||0; renderCEx();}
+    v.oninput=e=>{r.mescv=+e.target.value||0; renderCEx();}
+    sP+=+r.previsto||0; sM+=+r.mescv||0; sD+=d;
+  });
+  $('#exPrev').textContent=fmt(sP);
+  $('#exMes').textContent=fmt(sM);
+  $('#exDif').textContent=fmt(sD);
+  tb.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{state.cifra.exclusivos.splice(+b.dataset.del,1); renderCEx();});
 }
-$('#enter').onclick=enter;
-$('#pin').addEventListener('keydown',e=>{ if(e.key==='Enter') enter(); });
-$('#clear').onclick=()=>{ $('#pin').value=''; $('#pinMsg').style.display='none'; };
+$('#btnAddEx')?.addEventListener('click',()=>{state.cifra.exclusivos.push({centro:'',mes:'',previsto:0,mescv:0}); renderCEx();});
 
-window.addEventListener('load', ()=>{
-  stamp('listo');
+/* --- Visitas --- */
+function renderVisitas(){
+  const tb=$('#tblVisitas tbody'); tb.innerHTML='';
+  const q=($('#vsSearch').value||'').toLowerCase();
+  state.visitas.forEach((r,i)=>{
+    if(q && !(`${r.centro||''} ${r.visitador||''}`.toLowerCase().includes(q))) return;
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${i+1}</td>
+      <td><input value="${r.centro||''}"/></td>
+      <td><input value="${r.visitador||''}" placeholder="Nombre"/></td>
+      <td><select>
+        <option ${r.rol==='Responsable tec Audio'?'selected':''}>Responsable tec Audio</option>
+        <option ${r.rol==='Delegado de audio'?'selected':''}>Delegado de audio</option>
+      </select></td>
+      <td><input type="date" value="${r.fecha||''}"/></td>
+      <td><input value="${r.adj||''}" placeholder="URL Excel"/></td>`;
+    tb.appendChild(tr);
+    const [c,v,sel,f,a]=[...tr.querySelectorAll('input,select')].filter((_,ix)=>ix!==0); // skip index cell
+    c.oninput=e=>{ r.centro=e.target.value; };
+    v.oninput=e=>{ r.visitador=e.target.value; };
+    sel.oninput=e=>{ r.rol=e.target.value; };
+    f.oninput=e=>{ r.fecha=e.target.value; };
+    a.oninput=e=>{ r.adj=e.target.value; };
+  });
+}
+$('#btnAddVisita')?.addEventListener('click',()=>{ state.visitas.push({rol:'Responsable tec Audio'}); renderVisitas(); });
+$('#vsSearch')?.addEventListener('input',renderVisitas);
+
+/* --- Formaciones --- */
+function renderForm(){
+  const tb=$('#tblForm tbody'); tb.innerHTML='';
+  state.formaciones.forEach((r,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td><input type="date" value="${r.fecha||''}"/></td>
+      <td><input value="${r.delegado||''}"/></td>
+      <td><input value="${r.tema||''}"/></td>
+      <td><input value="${r.asis||''}"/></td>
+      <td><input value="${r.obs||''}"/></td>`;
+    tb.appendChild(tr);
+    const [f,d,t,a,o]=tr.querySelectorAll('input');
+    f.oninput=e=>{ r.fecha=e.target.value; };
+    d.oninput=e=>{ r.delegado=e.target.value; };
+    t.oninput=e=>{ r.tema=e.target.value; };
+    a.oninput=e=>{ r.asis=e.target.value; };
+    o.oninput=e=>{ r.obs=e.target.value; };
+  });
+}
+$('#btnAddForm')?.addEventListener('click',()=>{ state.formaciones.push({}); renderForm(); });
+
+/* --- Teleaudiología --- */
+function renderTele(){
+  const tb=$('#tblTele tbody'); tb.innerHTML='';
+  let cC=0,cF=0;
+  state.tele.forEach((r,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td><input value="${r.centro||''}"/></td>
+      <td><select>
+        <option value="cert" ${r.tipo==='cert'?'selected':''}>cert</option>
+        <option value="form" ${r.tipo==='form'?'selected':''}>form</option>
+      </select></td>
+      <td><input type="date" value="${r.fecha||''}"/></td>`;
+    tb.appendChild(tr);
+    tr.querySelector('input').oninput=e=>{ r.centro=e.target.value; };
+    const sel=tr.querySelector('select'); sel.oninput=e=>{ r.tipo=e.target.value; updateTeleCounters(); };
+    tr.querySelector('input[type="date"]').oninput=e=>{ r.fecha=e.target.value; };
+    if(r.tipo==='cert') cC++; else if(r.tipo==='form') cF++;
+  });
+  $('#cntCert').textContent='Certificados: '+cC;
+  $('#cntForm').textContent='Formaciones: '+cF;
+}
+function updateTeleCounters(){ renderTele(); }
+$('#btnAddTele')?.addEventListener('click',()=>{ state.tele.push({tipo:'cert'}); renderTele(); });
+
+/* --- Equipos (7 packs) --- */
+function renderPacks(){
+  const root=$('#packs'); root.innerHTML='';
+  const q=($('#eqSearch').value||'').toLowerCase();
+  state.equipos.packs.forEach((pack,pi)=>{
+    const box=document.createElement('div'); box.className='card'; box.style.marginBottom='8px';
+    box.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center">
+      <div style="font-weight:900">${pack.nombre}</div>
+      <button class="iconbtn" data-tog="${pi}">▾</button>
+    </div>
+    <div class="ct" data-ct="${pi}" style="margin-top:8px"></div>`;
+    root.appendChild(box);
+
+    const ct = box.querySelector('.ct');
+    // tabla
+    const tbl=document.createElement('table'); tbl.innerHTML=`
+      <thead><tr>
+        <th>Equipo</th><th>Nº serie</th><th>Persona</th><th>Fecha</th>
+        <th>Centro 1</th><th>C1</th><th>S1</th>
+        <th>Centro 2</th><th>C2</th><th>S2</th>
+        <th>Centro 3</th><th>C3</th><th>S3</th>
+      </tr></thead><tbody></tbody>`;
+    ct.appendChild(tbl);
+    const tb=tbl.querySelector('tbody');
+    pack.filas.forEach((r,ri)=>{
+      const text=(r.equipo||'')+' '+(r.serie||'')+' '+(r.persona||'')+' '+r.pares.map(p=>p.centro||'').join(' ');
+      if(q && !text.toLowerCase().includes(q)) return;
+      const tr=document.createElement('tr');
+      const P=i=>r.pares[i]||{centro:'',c:false,s:false};
+      tr.innerHTML=`<td><input value="${r.equipo||''}"/></td>
+        <td><input value="${r.serie||''}"/></td>
+        <td><input value="${r.persona||''}"/></td>
+        <td><input type="date" value="${r.fecha||''}"/></td>
+        <td><input value="${P(0).centro||''}"/></td><td><input type="checkbox" ${P(0).c?'checked':''}/></td><td><input type="checkbox" ${P(0).s?'checked':''}/></td>
+        <td><input value="${P(1).centro||''}"/></td><td><input type="checkbox" ${P(1).c?'checked':''}/></td><td><input type="checkbox" ${P(1).s?'checked':''}/></td>
+        <td><input value="${P(2).centro||''}"/></td><td><input type="checkbox" ${P(2).c?'checked':''}/></td><td><input type="checkbox" ${P(2).s?'checked':''}/></td>`;
+      tb.appendChild(tr);
+      const ins=[...tr.querySelectorAll('input')];
+      ins[0].oninput=e=>{ r.equipo=e.target.value; };
+      ins[1].oninput=e=>{ r.serie=e.target.value; };
+      ins[2].oninput=e=>{ r.persona=e.target.value; };
+      ins[3].oninput=e=>{ r.fecha=e.target.value; };
+      // pares
+      [[4,5,6,0],[7,8,9,1],[10,11,12,2]].forEach(([iC,iCk,iSk,idx])=>{
+        ins[iC].oninput=e=>{ r.pares[idx].centro=e.target.value; };
+        ins[iCk].oninput=e=>{ r.pares[idx].c=e.target.checked; };
+        ins[iSk].oninput=e=>{ r.pares[idx].s=e.target.checked; };
+      });
+    });
+    // toggle
+    box.querySelector('[data-tog]').onclick=()=>{
+      ct.style.display = ct.style.display==='none' ? '' : 'none';
+    };
+  });
+}
+$('#eqSearch')?.addEventListener('input',renderPacks);
+
+/* ======= Cloud ======= */
+async function cloudLoad(){
+  const url=gasUrl(); if(!url){ openModal('#mCfg'); return; }
+  setDot('ok');
+  try{
+    const r=await fetch(url+'?action=load',{mode:'cors',cache:'no-store'});
+    const t=await r.text(); let obj={};
+    try{obj=JSON.parse(t||'{}')}catch(_){}
+    if(obj && typeof obj==='object') state=obj;
+    renderAll(); toast('Datos cargados');
+  }catch(e){ console.error(e); setDot('err'); toast('Error al cargar','err'); }
+}
+async function cloudSave(){
+  const url=gasUrl(); if(!url){ openModal('#mCfg'); return; }
+  try{
+    const r=await fetch(url,{method:'POST',mode:'cors',headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({action:'save', data: JSON.stringify(state)})});
+    if(!r.ok) throw new Error(r.status);
+    toast('Guardado en nube');
+  }catch(e){ console.error(e); toast('Error al guardar','err'); }
+}
+
+/* ======= Render general ======= */
+function renderAll(){
+  renderCComp(); renderCEx(); renderVisitas(); renderForm(); renderTele(); renderPacks();
+}
+
+/* ======= Arranque ======= */
+window.addEventListener('DOMContentLoaded',()=>{
+  // Nav clicks
+  $$('.left .item').forEach(x=>x.addEventListener('click',()=>openView(x.dataset.open)));
+  // Botones nube
+  $('#btnLoad').onclick=cloudLoad;
+  $('#btnSave').onclick=cloudSave;
+  // Config
+  $('#btnCfg').onclick=()=>{ $('#inUrl').value=gasUrl(); openModal('#mCfg'); };
+  $('#btnCloseCfg').onclick=()=>closeModal('#mCfg');
+  $('#btnSaveUrl').onclick=()=>{ const v=$('#inUrl').value.trim(); if(v.startsWith('https://script.google.com/')&&v.endsWith('/exec')){ lsSet('GAS_URL',v); setDot('ok'); closeModal('#mCfg'); toast('URL guardada'); } else toast('URL inválida','err'); };
+  // PIN
+  const pinOk = v => { v=(v||'').trim(); if(/^AR/i.test(v)) v=v.slice(2); return v==='4321'; };
+  const enter=()=>{ if(pinOk($('#inPin').value)){ $('#mPin').classList.remove('show'); $('#btnSave').disabled=false; } else toast('PIN incorrecto','err'); };
+  $('#btnEnter').onclick=enter;
+  $('#btnPinClear').onclick=()=>$('#inPin').value='';
+  $('#inPin').addEventListener('keydown',e=>{ if(e.key==='Enter') enter(); });
+  openModal('#mPin');
+
+  // Cloud badge
+  setDot(gasUrl()?'ok':'warn');
+
+  // Vista inicial y render
+  openView('cifra-compania'); renderAll();
 });
 </script>
 </body>
