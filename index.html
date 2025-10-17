@@ -1,137 +1,205 @@
 <!doctype html>
 <html lang="es">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>SEGUIMIENTO AUDIO · Acceso</title>
-  <meta name="theme-color" content="#c82727"/>
-  <style>
-    :root{--rojo:#c82727;--rojo2:#a71f1f;--bg:#f6f7fb;--line:#e6e7ee;--shadow:0 4px 14px rgba(0,0,0,.06);--fs:12px}
-    *{box-sizing:border-box} html,body{height:100%}
-    body{margin:0;background:var(--bg);font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;font-size:var(--fs);color:#222}
-    .topbar{position:sticky;top:0;z-index:10;width:100%;background:linear-gradient(180deg,var(--rojo),var(--rojo2));color:#fff;box-shadow:var(--shadow)}
-    .bar-inner{padding:.85rem 12px;display:flex;align-items:center;justify-content:center}
-    .brand{display:flex;gap:.6rem;align-items:center;font-weight:900;letter-spacing:.4px;font-size:22px}
-    .brand i{font-style:normal}
-    #appwrap{position:relative;width:100%;height:calc(100vh - 66px);background:#fff;border-top:1px solid var(--line)}
-    #appframe{width:100%;height:100%;border:0;display:none}
-    #gate{position:fixed;inset:0;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;z-index:9999}
-    .gate-card{background:#111;color:#fff;border-radius:12px;box-shadow:var(--shadow);padding:18px 16px;min-width:300px;border:1px solid #2a2a2a}
-    .gate-card h3{margin:.2rem 0 1rem}
-    .pin{width:100%;letter-spacing:.35rem;font-size:1rem;text-align:center;background:#000;color:#fff;border:1px solid #444;border-radius:8px;padding:.5rem}
-    .btn{border:0;border-radius:9px;padding:.5rem .9rem;cursor:pointer;box-shadow:var(--shadow);font-weight:800}
-    .btn-primary{background:#fff;color:#7b0e0e}
-    .btn-ghost{background:transparent;border:1px solid #ffffff33;color:#fff}
-    .actions{display:flex;gap:.5rem;margin-top:.8rem}
-    .msg{display:none;color:#ff7b7b;margin-top:.6rem;font-size:.92em}
-    #loadingNote{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#666;font-size:.95rem}
-  </style>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>SEGUIMIENTO AUDIO · Cloud</title>
+<meta name="theme-color" content="#c82727"/>
+<style>
+:root{
+  --rojo:#c82727; --rojo2:#a71f1f; --bg:#f6f7fb; --line:#e8eaee; --sh:0 4px 14px rgba(0,0,0,.06);
+  --fs:12px; --mut:#6b7280;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;color:#111;font-size:var(--fs);line-height:1.25}
+
+/* Topbar rojo */
+.topbar{position:sticky;top:0;z-index:30;background:linear-gradient(180deg,var(--rojo),var(--rojo2));color:#fff;box-shadow:var(--sh)}
+.topbar .in{display:grid;grid-template-columns:1fr auto 1fr;gap:.6rem;align-items:center;padding:.7rem .8rem}
+.brand{font-weight:900;letter-spacing:.3px;display:flex;gap:.5rem;align-items:center;justify-content:center}
+.brand .logo{font-style:normal}
+.actions{display:flex;gap:.4rem;justify-content:flex-start}
+.meta{display:flex;gap:.4rem;justify-content:flex-end;align-items:center}
+.btn{border:0;border-radius:9px;padding:.38rem .7rem;cursor:pointer;box-shadow:var(--sh);font-weight:800;font-size:11px}
+.btn-lite{background:#fff;color:#7a0d0d}
+.btn-ghost{background:transparent;border:1px solid #ffffff66;color:#fff}
+.pill{border:1px solid #ffffff22;background:#ffffff19;padding:.16rem .5rem;border-radius:999px;font-size:11px;white-space:nowrap}
+
+/* Layout */
+.app{display:grid;grid-template-columns:320px minmax(0,1fr);gap:.6rem;padding:.6rem}
+@media (max-width:1000px){.app{grid-template-columns:1fr}}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:var(--sh)}
+.left{display:flex;flex-direction:column;min-height:70vh}
+.left .head{padding:.6rem .7rem;border-bottom:1px solid var(--line);font-weight:800}
+.left .body{padding:.6rem .7rem;display:flex;flex-direction:column;gap:.5rem}
+.stat{display:flex;justify-content:space-between;background:#f7f7fb;border:1px solid var(--line);border-radius:8px;padding:.36rem .5rem}
+.stat small{color:var(--mut)}
+
+.right{display:flex;flex-direction:column}
+.right .head{display:flex;justify-content:space-between;gap:.5rem;padding:.6rem .7rem;border-bottom:1px solid var(--line);align-items:center}
+.right .body{padding:.6rem .7rem}
+textarea.json{width:100%;height:60vh;border:1px solid var(--line);border-radius:10px;padding:.6rem;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;outline:none}
+.helper{font-size:11px;color:var(--mut);margin-top:.35rem}
+
+/* Gate PIN */
+.gate{position:fixed;inset:0;background:#000000c9;display:flex;align-items:center;justify-content:center;z-index:1000}
+.gate .panel{background:#111;color:#fff;border:1px solid #2a2a2a;border-radius:12px;box-shadow:var(--sh);padding:16px 14px;min-width:280px}
+.pin{width:100%;letter-spacing:.3rem;text-align:center;background:#000;color:#fff;border:1px solid #444;border-radius:8px;padding:.5rem}
+.pinmsg{display:none;color:#ff7b7b;margin-top:.4rem}
+</style>
 </head>
 <body>
-  <header class="topbar">
-    <div class="bar-inner">
-      <div class="brand"><i>🎧</i> SEGUIMIENTO AUDIO</div>
+
+<header class="topbar">
+  <div class="in">
+    <div class="actions">
+      <button id="btnLoad" class="btn btn-lite" title="Leer desde la nube">Actualizar (nube)</button>
+      <button id="btnSave" class="btn btn-lite" title="Guardar en la nube">Guardar (nube)</button>
+      <button id="btnReset" class="btn btn-ghost" title="Descartar cambios y recargar">Resetear</button>
     </div>
-  </header>
-
-  <main id="appwrap">
-    <div id="loadingNote">Esperando acceso…</div>
-    <iframe id="appframe" title="SEGUIMIENTO AUDIO"></iframe>
-  </main>
-
-  <div id="gate" aria-modal="true" role="dialog">
-    <div class="gate-card">
-      <h3>Acceso</h3>
-      <p style="opacity:.85;margin-top:0">Introduce el PIN para editar:</p>
-      <input id="pin" class="pin" type="password" inputmode="numeric" maxlength="6" placeholder="••••"/>
-      <div class="actions">
-        <button id="enter" class="btn btn-primary" style="flex:1">Acceder</button>
-        <button id="clear" class="btn btn-ghost" style="flex:.8">Limpiar</button>
-      </div>
-      <p id="pinMsg" class="msg">PIN incorrecto</p>
+    <div class="brand"><span class="logo">🎧</span> SEGUIMIENTO AUDIO</div>
+    <div class="meta">
+      <span id="stamp" class="pill">Cloud · sin cargar</span>
     </div>
   </div>
+</header>
 
-  <script>
-    const PIN_SHA256='fe2592b42a727e977f055947385b709cc82b16b9a87f88c6abf3900d65d0cdc3'; // "4321"
-    const APP_FILE='app.html'; // tu app original
+<main class="app">
+  <section class="left card">
+    <div class="head">Resumen</div>
+    <div class="body">
+      <div class="stat"><div>Última carga</div><small id="lastLoad">—</small></div>
+      <div class="stat"><div>Último guardado</div><small id="lastSave">—</small></div>
+      <div class="stat"><div>Tamaño JSON</div><small id="jsonSize">0 B</small></div>
 
-    const $=(s,r=document)=>r.querySelector(s);
-    async function sha256Hex(str){
-      const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str));
-      return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
-    }
-    async function checkPin(val){
-      let s=(val||'').trim();
-      if(/^AR/i.test(s)) s=s.slice(2);
-      if(!s) return false;
-      try{ return (await sha256Hex(s))===PIN_SHA256; }catch(_){ return false; }
-    }
-    function showApp(){
-      $('#gate').style.display='none';
-      const f=$('#appframe'), note=$('#loadingNote');
-      f.style.display='block';
-      f.src=APP_FILE+'?nc='+Date.now();
-      if(note) note.textContent='Cargando…';
-      f.addEventListener('load',()=>{ if(note) note.style.display='none'; });
-    }
-    async function handleEnter(){
-      $('#pinMsg').style.display='none';
-      const ok=await checkPin($('#pin').value);
-      if(!ok){ $('#pinMsg').style.display='block'; return; }
-      showApp();
-    }
-    window.addEventListener('DOMContentLoaded',()=>{
-      const pin=$('#pin'), enter=$('#enter'), clear=$('#clear');
-        enter.addEventListener('click', handleEnter);
-  clear.addEventListener('click', ()=>{ pin.value=''; $('#pinMsg').style.display='none'; pin.focus(); });
-  pin.addEventListener('keydown',(e)=>{ if(e.key==='Enter') handleEnter(); });
-  setTimeout(()=>{ try{ pin.focus(); }catch(_){} },50);
+      <div class="stat" style="background:#eef9f0;border-color:#d8f0db">
+        <div>Consejo</div>
+        <small>Trabaja libremente: todo se guarda en la nube (Google Sheets).</small>
+      </div>
+    </div>
+  </section>
+
+  <section class="right card">
+    <div class="head">
+      <div style="font-weight:800">Editor de datos (JSON)</div>
+      <div style="display:flex;gap:.4rem">
+        <button id="btnPretty" class="btn btn-ghost" title="Formatear JSON">Formatear</button>
+        <button id="btnMin" class="btn btn-ghost" title="Compactar JSON">Compactar</button>
+      </div>
+    </div>
+    <div class="body">
+      <textarea id="jsonBox" class="json" spellcheck="false" placeholder='Pegue/edite su JSON aquí...'></textarea>
+      <div class="helper">
+        Sugerencia: si aún no tienes datos, pulsa **Actualizar (nube)** para cargar el JSON actual (o un esqueleto).
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- Acceso (PIN 4321 o AR4321) -->
+<div id="gate" class="gate" role="dialog" aria-modal="true">
+  <div class="panel">
+    <h3 style="margin:.1rem 0 .4rem">Acceso</h3>
+    <p style="opacity:.85;margin:.2rem 0">Introduce el PIN para editar:</p>
+    <input id="pin" class="pin" maxlength="6" inputmode="numeric" placeholder="••••"/>
+    <div style="display:flex;gap:.5rem;margin-top:10px">
+      <button id="enter" class="btn btn-lite" style="flex:1">Acceder</button>
+      <button id="clear" class="btn btn-ghost" style="flex:.8">Limpiar</button>
+    </div>
+    <div id="pinMsg" class="pinmsg">PIN incorrecto</div>
+  </div>
+</div>
+
+<script>
+// ======== CONFIG =========
+const GAS_URL = 'PEGAR_AQUI_TU_URL_EXEC'; // <- REEMPLAZA por tu /exec de Apps Script
+const PIN_SHA256 = 'fe2592b42a727e977f055947385b709cc82b16b9a87f88c6abf3900d65d0cdc3'; // 4321
+const state = { lastLoad:null, lastSave:null };
+
+// ======== HELPERS ========
+const $ = (s, r=document)=>r.querySelector(s);
+function stamp(txt){ $('#stamp').textContent = 'Cloud · ' + txt; }
+function now(){ return new Date().toLocaleString(); }
+async function sha256Hex(str){
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+async function checkPin(val){ let s=(val||'').trim(); if(/^AR/i.test(s)) s=s.slice(2); if(!s) return false; try{return (await sha256Hex(s))===PIN_SHA256;}catch(_){return false;} }
+function setStats(size){
+  $('#jsonSize').textContent = (size>1024)? (Math.round(size/102.4)/10)+' KB' : size+' B';
+  if(state.lastLoad) $('#lastLoad').textContent = state.lastLoad;
+  if(state.lastSave) $('#lastSave').textContent = state.lastSave;
+}
+
+// ======== CLOUD API ========
+async function apiLoad(){
+  const r = await fetch(GAS_URL + '?action=load');
+  const js = await r.json();
+  if(!js.ok) throw new Error(js.error||'load fail');
+  const raw = js.data || '{}';
+  $('#jsonBox').value = raw;
+  state.lastLoad = now();
+  stamp('cargado');
+  setStats(raw.length||0);
+}
+async function apiStatus(){
+  try{
+    const r = await fetch(GAS_URL+'?action=status');
+    const js = await r.json();
+    if(js.ok) setStats(js.size||0);
+  }catch(_){}
+}
+async function apiSave(){
+  const raw = $('#jsonBox').value.trim() || '{}';
+  const resp = await fetch(GAS_URL, {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ action:'save', data: raw })
+  });
+  const js = await resp.json();
+  if(!js.ok) throw new Error(js.error||'save fail');
+  state.lastSave = now();
+  stamp('guardado');
+  setStats(raw.length||0);
+}
+
+// ======== UI ========
+$('#btnLoad').onclick = apiLoad;
+$('#btnSave').onclick = apiSave;
+$('#btnReset').onclick = async()=>{ await apiLoad(); };
+
+$('#btnPretty').onclick = ()=>{
+  try{
+    const o = JSON.parse($('#jsonBox').value || '{}');
+    $('#jsonBox').value = JSON.stringify(o, null, 2);
+  }catch(e){ alert('JSON inválido'); }
+};
+$('#btnMin').onclick = ()=>{
+  try{
+    const o = JSON.parse($('#jsonBox').value || '{}');
+    $('#jsonBox').value = JSON.stringify(o);
+  }catch(e){ alert('JSON inválido'); }
+};
+
+// ======== PIN GATE ========
+async function enter(){
+  $('#pinMsg').style.display='none';
+  const ok = await checkPin($('#pin').value);
+  if(!ok){ $('#pinMsg').style.display='block'; return; }
+  $('#gate').style.display='none';
+  stamp('inicializando…');
+  // carga inicial
+  try{ await apiLoad(); }catch(_){ $('#jsonBox').value='{}'; }
+  try{ await apiStatus(); }catch(_){}
+}
+$('#enter').onclick=enter;
+$('#pin').addEventListener('keydown',e=>{ if(e.key==='Enter') enter(); });
+$('#clear').onclick=()=>{ $('#pin').value=''; $('#pinMsg').style.display='none'; };
+
+window.addEventListener('load', ()=>{
+  stamp('listo');
 });
 </script>
-
-<!-- === Parche anti-duplicados (no toca tu contenido) === -->
-<style>
-  /* Si por cualquier motivo se generan varias topbars, solo se muestra la primera */
-  .topbar:not(:first-of-type){display:none !important}
-</style>
-
-<script>
-// Evitar segunda inicialización (por recargas, SW, etc.)
-if (window.__SEGUI_AUDIO_INITED__) {
-  console.warn('UI ya inicializada — evitando duplicación');
-} else {
-  window.__SEGUI_AUDIO_INITED__ = true;
-}
-</script>
-enter.addEventListener('click',handleEnter);
-      clear.addEventListener('click',()=>{ pin.value=''; $('#pinMsg').style.display='none'; pin.focus(); });
-      pin.addEventListener('keydown',(e)=>{ if(e.key==='Enter') handleEnter(); });
-      setTimeout(()=>{ try{ pin.focus(); }catch(_){ } },50);
-    });
-  </<!-- === Parche anti-duplicados (no toca tu contenido) === -->
-<style>
-  /* Si por cualquier motivo se generan varias topbars, solo se muestra la primera */
-  .topbar:not(:first-of-type){display:none !important}
-</style>
-<script>
-  // Evitar segunda inicialización (por recargas, SW, etc.)
-  if (window.__SEGUI_AUDIO_INITED__) {
-    console.warn('UI ya inicializada — evitando duplicación');
-  } else {
-    window.__SEGUI_AUDIO_INITED__ = true;
-  }
-
-  // Por si ya se pintó doble, limpiar extras al cargar:
-  document.addEventListener('DOMContentLoaded', () => {
-    const bars = document.querySelectorAll('.topbar');
-    if (bars.length > 1) {
-      for (let i = 1; i < bars.length; i++) bars[i].remove();
-      console.info('Se eliminaron topbars duplicadas:', bars.length - 1);
-    }
-  });
-</script>
-<!-- === Fin parche === -->
-script>
 </body>
 </html>
