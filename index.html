@@ -203,9 +203,29 @@ body{margin:0;background:var(--bg);font-family:Inter,system-ui,Segoe UI,Roboto,A
 
 <script>
 <script>
+<script>
 /* ======== CONFIG ========= */
-const GAS_URL  = 'https://script.google.com/macros/s/AKfyc...tu-EXEC.../exec';  // ← tu /exec correcto
+const GAS_URL  = 'https://script.google.com/macros/s/AKfyc...TU_EXEC.../exec';  // ← pega aquí tu /exec
 const PIN_CODE = '4321';
+</script>
+
+<!-- =========================================================
+     PARCHE ANTI-DUPLICADOS DE TOPBAR (se conserva)
+     ========================================================= -->
+<style>
+  /* Si el SW o recargas crean varias topbars, se oculta toda menos la 1ª */
+  .topbar:not(:first-of-type){display:none !important}
+</style>
+
+<!-- =========================================================
+     GUARD contra doble inicialización (se conserva)
+     ========================================================= -->
+<script>
+  if (window.__SEGUI_AUDIO_INITED__) {
+    console.warn('UI ya inicializada — evitando duplicación');
+  } else {
+    window.__SEGUI_AUDIO_INITED__ = true;
+  }
 </script>
 
 <!-- =========================================================
@@ -244,13 +264,12 @@ const PIN_CODE = '4321';
   };
 
   /*** 2) Export/import del estado ***/
-  // Si tu app define window.exportJSON()/importJSON(json) los usamos;
-  // si no, se hace snapshot de localStorage y luego recarga.
+  // Si tu app define exportJSON()/importJSON(json) los usamos;
+  // si no, hacemos snapshot de localStorage y luego recarga.
   const exportState = () => {
     if (typeof window.exportJSON === 'function') {
       try { return window.exportJSON(); } catch {}
     }
-    // snapshot de localStorage (todo)
     const snap = {};
     for (let i=0; i<localStorage.length; i++){
       const k = localStorage.key(i);
@@ -260,7 +279,6 @@ const PIN_CODE = '4321';
   };
 
   const importState = (json) => {
-    // json puede venir ya como objeto o string
     let data = json;
     if (typeof data === 'string') {
       try { data = JSON.parse(data); } catch {}
@@ -268,12 +286,10 @@ const PIN_CODE = '4321';
     if (typeof window.importJSON === 'function') {
       try { window.importJSON(data); return true; } catch {}
     }
-    // si es snapshot de localStorage, lo restauramos
     if (data && data.__type === 'localStorage' && data.data && typeof data.data === 'object') {
       Object.keys(data.data).forEach(k => localStorage.setItem(k, data.data[k]));
       return true;
     }
-    // último recurso: si es string, lo guardamos en una clave y recargamos
     try {
       localStorage.setItem('__segui_audio_cloud_raw__', (typeof json === 'string') ? json : JSON.stringify(json));
     } catch {}
@@ -289,21 +305,18 @@ const PIN_CODE = '4321';
     try {
       const payload = {
         action: 'save',
-        // OJO: mantenemos el contenido tal cual exportado (string u objeto)
-        data: exportState()
+        data: exportState()              // mantenemos el contenido tal cual (string u objeto)
       };
-      // Enviamos como text/plain para evitar preflight
       const res = await fetch(GAS_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+        headers: { 'Content-Type': 'text/plain;charset=UTF-8' },  // evita preflight
         body: JSON.stringify(payload),
         cache: 'no-store',
         mode: 'cors'
       });
       if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
       const txt = await res.text();
-      let out = null;
-      try { out = JSON.parse(txt); } catch {}
+      let out = null; try { out = JSON.parse(txt); } catch {}
       if (out && out.ok) {
         toast('Guardado en nube ✓', true);
       } else {
@@ -328,8 +341,7 @@ const PIN_CODE = '4321';
       });
       if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
       const txt = await res.text();
-      let out = null;
-      try { out = JSON.parse(txt); } catch {}
+      let out = null; try { out = JSON.parse(txt); } catch {}
       const raw = out && out.data ? out.data : txt;
       if (!raw || raw === 'null' || raw === '""') {
         toast('No hay datos en nube todavía', false);
@@ -346,23 +358,22 @@ const PIN_CODE = '4321';
 
   /*** 4) Enlazar a los botones existentes ***/
   const wireButtons = () => {
-    // Soportamos tus nombres de botones actuales
-    const btnSaveCloud = findButtonByText('Guardar (nube)') || findButtonByText('Guardar nube') || findButtonByText('Cloud');
-    const btnLoadCloud = findButtonByText('Recuperar') || findButtonByText('Cargar') || findButtonByText('Abrir compañía'); // “Recuperar…” es el más común
+    const btnSaveCloud = findButtonByText('guardar (nube)') || findButtonByText('guardar nube') || findButtonByText('cloud');
+    const btnLoadCloud = findButtonByText('recuperar') || findButtonByText('cargar');
 
     if (btnSaveCloud) btnSaveCloud.addEventListener('click', saveCloud, {passive:true});
     if (btnLoadCloud) btnLoadCloud.addEventListener('click', loadCloud, {passive:true});
 
-    // bonus: atajo Ctrl+S para nube si se pulsa con ALT
+    // atajo: Ctrl/Cmd + Alt + S → guardar en nube
     window.addEventListener('keydown', (e) => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's' && e.altKey) {
+      if ((e.ctrlKey || e.metaKey) && e.altKey && e.key.toLowerCase() === 's') {
         e.preventDefault();
         saveCloud();
       }
     });
   };
 
-  /*** 5) PIN (no tocamos tu lógica, solo garantizamos Enter) ***/
+  /*** 5) PIN: botón + Enter (sin tocar tu UI) ***/
   const ensurePinEnter = () => {
     const pin = $('#pin'), enter = $('#enter'), clear = $('#clear'), msg = $('#pinMsg');
     if (pin && enter) {
@@ -373,8 +384,7 @@ const PIN_CODE = '4321';
             setTimeout(()=> { if (msg) msg.style.display = 'none'; }, 1600);
             return;
           }
-          // deja que tu app muestre el contenido (tu showApp() si lo tienes)
-          if (typeof window.showApp === 'function') window.showApp();
+          if (typeof window.showApp === 'function') window.showApp(); // si la tienes
           document.body.classList.remove('locked');
         } catch {}
       };
@@ -393,10 +403,8 @@ const PIN_CODE = '4321';
 })();
 </script>
 
-<!-- (opcional) Service worker antiguo: si te da problemas de caché, bórralo -->
+<!-- (opcional) Si la caché/Service Worker te da guerra, descomenta, recarga 1 vez y vuelve a comentar -->
 <script>
-  // Si tienes un SW previo y quieres eliminarlo definitivamente,
-  // descomenta esto, recarga una vez y vuelve a comentarlo.
   /*
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.unregister()));
