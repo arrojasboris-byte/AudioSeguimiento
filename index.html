@@ -1,78 +1,52 @@
 <!doctype html>
 <html lang="es">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>SEGUIMIENTO AUDIO · Cloud</title>
-<meta name="theme-color" content="#c82727" />
+<meta name="theme-color" content="#c82727"/>
 <style>
   :root{
-    --rojo:#c82727; --rojo2:#a71f1f;
-    --bg:#f6f7fb; --card:#ffffff; --line:#e6e7ee;
-    --tx:#222; --muted:#6b7280; --ok:#10b981; --bad:#ef4444; --warn:#f59e0b;
+    --rojo:#c82727; --rojo2:#a71f1f; --bg:#f6f7fb; --card:#fff; --line:#e6e7ee;
+    --tx:#111; --muted:#6b7280; --ok:#16a34a; --bad:#ef4444;
     --sh:0 4px 14px rgba(0,0,0,.06);
   }
-  *{box-sizing:border-box}
-  html,body{height:100%}
+  *{box-sizing:border-box} html,body{height:100%}
   body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.25 Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif}
-  input,select,button{font:inherit}
 
-  /* Top bar */
-  .topbar{
-    position:sticky; top:0; z-index:1000; width:100%;
-    color:#fff; background:linear-gradient(180deg,var(--rojo),var(--rojo2));
-    box-shadow:var(--sh);
-  }
-  .topbar .inner{
-    max-width:1200px; margin:auto; padding:10px 12px;
-    display:flex; align-items:center; gap:12px;
-  }
-  .logo{display:flex; align-items:center; gap:10px; font-weight:800; letter-spacing:.5px; font-size:18px}
+  /* Top */
+  .topbar{position:sticky;top:0;z-index:1000;width:100%;
+    color:#fff;background:linear-gradient(180deg,var(--rojo),var(--rojo2));box-shadow:var(--sh)}
+  .topbar .inner{max-width:1200px;margin:auto;padding:10px 12px;display:flex;align-items:center;gap:10px}
+  .logo{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.4px}
   .sp{flex:1}
-  .pill{border:1px solid #fff5; background:#ffffff18; color:#fff; border-radius:999px; padding:8px 12px; cursor:pointer}
-  .pill.primary{background:#fff; color:#000; font-weight:700; box-shadow:0 1px 0 #0001}
-  .pill:disabled{opacity:.6; cursor:not-allowed}
+  .pill{border:1px solid #ffffff44;background:#ffffff14;color:#fff;border-radius:999px;padding:8px 12px;cursor:pointer}
+  .pill.primary{background:#fff;color:#111;font-weight:800}
+  .pill:disabled{opacity:.6;cursor:not-allowed}
+  .badge{font-size:12px;opacity:.9}
 
   /* Layout */
-  .main{max-width:1200px; margin:12px auto; padding:0 12px; display:grid; gap:12px; grid-template-columns:270px 1fr}
-  .card{background:var(--card); border:1px solid var(--line); box-shadow:var(--sh); border-radius:12px}
-  .side .sec{padding:12px; border-bottom:1px solid var(--line)}
+  .main{max-width:1200px;margin:12px auto;padding:0 12px;display:grid;grid-template-columns:260px 1fr;gap:12px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--sh)}
+  .side .sec{padding:12px;border-bottom:1px solid var(--line)}
   .side .sec:last-child{border-bottom:0}
-  .sec h4{margin:0 0 8px; display:flex; align-items:center; gap:8px; font-size:13px; color:#000; letter-spacing:.2px}
-  .sec .hint{font-size:12px; color:var(--muted)}
-  .btn{border:1px solid var(--line); background:#fff; padding:6px 10px; border-radius:8px; cursor:pointer}
-  .btn.primary{background:#111; color:#fff}
-  .row{display:flex; align-items:center; gap:8px}
-
+  .sec h4{margin:0 0 8px;display:flex;align-items:center;gap:6px;font-size:13px}
+  .btn{border:1px solid var(--line);background:#fff;padding:6px 10px;border-radius:8px;cursor:pointer}
   .detail{padding:12px}
-  .detail h3{margin:0 0 8px}
-  .toolbar{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:8px}
-  .tag{font-size:12px; color:#555}
-  .grid{overflow:auto; border:1px solid var(--line); border-radius:8px}
-  table{border-collapse:collapse; width:100%; min-width:780px}
-  th,td{border-bottom:1px solid var(--line); padding:8px 10px; text-align:left; white-space:nowrap}
-  thead th{background:#fafafb; font-weight:700}
-  tfoot td{background:#fafafb; font-weight:700}
-  input[type="number"]{width:110px}
-  .ok{background:#10b98112}
-  .bad{background:#ef44440f}
-  .muted{color:var(--muted)}
+  .toolbar{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+  .grid{overflow:auto;border:1px solid var(--line);border-radius:8px}
+  table{border-collapse:collapse;width:100%;min-width:760px}
+  th,td{border-bottom:1px solid var(--line);padding:8px 10px;text-align:left;white-space:nowrap}
+  thead th{background:#fafafb} tfoot td{background:#fafafb;font-weight:700}
+  .ok{background:#10b98112} .bad{background:#ef444410} .muted{color:var(--muted)}
+  .topbar:not(:first-of-type){display:none!important} /* anti-duplicados */
 
-  /* PIN overlay (fallback, si no hay uno nativo) */
-  #pinOverlay{
-    position:fixed; inset:0; background:rgba(0,0,0,.78);
-    display:flex; align-items:center; justify-content:center; z-index:9999;
-  }
-  #pinOverlay .panel{
-    background:#1b1b1b; color:#fff; padding:18px 20px; border-radius:12px; width:min(92vw,360px);
-    box-shadow:0 10px 30px rgba(0,0,0,.35)
-  }
-  #pinOverlay .panel h3{margin:0 0 10px}
-  #pinOverlay input{width:130px; text-align:center; letter-spacing:.3em}
-  #pinOverlay .msg{display:none; color:#ffb3b3; margin-top:8px; font-size:12px}
-
-  /* Parche anti-duplicados de topbar por SW/recarga */
-  .topbar:not(:first-of-type){display:none !important}
+  /* PIN overlay (si no tienes uno, usamos este) */
+  #pinOverlay{position:fixed;inset:0;background:rgba(0,0,0,.78);
+    display:none;align-items:center;justify-content:center;z-index:9999}
+  #pinOverlay .panel{background:#1b1b1b;color:#fff;padding:18px 20px;border-radius:12px;width:min(92vw,360px);box-shadow:0 10px 30px rgba(0,0,0,.35)}
+  #pinOverlay input{width:130px;text-align:center;letter-spacing:.3em}
+  #pinOverlay .msg{display:none;color:#ffb3b3;margin-top:8px;font-size:12px}
 </style>
 </head>
 <body>
@@ -85,96 +59,71 @@
     <button class="pill" id="btnReload">Actualizar</button>
     <button class="pill" id="btnSaveLocal">Guardar (local)</button>
     <button class="pill primary" id="btnSaveCloud">Guardar (nube)</button>
-    <button class="pill" id="btnRecover">Recuperar…</button>
-    <div class="tag" id="cloudBadge">Nube: —</div>
+    <button class="pill" id="btnLoadCloud">Recuperar (nube)</button>
+    <span class="badge" id="cloudBadge">Nube: —</span>
   </div>
 </div>
 
-<!-- Layout -->
+<!-- Layout básico (puedes reemplazar el contenido del detalle por tu plataforma) -->
 <div class="main">
-  <!-- Side -->
   <div class="card side">
     <div class="sec">
-      <h4>📈 CIFRA DE VENTAS</h4>
-      <div class="hint">Abre con ▶ para editar la tabla mensual</div>
-      <div class="row">
-        <button class="btn" id="btnOpenComp">▶ Abrir Compañía</button>
-      </div>
+      <h4>📈 Cifra de ventas</h4>
+      <button class="btn" id="btnOpenComp">▶ Abrir Compañía</button>
     </div>
-
     <div class="sec">
       <h4>⭐ Centros exclusivos</h4>
-      <div class="row"><button class="btn" id="btnAddCE">+ Añadir</button></div>
-      <div class="hint">Usa este bloque para tus centros exclusivos.</div>
+      <button class="btn" id="btnAddCE">+ Añadir</button>
     </div>
-
     <div class="sec">
       <h4>🟩 Centros flop</h4>
-      <div class="row"><button class="btn" id="btnAddCF">+ Añadir</button></div>
+      <button class="btn" id="btnAddCF">+ Añadir</button>
     </div>
-
     <div class="sec">
       <h4>🧭 Visitas audio</h4>
-      <div class="hint">Se puede pegar desde Excel (250 filas).</div>
-      <div class="row"><button class="btn" id="btnOpenVis">▶ Abrir</button></div>
+      <button class="btn" id="btnOpenVis">▶ Abrir</button>
     </div>
-
     <div class="sec">
       <h4>🎓 Formaciones y mentoring</h4>
-      <div class="row"><button class="btn" id="btnOpenFor">▶ Abrir</button></div>
+      <button class="btn" id="btnOpenFor">▶ Abrir</button>
     </div>
-
     <div class="sec">
       <h4>🩺 Teleaudiología</h4>
-      <div class="row"><button class="btn" id="btnOpenTele">▶ Abrir</button></div>
+      <button class="btn" id="btnOpenTele">▶ Abrir</button>
     </div>
-
     <div class="sec">
       <h4>🧰 Equipos</h4>
-      <div class="row"><button class="btn" id="btnOpenEq">▶ Abrir</button></div>
+      <button class="btn" id="btnOpenEq">▶ Abrir</button>
     </div>
   </div>
 
-  <!-- Detail -->
   <div class="card detail">
     <div class="toolbar">
       <h3 id="detTitle" style="margin:0">CIFRA — COMPAÑÍA</h3>
-      <span class="tag">Meses: Ago-25 → Jul-26</span>
-      <span class="tag">Consejo: rellena “Previsto” y “CV mes”</span>
+      <span class="muted">Meses: Ago-25 → Jul-26</span>
     </div>
-
     <div class="grid">
       <table id="tblCifra">
         <thead>
-          <tr>
-            <th style="width:130px">Mes</th>
-            <th>Previsto</th>
-            <th>CV mes</th>
-            <th>Diferencia</th>
-          </tr>
+          <tr><th>Mes</th><th>Previsto</th><th>CV mes</th><th>Diferencia</th></tr>
         </thead>
         <tbody id="tbCuerpo"></tbody>
         <tfoot>
-          <tr>
-            <td>Total</td>
-            <td id="totPrev" class="muted">0</td>
-            <td id="totMes" class="muted">0</td>
-            <td id="totDif" class="muted">0</td>
-          </tr>
+          <tr><td>Total</td><td id="totPrev">0</td><td id="totMes">0</td><td id="totDif">0</td></tr>
         </tfoot>
       </table>
     </div>
   </div>
 </div>
 
-<!-- Overlay de PIN (fallback; si ya tienes uno, este no molesta) -->
-<div id="pinOverlay" aria-modal="true" role="dialog" style="display:none">
+<!-- PIN (fallback) -->
+<div id="pinOverlay" aria-modal="true" role="dialog">
   <div class="panel">
-    <h3>Acceso</h3>
+    <h3 style="margin:0 0 10px">Acceso</h3>
     <div style="opacity:.85;margin-bottom:10px">Introduce el PIN para editar:</div>
-    <div class="row">
-      <input id="pin" type="password" inputmode="numeric" maxlength="4" placeholder="••••" autocomplete="one-time-code" />
-      <button id="enter" class="btn primary">Acceder</button>
+    <div style="display:flex;gap:8px;align-items:center">
+      <input id="pin" type="password" inputmode="numeric" maxlength="4" placeholder="••••" autocomplete="one-time-code"/>
+      <button id="enter" class="btn" style="background:#fff;font-weight:800">Acceder</button>
       <button id="clear" class="btn">Limpiar</button>
     </div>
     <div id="pinMsg" class="msg">PIN incorrecto</div>
@@ -182,304 +131,140 @@
 </div>
 
 <script>
-/* ========= CONFIG ========= */
-const GAS_URL  = 'https://script.google.com/macros/s/AKfycbwsfNXUKAClhKT-Jv_yPEpPNNkJxfwQE1CdKtiOsfxPprc8oeccmbCduuv7L5PriwiI/exec';   // ← pon aquí tu /exec
-const PIN_CODE = '4321';                     // ← cambia si lo necesitas
+/* ===== CONFIG ===== */
+const GAS_URL  = 'PEGAR_AQUI_TU_URL_EXEC';  // ⬅️ Pega aquí tu /exec
+const PIN_CODE = '4321';
 
-/* ========= UTILIDADES ========= */
-
-// Meses Ago-25 → Jul-26
-const MESES = [
-  'Ago-25','Sep-25','Oct-25','Nov-25','Dic-25','Ene-26','Feb-26','Mar-26','Abr-26','May-26','Jun-26','Jul-26'
-];
-
-// Formateo números
+/* ===== Utilidades ===== */
+const $ = (s,r=document)=>r.querySelector(s);
 const nf = new Intl.NumberFormat('es-ES',{maximumFractionDigits:0});
+const MESES = ['Ago-25','Sep-25','Oct-25','Nov-25','Dic-25','Ene-26','Feb-26','Mar-26','Abr-26','May-26','Jun-26','Jul-26'];
 
-// Selección rápida
-const $ = (sel, root=document) => root.querySelector(sel);
-
-// Serializar todos los inputs/select/textarea (y checked)
-function serializeControls(){
-  const out = [];
-  const all = document.querySelectorAll('input, select, textarea, [contenteditable="true"]');
-  all.forEach((el,idx)=>{
-    let type = (el.type||'').toLowerCase();
-    let val;
-    if (type==='checkbox' || type==='radio') val = el.checked;
-    else if (el.isContentEditable) val = el.innerHTML;
-    else val = el.value;
-    out.push({path: cssPath(el), t:type, v:val});
-  });
-  return out;
+function cssPath(el){
+  if(!(el instanceof Element)) return '';
+  const path=[]; while(el && el.nodeType===1 && el!==document.body){
+    let sel = el.nodeName.toLowerCase();
+    if(el.id){ sel += '#'+CSS.escape(el.id); path.unshift(sel); break; }
+    let sib=el, nth=1; while(sib = sib.previousElementSibling) if(sib.nodeName===el.nodeName) nth++;
+    sel += `:nth-of-type(${nth})`; path.unshift(sel); el=el.parentNode;
+  } return path.join(' > ');
 }
-
-// Restaurar
+function safeQuery(path){ try{return document.querySelector(path);}catch{ return null; } }
+function serializeControls(){
+  const out=[]; document.querySelectorAll('input,select,textarea,[contenteditable="true"]').forEach(el=>{
+    const t=(el.type||'').toLowerCase(); let v;
+    if(t==='checkbox'||t==='radio') v=!!el.checked;
+    else if(el.isContentEditable) v=el.innerHTML;
+    else v=el.value;
+    out.push({path:cssPath(el),t,v});
+  }); return out;
+}
 function restoreControls(list){
   if(!Array.isArray(list)) return;
-  list.forEach(item=>{
-    const el = safeQuery(item.path);
-    if(!el) return;
-    const type = (el.type||'').toLowerCase();
-    if (type==='checkbox' || type==='radio'){
-      el.checked = !!item.v;
-    }else if (el.isContentEditable){
-      el.innerHTML = item.v ?? '';
-    }else{
-      el.value = item.v ?? '';
-    }
-    // dispara evento change para cálculos
-    el.dispatchEvent(new Event('input', {bubbles:true}));
-    el.dispatchEvent(new Event('change', {bubbles:true}));
+  list.forEach(it=>{
+    const el=safeQuery(it.path); if(!el) return;
+    const t=(el.type||'').toLowerCase();
+    if(t==='checkbox'||t==='radio') el.checked=!!it.v;
+    else if(el.isContentEditable) el.innerHTML=it.v??'';
+    else el.value=it.v??'';
+    el.dispatchEvent(new Event('input',{bubbles:true}));
+    el.dispatchEvent(new Event('change',{bubbles:true}));
   });
 }
 
-// CSS path robusto
-function cssPath(el){
-  if (!(el instanceof Element)) return '';
-  const path = [];
-  while (el.nodeType === Node.ELEMENT_NODE && el !== document.body){
-    let sel = el.nodeName.toLowerCase();
-    if (el.id){
-      sel += '#'+CSS.escape(el.id);
-      path.unshift(sel); break;
-    }else{
-      let sib = el, nth=1;
-      while (sib = sib.previousElementSibling) if (sib.nodeName===el.nodeName) nth++;
-      sel += `:nth-of-type(${nth})`;
-    }
-    path.unshift(sel);
-    el = el.parentNode;
-  }
-  return path.join(' > ');
-}
-function safeQuery(path){
-  try{ return document.querySelector(path); }catch(_){ return null; }
-}
-
-/* ========= PIN ========= */
-
+/* ===== PIN ===== */
 (function pinGate(){
-  const overlay = $('#pinOverlay');
-  const pinInp  = $('#pin');
-  const btnOk   = $('#enter');
-  const btnCl   = $('#clear');
-  const msg     = $('#pinMsg');
-
-  function openGate(){
-    overlay.style.display = 'flex';
-    overlay.style.visibility = 'visible';
-    overlay.style.opacity = '1';
-    overlay.style.pointerEvents = 'auto';
-    overlay.style.zIndex = '9999';
-    document.body.style.overflow = 'hidden';
-    setTimeout(()=>pinInp.focus(),60);
+  const overlay=$('#pinOverlay'), pin=$('#pin'), enter=$('#enter'), clear=$('#clear'), msg=$('#pinMsg');
+  function open(){ overlay.style.display='flex'; overlay.style.visibility='visible'; overlay.style.opacity='1'; overlay.style.pointerEvents='auto'; overlay.style.zIndex='9999'; document.body.style.overflow='hidden'; setTimeout(()=>pin&&pin.focus(),60); }
+  function close(){ overlay.style.display='none'; document.body.style.overflow=''; }
+  async function go(){
+    const code=(pin.value||'').trim();
+    if(String(code)===String(PIN_CODE||'4321')){ sessionStorage.setItem('__SEGUI_AUDIO_AUTH__','1'); msg.style.display='none'; close();}
+    else { msg.style.display='block'; pin.select(); }
   }
-  function closeGate(){
-    overlay.style.display = 'none';
-    document.body.style.overflow = '';
-  }
-  async function handleEnter(){
-    const code = (pinInp.value||'').trim();
-    if (String(code) === String(PIN_CODE||'4321')){
-      sessionStorage.setItem('__SEGUI_AUDIO_AUTH__','1');
-      msg.style.display='none';
-      closeGate();
-    }else{
-      msg.style.display='block';
-      pinInp.select();
-    }
-  }
-  btnOk.addEventListener('click',handleEnter);
-  btnCl.addEventListener('click',()=>{pinInp.value=''; pinInp.focus();});
-  pinInp.addEventListener('keydown',e=>{ if(e.key==='Enter') handleEnter(); });
-
-  document.addEventListener('DOMContentLoaded',()=>{
-    if(sessionStorage.getItem('__SEGUI_AUDIO_AUTH__')!=='1'){ openGate(); }
-  });
+  enter.addEventListener('click',go);
+  clear.addEventListener('click',()=>{pin.value='';pin.focus();});
+  pin.addEventListener('keydown',e=>{ if(e.key==='Enter') go(); });
+  document.addEventListener('DOMContentLoaded',()=>{ if(sessionStorage.getItem('__SEGUI_AUDIO_AUTH__')!=='1') open(); });
 })();
 
-/* ========= TABLA CIFRA — COMPAÑÍA ========= */
-
+/* ===== Tabla demo CIFRA (para verificar que todo responde) ===== */
 (function buildCifra(){
-  const tbody = $('#tbCuerpo');
-  tbody.innerHTML = '';
+  const tb=$('#tbCuerpo'); tb.innerHTML='';
   MESES.forEach(m=>{
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${m}</td>
-      <td><input type="number" min="0" step="1" class="inPrev"  placeholder="0" /></td>
-      <td><input type="number" min="0" step="1" class="inMes"   placeholder="0" /></td>
-      <td class="difCell muted">0</td>
-    `;
-    tbody.appendChild(tr);
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${m}</td>
+      <td><input type="number" min="0" step="1" class="inPrev" placeholder="0"/></td>
+      <td><input type="number" min="0" step="1" class="inMes" placeholder="0"/></td>
+      <td class="difCell muted">0</td>`;
+    tb.appendChild(tr);
   });
-  const ups = () => calcCifra();
-  document.querySelectorAll('.inPrev,.inMes').forEach(i=>{
-    i.addEventListener('input', ups);
-    i.addEventListener('change', ups);
-  });
+  const upd=()=>calcCifra();
+  document.querySelectorAll('.inPrev,.inMes').forEach(i=>{i.addEventListener('input',upd);i.addEventListener('change',upd);});
   calcCifra();
 })();
-
 function calcCifra(){
-  let tPrev=0, tMes=0, tDif=0;
+  let tP=0,tM=0,tD=0;
   document.querySelectorAll('#tbCuerpo tr').forEach(tr=>{
-    const prev = Number(tr.querySelector('.inPrev').value || 0);
-    const mes  = Number(tr.querySelector('.inMes').value  || 0);
-    const dif  = mes - prev;
-
-    tPrev += prev; tMes += mes; tDif += dif;
-
-    const cell = tr.querySelector('.difCell');
-    cell.textContent = nf.format(dif);
+    const p=Number(tr.querySelector('.inPrev').value||0);
+    const m=Number(tr.querySelector('.inMes').value||0);
+    const d=m-p; tP+=p; tM+=m; tD+=d;
+    const cell=tr.querySelector('.difCell'); cell.textContent=nf.format(d);
     cell.classList.remove('ok','bad','muted');
-    if (mes === 0 && prev === 0){ cell.classList.add('muted'); }
-    else if (mes >= prev){ cell.classList.add('ok'); }
-    else { cell.classList.add('bad'); }
+    if(p===0 && m===0) cell.classList.add('muted'); else if(m>=p) cell.classList.add('ok'); else cell.classList.add('bad');
   });
-  $('#totPrev').textContent = nf.format(tPrev);
-  $('#totMes').textContent  = nf.format(tMes);
-  $('#totDif').textContent  = nf.format(tDif);
+  $('#totPrev').textContent=nf.format(tP);
+  $('#totMes').textContent =nf.format(tM);
+  $('#totDif').textContent =nf.format(tD);
 }
 
-/* ========= NUBE (Apps Script) ========= */
-
-/**
- * Carga: GET ?action=load → devuelve string JSON o "{}"
- * Guarda: POST text/plain {action:'save', data:'<json string>'}
- * Los datos que enviamos: { ts, origin, values:[{path,t,v}] }
- */
-async function cloudStatusBadge(ok, extra=''){
-  const b = $('#cloudBadge');
-  if(!b) return;
-  b.textContent = ok ? ('Nube: guardado '+extra) : ('Nube: error '+extra);
-}
+/* ===== Nube (Apps Script) sin preflight ===== */
+function setBadge(txt){ const b=$('#cloudBadge'); if(b) b.textContent='Nube: '+txt; }
 
 async function saveCloud(){
   try{
-    const payload = {
-      ts: new Date().toISOString(),
-      origin: location.href,
-      values: serializeControls()
-    };
-    const resp = await fetch(GAS_URL, {
+    if(!GAS_URL || !/\/exec(\?|$)/.test(GAS_URL)) throw new Error('GAS_URL inválida (falta /exec)');
+    const payload={ ts:new Date().toISOString(), origin:location.href, values:serializeControls() };
+    const res=await fetch(GAS_URL,{
       method:'POST',
-      headers:{'Content-Type':'text/plain'},
-      body: JSON.stringify({action:'save', data: JSON.stringify(payload)})
+      headers:{'Content-Type':'text/plain;charset=UTF-8'}, // evita preflight
+      body: JSON.stringify({action:'save', data: JSON.stringify(payload)}),
+      cache:'no-store', mode:'cors'
     });
-    if(!resp.ok) throw new Error('HTTP '+resp.status);
-    await resp.text(); // Apps Script suele responder "ok" / lo que envíes
-    alert('Guardado en nube: OK');
-    cloudStatusBadge(true, 'OK');
-  }catch(err){
-    console.error(err);
-    alert('Error guardando en nube: '+err.message);
-    cloudStatusBadge(false, '(guardar)');
-  }
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    setBadge('guardado ✓');
+    alert('Guardado en nube ✓');
+  }catch(e){ console.error(e); setBadge('error'); alert('Error al guardar en nube: '+e.message); }
 }
 
 async function loadCloud(){
   try{
-    const url = GAS_URL + '?action=load';
-    const resp = await fetch(url, {method:'GET'});
-    if(!resp.ok) throw new Error('HTTP '+resp.status);
-    const txt = await resp.text();
-    const data = JSON.parse(txt || '{}');
-    if(data && data.values){
-      restoreControls(data.values);
-      alert('Datos recuperados de la nube');
-      cloudStatusBadge(true, 'recuperado');
-    }else{
-      alert('Nube vacía (sin datos previos)');
-      cloudStatusBadge(true, 'vacío');
-    }
-  }catch(err){
-    console.error(err);
-    alert('Error recuperando de la nube: '+err.message);
-    cloudStatusBadge(false, '(cargar)');
-  }
+    if(!GAS_URL || !/\/exec(\?|$)/.test(GAS_URL)) throw new Error('GAS_URL inválida (falta /exec)');
+    const res=await fetch(GAS_URL+'?action=load&nc='+Date.now(),{method:'GET',cache:'no-store',mode:'cors'});
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const j=await res.json().catch(()=>null);
+    const raw=(j&&j.data)?j.data:'';
+    if(!raw){ alert('Nube vacía'); setBadge('vacío'); return; }
+    const obj=JSON.parse(raw);
+    if(obj && obj.values) restoreControls(obj.values);
+    setBadge('cargado ✓'); alert('Datos recuperados de la nube');
+  }catch(e){ console.error(e); setBadge('error'); alert('Error al recuperar de nube: '+e.message); }
 }
 
-/* ========= LOCAL & RECUPERAR ========= */
-
+/* ===== Local ===== */
 function saveLocal(){
-  try{
-    const payload = {
-      ts:new Date().toISOString(),
-      origin:location.href,
-      values:serializeControls()
-    };
-    localStorage.setItem('__SEGUI_AUDIO_LOCAL__', JSON.stringify(payload));
-    alert('Guardado local: OK');
-  }catch(err){
-    alert('Error guardando local: '+err.message);
-  }
+  try{ localStorage.setItem('__SEGUI_AUDIO_LOCAL__', JSON.stringify({ts:new Date().toISOString(),values:serializeControls()})); alert('Guardado local ✓'); }
+  catch(e){ alert('Error guardando local: '+e.message); }
 }
 
-function openRecoverDialog(){
-  const wrap = document.createElement('div');
-  wrap.style.position='fixed';
-  wrap.style.inset='0';
-  wrap.style.background='rgba(0,0,0,.65)';
-  wrap.style.zIndex='9999';
-  wrap.style.display='flex';
-  wrap.style.alignItems='center';
-  wrap.style.justifyContent='center';
-
-  const card=document.createElement('div');
-  card.style.background='#111'; card.style.color='#fff';
-  card.style.padding='16px'; card.style.borderRadius='12px';
-  card.style.width='min(92vw,720px)'; card.style.boxShadow='0 10px 30px rgba(0,0,0,.35)';
-
-  card.innerHTML=`
-    <h3 style="margin:0 0 8px">Recuperar datos</h3>
-    <div style="opacity:.85;margin-bottom:8px">Pega el JSON o usa “Elegir archivo…”. Nada de tu contenido actual se borra: se fusiona.</div>
-    <textarea id="recJson" style="width:100%;height:320px;border-radius:8px;padding:8px"></textarea>
-    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px">
-      <input id="recFile" type="file" accept=".json,application/json" />
-      <button class="btn" id="recCancel">Cancelar</button>
-      <button class="btn primary" id="recImport">Importar y guardar</button>
-    </div>
-  `;
-  wrap.appendChild(card);
-  document.body.appendChild(wrap);
-
-  $('#recCancel',wrap).onclick=()=>wrap.remove();
-  $('#recFile',wrap).onchange=(e)=>{
-    const f=e.target.files[0]; if(!f) return;
-    const fr=new FileReader();
-    fr.onload=()=>{ $('#recJson',wrap).value=fr.result; };
-    fr.readAsText(f,'utf-8');
-  };
-  $('#recImport',wrap).onclick=()=>{
-    try{
-      const txt=$('#recJson',wrap).value||'{}';
-      const obj=JSON.parse(txt);
-      if(obj && obj.values) restoreControls(obj.values);
-      alert('Importado. No olvides “Guardar (nube)” si quieres subirlo.');
-      wrap.remove();
-    }catch(err){
-      alert('JSON inválido: '+err.message);
-    }
-  };
-}
-
-/* ========= EVENTOS UI ========= */
-
+/* ===== Eventos ===== */
 document.addEventListener('DOMContentLoaded',()=>{
   $('#btnReload')?.addEventListener('click',()=>location.reload());
   $('#btnSaveLocal')?.addEventListener('click',saveLocal);
   $('#btnSaveCloud')?.addEventListener('click',saveCloud);
-  $('#btnRecover')?.addEventListener('click',openRecoverDialog);
-
-  // Demo: abrir compañía (no cambia nada, mantiene la tabla actual visible)
-  $('#btnOpenComp')?.addEventListener('click',()=>{
-    $('#detTitle').textContent='CIFRA — COMPAÑÍA';
-  });
-
-  // Badges iniciales
-  cloudStatusBadge(true,'listo');
+  $('#btnLoadCloud')?.addEventListener('click',loadCloud);
+  $('#btnOpenComp')?.addEventListener('click',()=>{$('#detTitle').textContent='CIFRA — COMPAÑÍA';});
+  setBadge('listo');
 });
 </script>
 </body>
