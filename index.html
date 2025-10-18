@@ -205,6 +205,148 @@ body{margin:0;background:var(--bg);font-family:Inter,system-ui,Segoe UI,Roboto,A
 /* ========= CONFIG ========= */
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbwsfNXUKAClhKT-Jv_yPEpPNNkJxfwQE1CdKtiOsfxPprc8oeccmbCduuv7L5PriwiI/exec'; 
 const PIN_CODE = '4321';
+<script id="cloud-bridge">
+/* ============================================================
+   PUENTE DE GUARDADO EN NUBE (Apps Script) SIN PREFLIGHT CORS
+   - Mantiene TODO tu contenido y UI
+   - Solo añade saveCloud / loadCloud + enlace a los botones
+   - Usa Content-Type: text/plain para evitar el preflight
+   - Si existen funciones propias de export/import, las usa;
+     si no, guarda/restaura el localStorage y recarga.
+   ============================================================ */
+
+/* --- helpers para localizar botones ya existentes --- */
+function $(sel, root=document){ return root.querySelector(sel); }
+function findButtonByText(txt){
+  const btns = document.querySelectorAll('button, a, .btn');
+  for (const b of btns) {
+    const t = (b.textContent || '').trim().toLowerCase();
+    if (t.includes(txt)) return b;
+  }
+  return null;
+}
+
+/* --- obtén el JSON actual de la app (no cambiamos tu modelo) --- */
+function getAppJSON() {
+  // 1) Si ya tienes funciones propias de exportación, úsalas:
+  if (typeof window.exportJSON === 'function') {
+    try { return JSON.stringify(window.exportJSON()); } catch(_){}
+  }
+  if (typeof window.appToJSON === 'function') {
+    try { return JSON.stringify(window.appToJSON()); } catch(_){}
+  }
+  if (typeof window.getAppStateJSON === 'function') {
+    try { return String(window.getAppStateJSON()); } catch(_){}
+  }
+
+  // 2) Fallback seguro: guardamos TODO tu localStorage.
+  try {
+    const ls = {};
+    for (let i=0;i<localStorage.length;i++){
+      const k = localStorage.key(i);
+      ls[k] = localStorage.getItem(k);
+    }
+    return JSON.stringify({ _schema: 'localStorage-dump', ls });
+  } catch (_) {
+    return JSON.stringify({}); // nunca rompemos
+  }
+}
+
+/* --- aplica JSON cargado a la app (no cambiamos tu UI) --- */
+function applyAppJSON(jsonStr) {
+  // 1) Si tienes funciones propias de importación, úsalas:
+  if (typeof window.importMergeJSON === 'function') {
+    try { window.importMergeJSON(jsonStr); return; } catch(_){}
+  }
+  if (typeof window.applyAppJSON === 'function' && window.applyAppJSON !== applyAppJSON) {
+    try { window.applyAppJSON(jsonStr); return; } catch(_){}
+  }
+
+  // 2) Fallback: restituir localStorage y recargar
+  try {
+    const obj = JSON.parse(jsonStr || '{}');
+    if (obj && obj._schema === 'localStorage-dump' && obj.ls) {
+      Object.keys(obj.ls).forEach(k => localStorage.setItem(k, obj.ls[k]));
+      // Redibuja (si tu UI lee localStorage al inicio, basta recargar)
+      location.reload();
+      return;
+    }
+  } catch (_) {}
+  // Si no hay nada que aplicar, no hacemos nada.
+}
+
+/* --- GUARDAR EN NUBE (evitando preflight) --- */
+async function saveCloud() {
+  try {
+    if (!window.GAS_URL) throw new Error('Falta GAS_URL en index.html');
+
+    const payload = {
+      action: 'save',
+      data: getAppJSON()
+    };
+
+    const res = await fetch(GAS_URL, {
+      method: 'POST',
+      // 👇 'text/plain' evita preflight CORS y Apps Script lo acepta
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload),
+      redirect: 'follow',
+      referrerPolicy: 'no-referrer'
+    });
+
+    if (!res.ok) throw new Error(res.status + ' ' + res.statusText);
+
+    // Tu backend devuelve JSON {ok:true,...}
+    const j = await res.json().catch(() => ({}));
+    if (j && j.ok) {
+      alert('Guardado en la nube ✅');
+    } else {
+      throw new Error((j && j.error) || 'Respuesta inválida');
+    }
+  } catch (e) {
+    alert('Error guardando en nube: ' + e.message);
+  }
+}
+
+/* --- CARGAR/RECUPERAR DESDE NUBE --- */
+async function loadCloud() {
+  try {
+    if (!window.GAS_URL) throw new Error('Falta GAS_URL en index.html');
+
+    const url = GAS_URL + '?action=load&nc=' + Date.now();
+    const res = await fetch(url, { method: 'GET' });
+
+    if (!res.ok) throw new Error(res.status + ' ' + res.statusText);
+
+    const j = await res.json();
+    if (!j || !j.ok) throw new Error((j && j.error) || 'Sin datos');
+
+    // j.data contiene el string JSON que guardamos en saveCloud
+    applyAppJSON(j.data || '{}');
+
+    // Si tu import no recarga, puedes notificar:
+    // alert('Datos cargados desde la nube ✅');
+  } catch (e) {
+    alert('Error cargando de nube: ' + e.message);
+  }
+}
+
+/* --- Enlazamos automáticamente a tus botones existentes --- */
+(function wireCloudButtons(){
+  // Por id (si quieres, añade estos id en tu HTML y listo)
+  const saveBtn = document.getElementById('btnSaveCloud') || findButtonByText('guardar (nube)');
+  if (saveBtn && !saveBtn.__wiredCloudSave) {
+    saveBtn.__wiredCloudSave = true;
+    saveBtn.addEventListener('click', (e)=>{ e.preventDefault(); saveCloud(); });
+  }
+
+  const loadBtn = document.getElementById('btnLoadCloud') || findButtonByText('recuperar');
+  if (loadBtn && !loadBtn.__wiredCloudLoad) {
+    loadBtn.__wiredCloudLoad = true;
+    loadBtn.addEventListener('click', (e)=>{ e.preventDefault(); loadCloud(); });
+  }
+})();
+</script>
 
 /* ========= ESTADO/DATOS ========= */
 const state = { panel:null, cvTarget:null, fmMode:'mentoring', chart:null };
