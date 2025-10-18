@@ -202,901 +202,207 @@ body{margin:0;background:var(--bg);font-family:Inter,system-ui,Segoe UI,Roboto,A
 </div>
 
 <script>
-/* ========= CONFIG ========= */
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbwsfNXUKAClhKT-Jv_yPEpPNNkJxfwQE1CdKtiOsfxPprc8oeccmbCduuv7L5PriwiI/exec'; 
+<script>
+/* ======== CONFIG ========= */
+const GAS_URL  = 'https://script.google.com/macros/s/AKfyc...tu-EXEC.../exec';  // ← tu /exec correcto
 const PIN_CODE = '4321';
+</script>
+
+<!-- =========================================================
+     PUENTE DE GUARDADO EN NUBE (Apps Script) SIN PREFLIGHT
+     ========================================================= -->
 <script id="cloud-bridge">
-/* ============================================================
-   PUENTE DE GUARDADO EN NUBE (Apps Script) SIN PREFLIGHT CORS
-   - Mantiene TODO tu contenido y UI
-   - Solo añade saveCloud / loadCloud + enlace a los botones
-   - Usa Content-Type: text/plain para evitar el preflight
-   - Si existen funciones propias de export/import, las usa;
-     si no, guarda/restaura el localStorage y recarga.
-   ============================================================ */
+(() => {
+  /*** 1) Utilidades ***/
+  const $ = (s, r=document) => r.querySelector(s);
+  const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
 
-/* --- helpers para localizar botones ya existentes --- */
-function $(sel, root=document){ return root.querySelector(sel); }
-function findButtonByText(txt){
-  const btns = document.querySelectorAll('button, a, .btn');
-  for (const b of btns) {
-    const t = (b.textContent || '').trim().toLowerCase();
-    if (t.includes(txt)) return b;
-  }
-  return null;
-}
-
-/* --- obtén el JSON actual de la app (no cambiamos tu modelo) --- */
-function getAppJSON() {
-  // 1) Si ya tienes funciones propias de exportación, úsalas:
-  if (typeof window.exportJSON === 'function') {
-    try { return JSON.stringify(window.exportJSON()); } catch(_){}
-  }
-  if (typeof window.appToJSON === 'function') {
-    try { return JSON.stringify(window.appToJSON()); } catch(_){}
-  }
-  if (typeof window.getAppStateJSON === 'function') {
-    try { return String(window.getAppStateJSON()); } catch(_){}
-  }
-
-  // 2) Fallback seguro: guardamos TODO tu localStorage.
-  try {
-    const ls = {};
-    for (let i=0;i<localStorage.length;i++){
-      const k = localStorage.key(i);
-      ls[k] = localStorage.getItem(k);
+  // Localiza un botón por su texto visible (case-insensitive)
+  const findButtonByText = (txt) => {
+    const t = (txt||'').trim().toLowerCase();
+    for (const b of $$('button, a.btn, a')) {
+      const v = (b.textContent || '').trim().toLowerCase();
+      if (v.includes(t)) return b;
     }
-    return JSON.stringify({ _schema: 'localStorage-dump', ls });
-  } catch (_) {
-    return JSON.stringify({}); // nunca rompemos
-  }
-}
+    return null;
+  };
 
-/* --- aplica JSON cargado a la app (no cambiamos tu UI) --- */
-function applyAppJSON(jsonStr) {
-  // 1) Si tienes funciones propias de importación, úsalas:
-  if (typeof window.importMergeJSON === 'function') {
-    try { window.importMergeJSON(jsonStr); return; } catch(_){}
-  }
-  if (typeof window.applyAppJSON === 'function' && window.applyAppJSON !== applyAppJSON) {
-    try { window.applyAppJSON(jsonStr); return; } catch(_){}
-  }
+  // Toast simple (cae en alert si no hay estilos)
+  const toast = (msg, ok=true) => {
+    try {
+      const box = document.createElement('div');
+      box.textContent = msg;
+      box.style.cssText = `
+        position:fixed;left:50%;top:20px;transform:translateX(-50%);
+        z-index:999999;padding:.6rem .9rem;border-radius:8px;
+        background:${ok?'#19c37d':'#e74c3c'};color:#fff;
+        font-weight:700;box-shadow:0 6px 18px rgba(0,0,0,.15);
+      `;
+      document.body.appendChild(box);
+      setTimeout(()=>box.remove(), 2800);
+    } catch { alert(msg); }
+  };
 
-  // 2) Fallback: restituir localStorage y recargar
-  try {
-    const obj = JSON.parse(jsonStr || '{}');
-    if (obj && obj._schema === 'localStorage-dump' && obj.ls) {
-      Object.keys(obj.ls).forEach(k => localStorage.setItem(k, obj.ls[k]));
-      // Redibuja (si tu UI lee localStorage al inicio, basta recargar)
-      location.reload();
+  /*** 2) Export/import del estado ***/
+  // Si tu app define window.exportJSON()/importJSON(json) los usamos;
+  // si no, se hace snapshot de localStorage y luego recarga.
+  const exportState = () => {
+    if (typeof window.exportJSON === 'function') {
+      try { return window.exportJSON(); } catch {}
+    }
+    // snapshot de localStorage (todo)
+    const snap = {};
+    for (let i=0; i<localStorage.length; i++){
+      const k = localStorage.key(i);
+      snap[k] = localStorage.getItem(k);
+    }
+    return JSON.stringify({__type:'localStorage', data:snap});
+  };
+
+  const importState = (json) => {
+    // json puede venir ya como objeto o string
+    let data = json;
+    if (typeof data === 'string') {
+      try { data = JSON.parse(data); } catch {}
+    }
+    if (typeof window.importJSON === 'function') {
+      try { window.importJSON(data); return true; } catch {}
+    }
+    // si es snapshot de localStorage, lo restauramos
+    if (data && data.__type === 'localStorage' && data.data && typeof data.data === 'object') {
+      Object.keys(data.data).forEach(k => localStorage.setItem(k, data.data[k]));
+      return true;
+    }
+    // último recurso: si es string, lo guardamos en una clave y recargamos
+    try {
+      localStorage.setItem('__segui_audio_cloud_raw__', (typeof json === 'string') ? json : JSON.stringify(json));
+    } catch {}
+    return true;
+  };
+
+  /*** 3) Llamadas a Apps Script (sin preflight) ***/
+  const saveCloud = async () => {
+    if (!GAS_URL || !/\/exec(\?|$)/.test(GAS_URL)) {
+      alert('Configura GAS_URL con tu /exec de Apps Script');
       return;
     }
-  } catch (_) {}
-  // Si no hay nada que aplicar, no hacemos nada.
-}
-
-/* --- GUARDAR EN NUBE (evitando preflight) --- */
-async function saveCloud() {
-  try {
-    if (!window.GAS_URL) throw new Error('Falta GAS_URL en index.html');
-
-    const payload = {
-      action: 'save',
-      data: getAppJSON()
-    };
-
-    const res = await fetch(GAS_URL, {
-      method: 'POST',
-      // 👇 'text/plain' evita preflight CORS y Apps Script lo acepta
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify(payload),
-      redirect: 'follow',
-      referrerPolicy: 'no-referrer'
-    });
-
-    if (!res.ok) throw new Error(res.status + ' ' + res.statusText);
-
-    // Tu backend devuelve JSON {ok:true,...}
-    const j = await res.json().catch(() => ({}));
-    if (j && j.ok) {
-      alert('Guardado en la nube ✅');
-    } else {
-      throw new Error((j && j.error) || 'Respuesta inválida');
+    try {
+      const payload = {
+        action: 'save',
+        // OJO: mantenemos el contenido tal cual exportado (string u objeto)
+        data: exportState()
+      };
+      // Enviamos como text/plain para evitar preflight
+      const res = await fetch(GAS_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+        body: JSON.stringify(payload),
+        cache: 'no-store',
+        mode: 'cors'
+      });
+      if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+      const txt = await res.text();
+      let out = null;
+      try { out = JSON.parse(txt); } catch {}
+      if (out && out.ok) {
+        toast('Guardado en nube ✓', true);
+      } else {
+        throw new Error((out && out.error) || 'Respuesta inválida');
+      }
+    } catch (e) {
+      console.error(e);
+      alert('Error guardando en nube: ' + (e.message || e));
     }
-  } catch (e) {
-    alert('Error guardando en nube: ' + e.message);
-  }
-}
+  };
 
-/* --- CARGAR/RECUPERAR DESDE NUBE --- */
-async function loadCloud() {
-  try {
-    if (!window.GAS_URL) throw new Error('Falta GAS_URL en index.html');
+  const loadCloud = async () => {
+    if (!GAS_URL || !/\/exec(\?|$)/.test(GAS_URL)) {
+      alert('Configura GAS_URL con tu /exec de Apps Script');
+      return;
+    }
+    try {
+      const res = await fetch(GAS_URL + (GAS_URL.includes('?') ? '&' : '?') + 'action=load', {
+        method: 'GET',
+        cache: 'no-store',
+        mode: 'cors'
+      });
+      if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+      const txt = await res.text();
+      let out = null;
+      try { out = JSON.parse(txt); } catch {}
+      const raw = out && out.data ? out.data : txt;
+      if (!raw || raw === 'null' || raw === '""') {
+        toast('No hay datos en nube todavía', false);
+        return;
+      }
+      importState(raw);
+      toast('Datos recuperados. Recargando…', true);
+      setTimeout(()=>location.reload(), 400);
+    } catch (e) {
+      console.error(e);
+      alert('Error recuperando de nube: ' + (e.message || e));
+    }
+  };
 
-    const url = GAS_URL + '?action=load&nc=' + Date.now();
-    const res = await fetch(url, { method: 'GET' });
+  /*** 4) Enlazar a los botones existentes ***/
+  const wireButtons = () => {
+    // Soportamos tus nombres de botones actuales
+    const btnSaveCloud = findButtonByText('Guardar (nube)') || findButtonByText('Guardar nube') || findButtonByText('Cloud');
+    const btnLoadCloud = findButtonByText('Recuperar') || findButtonByText('Cargar') || findButtonByText('Abrir compañía'); // “Recuperar…” es el más común
 
-    if (!res.ok) throw new Error(res.status + ' ' + res.statusText);
+    if (btnSaveCloud) btnSaveCloud.addEventListener('click', saveCloud, {passive:true});
+    if (btnLoadCloud) btnLoadCloud.addEventListener('click', loadCloud, {passive:true});
 
-    const j = await res.json();
-    if (!j || !j.ok) throw new Error((j && j.error) || 'Sin datos');
+    // bonus: atajo Ctrl+S para nube si se pulsa con ALT
+    window.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's' && e.altKey) {
+        e.preventDefault();
+        saveCloud();
+      }
+    });
+  };
 
-    // j.data contiene el string JSON que guardamos en saveCloud
-    applyAppJSON(j.data || '{}');
+  /*** 5) PIN (no tocamos tu lógica, solo garantizamos Enter) ***/
+  const ensurePinEnter = () => {
+    const pin = $('#pin'), enter = $('#enter'), clear = $('#clear'), msg = $('#pinMsg');
+    if (pin && enter) {
+      const go = async () => {
+        try {
+          if (String(PIN_CODE) !== String(pin.value || '')) {
+            if (msg) { msg.style.display = 'block'; msg.textContent = 'PIN incorrecto'; }
+            setTimeout(()=> { if (msg) msg.style.display = 'none'; }, 1600);
+            return;
+          }
+          // deja que tu app muestre el contenido (tu showApp() si lo tienes)
+          if (typeof window.showApp === 'function') window.showApp();
+          document.body.classList.remove('locked');
+        } catch {}
+      };
+      enter.addEventListener('click', go, {passive:true});
+      pin.addEventListener('keydown', (e)=> { if (e.key === 'Enter') go(); }, {passive:true});
+      if (clear) clear.addEventListener('click', ()=> pin.value='', {passive:true});
+      setTimeout(()=> { try { pin.focus(); } catch {} }, 60);
+    }
+  };
 
-    // Si tu import no recarga, puedes notificar:
-    // alert('Datos cargados desde la nube ✅');
-  } catch (e) {
-    alert('Error cargando de nube: ' + e.message);
-  }
-}
-
-/* --- Enlazamos automáticamente a tus botones existentes --- */
-(function wireCloudButtons(){
-  // Por id (si quieres, añade estos id en tu HTML y listo)
-  const saveBtn = document.getElementById('btnSaveCloud') || findButtonByText('guardar (nube)');
-  if (saveBtn && !saveBtn.__wiredCloudSave) {
-    saveBtn.__wiredCloudSave = true;
-    saveBtn.addEventListener('click', (e)=>{ e.preventDefault(); saveCloud(); });
-  }
-
-  const loadBtn = document.getElementById('btnLoadCloud') || findButtonByText('recuperar');
-  if (loadBtn && !loadBtn.__wiredCloudLoad) {
-    loadBtn.__wiredCloudLoad = true;
-    loadBtn.addEventListener('click', (e)=>{ e.preventDefault(); loadCloud(); });
-  }
+  /*** 6) Init ***/
+  window.addEventListener('DOMContentLoaded', () => {
+    ensurePinEnter();
+    wireButtons();
+  });
 })();
 </script>
 
-/* ========= ESTADO/DATOS ========= */
-const state = { panel:null, cvTarget:null, fmMode:'mentoring', chart:null };
-window._bulkPaste = false; // bandera para desactivar rerender durante pegados
-
-// Deep merge para NO perder contenido al cargar
-function deepMerge(target, source){
-  if(source==null || typeof source!=='object') return target;
-  Object.keys(source).forEach(k=>{
-    const sv=source[k], tv=target[k];
-    if(Array.isArray(sv)){
-      if(!Array.isArray(tv)) target[k]=[];
-      // conserva lo existente y añade lo nuevo
-      target[k] = (tv||[]).length>=sv.length ? tv : sv.map((v,i)=> (tv && tv[i]!=null) ? deepMerge(tv[i]||{}, v) : v);
-    }else if(sv && typeof sv==='object'){
-      target[k] = deepMerge(tv||{}, sv);
-    }else{
-      // si target ya tiene dato no lo pisamos con vacío
-      if(tv==null || tv==='') target[k]=sv;
-    }
-  });
-  return target;
-}
-
-let data = {
-  cv:{compania:[], exclusivos:[], flop:[]},
-  ex:[], flop:[],
-  va:{ rol:'Delegado de Audio', visitador:'', rows:[] },
-  fm:{ mentoring:[], coaching:[], generales:[] },
-  ta:{ rows:[] },
-  eq:{ packs: Array.from({length:7},()=>({rows:[]})) }
-};
-
-/* ========= UTILS ========= */
-const $ = (s,r=document)=>r.querySelector(s);
-const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
-const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
-function toast(msg){const t=document.createElement('div'); t.textContent=msg;
-  Object.assign(t.style,{position:'fixed',bottom:'10px',left:'50%',transform:'translateX(-50%)',background:'#111',color:'#fff',padding:'6px 9px',borderRadius:'8px',zIndex:9999,fontSize:'11px',opacity:.96});
-  document.body.appendChild(t); setTimeout(()=>t.remove(),1400);
-}
-
-/* ========= PIN ========= */
-function checkPin(v){ return v===PIN_CODE; }
-function handleEnter(){
-  $('#pinMsg').style.display='none';
-  if(!checkPin($('#pin').value)){ $('#pinMsg').style.display='block'; return; }
-  $('#pinModal').style.display='none';
-}
-$('#enter').onclick=handleEnter;
-$('#clear').onclick=()=>$('#pin').value='';
-$('#pin').addEventListener('keydown',e=>{ if(e.key==='Enter') handleEnter(); });
-
-/* ========= NAV ========= */
-function openPanel(id){
-  state.panel = id;
-  $('#detBody').innerHTML = '';
-  $('#cvHeaderMeta').style.display = (id==='cv') ? 'flex' : 'none';
-  if(id==='cv') drawCvLanding();
-  if(id==='ex') drawCentrosPanel('ex');
-  if(id==='flop') drawCentrosPanel('flop');
-  if(id==='va') drawVisitas();
-  if(id==='fm') drawFormaciones();
-  if(id==='ta') drawTeleaudiologia();
-  if(id==='eq') drawEquipos();
-}
-
-/* ========= CIFRA: meses/plantillas ========= */
-const CV_MESES=['Ago-25','Sep-25','Oct-25','Nov-25','Dic-25','Ene-26','Feb-26','Mar-26','Abr-26','May-26','Jun-26','Jul-26'];
-const blankCvMeses=()=>CV_MESES.map(m=>({mes:m,previsto:'',mescv:'',dif:0}));
-function ensureCvCentro(o){o.meta||={};o.meta.nombre??='';o.meta.delegado??='';o.meta.tipo??='Sucursal';o.meta.audiologo??='';o.meses||=blankCvMeses();return o;}
-function ensureDataShapes(){
-  data.cv ||= {compania:blankCvMeses(), exclusivos:[], flop:[]};
-  if(!Array.isArray(data.cv.compania) || data.cv.compania.length!==12) data.cv.compania=blankCvMeses();
-  data.cv.exclusivos = (data.cv.exclusivos||[]).map(ensureCvCentro);
-  data.cv.flop       = (data.cv.flop||[]).map(ensureCvCentro);
-  data.ex ||= []; data.flop ||= [];
-  data.va ||= {rol:'Delegado de Audio',visitador:'',rows: Array.from({length:250},()=>({}))};
-  if(!Array.isArray(data.va.rows) || data.va.rows.length<250){
-    const faltan=250-(data.va.rows||[]).length;
-    data.va.rows = (data.va.rows||[]).concat(Array.from({length:Math.max(0,faltan)},()=>({})));
+<!-- (opcional) Service worker antiguo: si te da problemas de caché, bórralo -->
+<script>
+  // Si tienes un SW previo y quieres eliminarlo definitivamente,
+  // descomenta esto, recarga una vez y vuelve a comentarlo.
+  /*
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.unregister()));
+    caches && caches.keys && caches.keys().then(k => k.forEach(c => caches.delete(c)));
   }
-  data.fm ||= {mentoring:[],coaching:[],generales:[]};
-  data.ta ||= {rows:[]};
-  data.eq ||= {packs:Array.from({length:7},()=>({rows:[]}))};
-}
-
-/* ========= CIFRA: Sidebar Exclusivos ========= */
-function renderCvSidebar(){
-  const inp=$('#cvSearchEx'), list=$('#cvListEx'); if(!list) return;
-  const q=(inp?.value||'').toLowerCase();
-  const items = (data.cv.exclusivos||[]).map((c,i)=>({c,i})).filter(o=>!q || (o.c.meta?.nombre||'').toLowerCase().includes(q));
-  list.innerHTML = items.map(o=>`
-    <div class="row" style="justify-content:space-between;align-items:center">
-      <span>${esc(o.c.meta?.nombre||('Centro '+(o.i+1)))}</span>
-      <button class="btn pill small" data-cvex="${o.i}">Abrir ▸</button>
-    </div>`).join('') || '<div class="note small">No hay centros aún.</div>';
-}
-$('#cvAddEx')?.addEventListener('click',()=>{
-  const n=prompt('Nombre del centro exclusivo:',''); if(n===null) return;
-  (data.cv.exclusivos ||= []).push(ensureCvCentro({meta:{nombre:n,delegado:'',tipo:'Sucursal',audiologo:''}}));
-  renderCvSidebar();
-});
-$('#cvSearchEx')?.addEventListener('input',renderCvSidebar);
-$('#cvListEx')?.addEventListener('click',e=>{
-  const i=e.target?.dataset?.cvex; if(i!=null) openCvCentro('ex', Number(i));
-});
-$('#cvOpenComp')?.addEventListener('click', ()=> openCvCompania());
-
-/* ========= CIFRA: Landing / Compañía / Centro ========= */
-function drawCvLanding(){
-  $('#detTag').textContent='CIFRA DE VENTAS';
-  $('#detBody').innerHTML=
-    `<div class="col" style="gap:.6rem">
-       <div class="row" style="gap:.6rem">
-         <button class="btn pill" id="goComp">Abrir Compañía</button>
-       </div>
-       <div class="note small">Usa la izquierda para crear/abrir centros exclusivos y editar su tabla mensual.</div>
-     </div>`;
-  $('#goComp').onclick=openCvCompania;
-}
-function openCvCompania(){ openPanel('cv'); state.cvTarget={kind:'compania'}; $('#detTag').textContent='CIFRA — COMPAÑÍA'; drawCvTable(null, data.cv.compania || blankCvMeses()); }
-function openCvCentro(kind,index){
-  openPanel('cv');
-  const arr=(kind==='ex')?data.cv.exclusivos:data.cv.flop;
-  ensureCvCentro(arr[index]); state.cvTarget={kind,index};
-  const m=arr[index].meta; $('#detTag').textContent=(kind==='ex'?'CIFRA — CENTRO EXCLUSIVO':'CIFRA — CENTRO FLOP')+' · '+(m.nombre||('Centro '+(index+1)));
-  drawCvTable(arr[index], arr[index].meses, m);
-}
-
-/* ========= CIFRA: Tabla + Gráfico ========= */
-function drawCvTable(centro, mesesArr, meta){
-  mesesArr ||= blankCvMeses();
-  const metaHtml = centro ? `
-    <div class="row" style="flex-wrap:wrap;margin-bottom:.4rem">
-      <input id="cvMetaNombre"  class="pill" value="${esc(meta?.nombre||'')}"   placeholder="Nombre del centro"/>
-      <input id="cvMetaDelegado"class="pill" value="${esc(meta?.delegado||'')}" placeholder="Delegado"/>
-      <select id="cvMetaTipo" class="pill">
-        <option ${meta?.tipo==='Sucursal'?'selected':''}>Sucursal</option>
-        <option ${meta?.tipo==='Franquicia'?'selected':''}>Franquicia</option>
-        <option ${meta?.tipo==='Propio'?'selected':''}>Propio</option>
-      </select>
-      <input id="cvMetaAudiologo"class="pill" value="${esc(meta?.audiologo||'')}" placeholder="Audiólogo"/>
-    </div>` : '';
-
-  $('#detBody').innerHTML =
-    metaHtml +
-    `<div class="row" style="align-items:flex-start;gap:1rem">
-      <div style="flex:1 1 560px;min-width:560px">
-        <div class="table-wrap">
-          <table class="table" id="cvTable">
-            <thead><tr><th>Mes</th><th>Previsto</th><th>CV mes</th><th>Dif.</th></tr></thead>
-            <tbody>
-              ${mesesArr.map((r,i)=>`
-                <tr>
-                  <td>${esc(r.mes)}</td>
-                  <td><input type="number" step="any" value="${esc(r.previsto)}" data-cv="prev" data-i="${i}"/></td>
-                  <td><input type="number" step="any" value="${esc(r.mescv)}" data-cv="mes"  data-i="${i}"/></td>
-                  <td id="cv-dif-${i}">0</td>
-                </tr>`).join('')}
-            </tbody>
-            <tfoot><tr><td>Total</td><td id="cv-t-prev">0</td><td id="cv-t-mes">0</td><td id="cv-t-dif">0</td></tr></tfoot>
-          </table>
-        </div>
-      </div>
-      <div style="flex:1 1 340px;min-width:320px">
-        <canvas id="cvChart" height="260"></canvas>
-      </div>
-    </div>`;
-
-  if(centro){
-    $('#cvMetaNombre').oninput   = e=>{ centro.meta.nombre   = e.target.value; renderCvSidebar(); };
-    $('#cvMetaDelegado').oninput = e=>{ centro.meta.delegado = e.target.value; };
-    $('#cvMetaTipo').oninput     = e=>{ centro.meta.tipo     = e.target.value; };
-    $('#cvMetaAudiologo').oninput= e=>{ centro.meta.audiologo= e.target.value; };
-  }
-  $('#cvTable').addEventListener('input',e=>{
-    const i=+e.target.dataset.i; if(Number.isNaN(i)) return;
-    const k=e.target.dataset.cv; if(k==='prev') mesesArr[i].previsto=e.target.value; if(k==='mes') mesesArr[i].mescv=e.target.value;
-    updateCvTotals(mesesArr); drawCvChart(mesesArr);
-  });
-  updateCvTotals(mesesArr); drawCvChart(mesesArr);
-}
-function updateCvTotals(mesesArr){
-  let tP=0,tM=0,tD=0;
-  mesesArr.forEach((r,i)=>{
-    const p=Number(r.previsto||0), m=Number(r.mescv||0), d=m-p;
-    tP+=p; tM+=m; tD+=d;
-    const cell=$('#cv-dif-'+i); if(cell){ cell.textContent=d.toFixed(2); cell.className=(m<p)?'cv-bad':'cv-good'; }
-  });
-  $('#cv-t-prev').textContent=tP.toFixed(2);
-  $('#cv-t-mes').textContent=tM.toFixed(2);
-  $('#cv-t-dif').textContent=tD.toFixed(2);
-}
-function drawCvChart(mesesArr){
-  const ctx=$('#cvChart'); if(!ctx) return;
-  const labels=mesesArr.map(r=>r.mes);
-  const previsto=mesesArr.map(r=>Number(r.previsto||0));
-  const mes=mesesArr.map(r=>Number(r.mescv||0));
-  if(state.chart){ state.chart.data.labels=labels; state.chart.data.datasets[0].data=previsto; state.chart.data.datasets[1].data=mes; state.chart.update(); return; }
-  state.chart = new Chart(ctx,{type:'line',data:{
-    labels, datasets:[
-      {label:'Previsto', data:previsto, tension:.2},
-      {label:'CV mes',   data:mes,      tension:.2}
-    ]},
-    options:{responsive:true,plugins:{legend:{position:'bottom'}},scales:{y:{beginAtZero:true}}}
-  });
-}
-
-/* ========= LISTAS IZQUIERDA: Centros Ex / Flop ========= */
-function renderLeftLists(){
-  const renderList = (arr, mountId, q) => {
-    const el = $(mountId); if(!el) return;
-    const items=(arr||[]).map((r,i)=>({r,i}))
-      .filter(o=>!q || [o.r.nombre,o.r.delegado,o.r.audiologo,o.r.tipo].join(' ').toLowerCase().includes(q));
-    el.innerHTML = items.map(o=>`
-      <div class="row" style="justify-content:space-between;align-items:center">
-        <span>${esc(o.r.nombre||('Centro '+(o.i+1)))}</span>
-        <button class="btn pill small" data-open-center="${mountId==='\\#exList'?'ex':'flop'}:${o.i}">Abrir ▸</button>
-      </div>`).join('') || '<div class="note small">No hay centros.</div>';
-  };
-  renderList(data.ex,   '#exList',   ($('#exSearch').value||'').toLowerCase());
-  renderList(data.flop, '#flopList', ($('#flopSearch').value||'').toLowerCase());
-}
-$('#exAdd').onclick=()=>{ (data.ex ||= []).push({nombre:'',delegado:'',audiologo:'',tipo:'Sucursal'}); renderLeftLists(); };
-$('#flopAdd').onclick=()=>{ (data.flop ||= []).push({nombre:'',delegado:'',audiologo:'',tipo:'Sucursal'}); renderLeftLists(); };
-$('#exSearch').oninput=renderLeftLists; $('#flopSearch').oninput=renderLeftLists;
-document.addEventListener('click',e=>{
-  const tag=e.target?.dataset?.openCenter; if(!tag) return;
-  const [kind,idx] = tag.split(':'); openCentroDetalle(kind, +idx);
-});
-
-/* ========= DETALLE DE CENTRO: 3 PANELES ========= */
-function openCentroDetalle(kind, idx){
-  const arr = (kind==='ex')? data.ex : data.flop;
-  const meta = arr[idx] ||= {nombre:'',delegado:'',audiologo:'',tipo:'Sucursal'};
-  $('#detTag').textContent = (kind==='ex'?'CENTRO EXCLUSIVO':'CENTRO FLOP')+' · '+(meta.nombre||('Centro '+(idx+1)));
-  const colorBG = (kind==='ex')?'var(--col-ex)':'var(--col-fl)';
-  $('#detBody').innerHTML =
-    `<div class="col" style="gap:.6rem">
-      <div class="row" style="flex-wrap:wrap;background:${colorBG};padding:.4rem;border-radius:8px;border:1px solid var(--line)">
-        <input class="pill" id="cNombre"   value="${esc(meta.nombre)}"   placeholder="Nombre del centro"/>
-        <input class="pill" id="cDelegado" value="${esc(meta.delegado)}" placeholder="Delegado"/>
-        <input class="pill" id="cAudio"    value="${esc(meta.audiologo)}"placeholder="Audiólogo"/>
-        <select class="pill" id="cTipo">
-          <option ${meta.tipo==='Sucursal'?'selected':''}>Sucursal</option>
-          <option ${meta.tipo==='Franquicia'?'selected':''}>Franquicia</option>
-          <option ${meta.tipo==='Propio'?'selected':''}>Propio</option>
-        </select>
-      </div>
-
-      <div class="row" style="gap:.6rem;flex-wrap:wrap">
-        <button class="btn pill" data-sub="acc">Acciones</button>
-        <button class="btn pill" data-sub="form">Formaciones y mentoring</button>
-        <button class="btn pill" data-sub="proc">Procesos</button>
-      </div>
-      <div id="centroSub" class="col"></div>
-    </div>`;
-
-  $('#cNombre').oninput=e=>{ meta.nombre=e.target.value; renderLeftLists(); };
-  $('#cDelegado').oninput=e=>{ meta.delegado=e.target.value; };
-  $('#cAudio').oninput   =e=>{ meta.audiologo=e.target.value; };
-  $('#cTipo').onchange   =e=>{ meta.tipo=e.target.value; };
-
-  const sub=$('#centroSub');
-
-  function subAcc(){
-    const storeKey = (kind==='ex')?'exAcc':'flopAcc';
-    data[storeKey] ||= {}; data[storeKey][idx] ||= [];
-    const get=()=> data[storeKey][idx];
-    sub.innerHTML =
-     `<div class="table-wrap"><table class="table" id="tbAcc">
-        <thead><tr><th>Fecha</th><th>Tipo de acción</th><th>Derivaciones</th><th>Citas</th><th>Ventas</th><th>Observaciones</th></tr></thead>
-        <tbody></tbody></table></div>
-      <button class="btn pill" id="accAdd" data-add-for="tbAcc">＋ Añadir</button>`;
-    const render=()=> $('#tbAcc tbody').innerHTML = get().map((r,i)=>`
-      <tr>
-        <td><input type="date" value="${esc(r.fecha||'')}" data-i="${i}" data-k="fecha"></td>
-        <td>
-          <select data-i="${i}" data-k="accion">
-            ${['azafata','buzoneo','mailing','ruleta','stand','cashback','otros'].map(x=>`<option ${r.accion===x?'selected':''}>${x}</option>`).join('')}
-          </select>
-        </td>
-        <td><input type="number" value="${esc(r.der||'')}"   data-i="${i}" data-k="der"></td>
-        <td><input type="number" value="${esc(r.cita||'')}"  data-i="${i}" data-k="cita"></td>
-        <td><input type="number" value="${esc(r.venta||'')}" data-i="${i}" data-k="venta"></td>
-        <td><input type="text"   value="${esc(r.obs||'')}"   data-i="${i}" data-k="obs"></td>
-      </tr>`).join('');
-    $('#accAdd').onclick=()=>{ get().push({}); render(); };
-    $('#tbAcc').addEventListener('input',e=>{const i=+e.target.dataset.i,k=e.target.dataset.k; if(Number.isNaN(i))return; get()[i][k]=(e.target.type==='checkbox')?e.target.checked:e.target.value; if(!window._bulkPaste) render();});
-    render();
-  }
-
-  function subForm(){
-    const storeKey = (kind==='ex')?'exForm':'flopForm';
-    data[storeKey] ||= {}; data[storeKey][idx] ||= [];
-    const get=()=> data[storeKey][idx];
-    sub.innerHTML =
-     `<div class="table-wrap"><table class="table" id="tbForm">
-        <thead><tr><th>Fecha</th><th>Tema</th><th>Asistencia</th><th>Aplicado</th><th>Observaciones</th></tr></thead>
-        <tbody></tbody></table></div>
-      <button class="btn pill" id="formAdd" data-add-for="tbForm">＋ Añadir</button>`;
-    const render=()=> $('#tbForm tbody').innerHTML = get().map((r,i)=>`
-      <tr>
-        <td><input type="date" value="${esc(r.fecha||'')}" data-i="${i}" data-k="fecha"></td>
-        <td><input type="text"  value="${esc(r.tema||'')}"  data-i="${i}" data-k="tema"></td>
-        <td style="text-align:center"><input type="checkbox" ${r.asis?'checked':''} data-i="${i}" data-k="asis"></td>
-        <td style="text-align:center"><input type="checkbox" ${r.apli?'checked':''} data-i="${i}" data-k="apli"></td>
-        <td><input type="text"  value="${esc(r.obs||'')}"   data-i="${i}" data-k="obs"></td>
-      </tr>`).join('');
-    $('#formAdd').onclick=()=>{ get().push({}); render(); };
-    $('#tbForm').addEventListener('input',e=>{const i=+e.target.dataset.i,k=e.target.dataset.k; const t=get()[i]; t[k]=(e.target.type==='checkbox')?e.target.checked:e.target.value; if(!window._bulkPaste) render();});
-    render();
-  }
-
-  function subProc(){
-    const storeKey = (kind==='ex')?'exProc':'flopProc';
-    data[storeKey] ||= {}; data[storeKey][idx] ||= [];
-    const get=()=> data[storeKey][idx];
-    sub.innerHTML =
-     `<div class="table-wrap"><table class="table" id="tbProc">
-        <thead><tr>
-          <th>Fecha visita</th><th>Puntuación %</th><th>% Pruebas</th><th>% Ventas</th>
-          <th>Deriv. óptica</th><th>Observaciones</th><th>Excel (enlace)</th>
-        </tr></thead><tbody></tbody></table></div>
-      <button class="btn pill" id="procAdd" data-add-for="tbProc">＋ Añadir</button>`;
-    function colorPunt(v){const n=Number(v||0);return n>=95?'score-ok':(n>=85?'score-mid':'score-bad');}
-    function colorPct(v){return Number(v||0)>=80?'pct-ok':'pct-bad';}
-    const render=()=> $('#tbProc tbody').innerHTML = get().map((r,i)=>`
-      <tr>
-        <td><input type="date" value="${esc(r.fecha||'')}" data-i="${i}" data-k="fecha"></td>
-        <td class="${colorPunt(r.punt)}"><input type="number" value="${esc(r.punt||'')}" data-i="${i}" data-k="punt"></td>
-        <td class="${colorPct (r.prue)}"><input type="number" value="${esc(r.prue||'')}" data-i="${i}" data-k="prue"></td>
-        <td class="${colorPct (r.vent)}"><input type="number" value="${esc(r.vent||'')}" data-i="${i}" data-k="vent"></td>
-        <td style="text-align:center"><input type="checkbox" ${r.optica?'checked':''} data-i="${i}" data-k="optica"></td>
-        <td><input type="text" value="${esc(r.obs||'')}" data-i="${i}" data-k="obs"></td>
-        <td><input type="text" value="${esc(r.xlsx||'')}" data-i="${i}" data-k="xlsx" placeholder="https://…"></td>
-      </tr>`).join('');
-    $('#procAdd').onclick=()=>{ get().push({}); render(); };
-    $('#tbProc').addEventListener('input',e=>{
-      const i=+e.target.dataset.i,k=e.target.dataset.k; const t=get()[i]; t[k]=(e.target.type==='checkbox')?e.target.checked:e.target.value;
-      if(!window._bulkPaste) render();
-    });
-    render();
-  }
-
-  $('[data-sub="acc"]').onclick = ()=> subAcc();
-  $('[data-sub="form"]').onclick= ()=> subForm();
-  $('[data-sub="proc"]').onclick= ()=> subProc();
-  subAcc(); // por defecto
-}
-
-/* ========= VISITAS AUDIO ========= */
-function drawVisitas(){
-  $('#detTag').textContent='VISITAS AUDIO';
-  const rows=data.va.rows ||= Array.from({length:250},()=>({}));
-  $('#detBody').innerHTML =
-    `<div class="col" style="gap:.6rem">
-      <div class="row" style="gap:.6rem">
-        <label class="pill">Visitador
-          <select id="vaRol">
-            <option ${data.va.rol==='Delegado de Audio'?'selected':''}>Delegado de Audio</option>
-            <option ${data.va.rol==='Responsable Tec. Audio'?'selected':''}>Responsable Tec. Audio</option>
-          </select>
-        </label>
-        <input id="vaVisitador" class="pill" placeholder="Nombre del visitador" value="${esc(data.va.visitador||'')}">
-        <input id="vaFilter" class="pill" placeholder="Buscar centro, delegado…">
-      </div>
-      <div class="table-wrap"><table class="table" id="tbVa">
-        <thead><tr>
-          <th>#</th><th>Fecha</th><th>Centro</th><th>Franquicia/Sucursal</th><th>Delegado</th>
-          <th>Puntuación procesos %</th><th>% Conv. pruebas</th><th>% Conv. ventas</th><th>Excel</th>
-        </tr></thead><tbody></tbody></table></div>
-      <button class="btn pill" id="vaAdd" data-add-for="tbVa">＋ Añadir fila</button>
-    </div>`;
-  function colorScore(v){const n=Number(v||0);return n>=95?'score-ok':(n>=85?'score-mid':'score-bad');}
-  function colorPct(v){return Number(v||0)>=80?'pct-ok':'pct-bad';}
-  function render(){
-    const q=($('#vaFilter').value||'').toLowerCase();
-    $('#tbVa tbody').innerHTML = rows
-      .map((r,i)=>({r,i}))
-      .filter(o=>!q || [o.r.centro,o.r.delegado,o.r.tipo].join(' ').toLowerCase().includes(q))
-      .map(o=>`
-        <tr>
-          <td>${o.i+1}</td>
-          <td><input type="date" value="${esc(o.r.fecha||'')}" data-i="${o.i}" data-k="fecha"></td>
-          <td><input type="text"  value="${esc(o.r.centro||'')}" data-i="${o.i}" data-k="centro"></td>
-          <td>
-            <select data-i="${o.i}" data-k="tipo">
-              <option ${o.r.tipo==='Sucursal'?'selected':''}>Sucursal</option>
-              <option ${o.r.tipo==='Franquicia'?'selected':''}>Franquicia</option>
-            </select>
-          </td>
-          <td><input type="text"  value="${esc(o.r.delegado||'')}" data-i="${o.i}" data-k="delegado"></td>
-          <td class="${colorScore(o.r.score)}"><input type="number" value="${esc(o.r.score||'')}" data-i="${o.i}" data-k="score"></td>
-          <td class="${colorPct(o.r.pctPrue)}"><input type="number" value="${esc(o.r.pctPrue||'')}" data-i="${o.i}" data-k="pctPrue"></td>
-          <td class="${colorPct(o.r.pctVent)}"><input type="number" value="${esc(o.r.pctVent||'')}" data-i="${o.i}" data-k="pctVent"></td>
-          <td><input type="text" value="${esc(o.r.xlsx||'')}" data-i="${o.i}" data-k="xlsx" placeholder="https://…"></td>
-        </tr>`).join('');
-  }
-  $('#tbVa').addEventListener('input',e=>{
-    const i=+e.target.dataset.i,k=e.target.dataset.k; if(Number.isNaN(i))return;
-    const t=rows[i]; t[k]=e.target.value; if(!window._bulkPaste) render();
-  });
-  $('#vaAdd').onclick=()=>{ rows.push({}); render(); };
-  $('#vaRol').onchange=e=>{ data.va.rol=e.target.value; };
-  $('#vaVisitador').oninput=e=>{ data.va.visitador=e.target.value; };
-  $('#vaFilter').oninput=render;
-  render();
-}
-
-/* ========= FORMACIONES Y MENTORING ========= */
-function drawFormaciones(){
-  $('#detTag').textContent='FORMACIONES Y MENTORING';
-  $('#detBody').innerHTML =
-   `<div class="row" style="gap:.6rem;margin-bottom:.6rem">
-      <button class="btn pill ${state.fmMode==='mentoring'?'primary':''}" data-fm="mentoring">Mentoring</button>
-      <button class="btn pill ${state.fmMode==='coaching'?'primary':''}" data-fm="coaching">Coaching</button>
-      <button class="btn pill ${state.fmMode==='generales'?'primary':''}" data-fm="generales">Generales</button>
-    </div>
-    <div class="table-wrap"><table class="table" id="tbFm">
-      <thead><tr><th>Fecha</th><th>Centro</th><th>Delegado</th><th>Audiólogo</th><th>Tema</th><th>Asistió</th><th>Aplicado</th><th>Observaciones</th></tr></thead>
-      <tbody></tbody></table></div>
-    <button class="btn pill" id="fmAdd" data-add-for="tbFm">＋ Añadir</button>`;
-  const arr = data.fm[state.fmMode] ||= [];
-  function render(){
-    $('#tbFm tbody').innerHTML = arr.map((r,i)=>`
-      <tr>
-        <td><input type="date" value="${esc(r.fecha||'')}" data-i="${i}" data-k="fecha"></td>
-        <td><input type="text"  value="${esc(r.centro||'')}" data-i="${i}" data-k="centro"></td>
-        <td><input type="text"  value="${esc(r.delegado||'')}" data-i="${i}" data-k="delegado"></td>
-        <td><input type="text"  value="${esc(r.audiologo||'')}" data-i="${i}" data-k="audiologo"></td>
-        <td><input type="text"  value="${esc(r.tema||'')}" data-i="${i}" data-k="tema"></td>
-        <td style="text-align:center"><input type="checkbox" ${r.asis?'checked':''} data-i="${i}" data-k="asis"></td>
-        <td style="text-align:center"><input type="checkbox" ${r.apli?'checked':''} data-i="${i}" data-k="apli"></td>
-        <td><input type="text"  value="${esc(r.obs||'')}" data-i="${i}" data-k="obs"></td>
-      </tr>`).join('');
-  }
-  $('#tbFm').addEventListener('input',e=>{
-    const i=+e.target.dataset.i,k=e.target.dataset.k; const t=arr[i];
-    t[k]=(e.target.type==='checkbox')?e.target.checked:e.target.value;
-  });
-  $('#fmAdd').onclick=()=>{ arr.push({}); render(); };
-  $$('[data-fm]').forEach(b=> b.onclick=()=>{ state.fmMode=b.dataset.fm; drawFormaciones(); });
-  render();
-}
-
-/* ========= TELEAUDIOLOGÍA ========= */
-function drawTeleaudiologia(){
-  $('#detTag').textContent='TELEAUDIOLOGÍA';
-  const arr=data.ta.rows ||= [];
-  $('#detBody').innerHTML =
-   `<div class="row" style="gap:1rem;margin-bottom:.5rem">
-      <div class="kpi green"><div class="dot"></div> <b id="taCert">0</b> cert.</div>
-      <div class="kpi orange"><div class="dot"></div> <b id="taForm">0</b> form.</div>
-      <input id="taSearch" class="pill" placeholder="Buscar por centro o persona…">
-    </div>
-    <div class="table-wrap"><table class="table" id="tbTa">
-      <thead><tr>
-        <th>Centro</th><th>Delegado</th><th>Rol</th><th>Persona</th>
-        <th>Form.</th><th>Prác.</th><th>Cert.</th><th>Pruebas</th><th>Ventas</th><th>Observaciones</th>
-      </tr></thead><tbody></tbody></table></div>
-    <button class="btn pill" id="taAdd" data-add-for="tbTa">＋ Añadir</button>`;
-  function render(){
-    const q=($('#taSearch').value||'').toLowerCase();
-    $('#tbTa tbody').innerHTML = arr
-      .filter(r=>!q || [r.centro,r.persona].join(' ').toLowerCase().includes(q))
-      .map((r,i)=>`
-        <tr>
-          <td><input value="${esc(r.centro||'')}"   data-i="${i}" data-k="centro"></td>
-          <td><input value="${esc(r.delegado||'')}" data-i="${i}" data-k="delegado"></td>
-          <td>
-            <select data-i="${i}" data-k="rol">
-              <option ${r.rol!=='Técnico'?'selected':''}>Audiólogo</option>
-              <option ${r.rol==='Técnico'?'selected':''}>Técnico</option>
-            </select>
-          </td>
-          <td><input value="${esc(r.persona||'')}"  data-i="${i}" data-k="persona" placeholder="Nombre"></td>
-          <td style="text-align:center"><input type="checkbox" ${r.form?'checked':''}       data-i="${i}" data-k="form"></td>
-          <td style="text-align:center"><input type="checkbox" ${r.pract?'checked':''}      data-i="${i}" data-k="pract"></td>
-          <td style="text-align:center"><input type="checkbox" ${r.cert?'checked':''}       data-i="${i}" data-k="cert"></td>
-          <td style="text-align:center"><input type="checkbox" ${r.pruebas?'checked':''}    data-i="${i}" data-k="pruebas"></td>
-          <td style="text-align:center"><input type="checkbox" ${r.ventas?'checked':''}     data-i="${i}" data-k="ventas"></td>
-          <td><input value="${esc(r.obs||'')}"      data-i="${i}" data-k="obs"></td>
-        </tr>`).join('');
-    $('#taCert').textContent = arr.filter(r=>r.cert).length;
-    $('#taForm').textContent = arr.filter(r=>r.form).length;
-  }
-  $('#tbTa').addEventListener('input',e=>{
-    const i=+e.target.dataset.i,k=e.target.dataset.k; const t=arr[i]; if(!t) return;
-    t[k]=(e.target.type==='checkbox')?e.target.checked:e.target.value; if(!window._bulkPaste) render();
-  });
-  $('#taAdd').onclick=()=>{ arr.push({}); render(); };
-  $('#taSearch').oninput=render;
-  render();
-}
-
-/* ========= EQUIPOS ========= */
-function drawEquipos(){
-  $('#detTag').textContent='EQUIPOS';
-  const packs=data.eq.packs ||= Array.from({length:7},()=>({rows:[]}));
-  $('#detBody').innerHTML =
-    `<div class="row" style="gap:.6rem;margin-bottom:.5rem">
-       <input id="eqSearch" class="pill" placeholder="Buscar por equipo, Nº de serie o centro…">
-     </div>` +
-    packs.map((p,pi)=>`
-      <details ${pi<2?'open':''} style="margin-bottom:.6rem">
-        <summary class="row" style="gap:.5rem"><strong>Pack ${pi+1}</strong> <button class="btn pill small" data-pack="${pi}" data-add-for="eqTbl-${pi}">＋</button></summary>
-        <div class="table-wrap" style="margin-top:.4rem">
-          <table class="table" id="eqTbl-${pi}" data-tb="${pi}">
-            <thead><tr><th>Equipo</th><th>Nº serie</th><th>Centro</th><th>Persona que envía</th><th>Fecha</th></tr></thead>
-            <tbody>${
-              (p.rows||[]).map((r,ri)=>`
-              <tr>
-                <td><input value="${esc(r.eq||'')}"     data-p="${pi}" data-i="${ri}" data-k="eq"></td>
-                <td><input value="${esc(r.sn||'')}"     data-p="${pi}" data-i="${ri}" data-k="sn"></td>
-                <td><input value="${esc(r.centro||'')}" data-p="${pi}" data-i="${ri}" data-k="centro"></td>
-                <td><input value="${esc(r.envia||'')}"  data-p="${pi}" data-i="${ri}" data-k="envia"></td>
-                <td><input type="date" value="${esc(r.fecha||'')}" data-p="${pi}" data-i="${ri}" data-k="fecha"></td>
-              </tr>`).join('')}
-            </tbody>
-          </table>
-        </div>
-      </details>`).join('');
-
-  // + por pack
-  $('#detBody').addEventListener('click',e=>{
-    const p=e.target.dataset.pack; if(p==null) return;
-    packs[+p].rows ||=([]); packs[+p].rows.push({}); drawEquipos();
-  });
-  // edición
-  $('#detBody').addEventListener('input',e=>{
-    const p=e.target.dataset.p,i=e.target.dataset.i,k=e.target.dataset.k;
-    if(p==null||i==null||!k) return; (packs[+p].rows[+i] ||= {})[k]=e.target.value;
-  });
-  // buscador
-  $('#eqSearch').oninput=(e)=>{
-    const q=(e.target.value||'').toLowerCase();
-    $$('table[data-tb]').forEach(t=>{
-      const pi=+t.dataset.tb; const rows=packs[pi].rows||[];
-      t.tBodies[0].innerHTML = rows
-        .filter(r=>!q || [r.eq,r.sn,r.centro].join(' ').toLowerCase().includes(q))
-        .map((r,ri)=>`
-          <tr>
-            <td><input value="${esc(r.eq||'')}"     data-p="${pi}" data-i="${ri}" data-k="eq"></td>
-            <td><input value="${esc(r.sn||'')}"     data-p="${pi}" data-i="${ri}" data-k="sn"></td>
-            <td><input value="${esc(r.centro||'')}" data-p="${pi}" data-i="${ri}" data-k="centro"></td>
-            <td><input value="${esc(r.envia||'')}"  data-p="${pi}" data-i="${ri}" data-k="envia"></td>
-            <td><input type="date" value="${esc(r.fecha||'')}" data-p="${pi}" data-i="${ri}" data-k="fecha"></td>
-          </tr>`).join('');
-    });
-  };
-}
-
-/* ========= GUARDAR / CARGAR ========= */
-function saveLocal(){
-  try{
-    // copia de seguridad con timestamp
-    localStorage.setItem('audioSeguimientoCloud_backup_'+Date.now(), JSON.stringify(data));
-    localStorage.setItem('audioSeguimientoCloud', JSON.stringify(data));
-    $('#statusTag').textContent='Local · guardado'; toast('Guardado local');
-  }catch(e){ alert('No se pudo guardar en local: '+e.message); }
-}
-async function saveCloud(){
-  if(!/^https:\/\/script\.google/.test(GAS_URL)){ alert('Configura GAS_URL con tu /exec de Apps Script'); return; }
-  $('#statusTag').textContent='Nube · guardando…';
-  try{
-    const res=await fetch(GAS_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'save',data})});
-    if(!res.ok) throw new Error('HTTP '+res.status);
-    $('#statusTag').textContent='Nube · guardado'; toast('Guardado en nube');
-  }catch(e){ $('#statusTag').textContent='Error nube'; alert('Error guardando en nube: '+e.message); }
-}
-async function loadCloud(){
-  // 1º intentamos cloud; si falla, local
-  let loaded=null;
-  if(/^https:\/\/script\.google/.test(GAS_URL)){
-    try{
-      const res=await fetch(GAS_URL+'?action=load',{cache:'no-store'});
-      if(res.ok){ const txt=await res.text(); try{ loaded=JSON.parse(txt||'{}'); }catch{} }
-    }catch(_){}
-  }
-  const localRaw=localStorage.getItem('audioSeguimientoCloud');
-  const localObj=localRaw? (()=>{try{return JSON.parse(localRaw)}catch{return null}})() : null;
-
-  // prioridad: NO perder nada → merge profundo: local ∪ cloud
-  const base = data;
-  if(localObj) deepMerge(base, localObj);
-  if(loaded)   deepMerge(base, loaded);
-
-  data = base;
-  ensureDataShapes();
-  renderCvSidebar(); renderLeftLists();
-  openPanel('cv');
-  $('#statusTag').textContent = loaded? 'Nube · cargado' : (localObj? 'Local · cargado' : 'Base · lista');
-}
-
-/* ========= TOPBAR ========= */
-$('#btnRefresh').onclick = ()=> location.reload();
-$('#btnSaveLocal').onclick = saveLocal;
-$('#btnSaveCloud').onclick = saveCloud;
-
-/* ========= Pegar “tipo Excel” con AUTOFILAS ========= */
-(function enableExcelPasteWithAutoRows(){
-  function addRowsByCloning(tbody, count){
-    if(count<=0) return;
-    const sample = tbody.rows[tbody.rows.length-1] || null;
-    if(!sample) return;
-    for(let k=0;k<count;k++){
-      const tr = sample.cloneNode(true);
-      tr.querySelectorAll('input,select,textarea').forEach(el=>{
-        if(el.type==='checkbox') el.checked = false; else el.value = '';
-      });
-      tbody.appendChild(tr);
-    }
-  }
-  function addRowsByButton(tableId, count){
-    if(count<=0) return Promise.resolve();
-    const btn = document.querySelector(`[data-add-for="${tableId}"]`);
-    if(!btn) return Promise.resolve();
-    return new Promise(resolve=>{
-      for(let i=0;i<count;i++) btn.click();
-      setTimeout(resolve, 60);
-    });
-  }
-  document.addEventListener('paste', async (e)=>{
-    const t = e.target;
-    if(!t || !t.closest('table')) return;
-    if(!(t.tagName==='INPUT' || t.tagName==='SELECT' || t.tagName==='TEXTAREA')) return;
-
-    const dt = e.clipboardData || window.clipboardData;
-    const txt = dt && dt.getData('text');
-    if(!txt || (!txt.includes('\t') && !txt.includes('\n'))) return;
-    e.preventDefault();
-
-    const table = t.closest('table');
-    const tbody = table.tBodies[0]; if(!tbody) return;
-
-    const tbRows = Array.from(tbody.rows);
-    const startRowInBody = tbRows.indexOf(t.closest('tr'));
-    if(startRowInBody<0) return;
-
-    const rows = txt.replace(/\r/g,'').split('\n').filter(r=>r.length);
-    const need = (startRowInBody + rows.length) - tbRows.length;
-
-    window._bulkPaste = true;
-    if(need>0 && table.id!=='cvTable'){
-      if(tbRows.length>0){ addRowsByCloning(tbody, need); }
-      else{ await addRowsByButton(table.id, need); }
-    }
-    const tbRows2 = Array.from(table.tBodies[0].rows);
-    for(let rIdx=0;rIdx<rows.length;rIdx++){
-      const tr = tbRows2[startRowInBody + rIdx]; if(!tr) break;
-      const cells = Array.from(tr.querySelectorAll('input,select,textarea'));
-      const inputsInRow = Array.from(t.closest('tr').querySelectorAll('input,select,textarea'));
-      const startColIndex = inputsInRow.indexOf(t);
-      const values = rows[rIdx].split('\t');
-      for(let cIdx=0;cIdx<values.length;cIdx++){
-        const el = cells[startColIndex + cIdx]; if(!el) break;
-        const val = values[cIdx];
-        if(el.tagName==='SELECT'){
-          const v = String(val).trim().toLowerCase();
-          const opt = Array.from(el.options).find(o=>o.text.toLowerCase()===v || String(o.value).toLowerCase()===v);
-          el.value = opt ? opt.value : val;
-          el.dispatchEvent(new Event('input',{bubbles:true}));
-          el.dispatchEvent(new Event('change',{bubbles:true}));
-        }else{
-          el.value = val;
-          el.dispatchEvent(new Event('input',{bubbles:true}));
-        }
-      }
-    }
-    window._bulkPaste = false;
-  });
-})();
-
-/* ========= IMPORTADOR “Recuperar…” ========= */
-(function injectRecover(){
-  // Modal
-  const modal = document.createElement('div');
-  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:99999';
-  modal.innerHTML = `
-    <div style="background:#111;color:#fff;max-width:720px;width:min(92vw,720px);border-radius:12px;padding:14px;border:1px solid #333;box-shadow:0 18px 50px rgba(0,0,0,.5)">
-      <h3 style="margin:.2rem 0 .6rem">Recuperar datos</h3>
-      <p style="opacity:.85;margin:.2rem 0 .5rem">Pega aquí el JSON (o usa “Elegir archivo”). Nada de tu contenido actual se borra: se fusiona.</p>
-      <textarea id="recoverPaste" style="width:100%;height:220px;border-radius:8px;border:1px solid #444;background:#000;color:#fff;padding:.6rem;font-family:ui-monospace,Consolas,monospace"></textarea>
-      <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:.6rem">
-        <button id="recChoose" class="btn">Elegir archivo…</button>
-        <button id="recCancel" class="btn">Cancelar</button>
-        <button id="recApply" class="btn primary">Importar y guardar</button>
-      </div>
-      <div id="recMsg" style="margin-top:.5rem;font-size:12px;opacity:.85"></div>
-    </div>`;
-  document.body.appendChild(modal);
-
-  const file = document.createElement('input');
-  file.type='file'; file.accept='application/json'; file.style.display='none'; document.body.appendChild(file);
-
-  function openModal(){ modal.style.display='flex'; }
-  function closeModal(){ modal.style.display='none'; $('#recoverPaste').value=''; $('#recMsg').textContent=''; }
-
-  $('#btnRecover').addEventListener('click', openModal);
-  modal.querySelector('#recCancel').addEventListener('click', closeModal);
-  modal.querySelector('#recChoose').addEventListener('click', ()=> file.click());
-  file.addEventListener('change', async (e)=>{
-    const f=e.target.files?.[0]; if(!f) return; const txt=await f.text();
-    $('#recoverPaste').value = txt; $('#recMsg').textContent = 'Archivo cargado. Pulsa “Importar y guardar”.';
-  });
-
-  // intento auto detectar LocalStorage antiguo
-  (function tryAutoFind(){
-    try{
-      const keys = Object.keys(localStorage||{}).filter(k=>/audio|seguimiento/i.test(k));
-      for(const k of keys){
-        const v = localStorage.getItem(k);
-        if(v && v.trim().startsWith('{') && v.includes('{')){
-          $('#recoverPaste').value = v;
-          $('#recMsg').textContent = `Datos encontrados en LocalStorage (“${k}”). Puedes importar directamente.`;
-          break;
-        }
-      }
-    }catch(_){}
-  })();
-
-  modal.querySelector('#recApply').addEventListener('click', async ()=>{
-    const raw=$('#recoverPaste').value.trim();
-    if(!raw){ alert('Pega o carga un archivo JSON primero.'); return; }
-    try{
-      const src = JSON.parse(raw);
-      data = deepMerge(data, src); // fusiona sin perder lo actual
-      saveLocal(); // copia local
-      await saveCloud(); // intenta nube
-      // redibuja
-      renderCvSidebar(); renderLeftLists(); openPanel('cv');
-      closeModal();
-      toast('Datos importados y guardados');
-    }catch(e){ alert('No se pudo leer el JSON: '+e.message); }
-  });
-})();
-
-/* ========= INICIO ========= */
-document.addEventListener('DOMContentLoaded', ()=>{
-  // manejar flechas de la izquierda
-  $$('[data-open]').forEach(b=> b.addEventListener('click',()=> openPanel(b.dataset.open)));
-  // submodos FM
-  $$('[data-fm]').forEach(b=> b.addEventListener('click',()=>{ state.fmMode=b.dataset.fm; openPanel('fm'); }));
-  // listas iniciales
-  renderCvSidebar(); renderLeftLists();
-  // carga datos (merge nube+local sin perder contenido)
-  loadCloud();
-});
+  */
 </script>
 </body>
 </html>
