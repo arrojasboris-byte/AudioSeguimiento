@@ -223,6 +223,168 @@
     //   });
     //   // Llama unlock() dentro del OK del PIN si deseas esta capa extra.
     // });
-  </script>
+  <!-- ====== PARCHE: PIN + NUBE (NO TOCA TU CONTENIDO) ====== -->
+<style id="cloudPatchStyles">
+  :root{--som:0 6px 18px rgba(0,0,0,.2)}
+  #pinOverlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;z-index:9999;
+    display:flex;align-items:center;justify-content:center}
+  #pinOverlay .panel{background:#111;color:#fff;min-width:320px;max-width:92vw;border-radius:14px;
+    box-shadow:var(--som);padding:22px}
+  #pinOverlay h3{margin:0 0 10px 0;font:600 18px/1.25 system-ui,Segoe UI,Roboto}
+  #pinOverlay .row{display:flex;gap:10px;align-items:center}
+  #pinOverlay input#pin{flex:1;font-size:18px;padding:10px;border-radius:8px;border:1px solid #333;
+    background:#181818;color:#fff;text-align:center;letter-spacing:.35em}
+  #pinOverlay .btn{appearance:none;border:0;border-radius:999px;padding:10px 14px;cursor:pointer}
+  #pinOverlay #enter.btn{background:#fff;color:#111;font-weight:800}
+  #pinOverlay #clear.btn{background:#2a2a2a;color:#ddd}
+  #pinOverlay .msg{margin-top:10px;color:#ffb3b3;font-size:13px;display:none}
+  .cloud-fab{position:fixed;right:14px;bottom:14px;display:flex;flex-direction:column;gap:10px;z-index:9998}
+  .cloud-fab button{background:#111;color:#fff;border:0;border-radius:999px;padding:10px 14px;
+    font:600 13px/1 system-ui;box-shadow:var(--som);cursor:pointer}
+  .cloud-fab button:hover{background:#000}
+</style>
+
+<script id="cloudPatch">
+(function(){
+  // ==== CONFIG ====
+  const GAS_URL  = 'PEGAR_AQUI_TU_URL_EXEC_DE_APPS_SCRIPT';  // <-- CAMBIA ESTO
+  const PIN_CODE = '4321';
+
+  // Evitar doble inyección
+  if (window.__CLOUD_PATCH__) return; window.__CLOUD_PATCH__ = true;
+
+  const $  = (s, r=document)=> r.querySelector(s);
+  const $$ = (s, r=document)=> Array.from(r.querySelectorAll(s));
+
+  // ==== Crear overlay PIN si no existe ====
+  if (!$('#pinOverlay')){
+    const ov = document.createElement('div');
+    ov.id = 'pinOverlay';
+    ov.innerHTML = `
+      <div class="panel">
+        <h3>Acceso</h3>
+        <div style="opacity:.85;margin-bottom:10px">Introduce el PIN para editar:</div>
+        <div class="row">
+          <input id="pin" type="password" inputmode="numeric" maxlength="4" placeholder="••••" autocomplete="one-time-code"/>
+          <button id="enter" class="btn">Acceder</button>
+          <button id="clear" class="btn">Limpiar</button>
+        </div>
+        <div id="pinMsg" class="msg">PIN incorrecto</div>
+      </div>`;
+    document.body.appendChild(ov);
+  }
+
+  // ==== PIN logic ====
+  function initPIN(){
+    const ov = $('#pinOverlay');
+    const pin = $('#pin');
+    const msg = $('#pinMsg');
+    const ok  = ()=>{
+      if (pin.value === String(PIN_CODE)) {
+        ov.style.display='none'; msg.style.display='none';
+        const first = $('input,textarea,select,[contenteditable="true"]');
+        first && first.focus?.();
+      } else {
+        msg.style.display='block'; setTimeout(()=>msg.style.display='none', 2000);
+      }
+    };
+    ov.style.display = 'flex';
+    $('#enter').onclick = ok;
+    $('#clear').onclick = ()=>{ pin.value=''; pin.focus(); };
+    pin.addEventListener('keydown', e=>{ if(e.key==='Enter') ok(); });
+    setTimeout(()=>pin.focus(),50);
+  }
+
+  // ==== Snapshot / Apply (no toca tu layout) ====
+  function snapshot(){
+    const data = {v:1, when: Date.now(), inputs:{}, html:{}};
+    $$('input, textarea, select').forEach(el=>{
+      const key = el.id || el.name || el.dataset.key || el.outerHTML.slice(0,120);
+      if(!key) return;
+      if (el.type==='checkbox' || el.type==='radio') data.inputs[key] = !!el.checked;
+      else data.inputs[key] = el.value;
+    });
+    $$('[contenteditable=""],[contenteditable="true"]').forEach(el=>{
+      const key = el.id || el.dataset.key || el.outerHTML.slice(0,120);
+      if(!key) return;
+      data.html[key] = el.innerHTML;
+    });
+    return data;
+  }
+  function applySnapshot(data){
+    if(!data || !data.inputs) return;
+    $$('input, textarea, select').forEach(el=>{
+      const key = el.id || el.name || el.dataset.key || el.outerHTML.slice(0,120);
+      if(!(key in data.inputs)) return;
+      if (el.type==='checkbox' || el.type==='radio') el.checked = !!data.inputs[key];
+      else el.value = data.inputs[key];
+    });
+    $$('[contenteditable=""],[contenteditable="true"]').forEach(el=>{
+      const key = el.id || el.dataset.key || el.outerHTML.slice(0,120);
+      if(!(key in data.html)) return;
+      el.innerHTML = data.html[key];
+    });
+  }
+
+  // ==== Local (por seguridad) ====
+  const LS_KEY = 'seguimiento-audio:ui';
+  function saveLocal(){ localStorage.setItem(LS_KEY, JSON.stringify(snapshot())); alert('Guardado local ✅'); }
+  function loadLocal(){
+    const raw = localStorage.getItem(LS_KEY);
+    if(!raw) return alert('No hay datos locales.');
+    try{ applySnapshot(JSON.parse(raw)); alert('Cargado local ✅'); }catch(e){ alert('Error leyendo local.'); }
+  }
+
+  // ==== Cloud (sin preflight) ====
+  async function saveCloud(){
+    try{
+      const body = JSON.stringify(snapshot());
+      const res  = await fetch(GAS_URL, { method:'POST', headers:{'Content-Type':'text/plain'}, body });
+      const txt  = await res.text();
+      if(!res.ok) throw new Error(txt||res.status);
+      alert('Guardado en nube ✅');
+    }catch(e){ console.error(e); alert('Error guardando en nube: '+e.message); }
+  }
+  async function loadCloud(){
+    try{
+      const res = await fetch(GAS_URL+'?action=load', {method:'GET', headers:{'Accept':'text/plain'}});
+      const txt = await res.text();
+      if(!res.ok) throw new Error(txt||res.status);
+      const data = JSON.parse(txt||'{}');
+      applySnapshot(data);
+      alert('Datos de nube cargados ✅');
+    }catch(e){ console.error(e); alert('Error cargando de nube: '+e.message); }
+  }
+
+  // ==== Enganchar botones existentes o crear flotante ====
+  function hookOrFab(){
+    function byText(t){ t=t.toLowerCase(); return $$('button,a').find(b=>(b.textContent||'').trim().toLowerCase()===t); }
+    const bSave = byText('guardar (nube)') || byText('guardar nube');
+    const bLoad = byText('recuperar…') || byText('recuperar') || byText('cargar nube');
+    if (bSave) bSave.addEventListener('click', e=>{ e.preventDefault(); saveCloud(); }, {passive:false});
+    if (bLoad) bLoad.addEventListener('click', e=>{ e.preventDefault(); loadCloud(); }, {passive:false});
+    if(!bSave && !bLoad){
+      const box = document.createElement('div');
+      box.className='cloud-fab';
+      box.innerHTML = `
+        <button id="fab-save">Guardar nube</button>
+        <button id="fab-load">Cargar nube</button>
+        <button id="fab-dl">Descargar HTML</button>`;
+      document.body.appendChild(box);
+      $('#fab-save').onclick = saveCloud;
+      $('#fab-load').onclick = loadCloud;
+      $('#fab-dl').onclick   = ()=>{
+        const blob = new Blob([document.documentElement.outerHTML], {type:'text/html;charset=utf-8'});
+        const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='SEGUIMIENTO.html'; a.click(); URL.revokeObjectURL(a.href);
+      };
+    }
+  }
+
+  // Lanzar PIN al cargar, y enganchar nube
+  window.addEventListener('DOMContentLoaded', ()=>{
+    initPIN(); hookOrFab();
+  });
+})();
+</script>
 </body>
 </html>
