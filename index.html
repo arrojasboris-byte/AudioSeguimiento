@@ -1,625 +1,228 @@
 <!doctype html>
 <html lang="es">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>SEGUIMIENTO AUDIO · Cloud</title>
-<meta name="theme-color" content="#c82727"/>
-<style>
-  :root{
-    --rojo:#c82727; --rojo2:#a71f1f; --bg:#f6f7fb; --card:#fff; --line:#e6e7ee;
-    --tx:#111; --muted:#6b7280; --ok:#16a34a; --bad:#ef4444; --sh:0 4px 14px rgba(0,0,0,.06);
-    --fs:13px;
-  }
-  *{box-sizing:border-box} html,body{height:100%}
-  body{margin:0;background:var(--bg);color:var(--tx);font:var(--fs)/1.25 Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif}
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>SEGUIMIENTO AUDIO · Cloud</title>
+  <meta name="theme-color" content="#c82727"/>
 
-  /* Top */
-  .topbar{position:sticky;top:0;z-index:1000;width:100%;color:#fff;background:linear-gradient(180deg,var(--rojo),var(--rojo2));box-shadow:var(--sh)}
-  .topbar .inner{max-width:1280px;margin:auto;padding:10px 12px;display:flex;align-items:center;gap:10px}
-  .logo{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.4px}
-  .sp{flex:1}
-  .pill{border:1px solid #ffffff44;background:#ffffff14;color:#fff;border-radius:999px;padding:8px 12px;cursor:pointer}
-  .pill.primary{background:#fff;color:#111;font-weight:800}
-  .pill:disabled{opacity:.6;cursor:not-allowed}
-  .badge{font-size:12px;opacity:.9}
-  .topbar:not(:first-of-type){display:none!important} /* anti-duplicados SW */
+  <!-- Estilos mínimos SOLO para el PIN y flotantes (no tocan tu layout) -->
+  <style>
+    :root{--rojo:#c82727;--som:0 4px 18px rgba(0,0,0,.15)}
+    /* Overlay PIN */
+    #pinOverlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;z-index:9999;
+      display:flex;align-items:center;justify-content:center}
+    #pinOverlay .panel{background:#111;color:#fff;min-width:320px;max-width:92vw;
+      border-radius:14px;box-shadow:var(--som);padding:22px}
+    #pinOverlay h3{margin:0 0 10px 0;font:600 18px/1.25 system-ui,Segoe UI,Roboto}
+    #pinOverlay .row{display:flex;gap:10px;align-items:center}
+    #pinOverlay input#pin{flex:1;font-size:18px;padding:10px;border-radius:8px;border:1px solid #333;
+      background:#181818;color:#fff;text-align:center;letter-spacing:.35em}
+    #pinOverlay .btn{appearance:none;border:0;border-radius:999px;padding:10px 14px;cursor:pointer}
+    #pinOverlay #enter.btn{background:#fff;color:#111;font-weight:800}
+    #pinOverlay #clear.btn{background:#2a2a2a;color:#ddd}
+    #pinOverlay .msg{margin-top:10px;color:#ffb3b3;font-size:13px;display:none}
 
-  /* Layout */
-  .main{max-width:1280px;margin:12px auto;padding:0 12px;display:grid;grid-template-columns:260px 1fr;gap:12px}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--sh)}
-  .side .sec{padding:12px;border-bottom:1px solid var(--line)}
-  .side .sec:last-child{border-bottom:0}
-  .sec h4{margin:0 0 8px;display:flex;align-items:center;gap:6px;font-size:13px}
-  .btn{border:1px solid var(--line);background:#fff;padding:6px 10px;border-radius:8px;cursor:pointer}
-  .row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-  .muted{color:var(--muted)}
-  .detail{padding:12px}
-  .toolbar{display:flex;align-items:center;gap:8px;margin-bottom:8px}
-  .grid{overflow:auto;border:1px solid var(--line);border-radius:8px}
-  table{border-collapse:collapse;width:100%;min-width:880px}
-  th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;white-space:nowrap}
-  thead th{background:#fafafb} tfoot td{background:#fafafb;font-weight:700}
-  input[type="number"]{width:110px}
-  .ok{background:#10b98112} .bad{background:#ef444410}
-
-  /* Estilo PARA los botones de la izquierda (solo visual): */
-  .side .btn.open{background:#111;color:#fff;border-color:#111}
-  .side .btn.open:hover{filter:brightness(1.08)}
-  .side .btn.add{background:#c82727;color:#fff;border-color:#c82727;font-weight:700}
-  .side .btn.add:hover{filter:brightness(1.1)}
-
-  /* PIN */
-  #pinOverlay{position:fixed;inset:0;background:rgba(0,0,0,.78);
-    display:none;align-items:center;justify-content:center;z-index:9999}
-  #pinOverlay .panel{background:#1b1b1b;color:#fff;padding:18px 20px;border-radius:12px;width:min(92vw,360px);box-shadow:0 10px 30px rgba(0,0,0,.35)}
-  #pinOverlay input{width:130px;text-align:center;letter-spacing:.3em}
-  #pinOverlay .msg{display:none;color:#ffb3b3;margin-top:8px;font-size:12px}
-
-  /* Visitas: barra lateral de progreso */
-  .va-right{position:sticky; top:82px; margin-left:8px; align-self:flex-start; width:240px}
-  .va-card{background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:var(--sh);padding:8px}
-  .bar{height:6px;background:#e9ecef;border-radius:999px;overflow:hidden}
-  .bar>div{height:100%;background:#1f6feb;width:0%}
-</style>
+    /* Flotante utilidades nube (solo si no existen tus botones) */
+    .cloud-fab{position:fixed;right:14px;bottom:14px;display:flex;flex-direction:column;gap:10px;z-index:9998}
+    .cloud-fab button{background:#111;color:#fff;border:0;border-radius:999px;padding:10px 14px;
+      font:600 13px/1 system-ui;box-shadow:var(--som);cursor:pointer}
+    .cloud-fab button:hover{background:#000}
+  </style>
 </head>
 <body>
 
-<!-- Topbar -->
-<div class="topbar">
-  <div class="inner">
-    <div class="logo">🎧 SEGUIMIENTO AUDIO</div>
-    <div class="sp"></div>
-    <button class="pill" id="btnReload">Actualizar</button>
-    <button class="pill" id="btnSaveLocal">Guardar (local)</button>
-    <button class="pill primary" id="btnSaveCloud">Guardar (nube)</button>
-    <button class="pill" id="btnLoadCloud">Recuperar (nube)</button>
-    <button class="pill" id="btnDownload">Descargar HTML</button>
-    <span class="badge" id="cloudBadge">Nube: —</span>
+  <!-- ======================= TU APP ACTUAL =========================
+       PEGA aquí TODO tu HTML de la plataforma (lo que ya te funciona).
+       No borres nada ni cambies clases/ids: este archivo no toca tu layout.
+  =================================================================== -->
+  <div id="app">
+    <!-- TU APP ACTUAL: pega aquí tu contenido existente tal cual -->
   </div>
-</div>
+  <!-- ================================================================= -->
 
-<!-- Layout -->
-<div class="main">
-  <!-- Sidebar -->
-  <div class="card side" id="sidebar">
-    <div class="sec">
-      <h4>📈 Cifra de ventas</h4>
-      <button class="btn open" data-open="cifra">▶ Abrir compañía</button>
-    </div>
-
-    <div class="sec">
-      <h4>⭐ Centros exclusivos</h4>
+  <!-- PIN overlay -->
+  <div id="pinOverlay" aria-modal="true" role="dialog" style="display:none">
+    <div class="panel">
+      <h3>Acceso</h3>
+      <div style="opacity:.85;margin-bottom:10px">Introduce el PIN para editar:</div>
       <div class="row">
-        <button class="btn open" data-open="centros_ex">▶ Abrir</button>
-        <button class="btn add" id="addCentroEx">+ Centro</button>
+        <input id="pin" type="password" inputmode="numeric" maxlength="4" placeholder="••••" autocomplete="one-time-code"/>
+        <button id="enter" class="btn">Acceder</button>
+        <button id="clear" class="btn">Limpiar</button>
       </div>
-    </div>
-
-    <div class="sec">
-      <h4>🟩 Centros flop</h4>
-      <div class="row">
-        <button class="btn open" data-open="centros_flop">▶ Abrir</button>
-        <button class="btn add" id="addCentroFlop">+ Centro</button>
-      </div>
-    </div>
-
-    <div class="sec">
-      <h4>🧭 Visitas audio</h4>
-      <button class="btn open" data-open="visitas">▶ Abrir</button>
-    </div>
-
-    <div class="sec">
-      <h4>🎓 Formaciones y mentoring</h4>
-      <button class="btn open" data-open="formaciones">▶ Abrir</button>
-    </div>
-
-    <div class="sec">
-      <h4>🩺 Teleaudiología</h4>
-      <button class="btn open" data-open="tele">▶ Abrir</button>
-    </div>
-
-    <div class="sec">
-      <h4>🧰 Equipos</h4>
-      <button class="btn open" data-open="equipos">▶ Abrir</button>
+      <div id="pinMsg" class="msg">PIN incorrecto</div>
     </div>
   </div>
 
-  <!-- Detalle -->
-  <div class="card detail">
-    <div class="toolbar">
-      <h3 id="detTitle" style="margin:0">CIFRA — COMPAÑÍA</h3>
-      <span class="muted" id="detHint">Edite y guarde; todo es editable. Use “Guardar (nube)”.</span>
-    </div>
+  <script>
+    /* ========== CONFIG ========== */
+    const GAS_URL  = 'https://script.google.com/macros/s/AKfycbz3MeWrV_4FX2wdT7IkOLb9uPDWuI7rC7zeNH_VA2y2W0cYEeeGK0R5rXGtcp8fr-3A3Q/exec';  // <-- 
+    const PIN_CODE = '4321';
 
-    <!-- ===== CIFRA ===== -->
-    <section id="panel-cifra">
-      <div class="grid">
-        <table id="tblCifra">
-          <thead>
-            <tr><th>Mes</th><th>Previsto</th><th>CV mes</th><th>Diferencia</th></tr>
-          </thead>
-          <tbody id="tbCifraBody"></tbody>
-          <tfoot>
-            <tr><td>Total</td><td id="cifraTotPrev">0</td><td id="cifraTotMes">0</td><td id="cifraTotDif">0</td></tr>
-          </tfoot>
-        </table>
-      </div>
-    </section>
+    /* ========== helpers DOM ========== */
+    const $  = (s, r=document)=> r.querySelector(s);
+    const $$ = (s, r=document)=> Array.from(r.querySelectorAll(s));
 
-    <!-- ===== CENTROS EXCLUSIVOS ===== -->
-    <section id="panel-centros_ex" style="display:none">
-      <div class="row" style="margin-bottom:8px">
-        <input placeholder="Buscar…" id="cExSearch" />
-      </div>
-      <div class="grid">
-        <table>
-          <thead>
-            <tr><th>#</th><th>Nombre</th><th>Delegado</th><th>Audiólogo</th><th>Tipo</th></tr>
-          </thead>
-          <tbody id="cExBody"></tbody>
-        </table>
-      </div>
+    /* ========== PIN overlay ========== */
+    (function initPIN(){
+      const ov  = $('#pinOverlay');
+      const pin = $('#pin');
+      const msg = $('#pinMsg');
+      const ok  = () => {
+        if (pin.value === String(PIN_CODE)) {
+          ov.style.display = 'none';
+          msg.style.display = 'none';
+          // foco amable
+          const first = $('input,textarea,select,[contenteditable="true"]', document);
+          first && first.focus?.();
+        } else {
+          msg.style.display = 'block';
+          setTimeout(()=>msg.style.display='none', 2000);
+        }
+      };
+      window.addEventListener('DOMContentLoaded', ()=>{
+        ov.style.display = 'flex';
+        $('#enter').onclick = ok;
+        $('#clear').onclick = ()=>{ pin.value=''; pin.focus(); };
+        pin.addEventListener('keydown', e => { if (e.key === 'Enter') ok(); });
+        pin.focus();
+      });
+    })();
 
-      <h4 style="margin:12px 0 6px">Acciones</h4>
-      <div class="grid">
-        <table>
-          <thead><tr><th>#</th><th>Fecha</th><th>Tipo de acción</th><th>Derivaciones</th><th>Citas</th><th>Ventas</th><th>Observaciones</th></tr></thead>
-          <tbody id="cExAcciones"></tbody>
-        </table>
-      </div>
+    /* ========== Serializador genérico de la UI (no toca tu layout) ========== */
+    function snapshot(){
+      const data = { v:1, when: Date.now(), inputs:{}, html:{} };
+      // inputs/textarea/select
+      $$('input, textarea, select').forEach(el=>{
+        try{
+          const key = el.id || el.name || el.dataset.key || el.outerHTML.slice(0,80);
+          if (!key) return;
+          if (el.type === 'checkbox' || el.type === 'radio') data.inputs[key] = !!el.checked;
+          else data.inputs[key] = el.value;
+        }catch(e){}
+      });
+      // contenteditable
+      $$('[contenteditable=""],[contenteditable="true"]').forEach(el=>{
+        const key = el.id || el.dataset.key || el.outerHTML.slice(0,80);
+        if (!key) return;
+        data.html[key] = el.innerHTML;
+      });
+      return data;
+    }
 
-      <h4 style="margin:12px 0 6px">Formaciones obligatorias</h4>
-      <div class="grid">
-        <table>
-          <thead><tr><th>#</th><th>Fecha</th><th>Tema</th><th>Asistencia</th><th>Aplicado</th><th>Observaciones</th></tr></thead>
-        <tbody id="cExForm"></tbody>
-        </table>
-      </div>
+    function applySnapshot(data){
+      if (!data || !data.inputs) return;
+      // inputs
+      $$('input, textarea, select').forEach(el=>{
+        const key = el.id || el.name || el.dataset.key || el.outerHTML.slice(0,80);
+        if (!(key in data.inputs)) return;
+        if (el.type === 'checkbox' || el.type === 'radio') el.checked = !!data.inputs[key];
+        else el.value = data.inputs[key];
+      });
+      // contenteditable
+      $$('[contenteditable=""],[contenteditable="true"]').forEach(el=>{
+        const key = el.id || el.dataset.key || el.outerHTML.slice(0,80);
+        if (!(key in data.html)) return;
+        el.innerHTML = data.html[key];
+      });
+    }
 
-      <h4 style="margin:12px 0 6px">Procesos</h4>
-      <div class="grid">
-        <table>
-          <thead><tr><th>#</th><th>Fecha visita</th><th>Puntuación %</th><th>% Pruebas</th><th>% Venta</th><th>Derivaciones óptica</th><th>Observaciones</th><th>Adjunto</th></tr></thead>
-          <tbody id="cExProc"></tbody>
-        </table>
-      </div>
-    </section>
+    /* ========== Guardado local (por si acaso) ========== */
+    const LS_KEY = 'seguimiento-audio:ui';
+    function saveLocal(){ localStorage.setItem(LS_KEY, JSON.stringify(snapshot())); alert('Guardado local ✅'); }
+    function loadLocal(){
+      const raw = localStorage.getItem(LS_KEY);
+      if (!raw) return alert('No hay datos locales.');
+      try{ applySnapshot(JSON.parse(raw)); alert('Cargado local ✅'); }catch(e){ alert('Error leyendo local.'); }
+    }
 
-    <!-- ===== CENTROS FLOP ===== (idéntico formato) -->
-    <section id="panel-centros_flop" style="display:none">
-      <div class="row" style="margin-bottom:8px"><input placeholder="Buscar…" id="cFlSearch" /></div>
-      <div class="grid">
-        <table>
-          <thead><tr><th>#</th><th>Nombre</th><th>Delegado</th><th>Audiólogo</th><th>Tipo</th></tr></thead>
-          <tbody id="cFlBody"></tbody>
-        </table>
-      </div>
+    /* ========== Nube: Apps Script (sin preflight) ========== */
+    async function saveCloud(){
+      try{
+        const body = JSON.stringify(snapshot());
+        const res  = await fetch(GAS_URL, {
+          method:'POST',
+          headers:{ 'Content-Type':'text/plain' },
+          body
+        });
+        const txt = await res.text();
+        if(!res.ok) throw new Error(txt||res.status);
+        alert('Guardado en nube ✅');
+      }catch(e){
+        console.error(e);
+        alert('Error guardando en nube: '+e.message);
+      }
+    }
 
-      <h4 style="margin:12px 0 6px">Acciones</h4>
-      <div class="grid"><table><thead><tr><th>#</th><th>Fecha</th><th>Tipo de acción</th><th>Derivaciones</th><th>Citas</th><th>Ventas</th><th>Observaciones</th></tr></thead><tbody id="cFlAcciones"></tbody></table></div>
+    async function loadCloud(){
+      try{
+        const res = await fetch(GAS_URL+'?action=load',{method:'GET', headers:{'Accept':'text/plain'}});
+        const txt = await res.text();
+        if(!res.ok) throw new Error(txt||res.status);
+        const data = JSON.parse(txt || '{}');
+        applySnapshot(data);
+        alert('Datos de nube cargados ✅');
+      }catch(e){
+        console.error(e);
+        alert('Error cargando de nube: '+e.message);
+      }
+    }
 
-      <h4 style="margin:12px 0 6px">Formaciones obligatorias</h4>
-      <div class="grid"><table><thead><tr><th>#</th><th>Fecha</th><th>Tema</th><th>Asistencia</th><th>Aplicado</th><th>Observaciones</th></tr></thead><tbody id="cFlForm"></tbody></table></div>
+    /* ========== Descarga del HTML actual (por si quieres copia) ========== */
+    function downloadHTML(){
+      const blob = new Blob([document.documentElement.outerHTML], {type:'text/html;charset=utf-8'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'SEGUIMIENTO.html';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
 
-      <h4 style="margin:12px 0 6px">Procesos</h4>
-      <div class="grid"><table><thead><tr><th>#</th><th>Fecha visita</th><th>Puntuación %</th><th>% Pruebas</th><th>% Venta</th><th>Derivaciones óptica</th><th>Observaciones</th><th>Adjunto</th></tr></thead><tbody id="cFlProc"></tbody></table></div>
-    </section>
+    /* ========== Enlazar a tus botones si existen; si no, poner flotantes ========== */
+    function hookOrFab(){
+      // Busca botones por texto (tus textos habituales)
+      function findBtnByText(label){
+        const L = label.toLowerCase();
+        return $$('button,a').find(b=>(b.textContent||'').trim().toLowerCase()===L);
+      }
+      const btnSaveCloud = findBtnByText('guardar (nube)') || findBtnByText('guardar nube');
+      const btnLoadCloud = findBtnByText('recuperar…') || findBtnByText('recuperar') || findBtnByText('cargar nube');
 
-    <!-- ===== VISITAS ===== -->
-    <section id="panel-visitas" style="display:none">
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;margin-bottom:8px">
-        <select id="vaRol">
-          <option>Responsable Tec Audio</option>
-          <option>Delegado Audio</option>
-        </select>
-        <input id="vaNombre" placeholder="Nombre visitador"/>
-        <input id="vaSearch" placeholder="Buscar centro…"/>
-        <button class="btn" id="vaAdd">+ 50 filas</button>
-      </div>
+      if (btnSaveCloud) btnSaveCloud.addEventListener('click', e=>{ e.preventDefault(); saveCloud(); }, {passive:false});
+      if (btnLoadCloud) btnLoadCloud.addEventListener('click',  e=>{ e.preventDefault(); loadCloud(); }, {passive:false});
 
-      <div style="display:grid;grid-template-columns:1fr 240px;gap:8px">
-        <div class="grid">
-          <table>
-            <thead>
-              <tr><th>#</th><th>Fecha</th><th>Centro</th><th>Delegado</th><th>Suc/Fran</th><th>Puntuación %</th><th>% Pruebas</th><th>% Venta</th><th>HIT</th><th>RT</th><th>Adj.</th></tr>
-            </thead>
-            <tbody id="vaBody"></tbody>
-          </table>
-        </div>
-        <div class="va-right">
-          <div class="va-card">
-            <div style="font-weight:700">Avance de visitas</div>
-            <div id="vaCount" class="muted">0 / 0</div>
-            <div class="bar" style="margin-top:6px"><div id="vaBar"></div></div>
-          </div>
-        </div>
-      </div>
-    </section>
+      // Si no hay botones, crea flotante discreta
+      if (!btnSaveCloud && !btnLoadCloud){
+        const box = document.createElement('div');
+        box.className='cloud-fab';
+        box.innerHTML = `
+          <button id="fab-save">Guardar nube</button>
+          <button id="fab-load">Cargar nube</button>
+          <button id="fab-dl">Descargar HTML</button>
+        `;
+        document.body.appendChild(box);
+        $('#fab-save').onclick = saveCloud;
+        $('#fab-load').onclick = loadCloud;
+        $('#fab-dl').onclick   = downloadHTML;
+      }
+    }
+    window.addEventListener('DOMContentLoaded', hookOrFab);
 
-    <!-- ===== FORMACIONES ===== -->
-    <section id="panel-formaciones" style="display:none">
-      <div class="row" style="margin-bottom:8px">
-        <select id="fmModo">
-          <option>Mentoring general</option>
-          <option>Mentoring por delegados</option>
-          <option>Formaciones generales</option>
-        </select>
-        <input id="fmSearch" placeholder="Buscar…"/>
-        <button class="btn" id="fmAdd">+ Añadir fila</button>
-      </div>
-      <div class="grid">
-        <table>
-          <thead><tr><th>#</th><th>Fecha</th><th>Centro</th><th>Delegado</th><th>Audiólogo</th><th>Tema</th><th>Asistió</th><th>Aplicado</th><th>Observaciones</th></tr></thead>
-          <tbody id="fmBody"></tbody>
-        </table>
-      </div>
-    </section>
-
-    <!-- ===== TELEAUDIOLOGÍA ===== -->
-    <section id="panel-tele" style="display:none">
-      <div class="row" style="margin-bottom:8px">
-        <input id="taSearch" placeholder="Centro o persona…"/>
-        <span class="muted">Certificados ✅: <b id="taCert">0</b> · En formación 🟧: <b id="taForm">0</b></span>
-        <button class="btn" id="taAdd">+ 50 filas</button>
-      </div>
-      <div class="grid">
-        <table>
-          <thead><tr><th>#</th><th>Centro</th><th>Delegado</th><th>Rol</th><th>Persona</th><th>Form.</th><th>Prác.</th><th>Cert.</th><th>Pruebas</th><th>Ventas</th><th>Obs.</th></tr></thead>
-          <tbody id="taBody"></tbody>
-        </table>
-      </div>
-    </section>
-
-    <!-- ===== EQUIPOS ===== -->
-    <section id="panel-equipos" style="display:none">
-      <div class="row" style="margin-bottom:8px">
-        <input id="eqSearch" placeholder="Equipo, serie o centro…"/>
-        <button class="btn" id="eqAdd">+ Fila</button>
-      </div>
-      <div class="grid">
-        <table>
-          <thead><tr><th>#</th><th>Equipo</th><th>Nº serie</th><th>Persona envío</th><th>Fecha</th><th>Centro</th><th>Centro ✓</th><th>Sede ✓</th></tr></thead>
-          <tbody id="eqBody"></tbody>
-        </table>
-      </div>
-    </section>
-
-  </div>
-</div>
-
-<!-- PIN overlay -->
-<div id="pinOverlay" aria-modal="true" role="dialog" style="display:none">
-  <div class="panel">
-    <h3 style="margin:0 0 10px">Acceso</h3>
-    <div style="opacity:.85;margin-bottom:10px">Introduce el PIN para editar:</div>
-    <div class="row">
-      <input id="pin" type="password" inputmode="numeric" maxlength="4" placeholder="••••" autocomplete="one-time-code"/>
-      <button id="enter" class="btn" style="background:#fff;font-weight:800">Acceder</button>
-      <button id="clear" class="btn">Limpiar</button>
-    </div>
-    <div id="pinMsg" class="msg">PIN incorrecto</div>
-  </div>
-</div>
-
-<script>
-/* ========= CONFIG (cambia la URL) ========= */
-const GAS_URL  = 'https://script.google.com/macros/s/AKfycbz3MeWrV_4FX2wdT7IkOLb9uPDWuI7rC7zeNH_VA2y2W0cYEeeGK0R5rXGtcp8fr-3A3Q/exec';  // ⬅️ tu /exec real
-const PIN_CODE = '4321';
-
-/* ========= Utiles ========= */
-const $ = (s,r=document)=>r.querySelector(s);
-const $$ = (s,r=document)=>Array.from(r.querySelectorAll(s));
-const nf = new Intl.NumberFormat('es-ES',{maximumFractionDigits:0});
-function setBadge(t){ const b=$('#cloudBadge'); if(b) b.textContent='Nube: '+t; }
-
-/* ========= PIN ========= */
-(function pinGate(){
-  const overlay=$('#pinOverlay'), pin=$('#pin'), enter=$('#enter'), clear=$('#clear'), msg=$('#pinMsg');
-  function open(){ overlay.style.display='flex'; overlay.style.visibility='visible'; overlay.style.opacity='1'; overlay.style.pointerEvents='auto'; overlay.style.zIndex='9999'; document.body.style.overflow='hidden'; setTimeout(()=>pin&&pin.focus(),60); }
-  function close(){ overlay.style.display='none'; document.body.style.overflow=''; }
-  async function go(){
-    const code=(pin.value||'').trim();
-    if(String(code)===String(PIN_CODE||'4321')){ sessionStorage.setItem('__SEGUI_AUDIO_AUTH__','1'); msg.style.display='none'; close(); }
-    else { msg.style.display='block'; pin.select(); }
-  }
-  enter.addEventListener('click',go);
-  clear.addEventListener('click',()=>{pin.value='';pin.focus();});
-  pin.addEventListener('keydown',e=>{ if(e.key==='Enter') go(); });
-  document.addEventListener('DOMContentLoaded',()=>{ if(sessionStorage.getItem('__SEGUI_AUDIO_AUTH__')!=='1') open(); });
-})();
-
-/* ========= NAV: abrir paneles ========= */
-const PANELS = ['cifra','centros_ex','centros_flop','visitas','formaciones','tele','equipos'];
-function openPanel(key){
-  PANELS.forEach(k=>$('#panel-'+k).style.display = (k===key)?'block':'none');
-  const titles = {
-    cifra:'CIFRA — COMPAÑÍA',
-    centros_ex:'CENTROS EXCLUSIVOS',
-    centros_flop:'CENTROS FLOP',
-    visitas:'VISITAS AUDIO',
-    formaciones:'FORMACIONES Y MENTORING',
-    tele:'TELEAUDIOLOGÍA',
-    equipos:'EQUIPOS'
-  };
-  $('#detTitle').textContent = titles[key] || '';
-}
-$('#sidebar').addEventListener('click',(e)=>{
-  const k=e.target?.dataset?.open; if(!k) return;
-  e.preventDefault(); openPanel(k);
-});
-
-/* ========= CIFRA ========= */
-const MESES=['Ago-25','Sep-25','Oct-25','Nov-25','Dic-25','Ene-26','Feb-26','Mar-26','Abr-26','May-26','Jun-26','Jul-26'];
-(function buildCifra(){
-  const tb=$('#tbCifraBody'); tb.innerHTML='';
-  for(const m of MESES){
-    const tr=document.createElement('tr');
-    tr.innerHTML=`<td>${m}</td>
-      <td><input type="number" min="0" step="1" class="cPrev" placeholder="0"/></td>
-      <td><input type="number" min="0" step="1" class="cMes"  placeholder="0"/></td>
-      <td class="cDif muted">0</td>`;
-    tb.appendChild(tr);
-  }
-  const upd=()=>calcCifra();
-  $$('.cPrev,.cMes').forEach(i=>{i.addEventListener('input',upd);i.addEventListener('change',upd);});
-  calcCifra();
-})();
-function calcCifra(){
-  let tP=0,tM=0,tD=0;
-  $$('#tbCifraBody tr').forEach(tr=>{
-    const p=Number($('.cPrev',tr).value||0), m=Number($('.cMes',tr).value||0), d=m-p;
-    tP+=p; tM+=m; tD+=d;
-    const cell=$('.cDif',tr); cell.textContent=nf.format(d);
-    cell.classList.remove('ok','bad','muted'); if(p===0&&m===0) cell.classList.add('muted'); else if(m>=p) cell.classList.add('ok'); else cell.classList.add('bad');
-  });
-  $('#cifraTotPrev').textContent=nf.format(tP);
-  $('#cifraTotMes').textContent =nf.format(tM);
-  $('#cifraTotDif').textContent =nf.format(tD);
-}
-
-/* ========= CENTROS (EX & FLOP) ========= */
-const ACTION_OPTS = ['Azafata','Buzoneo','Mailing','Ruleta','Stand','Cashback','Otros'];
-function buildCentros(section){
-  const body = section==='ex' ? $('#cExBody') : $('#cFlBody');
-  const acc  = section==='ex' ? $('#cExAcciones') : $('#cFlAcciones');
-  const frm  = section==='ex' ? $('#cExForm') : $('#cFlForm'];
-  const pro  = section==='ex' ? $('#cExProc') : $('#cFlProc');
-
-  body.innerHTML=''; acc.innerHTML=''; frm.innerHTML=''; pro.innerHTML='';
-
-  for(let i=0;i<5;i++){
-    const tr=document.createElement('tr');
-    tr.innerHTML=`<td>${i+1}</td>
-      <td contenteditable="true"></td>
-      <td contenteditable="true"></td>
-      <td contenteditable="true"></td>
-      <td><select><option>Sucursal</option><option>Franquicia</option></select></td>`;
-    body.appendChild(tr);
-  }
-  for(let i=0;i<12;i++){
-    const tr=document.createElement('tr');
-    tr.innerHTML=`<td>${i+1}</td>
-      <td><input type="date"/></td>
-      <td><select>${ACTION_OPTS.map(o=>`<option>${o}</option>`).join('')}</select></td>
-      <td><input type="number" min="0" step="1"/></td>
-      <td><input type="number" min="0" step="1"/></td>
-      <td><input type="number" min="0" step="1"/></td>
-      <td><input/></td>`;
-    acc.appendChild(tr);
-  }
-  for(let i=0;i<5;i++){
-    const tr=document.createElement('tr');
-    tr.innerHTML=`<td>${i+1}</td>
-      <td><input type="date"/></td>
-      <td><input placeholder="Tema"/></td>
-      <td><input type="checkbox"/></td>
-      <td><input type="checkbox"/></td>
-      <td><input placeholder="Observaciones"/></td>`;
-    frm.appendChild(tr);
-  }
-  for(let i=0;i<4;i++){
-    const tr=document.createElement('tr');
-    tr.innerHTML=`<td>${i+1}</td>
-      <td><input type="date"/></td>
-      <td><input type="number" min="0" max="100" step="1" placeholder="%" /></td>
-      <td><input type="number" min="0" max="100" step="1" placeholder="%"/></td>
-      <td><input type="number" min="0" max="100" step="1" placeholder="%"/></td>
-      <td><input type="checkbox"/></td>
-      <td><input placeholder="Observaciones"/></td>
-      <td><input type="file" accept=".xlsx,.xls,.csv,.pdf,.doc,.docx,.png,.jpg"/></td>`;
-    pro.appendChild(tr);
-  }
-}
-buildCentros('ex'); buildCentros('flop');
-$('#addCentroEx').onclick=()=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>*</td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td><select><option>Sucursal</option><option>Franquicia</option></select></td>`; $('#cExBody').appendChild(tr); };
-$('#addCentroFlop').onclick=()=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>*</td><td contenteditable="true"></td><td contenteditable="true"></td><td contenteditable="true"></td><td><select><option>Sucursal</option><option>Franquicia</option></select></td>`; $('#cFlBody').appendChild(tr); };
-
-/* ========= VISITAS ========= */
-let VA_ROWS=50;
-function buildVisitas(){
-  const tb=$('#vaBody'); tb.innerHTML='';
-  for(let i=0;i<VA_ROWS;i++){
-    const tr=document.createElement('tr');
-    tr.innerHTML=`<td>${i+1}</td>
-      <td><input type="date"/></td>
-      <td><input placeholder="Centro"/></td>
-      <td><input placeholder="Delegado"/></td>
-      <td><select><option>Sucursal</option><option>Franquicia</option></select></td>
-      <td><input type="number" min="0" max="100" step="1" placeholder="%"/></td>
-      <td><input type="number" min="0" max="100" step="1" placeholder="%"/></td>
-      <td><input type="number" min="0" max="100" step="1" placeholder="%"/></td>
-      <td style="text-align:center"><input type="checkbox"/></td>
-      <td style="text-align:center"><input type="checkbox"/></td>
-      <td><input type="file" /></td>`;
-    tb.appendChild(tr);
-  }
-  updateVisitasProgress();
-}
-function updateVisitasProgress(){
-  const rows=$$('#vaBody tr');
-  const total=rows.length;
-  let filled=0;
-  rows.forEach(tr=>{ const f=$('td:nth-child(2) input',tr)?.value; if(f) filled++; });
-  $('#vaCount').textContent = `${filled} / ${total}`;
-  $('#vaBar').style.width = Math.min(100, Math.round(filled*100/Math.max(1,total)))+'%';
-}
-$('#vaAdd').onclick=()=>{ VA_ROWS+=50; buildVisitas(); };
-$('#vaBody').addEventListener('input',updateVisitasProgress);
-buildVisitas();
-
-/* ========= FORMACIONES ========= */
-function buildFormaciones(){
-  const tb=$('#fmBody'); tb.innerHTML='';
-  for(let i=0;i<20;i++){
-    const tr=document.createElement('tr');
-    tr.innerHTML=`<td>${i+1}</td>
-      <td><input type="date"/></td>
-      <td><input placeholder="Centro"/></td>
-      <td><input placeholder="Delegado"/></td>
-      <td><input placeholder="Audiólogo"/></td>
-      <td><input placeholder="Tema"/></td>
-      <td style="text-align:center"><input type="checkbox"/></td>
-      <td style="text-align:center"><input type="checkbox"/></td>
-      <td><input placeholder="Observaciones"/></td>`;
-    tb.appendChild(tr);
-  }
-}
-buildFormaciones();
-$('#fmAdd').onclick=()=>{ const tb=$('#fmBody'); const i=tb.children.length+1; const tr=document.createElement('tr'); tr.innerHTML=`<td>${i}</td><td><input type="date"/></td><td><input/></td><td><input/></td><td><input/></td><td><input/></td><td style="text-align:center"><input type="checkbox"/></td><td style="text-align:center"><input type="checkbox"/></td><td><input/></td>`; tb.appendChild(tr); };
-
-/* ========= TELEAUDIOLOGÍA ========= */
-let TA_ROWS=100;
-function buildTele(){
-  const tb=$('#taBody'); tb.innerHTML='';
-  for(let i=0;i<TA_ROWS;i++){
-    const tr=document.createElement('tr');
-    tr.innerHTML=`<td>${i+1}</td>
-      <td><input placeholder="Centro"/></td>
-      <td><input placeholder="Delegado"/></td>
-      <td><select><option>Audiólogo</option><option>Técnico</option></select></td>
-      <td><input placeholder="Nombre"/></td>
-      <td style="text-align:center"><input class="taForm" type="checkbox"/></td>
-      <td style="text-align:center"><input type="checkbox"/></td>
-      <td style="text-align:center"><input class="taCert" type="checkbox"/></td>
-      <td style="text-align:center"><input type="checkbox"/></td>
-      <td style="text-align:center"><input type="checkbox"/></td>
-      <td><input placeholder="Obs."/></td>`;
-    tb.appendChild(tr);
-  }
-  updateTeleCounters();
-}
-function updateTeleCounters(){
-  const cert = $$('.taCert:checked').length;
-  const form = $$('.taForm:checked').length;
-  $('#taCert').textContent=cert;
-  $('#taForm').textContent=form;
-}
-$('#taAdd').onclick=()=>{ TA_ROWS+=50; buildTele(); };
-$('#taBody').addEventListener('input',updateTeleCounters);
-buildTele();
-
-/* ========= EQUIPOS ========= */
-function buildEquipos(){
-  const tb=$('#eqBody'); tb.innerHTML='';
-  for(let i=0;i<20;i++){
-    const tr=document.createElement('tr');
-    tr.innerHTML=`<td>${i+1}</td>
-      <td><input placeholder="Equipo"/></td>
-      <td><input placeholder="Serie"/></td>
-      <td><input placeholder="Persona"/></td>
-      <td><input type="date"/></td>
-      <td><input placeholder="Centro"/></td>
-      <td style="text-align:center"><input type="checkbox"/></td>
-      <td style="text-align:center"><input type="checkbox"/></td>`;
-    tb.appendChild(tr);
-  }
-}
-buildEquipos();
-$('#eqAdd').onclick=()=>{ const tb=$('#eqBody'); const i=tb.children.length+1; const tr=document.createElement('tr'); tr.innerHTML=`<td>${i}</td><td><input/></td><td><input/></td><td><input/></td><td><input type="date"/></td><td><input/></td><td style="text-align:center"><input type="checkbox"/></td><td style="text-align:center"><input type="checkbox"/></td>`; tb.appendChild(tr); };
-
-/* ========= SERIALIZACIÓN DOM ========= */
-function cssPath(el){
-  if(!(el instanceof Element)) return '';
-  const path=[]; while(el && el.nodeType===1 && el!==document.body){
-    let sel=el.nodeName.toLowerCase();
-    if(el.id){ sel+='#'+CSS.escape(el.id); path.unshift(sel); break; }
-    let sib=el, nth=1; while(sib=sib.previousElementSibling) if(sib.nodeName===el.nodeName) nth++;
-    sel+=`:nth-of-type(${nth})`; path.unshift(sel); el=el.parentNode;
-  } return path.join(' ');
-}
-function safeQuery(path){ try{return document.querySelector(path);}catch{ return null; } }
-function serializeControls(){
-  const out=[];
-  $$('input,select,textarea,[contenteditable="true"]').forEach(el=>{
-    const t=(el.type||'').toLowerCase(); let v;
-    if(t==='checkbox'||t==='radio') v=!!el.checked;
-    else if(el.isContentEditable) v=el.innerHTML;
-    else v=el.value;
-    out.push({path:cssPath(el),t,v});
-  });
-  return out;
-}
-function restoreControls(list){
-  if(!Array.isArray(list)) return;
-  list.forEach(it=>{
-    const el=safeQuery(it.path); if(!el) return;
-    const t=(el.type||'').toLowerCase();
-    if(t==='checkbox'||t==='radio') el.checked=!!it.v;
-    else if(el.isContentEditable) el.innerHTML=it.v??'';
-    else el.value=it.v??'';
-    el.dispatchEvent(new Event('input',{bubbles:true}));
-    el.dispatchEvent(new Event('change',{bubbles:true}));
-  });
-}
-
-/* ========= NUBE (Apps Script — sin preflight) ========= */
-async function saveCloud(){
-  try{
-    if(!GAS_URL || !/\/exec(\?|$)/.test(GAS_URL)) throw new Error('Configura GAS_URL con tu /exec');
-    const payload={ ts:new Date().toISOString(), origin:location.href, values:serializeControls() };
-    const res=await fetch(GAS_URL,{
-      method:'POST',
-      headers:{'Content-Type':'text/plain;charset=UTF-8'},
-      body: JSON.stringify({action:'save', data: JSON.stringify(payload)}),
-      cache:'no-store', mode:'cors'
-    });
-    if(!res.ok) throw new Error('HTTP '+res.status);
-    setBadge('guardado ✓'); alert('Guardado en nube ✓');
-  }catch(e){ console.error(e); setBadge('error'); alert('Error al guardar en nube: '+e.message); }
-}
-async function loadCloud(){
-  try{
-    if(!GAS_URL || !/\/exec(\?|$)/.test(GAS_URL)) throw new Error('Configura GAS_URL con tu /exec');
-    const res=await fetch(GAS_URL+'?action=load&nc='+Date.now(),{method:'GET',cache:'no-store',mode:'cors'});
-    if(!res.ok) throw new Error('HTTP '+res.status);
-    const j=await res.json().catch(()=>null);
-    const raw=(j&&j.data)?j.data:'';
-    if(!raw){ alert('Nube vacía'); setBadge('vacío'); return; }
-    const obj=JSON.parse(raw); if(obj&&obj.values) restoreControls(obj.values);
-    setBadge('cargado ✓'); alert('Datos recuperados de la nube');
-  }catch(e){ console.error(e); setBadge('error'); alert('Error al recuperar de nube: '+e.message); }
-}
-
-/* ========= Local, descargar y eventos ========= */
-function saveLocal(){ try{ localStorage.setItem('__SEGUI_AUDIO_LOCAL__', JSON.stringify({ts:new Date().toISOString(),values:serializeControls()})); alert('Guardado local ✓'); }catch(e){ alert('Error local: '+e.message); } }
-function downloadHTML(){
-  const html='<!doctype html>\n'+document.documentElement.outerHTML;
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(new Blob([html],{type:'text/html;charset=utf-8'}));
-  a.download='index.html';
-  document.body.appendChild(a); a.click();
-  setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove();},100);
-}
-
-document.addEventListener('DOMContentLoaded',()=>{
-  $('#btnReload')?.addEventListener('click',()=>location.reload());
-  $('#btnSaveLocal')?.addEventListener('click',saveLocal);
-  $('#btnSaveCloud')?.addEventListener('click',saveCloud);
-  $('#btnLoadCloud')?.addEventListener('click',loadCloud);
-  $('#btnDownload')?.addEventListener('click',downloadHTML);
-  setBadge('listo');
-});
-</script>
+    /* ========== Seguridad: bloquear edición si falla PIN (opcional) ========== */
+    // Si quieres impedir edición sin PIN, puedes envolver inputs en disabled = true
+    // y habilitarlos tras el PIN. Ejemplo:
+    // window.addEventListener('DOMContentLoaded', ()=>{
+    //   const lock = () => $$('input,textarea,select,[contenteditable="true"]').forEach(el=>{
+    //     if (el.matches('[contenteditable]')) el.setAttribute('contenteditable','false');
+    //     else el.disabled = true;
+    //   });
+    //   const unlock = () => $$('input,textarea,select,[contenteditable]').forEach(el=>{
+    //     if (el.getAttribute('data-was-ce')==='1') el.setAttribute('contenteditable','true');
+    //     else el.disabled = false;
+    //   });
+    //   // Llama unlock() dentro del OK del PIN si deseas esta capa extra.
+    // });
+  </script>
 </body>
 </html>
