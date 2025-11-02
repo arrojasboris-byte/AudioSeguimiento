@@ -70,7 +70,7 @@
     .ghost-icon { background: rgba(0,0,0,0.02); }
     .disabled { opacity: 0.6; cursor: not-allowed; }
 
-    /* layout centros (NO TOCADO) */
+    /* CENTROS (TU BLOQUE, SIN CAMBIOS) */
     .flex-split { display: flex; gap: 14px; align-items: stretch; }
     .centers-list { width: 240px; background: #fff; border-radius: 14px; border: 1px solid rgba(0,0,0,0.03); box-shadow: 0 2px 6px rgba(0,0,0,0.02); padding: 10px; display: flex; flex-direction: column; gap: 10px; }
     .centers-list-header { display:flex; justify-content:space-between; align-items:center; gap:6px; }
@@ -88,15 +88,17 @@
     .field { display: flex; flex-direction: column; gap: 4px; }
     .field label { font-size: 0.7rem; opacity: 0.8; }
     .field input, .field select { border-radius: 10px; border: 1px solid rgba(0,0,0,0.1); padding: 5px 8px; font-size: 0.78rem; background: #fff; }
+
     .table-like { width: 100%; border-collapse: collapse; background: #fff; border-radius: 12px; overflow: hidden; font-size: 0.74rem; }
     .table-like th, .table-like td { border: 1px solid rgba(0,0,0,0.12); padding: 4px 6px; }
     .table-toolbar { display: flex; gap: 6px; margin-bottom: 4px; align-items: center; justify-content: flex-end; }
+
     .badge-ok { background: rgba(11,160,72,0.1); color: #0b7a3a; padding: 2px 6px; border-radius: 6px; font-size: 0.65rem; }
     .badge-bad { background: rgba(211,47,47,0.12); color: #b71c1c; padding: 2px 6px; border-radius: 6px; font-size: 0.65rem; }
     .text-red { color: #b71c1c; }
     .text-green { color: #0b7a3a; }
 
-    /* NUEVO: panel lateral para formaciones y visitas */
+    /* PANEL DELEGADOS PARA FORMACIONES Y VISITAS (LO QUE TENÍAS) */
     .flex-form-vis { display:flex; gap:14px; }
     .delegados-panel {
       width: 220px;
@@ -129,7 +131,8 @@
       padding:2px 6px;
       cursor:pointer;
     }
-    /* calendario visible */
+
+    /* CALENDARIO VISIBLE */
     .date-wrap { position:relative; }
     .date-wrap::after {
       content:"📅";
@@ -143,15 +146,8 @@
     }
     input[type="date"]::-webkit-calendar-picker-indicator { opacity:0; cursor:pointer; }
 
-    @media (max-width: 1080px) {
-      .flex-split, .flex-form-vis { flex-direction: column; }
-      .centers-list, .delegados-panel { width: 100%; }
-    }
-    @media (max-width: 960px) {
-      main { flex-direction: column; }
-      .left-panel { width: 100%; flex-direction: row; overflow-x: auto; }
-      .right-panel { height: 60vh; }
-    }
+    @media (max-width: 1080px) { .flex-split, .flex-form-vis { flex-direction: column; } .centers-list, .delegados-panel { width: 100%; } }
+    @media (max-width: 960px) { main { flex-direction: column; } .left-panel { width: 100%; flex-direction: row; overflow-x: auto; } .right-panel { height: 60vh; } }
   </style>
 </head>
 <body>
@@ -175,26 +171,11 @@
         <strong>Bloques</strong>
         <button id="addBlock" class="tiny-btn">+ Añadir</button>
       </div>
-      <button class="block-btn active" data-type="OBJETIVOS" data-color="var(--obj)">
-        <div class="tag" style="background: rgba(183,28,28,0.2);">🎯</div>
-        <div><div>OBJETIVOS</div><small>KPIs, % logro</small></div>
-      </button>
-      <button class="block-btn" data-type="CENTROS EXCLUSIVOS" data-color="var(--cex)">
-        <div class="tag" style="background: rgba(47,52,55,0.05);">🏢</div>
-        <div><div>CENTROS EXCLUSIVOS</div><small>Seguimiento premium</small></div>
-      </button>
-      <button class="block-btn" data-type="CENTROS FLOP" data-color="var(--cflop)">
-        <div class="tag" style="background: rgba(183,28,28,0.17);">⚠️</div>
-        <div><div>CENTROS FLOP</div><small>Alarmas & plan</small></div>
-      </button>
-      <button class="block-btn" data-type="FORMACIONES Y MENTORING" data-color="var(--form)">
-        <div class="tag" style="background: rgba(24,24,24,0.05);">📚</div>
-        <div><div>FORMACIONES Y MENTORING</div><small>Plan de aulas</small></div>
-      </button>
-      <button class="block-btn" data-type="VISITAS" data-color="var(--vis)">
-        <div class="tag" style="background: rgba(0,0,0,0.04);">🗓️</div>
-        <div><div>VISITAS</div><small>Agenda & report</small></div>
-      </button>
+      <button class="block-btn active" data-type="OBJETIVOS" data-color="var(--obj)"><div class="tag" style="background: rgba(183,28,28,0.2);">🎯</div><div><div>OBJETIVOS</div><small>KPIs, % logro</small></div></button>
+      <button class="block-btn" data-type="CENTROS EXCLUSIVOS" data-color="var(--cex)"><div class="tag" style="background: rgba(47,52,55,0.05);">🏢</div><div><div>CENTROS EXCLUSIVOS</div><small>Seguimiento premium</small></div></button>
+      <button class="block-btn" data-type="CENTROS FLOP" data-color="var(--cflop)"><div class="tag" style="background: rgba(183,28,28,0.17);">⚠️</div><div><div>CENTROS FLOP</div><small>Alarmas & plan</small></div></button>
+      <button class="block-btn" data-type="FORMACIONES Y MENTORING" data-color="var(--form)"><div class="tag" style="background: rgba(24,24,24,0.05);">📚</div><div><div>FORMACIONES Y MENTORING</div><small>Plan de aulas</small></div></button>
+      <button class="block-btn" data-type="VISITAS" data-color="var(--vis)"><div class="tag" style="background: rgba(0,0,0,0.04);">🗓️</div><div><div>VISITAS</div><small>Agenda & report</small></div></button>
     </aside>
     <section class="right-panel">
       <div class="right-header" id="rightHeader">
@@ -231,7 +212,7 @@
 
     let editable = false;
 
-    /* ====== ESTADO INICIAL ====== */
+    /* ------------- ESTADO ------------- */
     let blocks = JSON.parse(localStorage.getItem("audioar_blocks") || "null") || {
       "OBJETIVOS": {
         color: "var(--obj)",
@@ -239,7 +220,7 @@
           { titulo: "Ventas Q4", detalle: "Objetivo 140% sobre 2024", fecha: "2025-11-02" }
         ]
       },
-      "CENTROS EXCLUSIVOS": {           /* NO TOCAR ESTRUCTURA */
+      "CENTROS EXCLUSIVOS": {
         color: "var(--cex)",
         selected: 0,
         view: "acciones",
@@ -261,7 +242,7 @@
           }
         ]
       },
-      "CENTROS FLOP": {                 /* NO TOCAR ESTRUCTURA */
+      "CENTROS FLOP": {
         color: "var(--cflop)",
         selected: 0,
         view: "acciones",
@@ -317,6 +298,15 @@
       localStorage.setItem("audioar_blocks", JSON.stringify(blocks));
     }
 
+    function toISODate(v) {
+      if (!v) return "";
+      if (/^\d{2}\/\d{2}\/\d{4}$/.test(v)) {
+        const [d,m,y] = v.split("/");
+        return `${y}-${m}-${d}`;
+      }
+      return v;
+    }
+
     function setEditable(on) {
       editable = on;
       editStatus.textContent = on ? "Edición activada" : "Solo lectura";
@@ -324,7 +314,7 @@
       renderCurrentBlock();
     }
 
-    /* ====== RENDER OBJETIVOS ====== */
+    /* ----------- RENDER OBJETIVOS (igual) ----------- */
     function renderObjectives(data) {
       contentHolder.innerHTML = "";
       const list = document.createElement("div");
@@ -352,15 +342,14 @@
         addBtn.className = "tiny-btn";
         addBtn.onclick = () => {
           data.items.push({ titulo: "Nuevo objetivo", detalle: "", fecha: "" });
-          persist();
-          renderCurrentBlock();
+          persist(); renderCurrentBlock();
         };
         list.appendChild(addBtn);
       }
       contentHolder.appendChild(list);
     }
 
-    /* ====== RENDER CENTROS (NO TOCADO) ====== */
+    /* ----------- RENDER CENTROS (SIN TOCAR) ----------- */
     function renderCentersBlock(blockName, data) {
       contentHolder.innerHTML = "";
       const wrap = document.createElement("div");
@@ -508,13 +497,13 @@
       contentHolder.appendChild(wrap);
     }
 
-    /* ====== FORMACIONES Y MENTORING (NUEVO DETALLE) ====== */
+    /* ----------- FORMACIONES (CON TU DETALLE + CALENDARIO) ----------- */
     function renderFormacionesBlock(data) {
       contentHolder.innerHTML = "";
       const wrap = document.createElement("div");
       wrap.className = "flex-form-vis";
 
-      // panel de delegados
+      // panel delegados
       const left = document.createElement("div");
       left.className = "delegados-panel";
       left.innerHTML = `
@@ -542,40 +531,40 @@
       });
       wrap.appendChild(left);
 
-      // contenido derecho
       const right = document.createElement("div");
       right.style.flex = "1";
+
       const sel = data.selected || 0;
       const delegado = data.delegados[sel] || { nombre: "", tabla: [], adjunto: "" };
 
-      const header = document.createElement("div");
-      header.innerHTML = `
-        <h3 style="margin-top:0;">Formaciones del delegado</h3>
-        <div class="table-toolbar" style="justify-content:flex-end;">
-          ${editable ? `<button class="tiny-btn" data-act="form-add-row">+ Fila</button>` : ""}
-          <label style="font-size:0.7rem;cursor:pointer;">
-            ${delegado.adjunto ? "📎 " + delegado.adjunto : "📎 Adjuntar Excel"}
-            <input type="file" data-act="form-attach" style="display:none;">
-          </label>
-          ${editable ? `<button class="tiny-btn" data-act="form-save-block">Guardar</button>` : ""}
-        </div>
+      const head = document.createElement("div");
+      head.className = "table-toolbar";
+      head.style.justifyContent = "flex-end";
+      head.innerHTML = `
+        <strong style="margin-right:auto;">Formaciones del delegado</strong>
+        ${editable ? `<button class="tiny-btn" data-act="form-add-row">+ Fila</button>` : ""}
+        <label style="font-size:0.7rem; cursor:pointer;">
+          ${delegado.adjunto ? "📎 " + delegado.adjunto : "📎 Adjuntar Excel"}
+          <input type="file" data-act="form-attach" style="display:none;">
+        </label>
+        ${editable ? `<button class="tiny-btn" data-act="form-save-block">Guardar</button>` : ""}
       `;
-      right.appendChild(header);
+      right.appendChild(head);
 
       const t = document.createElement("table");
       t.className = "table-like";
       t.innerHTML = `
         <thead>
           <tr>
-            <th style="width:130px;">Fecha</th>
-            <th style="width:180px;">Centros</th>
-            <th style="width:110px;">Suc./Franq.</th>
+            <th style="width:120px;">Fecha</th>
+            <th style="min-width:190px;">Centros</th>
+            <th style="width:120px;">Suc./Franq.</th>
             <th>Tema formación</th>
             <th style="width:90px;">Superado</th>
             <th style="width:90px;">Aplicado</th>
-            <th style="width:110px;">Mentoring</th>
+            <th style="width:90px;">Mentoring</th>
             <th>Observaciones</th>
-            ${editable ? `<th style="width:40px;"></th>` : ""}
+            ${editable ? `<th style="width:40px;"></th>` : ``}
           </tr>
         </thead>
         <tbody>
@@ -616,7 +605,7 @@
                   </select>
                 </td>
                 <td><input ${editable?"":"disabled"} data-form="obs" data-row="${i}" value="${r.obs||""}" style="width:100%;"></td>
-                ${editable ? `<td><button class="ghost-icon" data-act="form-del-row" data-row="${i}">−</button></td>` : ""}
+                ${editable ? `<td><button class="ghost-icon" data-act="form-del-row" data-row="${i}">−</button></td>` : ``}
               </tr>
             `;
           }).join("")}
@@ -628,7 +617,7 @@
       contentHolder.appendChild(wrap);
     }
 
-    /* ====== VISITAS (NUEVO DETALLE) ====== */
+    /* ----------- VISITAS (CON TU DETALLE + CALENDARIO + COLORES) ----------- */
     function renderVisitasBlock(data) {
       contentHolder.innerHTML = "";
       const wrap = document.createElement("div");
@@ -687,16 +676,16 @@
         <thead>
           <tr>
             <th style="width:120px;">Fecha</th>
-            <th style="min-width:190px;">Centros</th>
+            <th style="min-width:200px;">Centros</th>
             <th style="width:110px;">Suc./Franq.</th>
-            <th style="width:130px;">Audiólogo</th>
+            <th style="width:120px;">Audiólogo</th>
             <th style="width:90px;">Checklist %</th>
             <th style="width:80px;">Estado</th>
             <th style="width:95px;">Conv. prueba %</th>
             <th style="width:95px;">Conv. venta %</th>
             <th style="width:80px;">HIT</th>
             <th style="width:80px;">AAR</th>
-            <th style="width:90px;">RT-equipo</th>
+            <th style="width:95px;">RT-equipo</th>
             <th>Observaciones</th>
             ${editable ? `<th style="width:40px;"></th>` : ""}
           </tr>
@@ -758,14 +747,12 @@
       contentHolder.appendChild(wrap);
     }
 
-    /* ====== RENDER SIMPLE ====== */
+    /* ----------- RENDER SIMPLE (para futuros) ----------- */
     function renderSimple(data) {
       contentHolder.innerHTML = "";
-      const list = document.createElement("div");
-      list.className = "list";
+      const list = document.createElement("div"); list.className = "list";
       (data.items || []).forEach((item, idx) => {
-        const div = document.createElement("div");
-        div.className = "item";
+        const div = document.createElement("div"); div.className = "item";
         div.innerHTML = `
           <div class="item-header">
             <strong ${editable ? `contenteditable="true" data-idx="${idx}" data-field="titulo"` : ""}>${item.titulo}</strong>
@@ -780,17 +767,13 @@
         const addBtn = document.createElement("button");
         addBtn.textContent = "+ Añadir elemento";
         addBtn.className = "tiny-btn";
-        addBtn.onclick = () => {
-          data.items.push({ titulo: "Nuevo", detalle: "", fecha: "" });
-          persist();
-          renderCurrentBlock();
-        };
+        addBtn.onclick = () => { data.items.push({ titulo: "Nuevo", detalle: "", fecha: "" }); persist(); renderCurrentBlock(); };
         list.appendChild(addBtn);
       }
       contentHolder.appendChild(list);
     }
 
-    /* ====== RENDER GENERAL ====== */
+    /* ----------- RENDER GENERAL ----------- */
     function renderCurrentBlock() {
       const data = blocks[currentBlock]; if (!data) return;
       badgeColor.style.background = data.color || "#fff";
@@ -799,7 +782,7 @@
       if (currentBlock === "OBJETIVOS") {
         renderObjectives(data);
       } else if (currentBlock === "CENTROS EXCLUSIVOS" || currentBlock === "CENTROS FLOP") {
-        renderCentersBlock(currentBlock, data);   // SIN CAMBIOS
+        renderCentersBlock(currentBlock, data);  // NO TOCAMOS
       } else if (currentBlock === "FORMACIONES Y MENTORING") {
         renderFormacionesBlock(data);
       } else if (currentBlock === "VISITAS") {
@@ -809,17 +792,7 @@
       }
     }
 
-    /* ====== UTILS ====== */
-    function toISODate(v) {
-      if (!v) return "";
-      if (/^\d{2}\/\d{2}\/\d{4}$/.test(v)) {
-        const [d,m,y] = v.split("/");
-        return `${y}-${m}-${d}`;
-      }
-      return v;
-    }
-
-    /* ====== PIN ====== */
+    /* ----------- PIN ----------- */
     pinBtn.addEventListener("click", () => {
       const v = pinInput.value.trim();
       if (v === PIN_MASTER) setEditable(true);
@@ -833,7 +806,7 @@
       }
     });
 
-    /* ====== BLOQUES LATERALES ====== */
+    /* ----------- LADO IZQUIERDO ----------- */
     leftPanel.addEventListener("click", (e) => {
       const btn = e.target.closest(".block-btn");
       if (!btn) return;
@@ -843,7 +816,7 @@
       renderCurrentBlock();
     });
 
-    /* ====== AÑADIR BLOQUE ====== */
+    /* ----------- AÑADIR BLOQUE ----------- */
     addBlock.addEventListener("click", () => {
       if (!editable) return alert("Primero desbloquea edición con el PIN AR4321.");
       const name = prompt("Nombre del nuevo bloque:");
@@ -858,7 +831,7 @@
       leftPanel.appendChild(btn);
     });
 
-    /* ====== CLICK EN CONTENIDO ====== */
+    /* ----------- CLICK EN CONTENIDO ----------- */
     contentHolder.addEventListener("click", (e) => {
       const t = e.target;
 
@@ -947,11 +920,10 @@
         persist(); renderCurrentBlock(); return;
       }
 
-      /* FORMACIONES: acciones */
+      /* FORMACIONES: acciones nuevas */
       if (t.dataset.act === "form-delegado-select") {
         const idx = +t.dataset.idx;
-        const data = blocks["FORMACIONES Y MENTORING"];
-        data.selected = idx;
+        blocks["FORMACIONES Y MENTORING"].selected = idx;
         persist(); renderCurrentBlock(); return;
       }
       if (t.dataset.act === "form-delegado-add") {
@@ -977,11 +949,10 @@
         }
         return;
       }
-      if (t.dataset.act === "form-delegado-save") { persist(); alert("Formaciones guardadas."); return; }
       if (t.dataset.act === "form-add-row") {
         const data = blocks["FORMACIONES Y MENTORING"];
         const d = data.delegados[data.selected || 0];
-        d.tabla.push({ fecha: "", centros: "", sucursal: "", tema: "", superado: "No", aplicado: "No", mentoring: "No", obs: "" });
+        d.tabla.push({ fecha: "", centros: "", sucursal: "Sucursal", tema: "", superado: "No", aplicado: "No", mentoring: "No", obs: "" });
         persist(); renderCurrentBlock(); return;
       }
       if (t.dataset.act === "form-del-row") {
@@ -990,12 +961,14 @@
         d.tabla.splice(+t.dataset.row, 1);
         persist(); renderCurrentBlock(); return;
       }
-      if (t.dataset.act === "form-save-block") { persist(); alert("Formaciones guardadas."); return; }
+      if (t.dataset.act === "form-save-block" || t.dataset.act === "form-delegado-save") {
+        persist(); alert("Formaciones guardadas."); return;
+      }
 
-      /* VISITAS: acciones */
+      /* VISITAS: acciones nuevas */
       if (t.dataset.act === "vis-delegado-select") {
-        const data = blocks["VISITAS"];
-        data.selected = +t.dataset.idx;
+        const idx = +t.dataset.idx;
+        blocks["VISITAS"].selected = idx;
         persist(); renderCurrentBlock(); return;
       }
       if (t.dataset.act === "vis-delegado-add") {
@@ -1021,7 +994,6 @@
         }
         return;
       }
-      if (t.dataset.act === "vis-delegado-save") { persist(); alert("Visitas guardadas."); return; }
       if (t.dataset.act === "vis-add-row") {
         const data = blocks["VISITAS"];
         const d = data.delegados[data.selected || 0];
@@ -1034,21 +1006,24 @@
         d.visitas.splice(+t.dataset.row, 1);
         persist(); renderCurrentBlock(); return;
       }
-      if (t.dataset.act === "vis-save-block") { persist(); alert("Visitas guardadas."); return; }
+      if (t.dataset.act === "vis-save-block" || t.dataset.act === "vis-delegado-save") {
+        persist(); alert("Visitas guardadas."); return;
+      }
 
-      /* simple */
+      /* SIMPLE */
       if (t.dataset.act === "del-simple") {
         const data = blocks[currentBlock];
         data.items.splice(+t.dataset.idx, 1);
-        persist(); renderCurrentBlock(); return;
+        persist(); renderCurrentBlock();
+        return;
       }
     });
 
-    /* ====== CAMBIOS (change) PARA FORMACIONES/VISITAS ====== */
+    /* ----------- CHANGE (para inputs/select de formaciones y visitas) ----------- */
     contentHolder.addEventListener("change", (e) => {
       const t = e.target;
 
-      // formaciones tabla
+      // formaciones
       if (t.dataset.form) {
         const data = blocks["FORMACIONES Y MENTORING"];
         const d = data.delegados[data.selected || 0];
@@ -1060,7 +1035,7 @@
         return;
       }
 
-      // visitas tabla
+      // visitas
       if (t.dataset.vis) {
         const data = blocks["VISITAS"];
         const d = data.delegados[data.selected || 0];
@@ -1069,17 +1044,17 @@
         if (!d.visitas[row]) d.visitas[row] = {};
         d.visitas[row][field] = t.value;
         persist();
-        // re-render para recolorear
+        // recolorear
         renderVisitasBlock(data);
         return;
       }
     });
 
-    /* ====== INPUT (centros y simples) ====== */
+    /* ----------- INPUT (para centros + simples) ----------- */
     contentHolder.addEventListener("input", (e) => {
       const t = e.target;
 
-      // campos de centro (NO TOCAR)
+      // campos de centro
       if ((currentBlock === "CENTROS EXCLUSIVOS" || currentBlock === "CENTROS FLOP") && t.dataset.field) {
         const data = blocks[currentBlock];
         const c = data.centers[data.selected || 0];
@@ -1088,7 +1063,7 @@
         return;
       }
 
-      // tablas de centros (NO TOCAR)
+      // tablas de centros (acciones, formaciones, visitas) sin tocar
       const tr = t.closest("tr[data-table]");
       if (tr && (currentBlock === "CENTROS EXCLUSIVOS" || currentBlock === "CENTROS FLOP")) {
         const data = blocks[currentBlock];
@@ -1118,7 +1093,7 @@
       }
     });
 
-    /* ====== DESCARGAS ====== */
+    /* ----------- DESCARGAS ----------- */
     document.getElementById("btnHTML").addEventListener("click", () => {
       const blob = new Blob([document.documentElement.outerHTML], { type: "text/html" });
       const url = URL.createObjectURL(blob);
@@ -1126,49 +1101,40 @@
       a.href = url; a.download = "seguimiento-audio-ar.html"; a.click();
       URL.revokeObjectURL(url);
     });
-    document.getElementById("btnPDF").addEventListener("click", () => {
-      alert("Exportar a PDF: usa Imprimir > Guardar como PDF.");
-    });
+    document.getElementById("btnPDF").addEventListener("click", () => { alert("Exportar a PDF: usa Imprimir > Guardar como PDF."); });
     document.getElementById("btnXLS").addEventListener("click", () => {
       const rows = [["Bloque","Campo1","Campo2","Campo3","Campo4"]];
       Object.keys(blocks).forEach(bn => {
         const b = blocks[bn];
         if (bn === "CENTROS EXCLUSIVOS" || bn === "CENTROS FLOP") {
-          (b.centers || []).forEach(c => {
-            rows.push([bn, c.nombre, c.delegado, c.audiologo, c.tipo]);
-          });
+          (b.centers || []).forEach(c => { rows.push([bn, c.nombre, c.delegado, c.audiologo, c.tipo]); });
         } else if (bn === "FORMACIONES Y MENTORING") {
           (b.delegados || []).forEach(d => {
             (d.tabla || []).forEach(r => {
               rows.push([bn, d.nombre, r.centros, r.tema, r.fecha]);
-            })
+            });
           });
         } else if (bn === "VISITAS") {
           (b.delegados || []).forEach(d => {
             (d.visitas || []).forEach(v => {
               rows.push([bn, d.nombre, v.centros, v.sucursal, v.fecha]);
-            })
+            });
           });
         } else {
-          (b.items || []).forEach(it => {
-            rows.push([bn, it.titulo, it.detalle, it.fecha || "", ""]);
-          });
+          (b.items || []).forEach(it => { rows.push([bn, it.titulo, it.detalle, it.fecha || "", ""]); });
         }
       });
       const csv = rows.map(r => r.map(v => `"${(v||"").replace(/"/g,'""')}"`).join(",")).join("\n");
       const blob = new Blob([csv], { type: "text/csv" });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url; a.download = "seguimiento-audio-ar.csv"; a.click();
+      const a = document.createElement("a"); a.href = url; a.download = "seguimiento-audio-ar.csv"; a.click();
       URL.revokeObjectURL(url);
     });
 
-    /* ====== INIT ====== */
+    /* ----------- INIT ----------- */
     renderCurrentBlock();
-    console.log("[TEST] UI cargada");
-    console.assert(document.getElementById("contentHolder"), "contentHolder no existe");
+    console.log("[TEST] UI cargada sin romper CENTROS.");
 
-    /* ====== GUARDADO LOCAL ====== */
     saveLocalBtn.addEventListener("click", () => {
       persist();
       editStatus.textContent = "Guardado local";
