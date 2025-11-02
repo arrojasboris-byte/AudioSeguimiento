@@ -8,8 +8,12 @@
     :root {
       --bg: #f4f4f4;
       --panel: #ffffff;
+      --gris: #2f3437;
       --rojo: #b71c1c;
+      --blanco: #ffffff;
       --negro: #181818;
+      --radius-lg: 18px;
+      --shadow-sm: 0 3px 10px rgba(0, 0, 0, 0.08);
       --obj: #ffe6e6;
       --cex: #f6f0ff;
       --cflop: #ffe9d6;
@@ -17,1105 +21,870 @@
       --vis: #f9fbe7;
       --ok: #0ba048;
       --bad: #d32f2f;
-      --radius-lg: 18px;
-      --shadow-sm: 0 3px 10px rgba(0,0,0,0.08);
     }
-    *{box-sizing:border-box;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;}
-    body{margin:0;background:var(--bg);color:var(--negro);min-height:100vh;display:flex;flex-direction:column;}
-    header{
-      background:linear-gradient(120deg,#000 0%,#b71c1c 80%);
-      color:#fff;display:flex;align-items:center;justify-content:space-between;
-      padding:12px 26px;gap:12px;
+    * { box-sizing: border-box; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    body { margin: 0; background: var(--bg); color: var(--negro); height: 100vh; display: flex; flex-direction: column; }
+    header {
+      background: linear-gradient(120deg, #000000 0%, #b71c1c 80%);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 26px;
+      gap: 12px;
     }
-    header h1{display:flex;align-items:center;gap:10px;font-size:1rem;}
-    header h1 .logo{background:rgba(255,255,255,.1);padding:4px 10px;border-radius:99px;font-weight:700;}
-    .top-actions{display:flex;gap:10px;align-items:center;}
-    .btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:#fff;border-radius:14px;padding:6px 12px;font-size:.75rem;display:inline-flex;gap:5px;align-items:center;cursor:pointer;}
-    .btn.secondary{background:rgba(0,0,0,.35);}
-    .pin-box{display:flex;gap:6px;align-items:center;background:rgba(0,0,0,.2);padding:3px 8px 3px 10px;border-radius:12px;}
-    .pin-box input{all:unset;background:rgba(0,0,0,.3);padding:3px 6px;border-radius:7px;font-size:.7rem;}
-    .status-pill{background:rgba(0,0,0,.2);padding:3px 10px;border-radius:999px;font-size:.68rem;}
-    main{flex:1;display:flex;gap:10px;padding:12px;overflow:hidden;}
-    /* left */
-    .left-panel{width:268px;background:var(--panel);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);padding:10px;display:flex;flex-direction:column;gap:6px;overflow-y:auto;}
-    .block-btn{display:flex;gap:10px;align-items:center;border-radius:14px;padding:6px 10px;border:1px solid transparent;cursor:pointer;font-size:.78rem;}
-    .block-btn .tag{width:28px;height:28px;border-radius:12px;display:grid;place-items:center;}
-    .block-btn small{font-size:.62rem;opacity:.6;}
-    .block-btn.active{border:1px solid rgba(0,0,0,.1);background:#fff;box-shadow:0 3px 9px rgba(0,0,0,.05);}
-    .block-btn[data-type="OBJETIVOS"]{background:var(--obj);}
-    .block-btn[data-type="CENTROS EXCLUSIVOS"]{background:var(--cex);}
-    .block-btn[data-type="CENTROS FLOP"]{background:var(--cflop);}
-    .block-btn[data-type="FORMACIONES Y MENTORING"]{background:var(--form);}
-    .block-btn[data-type="VISITAS"]{background:var(--vis);}
-    /* right */
-    .right-panel{flex:1;background:var(--panel);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);display:flex;flex-direction:column;overflow:hidden;}
-    .right-header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid rgba(0,0,0,.05);}
-    .badge-color{width:18px;height:18px;border-radius:6px;}
-    .content-area{flex:1;padding:16px;overflow-y:auto;background:#f9f9f9;}
-    .content-wrap{position:relative;}
-    .locked-overlay{background:rgba(255,255,255,.75);border:2px dashed rgba(183,28,28,.35);backdrop-filter:blur(2px);border-radius:16px;position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:8px;color:#b71c1c;font-weight:500;display:none;}
-    .content-wrap.locked .locked-overlay{display:flex;}
-    /* common fields */
-    .field{display:flex;flex-direction:column;gap:4px;}
-    .field label{font-size:.68rem;opacity:.7;}
-    .field input,.field select{border-radius:10px;border:1px solid rgba(0,0,0,.1);padding:4px 6px;font-size:.74rem;}
+    header h1 { font-size: 1.1rem; letter-spacing: 0.04rem; display: flex; align-items: center; gap: 10px; }
+    header h1 span.logo { background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 99px; font-weight: 700; }
+    .top-actions { display: flex; gap: 10px; align-items: center; }
+    .btn { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff; border-radius: 14px; padding: 6px 12px; font-size: 0.78rem; display: inline-flex; gap: 6px; align-items: center; cursor: pointer; transition: 0.2s ease; }
+    .btn:hover { background: rgba(255,255,255,0.2); }
+    .btn.secondary { background: rgba(0,0,0,0.3); }
+    .pin-box { display: flex; gap: 6px; align-items: center; background: rgba(0,0,0,0.2); border-radius: 12px; padding: 3px 6px 3px 10px; }
+    .pin-box input { all: unset; background: rgba(0,0,0,0.3); padding: 3px 6px; border-radius: 8px; font-size: 0.7rem; }
+    .status-pill { background: rgba(0,0,0,0.2); padding: 3px 10px; border-radius: 99px; font-size: 0.68rem; }
+    main { flex: 1; display: flex; gap: 10px; padding: 12px; overflow: hidden; }
+    .left-panel { width: 268px; background: var(--panel); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); padding: 10px; display: flex; flex-direction: column; gap: 6px; overflow-y: auto; }
+    .left-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+    .block-btn { display: flex; align-items: center; gap: 10px; background: #f3f3f3; border: 1px solid transparent; border-radius: 14px; padding: 6px 10px; cursor: pointer; transition: 0.15s ease; font-size: 0.78rem; }
+    .block-btn .tag { width: 28px; height: 28px; border-radius: 12px; display: grid; place-items: center; font-size: 0.75rem; font-weight: 600; }
+    .block-btn small { opacity: 0.5; font-size: 0.65rem; }
+    .block-btn.active { border: 1px solid rgba(0,0,0,0.12); background: #fff; box-shadow: 0 3px 12px rgba(0,0,0,0.03); }
+    .block-btn[data-type="OBJETIVOS"] { background: var(--obj); }
+    .block-btn[data-type="CENTROS EXCLUSIVOS"] { background: var(--cex); }
+    .block-btn[data-type="CENTROS FLOP"] { background: var(--cflop); }
+    .block-btn[data-type="FORMACIONES Y MENTORING"] { background: var(--form); }
+    .block-btn[data-type="VISITAS"] { background: var(--vis); }
+    .right-panel { flex: 1; background: var(--panel); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); display: flex; flex-direction: column; overflow: hidden; }
+    .right-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid rgba(0,0,0,0.05); }
+    .right-header .title { display: flex; gap: 8px; align-items: center; }
+    .badge-color { width: 18px; height: 18px; border-radius: 6px; }
+    .content-area { flex: 1; padding: 16px; overflow-y: auto; background: #f9f9f9; }
+    .locked-overlay { background: rgba(255,255,255,0.75); border: 2px dashed rgba(183, 28, 28, 0.3); border-radius: 16px; display: none; align-items: center; justify-content: center; gap: 10px; font-weight: 500; color: #b71c1c; padding: 10px; }
+    .content-wrap { position: relative; }
+    .content-wrap.locked .locked-overlay { display: flex; position: absolute; inset: 0; backdrop-filter: blur(1px); }
+    .list { display: grid; gap: 10px; }
+    .item { background: #fff; border: 1px solid rgba(0,0,0,0.04); border-left: 4px solid rgba(183,28,28,0.6); border-radius: 12px; padding: 8px 10px 6px 10px; display: flex; flex-direction: column; gap: 4px; box-shadow: 0 1px 6px rgba(0,0,0,0.02); }
+    .item-header { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+    .item-actions { display: flex; gap: 6px; }
+    .tiny-btn, .ghost-icon { background: rgba(0,0,0,0.04); padding: 2px 6px; border-radius: 6px; border: none; cursor: pointer; font-size: 0.7rem; display: inline-flex; align-items: center; gap: 2px; }
+    .ghost-icon { background: rgba(0,0,0,0.02); }
+    .disabled { opacity: 0.6; cursor: not-allowed; }
+    /* layout centros */
+    .flex-split { display: flex; gap: 14px; align-items: stretch; }
+    .centers-list { width: 240px; background: #fff; border-radius: 14px; border: 1px solid rgba(0,0,0,0.03); box-shadow: 0 2px 6px rgba(0,0,0,0.02); padding: 10px; display: flex; flex-direction: column; gap: 10px; }
+    .centers-list-header { display:flex; justify-content:space-between; align-items:center; gap:6px; }
+    .center-right { flex: 1; display: flex; min-height: 360px; }
+    .center-content { flex: 1; display: flex; flex-direction: column; gap: 10px; }
+    .center-subnav { width: 100%; display: flex; flex-direction: row; gap: 8px; margin-top: 4px; }
+    .center-subnav button { background: #000; color: #fff; border: none; border-radius: 12px; padding: 6px 10px; font-size: 0.72rem; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+    .center-subnav button.active { background: #b71c1c; }
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+    .field { display: flex; flex-direction: column; gap: 4px; }
+    .field label { font-size: 0.7rem; opacity: 0.8; }
+    .field input, .field select { border-radius: 10px; border: 1px solid rgba(0,0,0,0.1); padding: 5px 8px; font-size: 0.78rem; background: #fff; }
+    .table-like { width: 100%; border-collapse: collapse; background: #fff; border-radius: 12px; overflow: hidden; font-size: 0.74rem; }
+    .table-like th, .table-like td { border: 1px solid rgba(0,0,0,0.12); padding: 4px 6px; vertical-align: middle; }
+    .table-toolbar { display: flex; gap: 6px; margin-bottom: 4px; align-items: center; justify-content: flex-end; }
+    .badge-ok { background: rgba(11,160,72,0.1); color: #0b7a3a; padding: 2px 6px; border-radius: 6px; font-size: 0.65rem; }
+    .badge-bad { background: rgba(211,47,47,0.12); color: #b71c1c; padding: 2px 6px; border-radius: 6px; font-size: 0.65rem; }
+    .text-red { color: #b71c1c; }
+    .text-green { color: #0b7a3a; }
     .date-wrap{position:relative;}
-    .date-wrap::after{content:"📅";position:absolute;right:5px;top:50%;transform:translateY(-50%);font-size:.66rem;opacity:.4;pointer-events:none;}
+    .date-wrap::after{content:"📅";position:absolute;right:4px;top:50%;transform:translateY(-50%);font-size:.6rem;opacity:.5;pointer-events:none;}
     input[type="date"]::-webkit-calendar-picker-indicator{opacity:0;cursor:pointer;}
-    /* grid */
-    .list{display:grid;gap:10px;}
-    .card{background:#fff;border-radius:12px;padding:8px 10px;box-shadow:0 1px 5px rgba(0,0,0,.03);}
-    .card-header{display:flex;justify-content:space-between;align-items:center;gap:6px;}
-    .tiny-btn{background:rgba(0,0,0,.04);border:none;border-radius:6px;padding:2px 6px;font-size:.65rem;cursor:pointer;}
-    /* containers for split */
-    .flex-split{display:flex;gap:14px;align-items:stretch;}
-    .list-box{width:235px;background:#fff;border-radius:14px;border:1px solid rgba(0,0,0,.02);box-shadow:0 2px 6px rgba(0,0,0,.02);padding:10px;display:flex;flex-direction:column;gap:6px;max-height:calc(100vh - 160px);overflow-y:auto;}
-    .list-box-header{display:flex;justify-content:space-between;align-items:center;gap:4px;}
-    .item-row{display:flex;align-items:center;gap:6px;padding:4px 6px;border-radius:8px;background:rgba(0,0,0,.02);cursor:pointer;}
-    .item-row.active{background:#000;color:#fff;}
-    .item-row .name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-    .item-row button{background:rgba(255,255,255,.15);border:none;border-radius:5px;padding:2px 4px;font-size:.6rem;color:inherit;cursor:pointer;}
-    .detail-box{flex:1;display:flex;flex-direction:column;gap:10px;}
-    .grid-4{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;}
-    /* tabs centers */
-    .center-tabs{display:flex;gap:8px;}
-    .center-tabs button{background:#000;color:#fff;border:none;border-radius:12px;padding:4px 10px;font-size:.7rem;cursor:pointer;display:flex;gap:5px;align-items:center;}
-    .center-tabs button.active{background:#b71c1c;}
-    /* tables */
-    .table-like{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden;font-size:.72rem;}
-    .table-like th,.table-like td{border:1px solid rgba(0,0,0,.1);padding:3px 4px;vertical-align:middle;}
-    .table-toolbar{display:flex;gap:6px;align-items:center;margin-bottom:4px;justify-content:flex-end;}
-    .vis-centro{min-width:210px;}
-    .vis-obs{min-width:200px;}
-    .yes-cell{background:rgba(11,160,72,.12);}
-    .no-cell{background:rgba(211,47,47,.12);}
-    @media(max-width:1100px){.flex-split{flex-direction:column;} .list-box{width:100%;flex-direction:row;flex-wrap:wrap;max-height:unset;}}
-    @media(max-width:960px){main{flex-direction:column;} .left-panel{width:100%;flex-direction:row;overflow-x:auto;}}
+    @media (max-width: 1080px) { .flex-split { flex-direction: column; } .centers-list { width: 100%; } }
+    @media (max-width: 960px) { main { flex-direction: column; } .left-panel { width: 100%; flex-direction: row; overflow-x: auto; } .right-panel { height: 60vh; } }
   </style>
 </head>
 <body>
-<header>
-  <h1><span class="logo">SEGUIMIENTO</span> AUDIO-AR <small style="opacity:.6;font-size:.65rem;">Panel de seguimiento formación & ventas</small></h1>
-  <div class="top-actions">
-    <div class="pin-box">
-      <span>🔐 PIN:</span>
-      <input id="pinInput" type="password" maxlength="6" placeholder="••••••">
-      <button id="pinBtn" class="btn secondary" style="padding:3px 8px;">OK</button>
+  <header>
+    <h1><span class="logo">SEGUIMIENTO</span> AUDIO-AR <small style="opacity:0.6; font-size:0.65rem;">Panel de seguimiento formación & ventas</small></h1>
+    <div class="top-actions">
+      <div class="pin-box">
+        <span>🔐 PIN:</span>
+        <input id="pinInput" type="password" maxlength="6" placeholder="••••••" />
+        <button id="pinBtn" class="btn secondary" style="padding:4px 8px;">OK</button>
+      </div>
+      <button id="saveCloud" class="btn disabled">☁️ Guardar en nube</button>
+      <button id="loadCloud" class="btn disabled">🔄 Actualizar de nube</button>
+      <button id="saveLocal" class="btn secondary">💾 Guardar local</button>
+      <div class="status-pill" id="editStatus">Solo lectura</div>
     </div>
-    <button id="saveLocal" class="btn secondary">💾 Guardar local</button>
-    <div id="editStatus" class="status-pill">Solo lectura</div>
-  </div>
-</header>
-<main>
-  <aside class="left-panel" id="leftPanel">
-    <button class="block-btn active" data-type="OBJETIVOS" data-color="var(--obj)">
-      <div class="tag" style="background:rgba(183,28,28,.15);">🎯</div>
-      <div><div>OBJETIVOS</div><small>KPIs, % logro</small></div>
-    </button>
-    <button class="block-btn" data-type="CENTROS EXCLUSIVOS" data-color="var(--cex)">
-      <div class="tag" style="background:rgba(0,0,0,.03);">🏢</div>
-      <div><div>CENTROS EXCLUSIVOS</div><small>Seguimiento premium</small></div>
-    </button>
-    <button class="block-btn" data-type="CENTROS FLOP" data-color="var(--cflop)">
-      <div class="tag" style="background:rgba(183,28,28,.12);">⚠️</div>
-      <div><div>CENTROS FLOP</div><small>Alarmas & plan</small></div>
-    </button>
-    <button class="block-btn" data-type="FORMACIONES Y MENTORING" data-color="var(--form)">
-      <div class="tag" style="background:rgba(0,0,0,.04);">📚</div>
-      <div><div>FORMACIONES Y MENTORING</div><small>Plan de aulas</small></div>
-    </button>
-    <button class="block-btn" data-type="VISITAS" data-color="var(--vis)">
-      <div class="tag" style="background:rgba(0,0,0,.03);">🗓️</div>
-      <div><div>VISITAS</div><small>Agenda & report</small></div>
-    </button>
-  </aside>
-  <section class="right-panel">
-    <div class="right-header">
-      <div style="display:flex;gap:8px;align-items:center;">
-        <div id="badgeColor" class="badge-color" style="background:var(--obj);"></div>
-        <h2 id="sectionTitle" style="font-size:.93rem;">OBJETIVOS</h2>
+  </header>
+  <main>
+    <aside class="left-panel" id="leftPanel">
+      <div class="left-header">
+        <strong>Bloques</strong>
+        <button id="addBlock" class="tiny-btn">+ Añadir</button>
       </div>
-      <div>
-        <button id="btnHTML" class="btn secondary">⬇︎ HTML</button>
-        <button id="btnPDF" class="btn secondary">⬇︎ PDF</button>
-        <button id="btnXLS" class="btn secondary">⬇︎ Excel</button>
-      </div>
-    </div>
-    <div class="content-area">
-      <div id="contentWrap" class="content-wrap">
-        <div class="locked-overlay">🔒 Edición bloqueada. Introduce PIN AR4321.</div>
-        <div id="contentHolder"></div>
-      </div>
-    </div>
-  </section>
-</main>
-
-<script>
-const PIN_MASTER = "AR4321";
-const pinInput = document.getElementById("pinInput");
-const pinBtn = document.getElementById("pinBtn");
-const contentHolder = document.getElementById("contentHolder");
-const contentWrap = document.getElementById("contentWrap");
-const editStatus = document.getElementById("editStatus");
-const leftPanel = document.getElementById("leftPanel");
-const badgeColor = document.getElementById("badgeColor");
-const sectionTitle = document.getElementById("sectionTitle");
-const saveLocalBtn = document.getElementById("saveLocal");
-
-let editable = false;
-
-let blocks = JSON.parse(localStorage.getItem("audioar_blocks") || "null") || {
-  "OBJETIVOS": {
-    color: "var(--obj)",
-    items: [
-      { titulo: "Ventas Q4", detalle: "Objetivo 140% sobre 2024", fecha: "2025-11-02" }
-    ]
-  },
-  "CENTROS EXCLUSIVOS": {
-    color: "var(--cex)",
-    selected: 0,
-    view: "acciones",
-    centers: [
-      {
-        nombre: "Centro exclusivo 1",
-        delegado: "Delegado A",
-        audiologo: "Audi 1",
-        tipo: "Sucursal",
-        acciones: [
-          { tipo: "Seguimiento audífonos", fecha: "2025-11-03", derivaciones: "2", citas: "3", ventas: "1", obs: "Potencial en ORL" }
-        ],
-        formaciones: [
-          { curso: "Teleaudiometría avanzada", superado: "Sí", aplicado: "Sí", mentoring: "No" }
-        ],
-        visitas: [
-          { fecha: "2025-11-02", checklist: "92", convPrueba: "85", convVenta: "80" }
-        ]
-      }
-    ]
-  },
-  "CENTROS FLOP": {
-    color: "var(--cflop)",
-    selected: 0,
-    view: "acciones",
-    centers: [
-      {
-        nombre: "Centro flop 1",
-        delegado: "Delegado B",
-        audiologo: "Audi 2",
-        tipo: "Franquicia",
-        acciones: [
-          { tipo: "Alerta baja conversión", fecha: "2025-11-05", derivaciones: "0", citas: "1", ventas: "0", obs: "Revisar argumentario" }
-        ],
-        formaciones: [
-          { curso: "ACE / Rehabilitación", superado: "No", aplicado: "No", mentoring: "Sí" }
-        ],
-        visitas: [
-          { fecha: "2025-11-05", checklist: "70", convPrueba: "60", convVenta: "50" }
-        ]
-      }
-    ]
-  },
-  "FORMACIONES Y MENTORING": {
-    color: "var(--form)",
-    selected: 0,
-    delegados: [
-      {
-        nombre: "Delegado 1",
-        tabla: [
-          { fecha: "2025-11-04", centros: "Centro 1", sucursal: "Sucursal", tema: "Teleaudiometría", superado: "Sí", aplicado: "Sí", mentoring: "No", obs: "Buena participación" }
-        ],
-        adjunto: ""
-      }
-    ]
-  },
-  "VISITAS": {
-    color: "var(--vis)",
-    selected: 0,
-    delegados: [
-      {
-        nombre: "Delegado 1",
-        visitador: "",
-        visitas: [
-          { fecha: "2025-11-06", centros: "Centro Tetuán", sucursal: "Sucursal", audiologo: "", checklist: "82", convPrueba: "75", convVenta: "60", hit: "No", aar: "No", rt: "No", obs: "Reforzar cierre" }
-        ],
-        adjunto: ""
-      }
-    ]
-  }
-};
-
-let currentBlock = "OBJETIVOS";
-
-function persist(){ localStorage.setItem("audioar_blocks", JSON.stringify(blocks)); }
-
-function setEditable(on){
-  editable = on;
-  editStatus.textContent = on ? "Edición activada" : "Solo lectura";
-  editStatus.style.background = on ? "rgba(11,160,72,.12)" : "rgba(0,0,0,.2)";
-  renderCurrentBlock();
-}
-
-/* ----- render OBJETIVOS ----- */
-function renderObjectives(data){
-  contentHolder.innerHTML = "";
-  const list = document.createElement("div");
-  list.className = "list";
-  data.items.forEach((it,i)=>{
-    const card = document.createElement("div");
-    card.className = "card";
-    card.innerHTML = `
-      <div class="card-header">
-        <strong>${it.titulo}</strong>
-        ${editable?`<div style="display:flex;gap:4px;">
-          <button class="tiny-btn" data-act="obj-edit" data-idx="${i}">✏</button>
-          <button class="tiny-btn" data-act="obj-add" data-idx="${i}">＋</button>
-          <button class="tiny-btn" data-act="obj-del" data-idx="${i}">−</button>
-        </div>`:""}
-      </div>
-      <small>${it.detalle||""}</small>
-      <div class="field" style="max-width:180px;margin-top:4px;">
-        <label>Fecha</label>
-        <div class="date-wrap">
-          <input type="date" class="date-input" data-act="obj-date" data-idx="${i}" value="${it.fecha||""}" ${editable?"":"disabled"}>
+      <button class="block-btn active" data-type="OBJETIVOS" data-color="var(--obj)"><div class="tag" style="background: rgba(183,28,28,0.2);">🎯</div><div><div>OBJETIVOS</div><small>KPIs, % logro</small></div></button>
+      <button class="block-btn" data-type="CENTROS EXCLUSIVOS" data-color="var(--cex)"><div class="tag" style="background: rgba(47,52,55,0.05);">🏢</div><div><div>CENTROS EXCLUSIVOS</div><small>Seguimiento premium</small></div></button>
+      <button class="block-btn" data-type="CENTROS FLOP" data-color="var(--cflop)"><div class="tag" style="background: rgba(183,28,28,0.17);">⚠️</div><div><div>CENTROS FLOP</div><small>Alarmas & plan</small></div></button>
+      <button class="block-btn" data-type="FORMACIONES Y MENTORING" data-color="var(--form)"><div class="tag" style="background: rgba(24,24,24,0.05);">📚</div><div><div>FORMACIONES Y MENTORING</div><small>Plan de aulas</small></div></button>
+      <button class="block-btn" data-type="VISITAS" data-color="var(--vis)"><div class="tag" style="background: rgba(0,0,0,0.04);">🗓️</div><div><div>VISITAS</div><small>Agenda & report</small></div></button>
+    </aside>
+    <section class="right-panel">
+      <div class="right-header" id="rightHeader">
+        <div class="title">
+          <div class="badge-color" id="badgeColor" style="background: var(--obj);"></div>
+          <h2 id="sectionTitle" style="font-size:0.95rem;">OBJETIVOS</h2>
+        </div>
+        <div class="footer-tools">
+          <button id="btnHTML" class="btn secondary">⬇︎ HTML</button>
+          <button id="btnPDF" class="btn secondary">⬇︎ PDF</button>
+          <button id="btnXLS" class="btn secondary">⬇︎ Excel</button>
         </div>
       </div>
-    `;
-    list.appendChild(card);
-  });
-  if (editable){
-    const btn = document.createElement("button");
-    btn.className = "tiny-btn";
-    btn.textContent = "+ Añadir objetivo";
-    btn.onclick = ()=>{ data.items.push({titulo:"Nuevo objetivo",detalle:"",fecha:""}); persist(); renderCurrentBlock(); };
-    list.appendChild(btn);
-  }
-  contentHolder.appendChild(list);
-}
-
-/* ----- render CENTROS ----- */
-function renderCentersBlock(blockName, data){
-  contentHolder.innerHTML = "";
-  const wrap = document.createElement("div");
-  wrap.className = "flex-split";
-
-  // listado de centros
-  const list = document.createElement("div");
-  list.className = "list-box";
-  list.innerHTML = `
-    <div class="list-box-header">
-      <strong>${blockName==="CENTROS EXCLUSIVOS"?"Centros exclusivos":"Centros flop"}</strong>
-      ${editable?`<span style="display:flex;gap:3px;">
-        <button class="tiny-btn" data-act="center-add">+</button>
-        <button class="tiny-btn" data-act="center-del">−</button>
-        <button class="tiny-btn" data-act="center-save">Guardar</button>
-      </span>`:""}
-    </div>
-  `;
-  (data.centers||[]).forEach((c,idx)=>{
-    const row = document.createElement("div");
-    row.className = "item-row"+(idx===(data.selected||0)?" active":"");
-    row.dataset.idx = idx;
-    row.innerHTML = `
-      <span class="name">${c.nombre||((blockName==="CENTROS EXCLUSIVOS"?"Exclusivo ":"Flop ")+(idx+1))}</span>
-      ${editable?`<button data-act="center-rename" data-idx="${idx}">✏</button>`:""}
-    `;
-    list.appendChild(row);
-  });
-  wrap.appendChild(list);
-
-  // detalle
-  const right = document.createElement("div");
-  right.className = "detail-box";
-  const currentIdx = data.selected || 0;
-  const center = data.centers[currentIdx] || {nombre:"",delegado:"",audiologo:"",tipo:"Sucursal",acciones:[],formaciones:[],visitas:[]};
-  if (!data.view) data.view = "acciones";
-
-  const info = document.createElement("div");
-  info.className = "grid-4";
-  info.innerHTML = `
-    <div class="field"><label>Nombre del centro</label><input ${editable?"":"disabled"} data-field="nombre" value="${center.nombre||""}"></div>
-    <div class="field"><label>Delegado</label><input ${editable?"":"disabled"} data-field="delegado" value="${center.delegado||""}"></div>
-    <div class="field"><label>Audiólogo</label><input ${editable?"":"disabled"} data-field="audiologo" value="${center.audiologo||""}"></div>
-    <div class="field"><label>Sucursal / Franquicia</label>
-      <select ${editable?"":"disabled"} data-field="tipo">
-        <option value="Sucursal" ${center.tipo==="Sucursal"?"selected":""}>Sucursal</option>
-        <option value="Franquicia" ${center.tipo==="Franquicia"?"selected":""}>Franquicia</option>
-      </select>
-    </div>
-  `;
-  right.appendChild(info);
-
-  const tabs = document.createElement("div");
-  tabs.className = "center-tabs";
-  ["acciones","formaciones","visitas"].forEach(v=>{
-    const b = document.createElement("button");
-    b.dataset.sub = v;
-    b.textContent = v==="acciones"?"📋 Acciones":v==="formaciones"?"📚 Formaciones y refuerzo":"🗓️ Visitas";
-    if (data.view===v) b.classList.add("active");
-    tabs.appendChild(b);
-  });
-  right.appendChild(tabs);
-
-  // tabla según vista
-  if (data.view==="acciones"){
-    const box = document.createElement("div");
-    box.innerHTML = `
-      <div class="table-toolbar">
-        <strong style="margin-right:auto;">Acciones</strong>
-        ${editable?`<button class="tiny-btn" data-act="centro-add-accion">+ Acción</button>`:""}
+      <div class="content-area">
+        <div class="content-wrap" id="contentWrap">
+          <div class="locked-overlay">🔒 Edición bloqueada. Introduce PIN AR4321.</div>
+          <div id="contentHolder"></div>
+        </div>
       </div>
-    `;
-    const t = document.createElement("table");
-    t.className = "table-like";
-    t.dataset.excel = "centro-acciones";
-    t.innerHTML = `
-      <thead>
-        <tr>
-          <th>Tipo de acción</th>
-          <th>Fecha</th>
-          <th>Derivaciones</th>
-          <th>Citas</th>
-          <th>Ventas</th>
-          <th>Observaciones</th>
-          ${editable?`<th></th>`:""}
-        </tr>
-      </thead>
-      <tbody>
-        ${(center.acciones||[]).map((a,i)=>`
-          <tr>
-            <td><input ${editable?"":"disabled"} data-centrotable="acciones" data-field="tipo" data-idx="${i}" value="${a.tipo||""}" style="width:100%;"></td>
-            <td><div class="date-wrap"><input type="date" ${editable?"":"disabled"} class="date-input" data-centrotable="acciones" data-field="fecha" data-idx="${i}" value="${a.fecha||""}"></div></td>
-            <td><input ${editable?"":"disabled"} data-centrotable="acciones" data-field="derivaciones" data-idx="${i}" value="${a.derivaciones||""}" style="width:70px;"></td>
-            <td><input ${editable?"":"disabled"} data-centrotable="acciones" data-field="citas" data-idx="${i}" value="${a.citas||""}" style="width:70px;"></td>
-            <td><input ${editable?"":"disabled"} data-centrotable="acciones" data-field="ventas" data-idx="${i}" value="${a.ventas||""}" style="width:70px;"></td>
-            <td><input ${editable?"":"disabled"} data-centrotable="acciones" data-field="obs" data-idx="${i}" value="${a.obs||""}" style="width:100%;"></td>
-            ${editable?`<td><button class="tiny-btn" data-act="centro-del-row" data-table="acciones" data-idx="${i}">−</button></td>`:""}
-          </tr>
-        `).join("")}
-      </tbody>
-    `;
-    box.appendChild(t);
-    right.appendChild(box);
-  } else if (data.view==="formaciones"){
-    const box = document.createElement("div");
-    box.innerHTML = `
-      <div class="table-toolbar">
-        <strong style="margin-right:auto;">Formaciones y refuerzo</strong>
-        ${editable?`<button class="tiny-btn" data-act="centro-add-forma">+ Formación</button>`:""}
-      </div>
-    `;
-    const t = document.createElement("table");
-    t.className = "table-like";
-    t.dataset.excel = "centro-formaciones";
-    t.innerHTML = `
-      <thead>
-        <tr>
-          <th>Curso relevante</th>
-          <th>Superado</th>
-          <th>Aplicado</th>
-          <th>Mentoring-Coaching</th>
-          ${editable?`<th></th>`:""}
-        </tr>
-      </thead>
-      <tbody>
-        ${(center.formaciones||[]).map((f,i)=>`
-          <tr>
-            <td><input ${editable?"":"disabled"} data-centrotable="formaciones" data-field="curso" data-idx="${i}" value="${f.curso||""}" style="width:100%;"></td>
-            <td><select ${editable?"":"disabled"} data-centrotable="formaciones" data-field="superado" data-idx="${i}"><option value="Sí" ${f.superado==="Sí"?"selected":""}>Sí</option><option value="No" ${f.superado!=="Sí"?"selected":""}>No</option></select></td>
-            <td><select ${editable?"":"disabled"} data-centrotable="formaciones" data-field="aplicado" data-idx="${i}"><option value="Sí" ${f.aplicado==="Sí"?"selected":""}>Sí</option><option value="No" ${f.aplicado!=="Sí"?"selected":""}>No</option></select></td>
-            <td><select ${editable?"":"disabled"} data-centrotable="formaciones" data-field="mentoring" data-idx="${i}"><option value="Sí" ${f.mentoring==="Sí"?"selected":""}>Sí</option><option value="No" ${f.mentoring!=="Sí"?"selected":""}>No</option></select></td>
-            ${editable?`<td><button class="tiny-btn" data-act="centro-del-row" data-table="formaciones" data-idx="${i}">−</button></td>`:""}
-          </tr>
-        `).join("")}
-      </tbody>
-    `;
-    box.appendChild(t);
-    right.appendChild(box);
-  } else {
-    const box = document.createElement("div");
-    box.innerHTML = `
-      <div class="table-toolbar">
-        <strong style="margin-right:auto;">Visitas</strong>
-        ${editable?`<button class="tiny-btn" data-act="centro-add-visita">+ Visita</button>`:""}
-      </div>
-    `;
-    const t = document.createElement("table");
-    t.className = "table-like";
-    t.dataset.excel = "centro-visitas";
-    t.innerHTML = `
-      <thead>
-        <tr>
-          <th>Fecha</th>
-          <th>Checklist %</th>
-          <th>Conv. prueba %</th>
-          <th>Conv. venta %</th>
-          ${editable?`<th></th>`:""}
-        </tr>
-      </thead>
-      <tbody>
-        ${(center.visitas||[]).map((v,i)=>{
-          const redChk = Number(v.checklist||0) < 85;
-          const redPr = Number(v.convPrueba||0) < 80;
-          const redVe = Number(v.convVenta||0) < 80;
-          return `
+    </section>
+  </main>
+  <script>
+    const PIN_MASTER = "AR4321";
+    const pinInput = document.getElementById("pinInput");
+    const pinBtn = document.getElementById("pinBtn");
+    const editStatus = document.getElementById("editStatus");
+    const saveLocalBtn = document.getElementById("saveLocal");
+    const contentWrap = document.getElementById("contentWrap");
+    const contentHolder = document.getElementById("contentHolder");
+    const leftPanel = document.getElementById("leftPanel");
+    const badgeColor = document.getElementById("badgeColor");
+    const sectionTitle = document.getElementById("sectionTitle");
+    const addBlock = document.getElementById("addBlock");
+
+    let editable = false;
+
+    let blocks = JSON.parse(localStorage.getItem("audioar_blocks") || "null") || {
+      "OBJETIVOS": {
+        color: "var(--obj)",
+        items: [
+          { titulo: "Ventas Q4", detalle: "Objetivo 140% sobre 2024", fecha: "2025-11-02" }
+        ]
+      },
+      "CENTROS EXCLUSIVOS": {
+        color: "var(--cex)",
+        selected: 0,
+        view: "acciones",
+        centers: [
+          {
+            nombre: "Centro 1",
+            delegado: "",
+            audiologo: "",
+            tipo: "Sucursal",
+            acciones: [
+              { tipo: "Seguimiento audífonos", fecha: "2025-11-03", derivaciones: "2", citas: "3", ventas: "1", obs: "Potencial en ORL" }
+            ],
+            formaciones: [
+              { curso: "Teleaudiometría avanzada", superado: "Sí", aplicado: "Sí", mentoring: "No" }
+            ],
+            visitas: [
+              { fecha: "2025-11-02", checklist: "90", convPrueba: "85", convVenta: "80" }
+            ],
+            servicios: [
+              { nombre: "Tinnitus-TRT", si: "No", ventas: "" },
+              { nombre: "Pediátrico", si: "No", ventas: "" },
+              { nombre: "AAR", si: "No", ventas: "" },
+              { nombre: "HIT", si: "No", ventas: "" }
+            ]
+          }
+        ]
+      },
+      "CENTROS FLOP": {
+        color: "var(--cflop)",
+        selected: 0,
+        view: "acciones",
+        centers: [
+          {
+            nombre: "Centro Tetuán",
+            delegado: "",
+            audiologo: "",
+            tipo: "Franquicia",
+            acciones: [
+              { tipo: "Alerta baja conversión", fecha: "2025-11-05", derivaciones: "0", citas: "1", ventas: "0", obs: "Revisar argumentario" }
+            ],
+            formaciones: [
+              { curso: "ACE / Rehabilitación", superado: "No", aplicado: "No", mentoring: "Sí" }
+            ],
+            visitas: [
+              { fecha: "2025-11-05", checklist: "70", convPrueba: "60", convVenta: "50" }
+            ],
+            servicios: [
+              { nombre: "Tinnitus-TRT", si: "No", ventas: "" },
+              { nombre: "Pediátrico", si: "No", ventas: "" },
+              { nombre: "AAR", si: "No", ventas: "" },
+              { nombre: "HIT", si: "No", ventas: "" }
+            ]
+          }
+        ]
+      },
+      "FORMACIONES Y MENTORING": {
+        color: "var(--form)",
+        selected: 0,
+        delegados: [
+          {
+            nombre: "Delegado 1",
+            tabla: [
+              { fecha: "2025-11-04", centros: "Centro 1", sucursal: "Sucursal", tema: "Teleaudiometría", superado: "Sí", aplicado: "Sí", obs: "Buena participación" }
+            ],
+            adjunto: ""
+          }
+        ]
+      },
+      "VISITAS": {
+        color: "var(--vis)",
+        selected: 0,
+        delegados: [
+          {
+            nombre: "Delegado 1",
+            visitas: [
+              { fecha: "2025-11-06", centros: "Centro Tetuán", sucursal: "Sucursal", audiologo: "", checklist: "82", convPrueba: "75", convVenta: "60", hit: "No", arr: "No", rt: "No", obs: "Reforzar cierre" }
+            ],
+            adjunto: ""
+          }
+        ]
+      }
+    };
+
+    let currentBlock = "OBJETIVOS";
+
+    function persist() { localStorage.setItem("audioar_blocks", JSON.stringify(blocks)); }
+
+    function setEditable(on) {
+      editable = on;
+      editStatus.textContent = on ? "Edición activada" : "Solo lectura";
+      editStatus.style.background = on ? "rgba(11,160,72,0.1)" : "rgba(0,0,0,0.2)";
+      renderCurrentBlock();
+    }
+
+    function renderObjectives(data) {
+      contentHolder.innerHTML = "";
+      const list = document.createElement("div");
+      list.className = "list";
+      data.items.forEach((item, idx) => {
+        const div = document.createElement("div");
+        div.className = "item";
+        div.innerHTML = `<div class="item-header"><strong>${item.titulo}</strong>${editable ? `<div class="item-actions"><button class="ghost-icon" data-act="edit-obj" data-idx="${idx}">✏</button><button class="ghost-icon" data-act="add-obj" data-idx="${idx}">＋</button><button class="ghost-icon" data-act="del-obj" data-idx="${idx}">−</button></div>` : ""}</div><small>${item.detalle}</small><small>📅 ${item.fecha || ""}</small>`;
+        list.appendChild(div);
+      });
+      if (editable) {
+        const addBtn = document.createElement("button");
+        addBtn.textContent = "+ Añadir objetivo";
+        addBtn.className = "tiny-btn";
+        addBtn.onclick = () => { data.items.push({ titulo: "Nuevo objetivo", detalle: "", fecha: "" }); persist(); renderCurrentBlock(); };
+        list.appendChild(addBtn);
+      }
+      contentHolder.appendChild(list);
+    }
+
+    function ensureServicios(center){
+      if (!center.servicios || !Array.isArray(center.servicios) || center.servicios.length===0){
+        center.servicios = [
+          { nombre: "Tinnitus-TRT", si: "No", ventas: "" },
+          { nombre: "Pediátrico", si: "No", ventas: "" },
+          { nombre: "AAR", si: "No", ventas: "" },
+          { nombre: "HIT", si: "No", ventas: "" }
+        ];
+      }
+    }
+
+    function renderCentersBlock(blockName, data) {
+      contentHolder.innerHTML = "";
+      const wrap = document.createElement("div");
+      wrap.className = "flex-split";
+
+      const left = document.createElement("div");
+      left.className = "centers-list";
+      left.innerHTML = `<div class="centers-list-header">
+          <strong>${blockName === "CENTROS EXCLUSIVOS" ? "Centros exclusivos" : "Centros flop"}</strong>
+          ${editable ? `<div style="display:flex;gap:4px;">
+              <button class="tiny-btn" data-act="add-center">+</button>
+              <button class="tiny-btn" data-act="del-center">−</button>
+              <button class="tiny-btn" data-act="rename-center-head">✏</button>
+              <button class="tiny-btn" data-act="save-centers">Guardar</button>
+            </div>` : ""}
+        </div>`;
+      const select = document.createElement("select");
+      select.className = "centers-select";
+      select.dataset.act = "select-center";
+      (data.centers || []).forEach((c, idx) => {
+        const opt = document.createElement("option");
+        opt.value = idx;
+        opt.textContent = c.nombre || `${blockName === "CENTROS EXCLUSIVOS" ? "Exclusivo" : "Flop"} ${idx+1}`;
+        if (idx === (data.selected || 0)) opt.selected = true;
+        select.appendChild(opt);
+      });
+      left.appendChild(select);
+      wrap.appendChild(left);
+
+      const right = document.createElement("div");
+      right.className = "center-right";
+      const sel = data.selected || 0;
+      const center = data.centers[sel] || { nombre:"", delegado:"", audiologo:"", tipo:"Sucursal", acciones:[], formaciones:[], visitas:[] };
+      ensureServicios(center);
+      if (!data.view) data.view = "acciones";
+
+      const mainContent = document.createElement("div");
+      mainContent.className = "center-content";
+      const info = document.createElement("div");
+      info.className = "grid-3";
+      info.innerHTML = `<div class="field"><label>Nombre del centro</label><input ${editable?"":"disabled"} data-field="nombre" value="${center.nombre||""}"></div>
+        <div class="field"><label>Delegado</label><input ${editable?"":"disabled"} data-field="delegado" value="${center.delegado||""}"></div>
+        <div class="field"><label>Audiólogo</label><input ${editable?"":"disabled"} data-field="audiologo" value="${center.audiologo||""}"></div>
+        <div class="field"><label>Sucursal / Franquicia</label><select ${editable?"":"disabled"} data-field="tipo"><option value="Sucursal" ${center.tipo==="Sucursal"?"selected":""}>Sucursal</option><option value="Franquicia" ${center.tipo==="Franquicia"?"selected":""}>Franquicia</option></select></div>`;
+      mainContent.appendChild(info);
+
+      const subnav = document.createElement("div");
+      subnav.className = "center-subnav";
+      [
+        { id: "acciones", label: "📋 Acciones" },
+        { id: "formaciones", label: "📚 Formaciones y refuerzo" },
+        { id: "visitas", label: "🗓️ Visitas" },
+        { id: "servicios", label: "🧩 Servicios" },
+      ].forEach(b => {
+        const bb = document.createElement("button");
+        bb.dataset.sub = b.id;
+        bb.textContent = b.label;
+        if (data.view === b.id) bb.classList.add("active");
+        subnav.appendChild(bb);
+      });
+      mainContent.appendChild(subnav);
+
+      if (data.view === "acciones") {
+        const box = document.createElement("div");
+        box.innerHTML = `<div class="table-toolbar" style="justify-content:flex-end;"><strong style="margin-right:auto; font-size:0.8rem;">Acciones</strong>${editable ? `<button class="tiny-btn" data-act="add-accion">+ Acción</button>` : ""}</div>`;
+        const t = document.createElement("table");
+        t.className = "table-like";
+        t.innerHTML = `<thead><tr>
+            <th>Tipo de acción</th>
+            <th>Fecha</th>
+            <th>Derivaciones</th>
+            <th>Citas</th>
+            <th>Ventas</th>
+            <th>Observaciones</th>
+            ${editable?`<th></th>`:""}
+          </tr></thead><tbody>${
+            (center.acciones||[]).map((a,i)=>`
+              <tr data-row="${i}" data-table="acciones">
+                <td>
+                  <select ${editable?"":"disabled"} data-centeraction="tipo" data-idx="${i}">
+                    <option value=""></option>
+                    <option value="Azafata" ${a.tipo==="Azafata"?"selected":""}>Azafata</option>
+                    <option value="Cashback" ${a.tipo==="Cashback"?"selected":""}>Cashback</option>
+                    <option value="Ruleta" ${a.tipo==="Ruleta"?"selected":""}>Ruleta</option>
+                    <option value="Stand" ${a.tipo==="Stand"?"selected":""}>Stand</option>
+                    <option value="Call center" ${a.tipo==="Call center"?"selected":""}>Call center</option>
+                    <option value="Mailing" ${a.tipo==="Mailing"?"selected":""}>Mailing</option>
+                    <option value="Buzoneo" ${a.tipo==="Buzoneo"?"selected":""}>Buzoneo</option>
+                    <option value="Bono" ${a.tipo==="Bono"?"selected":""}>Bono</option>
+                  </select>
+                </td>
+                <td>
+                  <div class="date-wrap">
+                    <input type="date" ${editable?"":"disabled"} data-centeraction="fecha" data-idx="${i}" value="${a.fecha||""}">
+                  </div>
+                </td>
+                <td><input ${editable?"":"disabled"} data-centeraction="derivaciones" data-idx="${i}" value="${a.derivaciones||""}" style="width:70px;"></td>
+                <td><input ${editable?"":"disabled"} data-centeraction="citas" data-idx="${i}" value="${a.citas||""}" style="width:70px;"></td>
+                <td><input ${editable?"":"disabled"} data-centeraction="ventas" data-idx="${i}" value="${a.ventas||""}" style="width:70px;"></td>
+                <td><input ${editable?"":"disabled"} data-centeraction="obs" data-idx="${i}" value="${a.obs||""}" style="width:100%;"></td>
+                ${editable?`<td><button class="ghost-icon" data-act="del-row">−</button></td>`:""}
+              </tr>
+            `).join("")
+          }</tbody>`;
+        box.appendChild(t);
+        mainContent.appendChild(box);
+      } else if (data.view === "formaciones") {
+        const box = document.createElement("div");
+        box.innerHTML = `<div class="table-toolbar" style="justify-content:flex-end;"><strong style="margin-right:auto; font-size:0.8rem;">Formaciones y refuerzo</strong>${editable ? `<button class="tiny-btn" data-act="add-forma">+ Formación</button>` : ""}</div>`;
+        const t = document.createElement("table");
+        t.className = "table-like";
+        t.innerHTML = `<thead><tr><th>Curso relevante</th><th>Superado</th><th>Aplicado</th><th>Mentoring-Coaching</th>${editable?`<th></th>`:""}</tr></thead><tbody>${(center.formaciones||[]).map((f,i)=>`<tr data-row="${i}" data-table="formaciones"><td contenteditable="${editable}">${f.curso||""}</td><td contenteditable="${editable}">${f.superado||"No"}</td><td contenteditable="${editable}">${f.aplicado||"No"}</td><td contenteditable="${editable}">${f.mentoring||"No"}</td>${editable?`<td><button class="ghost-icon" data-act="del-row">−</button></td>`:""}</tr>`).join("")}</tbody>`;
+        box.appendChild(t);
+        mainContent.appendChild(box);
+      } else if (data.view === "visitas") {
+        const box = document.createElement("div");
+        box.innerHTML = `<div class="table-toolbar" style="justify-content:flex-end;"><strong style="margin-right:auto; font-size:0.8rem;">Visitas</strong>${editable ? `<button class="tiny-btn" data-act="add-visita">+ Visita</button>` : ""}</div>`;
+        const t = document.createElement("table");
+        t.className = "table-like";
+        t.innerHTML = `<thead><tr><th>Fecha</th><th>Checklist %</th><th>Estado</th><th>Conv. prueba %</th><th>Conv. venta %</th>${editable?`<th></th>`:""}</tr></thead><tbody>${(center.visitas||[]).map((v,i)=>{const estado = Number(v.checklist||0) < 85 ? '<span class="badge-bad">ROJO</span>' : '<span class="badge-ok">VERDE</span>'; const clasePrueba = Number(v.convPrueba||0) < 80 ? 'text-red' : 'text-green'; const claseVenta = Number(v.convVenta||0) < 80 ? 'text-red' : 'text-green'; return `<tr data-row="${i}" data-table="visitas"><td contenteditable="${editable}">${v.fecha||""}</td><td contenteditable="${editable}">${v.checklist||""}</td><td>${estado}</td><td contenteditable="${editable}" class="${clasePrueba}">${v.convPrueba||""}</td><td contenteditable="${editable}" class="${claseVenta}">${v.convVenta||""}</td>${editable?`<td><button class="ghost-icon" data-act="del-row">−</button></td>`:""}</tr>`;}).join("")}</tbody>`;
+        box.appendChild(t);
+        mainContent.appendChild(box);
+      } else if (data.view === "servicios") {
+        const box = document.createElement("div");
+        box.innerHTML = `<div class="table-toolbar" style="justify-content:flex-end;"><strong style="margin-right:auto; font-size:0.8rem;">Servicios</strong></div>`;
+        const t = document.createElement("table");
+        t.className = "table-like";
+        t.innerHTML = `<thead><tr><th>Servicio</th><th>Disponible</th><th>Ventas</th></tr></thead><tbody>${
+          (center.servicios||[]).map((s,i)=>`
             <tr>
-              <td><div class="date-wrap"><input type="date" ${editable?"":"disabled"} class="date-input" data-centrotable="visitas" data-field="fecha" data-idx="${i}" value="${v.fecha||""}"></div></td>
-              <td><input ${editable?"":"disabled"} data-centrotable="visitas" data-field="checklist" data-idx="${i}" value="${v.checklist||""}" style="width:90px;${redChk?"background:rgba(211,47,47,.12);":"background:rgba(11,160,72,.12);"}"></td>
-              <td><input ${editable?"":"disabled"} data-centrotable="visitas" data-field="convPrueba" data-idx="${i}" value="${v.convPrueba||""}" style="width:90px;${redPr?"background:rgba(211,47,47,.12);":"background:rgba(11,160,72,.12);"}"></td>
-              <td><input ${editable?"":"disabled"} data-centrotable="visitas" data-field="convVenta" data-idx="${i}" value="${v.convVenta||""}" style="width:90px;${redVe?"background:rgba(211,47,47,.12);":"background:rgba(11,160,72,.12);"}"></td>
-              ${editable?`<td><button class="tiny-btn" data-act="centro-del-row" data-table="visitas" data-idx="${i}">−</button></td>`:""}
+              <td>${s.nombre}</td>
+              <td>
+                <select ${editable?"":"disabled"} data-centerserv="si" data-idx="${i}">
+                  <option value="Sí" ${s.si==="Sí"?"selected":""}>Sí</option>
+                  <option value="No" ${s.si!=="Sí"?"selected":""}>No</option>
+                </select>
+              </td>
+              <td><input ${editable?"":"disabled"} data-centerserv="ventas" data-idx="${i}" value="${s.ventas||""}" style="width:90px;"></td>
             </tr>
-          `;
-        }).join("")}
-      </tbody>
-    `;
-    box.appendChild(t);
-    right.appendChild(box);
-  }
+          `).join("")
+        }</tbody>`;
+        box.appendChild(t);
+        mainContent.appendChild(box);
+      }
 
-  wrap.appendChild(right);
-  contentHolder.appendChild(wrap);
-}
+      right.appendChild(mainContent);
+      wrap.appendChild(right);
+      contentHolder.appendChild(wrap);
+    }
 
-/* ----- render FORMACIONES ----- */
-function renderFormacionesBlock(data){
-  contentHolder.innerHTML = "";
-  const wrap = document.createElement("div");
-  wrap.className = "flex-split";
+    function renderFormacionesBlock(data) {
+      contentHolder.innerHTML = "";
+      const sel = data.selected || 0;
+      const delegado = data.delegados[sel] || { nombre: "", tabla: [], adjunto: "" };
 
-  // lista de delegados
-  const list = document.createElement("div");
-  list.className = "list-box";
-  list.innerHTML = `
-    <div class="list-box-header">
-      <strong>Delegados</strong>
-      ${editable?`<span style="display:flex;gap:3px;">
-        <button class="tiny-btn" data-act="form-add-deleg">+</button>
-        <button class="tiny-btn" data-act="form-del-deleg">−</button>
-        <button class="tiny-btn" data-act="form-save">Guardar</button>
-      </span>`:""}
-    </div>
-  `;
-  (data.delegados||[]).forEach((d,idx)=>{
-    const row = document.createElement("div");
-    row.className = "item-row"+(idx===(data.selected||0)?" active":"");
-    row.dataset.idx = idx;
-    row.innerHTML = `<span class="name">${d.nombre||("Delegado "+(idx+1))}</span>${editable?`<button data-act="form-rename-deleg" data-idx="${idx}">✏</button>`:""}`;
-    list.appendChild(row);
-  });
-  wrap.appendChild(list);
+      const info = document.createElement("div");
+      info.className = "grid-3";
+      info.innerHTML = `
+        <div class="field">
+          <label>Delegado</label>
+          <input disabled value="${delegado.nombre || ""}">
+        </div>
+      `;
+      contentHolder.appendChild(info);
 
-  // detalle
-  const right = document.createElement("div");
-  right.className = "detail-box";
-  const sel = data.selected || 0;
-  const del = data.delegados[sel] || {nombre:"",tabla:[],adjunto:""};
-
-  const box = document.createElement("div");
-  box.innerHTML = `
-    <div class="table-toolbar">
-      <strong style="margin-right:auto;">Formaciones del delegado</strong>
-      ${editable?`<button class="tiny-btn" data-act="form-add-row">+ Fila</button>`:""}
-      <label style="font-size:.7rem;cursor:pointer;">📎 Adjuntar Excel<input type="file" style="display:none;"></label>
-      ${editable?`<button class="tiny-btn" data-act="form-save">Guardar</button>`:""}
-    </div>
-  `;
-  const t = document.createElement("table");
-  t.className = "table-like";
-  t.dataset.excel = "formaciones";
-  t.innerHTML = `
-    <thead>
-      <tr>
-        <th>Fecha</th>
-        <th>Centros</th>
-        <th>Suc./Franq.</th>
-        <th>Tema formación</th>
-        <th>Superado</th>
-        <th>Aplicado</th>
-        <th>Mentoring</th>
-        <th>Observaciones</th>
-        ${editable?`<th></th>`:""}
-      </tr>
-    </thead>
-    <tbody>
-      ${(del.tabla||[]).map((r,i)=>`
-        <tr>
-          <td><div class="date-wrap"><input type="date" ${editable?"":"disabled"} data-formcell="fecha" data-idx="${i}" value="${r.fecha||""}"></div></td>
-          <td><input ${editable?"":"disabled"} data-formcell="centros" data-idx="${i}" value="${r.centros||""}" style="width:160px;"></td>
-          <td>
-            <select ${editable?"":"disabled"} data-formcell="sucursal" data-idx="${i}">
-              <option value="Sucursal" ${r.sucursal==="Sucursal"?"selected":""}>Sucursal</option>
-              <option value="Franquicia" ${r.sucursal==="Franquicia"?"selected":""}>Franquicia</option>
-            </select>
-          </td>
-          <td><input ${editable?"":"disabled"} data-formcell="tema" data-idx="${i}" value="${r.tema||""}" style="width:140px;"></td>
-          <td>
-            <select ${editable?"":"disabled"} data-formcell="superado" data-idx="${i}">
-              <option value="Sí" ${r.superado==="Sí"?"selected":""}>Sí</option>
-              <option value="No" ${r.superado!=="Sí"?"selected":""}>No</option>
-            </select>
-          </td>
-          <td>
-            <select ${editable?"":"disabled"} data-formcell="aplicado" data-idx="${i}">
-              <option value="Sí" ${r.aplicado==="Sí"?"selected":""}>Sí</option>
-              <option value="No" ${r.aplicado!=="Sí"?"selected":""}>No</option>
-            </select>
-          </td>
-          <td>
-            <select ${editable?"":"disabled"} data-formcell="mentoring" data-idx="${i}">
-              <option value="Sí" ${r.mentoring==="Sí"?"selected":""}>Sí</option>
-              <option value="No" ${r.mentoring!=="Sí"?"selected":""}>No</option>
-            </select>
-          </td>
-          <td><input ${editable?"":"disabled"} data-formcell="obs" data-idx="${i}" value="${r.obs||""}" style="width:160px;"></td>
-          ${editable?`<td><button class="tiny-btn" data-act="form-del-row" data-idx="${i}">−</button></td>`:""}
-        </tr>
-      `).join("")}
-    </tbody>
-  `;
-  box.appendChild(t);
-  right.appendChild(box);
-
-  wrap.appendChild(right);
-  contentHolder.appendChild(wrap);
-}
-
-/* ----- render VISITAS ----- */
-function renderVisitasBlock(data){
-  contentHolder.innerHTML = "";
-  const wrap = document.createElement("div");
-  wrap.className = "flex-split";
-
-  const list = document.createElement("div");
-  list.className = "list-box";
-  list.innerHTML = `
-    <div class="list-box-header">
-      <strong>Delegados</strong>
-      ${editable?`<span style="display:flex;gap:3px;">
-        <button class="tiny-btn" data-act="vis-add-deleg">+</button>
-        <button class="tiny-btn" data-act="vis-del-deleg">−</button>
-        <button class="tiny-btn" data-act="vis-save">Guardar</button>
-      </span>`:""}
-    </div>
-  `;
-  (data.delegados||[]).forEach((d,idx)=>{
-    const row = document.createElement("div");
-    row.className = "item-row"+(idx===(data.selected||0)?" active":"");
-    row.dataset.idx = idx;
-    row.innerHTML = `<span class="name">${d.nombre||("Delegado "+(idx+1))}</span>${editable?`<button data-act="vis-rename-deleg" data-idx="${idx}">✏</button>`:""}`;
-    list.appendChild(row);
-  });
-  wrap.appendChild(list);
-
-  const right = document.createElement("div");
-  right.className = "detail-box";
-  const sel = data.selected||0;
-  const del = data.delegados[sel] || {nombre:"",visitador:"",visitas:[]};
-
-  const topRow = document.createElement("div");
-  topRow.style.display = "flex";
-  topRow.style.gap = "8px";
-  topRow.style.marginBottom = "6px";
-  topRow.innerHTML = `
-    <div class="field" style="min-width:140px;">
-      <label>Delegado</label>
-      <input value="${del.nombre||""}" disabled>
-    </div>
-    <div class="field" style="min-width:140px;">
-      <label>Visitador</label>
-      <input ${editable?"":"disabled"} data-act="vis-visitador" value="${del.visitador||""}">
-    </div>
-    <div class="field" style="flex:1;">
-      <label>Buscar</label>
-      <input data-act="vis-filter" placeholder="Filtrar visitas...">
-    </div>
-    ${editable?`<div class="field" style="justify-content:flex-end;">
-      <label style="opacity:0;">&nbsp;</label>
-      <button class="tiny-btn" data-act="vis-save">Guardar</button>
-    </div>`:""}
-  `;
-  right.appendChild(topRow);
-
-  const box = document.createElement("div");
-  box.innerHTML = `
-    <div class="table-toolbar">
-      <strong style="margin-right:auto;">Visitas del delegado</strong>
-      ${editable?`<button class="tiny-btn" data-act="vis-add-row">+ Visita</button>`:""}
-      <label style="font-size:.7rem;cursor:pointer;">📎 Adjuntar Excel<input type="file" style="display:none;"></label>
-    </div>
-  `;
-  const t = document.createElement("table");
-  t.className = "table-like";
-  t.dataset.excel = "visitas";
-  t.innerHTML = `
-    <thead>
-      <tr>
-        <th>Fecha</th>
-        <th class="vis-centro">Centros</th>
-        <th>Suc./Franq.</th>
-        <th>Audiólogo</th>
-        <th>Checklist %</th>
-        <th>Conv. prueba %</th>
-        <th>Conv. venta %</th>
-        <th>HIT</th>
-        <th>AAR</th>
-        <th>RT-equipo</th>
-        <th class="vis-obs">Observaciones</th>
-        ${editable?`<th></th>`:""}
-      </tr>
-    </thead>
-    <tbody>
-      ${(del.visitas||[]).map((v,i)=>{
-        const redChk = Number(v.checklist||0) < 85;
-        const redPr = Number(v.convPrueba||0) < 80;
-        const redVe = Number(v.convVenta||0) < 80;
-        const hitYes = v.hit==="Sí";
-        const aarYes = v.aar==="Sí";
-        const rtYes = v.rt==="Sí";
-        return `
+      const box = document.createElement("div");
+      box.innerHTML = `
+        <div class="table-toolbar" style="justify-content:flex-end;">
+          <strong style="margin-right:auto;">Formaciones del delegado</strong>
+          ${editable ? `<button class="tiny-btn" data-act="form-add-row">+ Fila</button>` : ``}
+          <label style="font-size:0.7rem;cursor:pointer;">
+            ${delegado.adjunto ? "📎 " + delegado.adjunto : "📎 Adjuntar Excel"}
+            <input type="file" data-act="form-attach" style="display:none;">
+          </label>
+          ${editable ? `<button class="tiny-btn" data-act="form-save-block">Guardar</button>` : ``}
+        </div>
+      `;
+      const t = document.createElement("table");
+      t.className = "table-like";
+      t.innerHTML = `
+        <thead>
           <tr>
-            <td><div class="date-wrap"><input type="date" ${editable?"":"disabled"} data-viscell="fecha" data-idx="${i}" value="${v.fecha||""}"></div></td>
-            <td><input ${editable?"":"disabled"} data-viscell="centros" data-idx="${i}" value="${v.centros||""}" style="width:100%;"></td>
-            <td>
-              <select ${editable?"":"disabled"} data-viscell="sucursal" data-idx="${i}">
-                <option value="Sucursal" ${v.sucursal==="Sucursal"?"selected":""}>Sucursal</option>
-                <option value="Franquicia" ${v.sucursal==="Franquicia"?"selected":""}>Franquicia</option>
-              </select>
-            </td>
-            <td><input ${editable?"":"disabled"} data-viscell="audiologo" data-idx="${i}" value="${v.audiologo||""}" style="width:110px;"></td>
-            <td><input ${editable?"":"disabled"} data-viscell="checklist" data-idx="${i}" value="${v.checklist||""}" style="width:70px;${redChk?"background:rgba(211,47,47,.12);":"background:rgba(11,160,72,.12);"}"></td>
-            <td><input ${editable?"":"disabled"} data-viscell="convPrueba" data-idx="${i}" value="${v.convPrueba||""}" style="width:80px;${redPr?"background:rgba(211,47,47,.12);":"background:rgba(11,160,72,.12);"}"></td>
-            <td><input ${editable?"":"disabled"} data-viscell="convVenta" data-idx="${i}" value="${v.convVenta||""}" style="width:80px;${redVe?"background:rgba(211,47,47,.12);":"background:rgba(11,160,72,.12);"}"></td>
-            <td class="${hitYes?"yes-cell":"no-cell"}">
-              <select ${editable?"":"disabled"} data-viscell="hit" data-idx="${i}" style="background:transparent;">
-                <option value="Sí" ${hitYes?"selected":""}>Sí</option>
-                <option value="No" ${!hitYes?"selected":""}>No</option>
-              </select>
-            </td>
-            <td class="${aarYes?"yes-cell":"no-cell"}">
-              <select ${editable?"":"disabled"} data-viscell="aar" data-idx="${i}" style="background:transparent;">
-                <option value="Sí" ${aarYes?"selected":""}>Sí</option>
-                <option value="No" ${!aarYes?"selected":""}>No</option>
-              </select>
-            </td>
-            <td class="${rtYes?"yes-cell":"no-cell"}">
-              <select ${editable?"":"disabled"} data-viscell="rt" data-idx="${i}" style="background:transparent;">
-                <option value="Sí" ${rtYes?"selected":""}>Sí</option>
-                <option value="No" ${!rtYes?"selected":""}>No</option>
-              </select>
-            </td>
-            <td><input ${editable?"":"disabled"} data-viscell="obs" data-idx="${i}" value="${v.obs||""}" style="width:100%;"></td>
-            ${editable?`<td><button class="tiny-btn" data-act="vis-del-row" data-idx="${i}">−</button></td>`:""}
+            <th>Fecha</th>
+            <th>Centros</th>
+            <th>Sucursal / Franquicia</th>
+            <th>Tema formación</th>
+            <th>Superado</th>
+            <th>Aplicado</th>
+            <th>Observaciones</th>
+            ${editable ? `<th></th>` : ``}
           </tr>
-        `;
-      }).join("")}
-    </tbody>
-  `;
-  box.appendChild(t);
-  right.appendChild(box);
-
-  wrap.appendChild(right);
-  contentHolder.appendChild(wrap);
-}
-
-/* ----- render principal ----- */
-function renderCurrentBlock(){
-  const data = blocks[currentBlock]; if (!data) return;
-  badgeColor.style.background = data.color || "#fff";
-  sectionTitle.textContent = currentBlock;
-  if (!editable) contentWrap.classList.add("locked"); else contentWrap.classList.remove("locked");
-  if (currentBlock==="OBJETIVOS") renderObjectives(data);
-  else if (currentBlock==="CENTROS EXCLUSIVOS" || currentBlock==="CENTROS FLOP") renderCentersBlock(currentBlock, data);
-  else if (currentBlock==="FORMACIONES Y MENTORING") renderFormacionesBlock(data);
-  else if (currentBlock==="VISITAS") renderVisitasBlock(data);
-}
-
-/* ----- eventos globales ----- */
-pinBtn.addEventListener("click", ()=>{
-  const v = pinInput.value.trim();
-  if (v===PIN_MASTER) setEditable(true);
-  else{ alert("PIN incorrecto. Usa AR4321"); setEditable(false); }
-});
-pinInput.addEventListener("keydown", e=>{
-  if (e.key==="Enter"){
-    const v = pinInput.value.trim();
-    if (v===PIN_MASTER) setEditable(true);
-    else { alert("PIN incorrecto. Usa AR4321"); setEditable(false); }
-  }
-});
-
-leftPanel.addEventListener("click", e=>{
-  const b = e.target.closest(".block-btn"); if (!b) return;
-  document.querySelectorAll(".block-btn").forEach(x=>x.classList.remove("active"));
-  b.classList.add("active");
-  currentBlock = b.dataset.type;
-  renderCurrentBlock();
-});
-
-/* clicks en contenido */
-contentHolder.addEventListener("click", e=>{
-  const t = e.target;
-
-  /* OBJETIVOS */
-  if (t.dataset.act==="obj-edit"){
-    const it = blocks["OBJETIVOS"].items[+t.dataset.idx];
-    const nt = prompt("Título", it.titulo||"");
-    if (nt!==null) it.titulo = nt;
-    const nd = prompt("Detalle", it.detalle||"");
-    if (nd!==null) it.detalle = nd;
-    persist(); renderCurrentBlock(); return;
-  }
-  if (t.dataset.act==="obj-add"){
-    blocks["OBJETIVOS"].items.splice(+t.dataset.idx+1,0,{titulo:"Nuevo objetivo",detalle:"",fecha:""});
-    persist(); renderCurrentBlock(); return;
-  }
-  if (t.dataset.act==="obj-del"){
-    blocks["OBJETIVOS"].items.splice(+t.dataset.idx,1);
-    persist(); renderCurrentBlock(); return;
-  }
-
-  /* Centros: seleccionar fila */
-  if (t.closest(".item-row") && (currentBlock==="CENTROS EXCLUSIVOS" || currentBlock==="CENTROS FLOP" || currentBlock==="FORMACIONES Y MENTORING" || currentBlock==="VISITAS")){
-    const row = t.closest(".item-row");
-    const idx = +row.dataset.idx;
-    const d = blocks[currentBlock];
-    d.selected = idx;
-    persist(); renderCurrentBlock(); return;
-  }
-
-  /* Centros: add/del/rename/save */
-  if (t.dataset.act==="center-add"){
-    const d = blocks[currentBlock];
-    d.centers.push({nombre: currentBlock==="CENTROS EXCLUSIVOS"?"Centro exclusivo nuevo":"Centro flop nuevo",delegado:"",audiologo:"",tipo:"Sucursal",acciones:[],formaciones:[],visitas:[]});
-    d.selected = d.centers.length-1;
-    persist(); renderCurrentBlock(); return;
-  }
-  if (t.dataset.act==="center-del"){
-    const d = blocks[currentBlock];
-    if (!d.centers.length) return;
-    d.centers.splice(d.selected||0,1);
-    if (d.selected>0) d.selected--;
-    persist(); renderCurrentBlock(); return;
-  }
-  if (t.dataset.act==="center-rename"){
-    const d = blocks[currentBlock];
-    const c = d.centers[+t.dataset.idx];
-    const nuevo = prompt("Nombre del centro", c.nombre||"");
-    if (nuevo!==null){ c.nombre = nuevo.trim(); persist(); renderCurrentBlock(); }
-    return;
-  }
-  if (t.dataset.act==="center-save"){ persist(); alert("Centros guardados"); return; }
-
-  /* tabs de centro */
-  if (t.dataset.sub){
-    const d = blocks[currentBlock];
-    d.view = t.dataset.sub;
-    persist(); renderCurrentBlock(); return;
-  }
-
-  /* añadir filas dentro de CENTROS */
-  if (t.dataset.act==="centro-add-accion"){
-    const d = blocks[currentBlock];
-    const c = d.centers[d.selected||0];
-    c.acciones.push({tipo:"",fecha:"",derivaciones:"",citas:"",ventas:"",obs:""});
-    persist(); renderCurrentBlock(); return;
-  }
-  if (t.dataset.act==="centro-add-forma"){
-    const d = blocks[currentBlock];
-    const c = d.centers[d.selected||0];
-    c.formaciones.push({curso:"",superado:"No",aplicado:"No",mentoring:"No"});
-    persist(); renderCurrentBlock(); return;
-  }
-  if (t.dataset.act==="centro-add-visita"){
-    const d = blocks[currentBlock];
-    const c = d.centers[d.selected||0];
-    c.visitas.push({fecha:"",checklist:"",convPrueba:"",convVenta:""});
-    persist(); renderCurrentBlock(); return;
-  }
-  if (t.dataset.act==="centro-del-row"){
-    const d = blocks[currentBlock];
-    const c = d.centers[d.selected||0];
-    c[t.dataset.table].splice(+t.dataset.idx,1);
-    persist(); renderCurrentBlock(); return;
-  }
-
-  /* FORMACIONES delegados */
-  if (t.dataset.act==="form-add-deleg"){
-    const d = blocks["FORMACIONES Y MENTORING"];
-    d.delegados.push({nombre:"Delegado nuevo",tabla:[],adjunto:""});
-    d.selected = d.delegados.length-1;
-    persist(); renderCurrentBlock(); return;
-  }
-  if (t.dataset.act==="form-del-deleg"){
-    const d = blocks["FORMACIONES Y MENTORING"];
-    if (!d.delegados.length) return;
-    d.delegados.splice(d.selected||0,1);
-    if (d.selected>0) d.selected--;
-    persist(); renderCurrentBlock(); return;
-  }
-  if (t.dataset.act==="form-rename-deleg"){
-    const d = blocks["FORMACIONES Y MENTORING"];
-    const de = d.delegados[+t.dataset.idx];
-    const nuevo = prompt("Nombre del delegado", de.nombre||"");
-    if (nuevo!==null){ de.nombre = nuevo.trim(); persist(); renderCurrentBlock(); }
-    return;
-  }
-  if (t.dataset.act==="form-add-row"){
-    const d = blocks["FORMACIONES Y MENTORING"];
-    const del = d.delegados[d.selected||0];
-    del.tabla.push({fecha:"",centros:"",sucursal:"Sucursal",tema:"",superado:"No",aplicado:"No",mentoring:"No",obs:""});
-    persist(); renderCurrentBlock(); return;
-  }
-  if (t.dataset.act==="form-del-row"){
-    const d = blocks["FORMACIONES Y MENTORING"];
-    const del = d.delegados[d.selected||0];
-    del.tabla.splice(+t.dataset.idx,1);
-    persist(); renderCurrentBlock(); return;
-  }
-  if (t.dataset.act==="form-save"){ persist(); alert("Formaciones guardadas"); return; }
-
-  /* VISITAS delegados */
-  if (t.dataset.act==="vis-add-deleg"){
-    const d = blocks["VISITAS"];
-    d.delegados.push({nombre:"Delegado nuevo",visitador:"",visitas:[],adjunto:""});
-    d.selected = d.delegados.length-1;
-    persist(); renderCurrentBlock(); return;
-  }
-  if (t.dataset.act==="vis-del-deleg"){
-    const d = blocks["VISITAS"];
-    if (!d.delegados.length) return;
-    d.delegados.splice(d.selected||0,1);
-    if (d.selected>0) d.selected--;
-    persist(); renderCurrentBlock(); return;
-  }
-  if (t.dataset.act==="vis-rename-deleg"){
-    const d = blocks["VISITAS"];
-    const de = d.delegados[+t.dataset.idx];
-    const nuevo = prompt("Nombre del delegado", de.nombre||"");
-    if (nuevo!==null){ de.nombre = nuevo.trim(); persist(); renderCurrentBlock(); }
-    return;
-  }
-  if (t.dataset.act==="vis-add-row"){
-    const d = blocks["VISITAS"];
-    const de = d.delegados[d.selected||0];
-    de.visitas.push({fecha:"",centros:"",sucursal:"Sucursal",audiologo:"",checklist:"",convPrueba:"",convVenta:"",hit:"No",aar:"No",rt:"No",obs:""});
-    persist(); renderCurrentBlock(); return;
-  }
-  if (t.dataset.act==="vis-del-row"){
-    const d = blocks["VISITAS"];
-    const de = d.delegados[d.selected||0];
-    de.visitas.splice(+t.dataset.idx,1);
-    persist(); renderCurrentBlock(); return;
-  }
-  if (t.dataset.act==="vis-save"){ persist(); alert("Visitas guardadas"); return; }
-});
-
-/* cambios en inputs */
-contentHolder.addEventListener("change", e=>{
-  const t = e.target;
-
-  /* objetivos fecha */
-  if (t.dataset.act==="obj-date"){
-    blocks["OBJETIVOS"].items[+t.dataset.idx].fecha = t.value;
-    persist(); return;
-  }
-
-  /* campos de centro */
-  if ((currentBlock==="CENTROS EXCLUSIVOS" || currentBlock==="CENTROS FLOP") && t.dataset.field){
-    const d = blocks[currentBlock];
-    const c = d.centers[d.selected||0];
-    c[t.dataset.field] = t.value;
-    persist(); return;
-  }
-  if (t.dataset.centrotable){
-    const d = blocks[currentBlock];
-    const c = d.centers[d.selected||0];
-    c[t.dataset.centrotable][+t.dataset.idx][t.dataset.field] = t.value;
-    persist();
-    if (t.dataset.centrotable==="visitas" && ["checklist","convPrueba","convVenta"].includes(t.dataset.field)) renderCurrentBlock();
-    return;
-  }
-
-  /* formaciones tabla */
-  if (t.dataset.formcell){
-    const d = blocks["FORMACIONES Y MENTORING"];
-    const del = d.delegados[d.selected||0];
-    del.tabla[+t.dataset.idx][t.dataset.formcell] = t.value;
-    persist(); return;
-  }
-
-  /* visitas tabla */
-  if (t.dataset.viscell){
-    const d = blocks["VISITAS"];
-    const del = d.delegados[d.selected||0];
-    del.visitas[+t.dataset.idx][t.dataset.viscell] = t.value;
-    persist();
-    if (["checklist","convPrueba","convVenta","hit","aar","rt"].includes(t.dataset.viscell)) renderCurrentBlock();
-    return;
-  }
-});
-
-/* input para filtro y visitador */
-contentHolder.addEventListener("input", e=>{
-  const t = e.target;
-  if (t.dataset.act==="vis-filter"){
-    const term = t.value.toLowerCase();
-    contentHolder.querySelectorAll("table tbody tr").forEach(tr=>{
-      tr.style.display = tr.textContent.toLowerCase().includes(term)?"":"none";
-    });
-    return;
-  }
-  if (t.dataset.act==="vis-visitador"){
-    const d = blocks["VISITAS"];
-    const del = d.delegados[d.selected||0];
-    del.visitador = t.value;
-    persist(); return;
-  }
-});
-
-/* pegar estilo Excel */
-contentHolder.addEventListener("paste", e=>{
-  const table = e.target.closest("[data-excel]");
-  if (!table || !editable) return;
-  e.preventDefault();
-  const text = (e.clipboardData||window.clipboardData).getData("text");
-  if (!text) return;
-  const rows = text.trim().split(/\r?\n/).map(r=>r.split("\t"));
-  const kind = table.dataset.excel;
-
-  if (kind.startsWith("centro-")){
-    const d = blocks[currentBlock];
-    const c = d.centers[d.selected||0];
-    if (kind==="centro-acciones"){
-      rows.forEach((r,i)=>{
-        if (!c.acciones[i]) c.acciones[i] = {tipo:"",fecha:"",derivaciones:"",citas:"",ventas:"",obs:""};
-        c.acciones[i].tipo = r[0]||"";
-        c.acciones[i].fecha = r[1]||"";
-        c.acciones[i].derivaciones = r[2]||"";
-        c.acciones[i].citas = r[3]||"";
-        c.acciones[i].ventas = r[4]||"";
-        c.acciones[i].obs = r[5]||"";
-      });
-    } else if (kind==="centro-formaciones"){
-      rows.forEach((r,i)=>{
-        if (!c.formaciones[i]) c.formaciones[i] = {curso:"",superado:"No",aplicado:"No",mentoring:"No"};
-        c.formaciones[i].curso = r[0]||"";
-        c.formaciones[i].superado = r[1]||"No";
-        c.formaciones[i].aplicado = r[2]||"No";
-        c.formaciones[i].mentoring = r[3]||"No";
-      });
-    } else if (kind==="centro-visitas"){
-      rows.forEach((r,i)=>{
-        if (!c.visitas[i]) c.visitas[i] = {fecha:"",checklist:"",convPrueba:"",convVenta:""};
-        c.visitas[i].fecha = r[0]||"";
-        c.visitas[i].checklist = r[1]||"";
-        c.visitas[i].convPrueba = r[2]||"";
-        c.visitas[i].convVenta = r[3]||"";
-      });
+        </thead>
+        <tbody>
+          ${(delegado.tabla || []).map((r,i)=>`
+            <tr data-row="${i}">
+              <td contenteditable="${editable}">${r.fecha || ""}</td>
+              <td contenteditable="${editable}">${r.centros || ""}</td>
+              <td contenteditable="${editable}">${r.sucursal || ""}</td>
+              <td contenteditable="${editable}">${r.tema || ""}</td>
+              <td contenteditable="${editable}">${r.superado || ""}</td>
+              <td contenteditable="${editable}">${r.aplicado || ""}</td>
+              <td contenteditable="${editable}">${r.obs || ""}</td>
+              ${editable ? `<td><button class="ghost-icon" data-act="form-del-row" data-row="${i}">−</button></td>` : ``}
+            </tr>
+          `).join("")}
+        </tbody>
+      `;
+      box.appendChild(t);
+      contentHolder.appendChild(box);
     }
-    persist(); renderCurrentBlock(); return;
-  }
 
-  if (kind==="formaciones"){
-    const d = blocks["FORMACIONES Y MENTORING"];
-    const del = d.delegados[d.selected||0];
-    rows.forEach((r,i)=>{
-      if (!del.tabla[i]) del.tabla[i] = {fecha:"",centros:"",sucursal:"Sucursal",tema:"",superado:"No",aplicado:"No",mentoring:"No",obs:""};
-      del.tabla[i].fecha = r[0]||"";
-      del.tabla[i].centros = r[1]||"";
-      del.tabla[i].sucursal = r[2]||"";
-      del.tabla[i].tema = r[3]||"";
-      del.tabla[i].superado = r[4]||"No";
-      del.tabla[i].aplicado = r[5]||"No";
-      del.tabla[i].mentoring = r[6]||"No";
-      del.tabla[i].obs = r[7]||"";
-    });
-    persist(); renderCurrentBlock(); return;
-  }
+    function renderVisitasBlock(data) {
+      contentHolder.innerHTML = "";
+      const sel = data.selected || 0;
+      const delegado = data.delegados[sel] || { nombre: "", visitas: [], adjunto: "" };
 
-  if (kind==="visitas"){
-    const d = blocks["VISITAS"];
-    const del = d.delegados[d.selected||0];
-    rows.forEach((r,i)=>{
-      if (!del.visitas[i]) del.visitas[i] = {fecha:"",centros:"",sucursal:"Sucursal",audiologo:"",checklist:"",convPrueba:"",convVenta:"",hit:"No",aar:"No",rt:"No",obs:""};
-      del.visitas[i].fecha = r[0]||"";
-      del.visitas[i].centros = r[1]||"";
-      del.visitas[i].sucursal = r[2]||"";
-      del.visitas[i].audiologo = r[3]||"";
-      del.visitas[i].checklist = r[4]||"";
-      del.visitas[i].convPrueba = r[5]||"";
-      del.visitas[i].convVenta = r[6]||"";
-      del.visitas[i].hit = r[7]||"No";
-      del.visitas[i].aar = r[8]||"No";
-      del.visitas[i].rt = r[9]||"No";
-      del.visitas[i].obs = r[10]||"";
-    });
-    persist(); renderCurrentBlock(); return;
-  }
-});
+      const info = document.createElement("div");
+      info.className = "grid-3";
+      info.innerHTML = `
+        <div class="field">
+          <label>Delegado</label>
+          <input disabled value="${delegado.nombre || ""}">
+        </div>
+      `;
+      contentHolder.appendChild(info);
 
-/* guardar con ENTER */
-document.addEventListener("keydown", e=>{
-  if (!editable) return;
-  if (e.key==="Enter" && !e.target.matches("#pinInput")){
-    e.preventDefault();
-    persist();
-    editStatus.textContent = "Guardado local (ENTER)";
-    setTimeout(()=>{ editStatus.textContent = "Edición activada"; },1400);
-  }
-});
-
-/* export */
-document.getElementById("btnHTML").addEventListener("click", ()=>{
-  const blob = new Blob([document.documentElement.outerHTML],{type:"text/html"});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url; a.download = "seguimiento-audio-ar.html"; a.click();
-  URL.revokeObjectURL(url);
-});
-document.getElementById("btnPDF").addEventListener("click", ()=>{ alert("Para PDF usa Imprimir > Guardar como PDF."); });
-document.getElementById("btnXLS").addEventListener("click", ()=>{
-  const rows = [["Bloque","Campo1","Campo2","Campo3","Campo4"]];
-  Object.keys(blocks).forEach(bn=>{
-    const b = blocks[bn];
-    if (bn==="CENTROS EXCLUSIVOS" || bn==="CENTROS FLOP"){
-      (b.centers||[]).forEach(c=>{
-        rows.push([bn,c.nombre,c.delegado,c.audiologo,c.tipo]);
-      });
-    } else if (bn==="VISITAS"){
-      (b.delegados||[]).forEach(d=>{
-        (d.visitas||[]).forEach(v=>{
-          rows.push([bn,d.nombre,v.centros,v.sucursal,v.checklist]);
-        });
-      });
-    } else if (bn==="FORMACIONES Y MENTORING"){
-      (b.delegados||[]).forEach(d=>{
-        (d.tabla||[]).forEach(r=>{
-          rows.push([bn,d.nombre,r.centros,r.sucursal,r.tema]);
-        });
-      });
-    } else {
-      (b.items||[]).forEach(it=>{
-        rows.push([bn,it.titulo,it.detalle,it.fecha||"",""]);
-      });
+      const box = document.createElement("div");
+      box.innerHTML = `
+        <div class="table-toolbar" style="justify-content:flex-end;">
+          <strong style="margin-right:auto;">Visitas del delegado</strong>
+          ${editable ? `<button class="tiny-btn" data-act="vis-add-row">+ Visita</button>` : ``}
+          <label style="font-size:0.7rem;cursor:pointer;">
+            ${delegado.adjunto ? "📎 " + delegado.adjunto : "📎 Adjuntar Excel"}
+            <input type="file" data-act="vis-attach" style="display:none;">
+          </label>
+          ${editable ? `<button class="tiny-btn" data-act="vis-save-block">Guardar</button>` : ``}
+        </div>
+      `;
+      const t = document.createElement("table");
+      t.className = "table-like";
+      t.innerHTML = `
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Centros</th>
+            <th>Sucursal / Franquicia</th>
+            <th>Audiólogo</th>
+            <th>Checklist %</th>
+            <th>Estado</th>
+            <th>Conv. prueba %</th>
+            <th>Conv. venta %</th>
+            <th>HIT</th>
+            <th>ARR</th>
+            <th>RT-equipo</th>
+            <th>Observaciones</th>
+            ${editable ? `<th></th>` : ``}
+          </tr>
+        </thead>
+        <tbody>
+          ${(delegado.visitas || []).map((v,i)=>{
+            const estado = Number(v.checklist || 0) < 85 ? '<span class="badge-bad">ROJO</span>' : '<span class="badge-ok">VERDE</span>';
+            const clasePrueba = Number(v.convPrueba || 0) < 80 ? "text-red" : "text-green";
+            const claseVenta = Number(v.convVenta || 0) < 80 ? "text-red" : "text-green";
+            return `
+              <tr data-row="${i}">
+                <td contenteditable="${editable}">${v.fecha || ""}</td>
+                <td contenteditable="${editable}">${v.centros || ""}</td>
+                <td contenteditable="${editable}">${v.sucursal || ""}</td>
+                <td contenteditable="${editable}">${v.audiologo || ""}</td>
+                <td contenteditable="${editable}">${v.checklist || ""}</td>
+                <td>${estado}</td>
+                <td contenteditable="${editable}" class="${clasePrueba}">${v.convPrueba || ""}</td>
+                <td contenteditable="${editable}" class="${claseVenta}">${v.convVenta || ""}</td>
+                <td contenteditable="${editable}">${v.hit || "No"}</td>
+                <td contenteditable="${editable}">${v.arr || "No"}</td>
+                <td contenteditable="${editable}">${v.rt || ""}</td>
+                <td contenteditable="${editable}">${v.obs || ""}</td>
+                ${editable ? `<td><button class="ghost-icon" data-act="vis-del-row" data-row="${i}">−</button></td>` : ``}
+              </tr>
+            `;
+          }).join("")}
+        </tbody>
+      `;
+      box.appendChild(t);
+      contentHolder.appendChild(box);
     }
-  });
-  const csv = rows.map(r=>r.map(v=>`"${(v||"").replace(/"/g,'""')}"`).join(",")).join("\n");
-  const blob = new Blob([csv],{type:"text/csv"});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url; a.download = "seguimiento-audio-ar.csv"; a.click();
-  URL.revokeObjectURL(url);
-});
 
-saveLocalBtn.addEventListener("click", ()=>{
-  persist();
-  editStatus.textContent = "Guardado local";
-  setTimeout(()=>{ editStatus.textContent = editable?"Edición activada":"Solo lectura"; },1500);
-});
+    function renderSimple(data) {
+      contentHolder.innerHTML = "";
+      const list = document.createElement("div"); list.className = "list";
+      (data.items || []).forEach((item, idx) => {
+        const div = document.createElement("div"); div.className = "item";
+        div.innerHTML = `<div class="item-header"><strong ${editable ? `contenteditable="true" data-idx="${idx}" data-field="titulo"` : ""}>${item.titulo}</strong>${editable ? `<div class="item-actions"><button class="tiny-btn" data-act="del-simple" data-idx="${idx}">✖</button></div>` : ""}</div><small ${editable ? `contenteditable="true" data-idx="${idx}" data-field="detalle"` : ""}>${item.detalle}</small><small>📅 <span ${editable ? `contenteditable="true" data-idx="${idx}" data-field="fecha"` : ""}>${item.fecha || ""}</span></small>`;
+        list.appendChild(div);
+      });
+      if (editable) {
+        const addBtn = document.createElement("button"); addBtn.textContent = "+ Añadir elemento"; addBtn.className = "tiny-btn"; addBtn.onclick = () => { data.items.push({ titulo: "Nuevo", detalle: "", fecha: "" }); persist(); renderCurrentBlock(); };
+        list.appendChild(addBtn);
+      }
+      contentHolder.appendChild(list);
+    }
 
-/* init */
-renderCurrentBlock();
-</script>
+    function renderCurrentBlock() {
+      const data = blocks[currentBlock]; if (!data) return;
+      badgeColor.style.background = data.color || "#fff";
+      sectionTitle.textContent = currentBlock;
+      if (!editable) contentWrap.classList.add("locked"); else contentWrap.classList.remove("locked");
+      if (currentBlock === "OBJETIVOS") {
+        renderObjectives(data);
+      } else if (currentBlock === "CENTROS EXCLUSIVOS" || currentBlock === "CENTROS FLOP") {
+        renderCentersBlock(currentBlock, data);
+      } else if (currentBlock === "FORMACIONES Y MENTORING") {
+        renderFormacionesBlock(data);
+      } else if (currentBlock === "VISITAS") {
+        renderVisitasBlock(data);
+      } else {
+        renderSimple(data);
+      }
+    }
+
+    // PIN
+    pinBtn.addEventListener("click", () => {
+      const v = pinInput.value.trim();
+      if (v === PIN_MASTER) setEditable(true);
+      else { alert("PIN incorrecto. Usa AR4321"); setEditable(false); }
+    });
+    pinInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        const v = pinInput.value.trim();
+        if (v === PIN_MASTER) setEditable(true);
+        else { alert("PIN incorrecto. Usa AR4321"); setEditable(false); }
+      }
+    });
+
+    // cambiar de bloque
+    leftPanel.addEventListener("click", (e) => {
+      const btn = e.target.closest(".block-btn"); if (!btn) return;
+      document.querySelectorAll(".block-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      currentBlock = btn.dataset.type;
+      renderCurrentBlock();
+    });
+
+    // añadir bloque (lo dejo igual que lo tenías)
+    addBlock.addEventListener("click", () => {
+      if (!editable) return alert("Primero desbloquea edición con el PIN AR4321.");
+      const name = prompt("Nombre del nuevo bloque:");
+      if (!name) return;
+      blocks[name] = { color: "#fff5d9", items: [] };
+      persist();
+      const btn = document.createElement("button");
+      btn.className = "block-btn";
+      btn.dataset.type = name;
+      btn.dataset.color = "#fff5d9";
+      btn.innerHTML = `<div class="tag" style="background: rgba(0,0,0,0.04);">🆕</div><div><div>${name}</div><small>Nuevo bloque</small></div>`;
+      leftPanel.appendChild(btn);
+    });
+
+    // clicks dentro de contenido
+    contentHolder.addEventListener("click", (e) => {
+      const t = e.target;
+
+      // OBJETIVOS
+      if (t.dataset.act === "edit-obj") {
+        const idx = +t.dataset.idx;
+        const item = blocks["OBJETIVOS"].items[idx];
+        const nt = prompt("Título del objetivo", item.titulo || "");
+        if (nt !== null) item.titulo = nt;
+        const nd = prompt("Detalle / KPI", item.detalle || "");
+        if (nd !== null) item.detalle = nd;
+        const nf = prompt("Fecha", item.fecha || "");
+        if (nf !== null) item.fecha = nf;
+        persist(); renderCurrentBlock(); return;
+      }
+      if (t.dataset.act === "add-obj") {
+        blocks["OBJETIVOS"].items.splice(+t.dataset.idx + 1, 0, { titulo: "Nuevo objetivo", detalle: "", fecha: "" });
+        persist(); renderCurrentBlock(); return;
+      }
+      if (t.dataset.act === "del-obj") {
+        blocks["OBJETIVOS"].items.splice(+t.dataset.idx, 1);
+        persist(); renderCurrentBlock(); return;
+      }
+
+      // SELECTOR centro
+      if (t.dataset.act === "select-center") {
+        const data = blocks[currentBlock];
+        data.selected = parseInt(t.value, 10) || 0;
+        persist(); renderCurrentBlock(); return;
+      }
+
+      // cambiar subvista
+      if (t.closest(".center-subnav") && (currentBlock === "CENTROS EXCLUSIVOS" || currentBlock === "CENTROS FLOP")) {
+        const btn = t.closest("button[data-sub]");
+        if (btn) {
+          const data = blocks[currentBlock];
+          data.view = btn.dataset.sub;
+          persist(); renderCurrentBlock();
+        }
+        return;
+      }
+
+      // añadir centro
+      if (t.dataset.act === "add-center") {
+        const data = blocks[currentBlock];
+        data.centers.push({
+          nombre: currentBlock === "CENTROS EXCLUSIVOS" ? "Centro exclusivo nuevo" : "Centro flop nuevo",
+          delegado: "",
+          audiologo: "",
+          tipo: "Sucursal",
+          acciones: [],
+          formaciones: [],
+          visitas: [],
+          servicios: [
+            { nombre: "Tinnitus-TRT", si: "No", ventas: "" },
+            { nombre: "Pediátrico", si: "No", ventas: "" },
+            { nombre: "AAR", si: "No", ventas: "" },
+            { nombre: "HIT", si: "No", ventas: "" }
+          ]
+        });
+        data.selected = data.centers.length - 1;
+        persist();
+        renderCurrentBlock();
+        return;
+      }
+      if (t.dataset.act === "del-center") {
+        const data = blocks[currentBlock];
+        if (!data.centers || data.centers.length === 0) return;
+        const idx = data.selected || 0;
+        data.centers.splice(idx, 1);
+        if (data.selected > 0) data.selected -= 1;
+        persist();
+        renderCurrentBlock();
+        return;
+      }
+      if (t.dataset.act === "rename-center-head") {
+        const data = blocks[currentBlock];
+        const idx = data.selected || 0;
+        const c = data.centers[idx];
+        const nuevo = prompt("Nombre del centro:", c.nombre || "");
+        if (nuevo !== null) {
+          c.nombre = nuevo.trim();
+          persist();
+          renderCurrentBlock();
+        }
+        return;
+      }
+      if (t.dataset.act === "save-centers") {
+        persist();
+        alert("Centros guardados en este bloque.");
+        return;
+      }
+      if (t.dataset.act === "add-forma") {
+        const data = blocks[currentBlock];
+        const c = data.centers[data.selected || 0];
+        c.formaciones.push({ curso: "", superado: "No", aplicado: "No", mentoring: "No" });
+        persist(); renderCurrentBlock(); return;
+      }
+      if (t.dataset.act === "add-visita") {
+        const data = blocks[currentBlock];
+        const c = data.centers[data.selected || 0];
+        c.visitas.push({ fecha: "", checklist: "", convPrueba: "", convVenta: "" });
+        persist(); renderCurrentBlock(); return;
+      }
+      if (t.dataset.act === "add-accion") {
+        const data = blocks[currentBlock];
+        const c = data.centers[data.selected || 0];
+        c.acciones.push({ tipo: "", fecha: "", derivaciones: "", citas: "", ventas: "", obs: "" });
+        persist(); renderCurrentBlock(); return;
+      }
+      if (t.dataset.act === "del-row") {
+        const tr = t.closest("tr");
+        const data = blocks[currentBlock];
+        const c = data.centers[data.selected || 0];
+        const tableName = tr.dataset.table;
+        const idx = +tr.dataset.row;
+        c[tableName].splice(idx, 1);
+        persist(); renderCurrentBlock(); return;
+      }
+
+      // borrar simple
+      if (t.dataset.act === "del-simple") {
+        const data = blocks[currentBlock];
+        data.items.splice(+t.dataset.idx, 1);
+        persist(); renderCurrentBlock(); return;
+      }
+    });
+
+    // cambios (selects / inputs) en centros
+    contentHolder.addEventListener("change", e=>{
+      const t = e.target;
+
+      // acciones de centro (desplegable, fecha, inputs)
+      if (t.dataset.centeraction) {
+        const data = blocks[currentBlock];
+        const c = data.centers[data.selected || 0];
+        const idx = +t.dataset.idx;
+        const field = t.dataset.centeraction;
+        c.acciones[idx][field] = t.value;
+        persist();
+        return;
+      }
+
+      // servicios
+      if (t.dataset.centerserv) {
+        const data = blocks[currentBlock];
+        const c = data.centers[data.selected || 0];
+        const idx = +t.dataset.idx;
+        const field = t.dataset.centerserv;
+        c.servicios[idx][field] = t.value;
+        persist();
+        return;
+      }
+    });
+
+    // edición en línea (para lo que sigue siendo contenteditable)
+    contentHolder.addEventListener("input", (e) => {
+      const t = e.target;
+      // campos de centro
+      if ((currentBlock === "CENTROS EXCLUSIVOS" || currentBlock === "CENTROS FLOP") && t.dataset.field) {
+        const data = blocks[currentBlock];
+        const c = data.centers[data.selected || 0];
+        c[t.dataset.field] = t.value;
+        persist();
+        return;
+      }
+      // tablas contenteditable de formaciones/visitas de centro
+      const tr = t.closest("tr[data-table]");
+      if (tr && (currentBlock === "CENTROS EXCLUSIVOS" || currentBlock === "CENTROS FLOP")) {
+        const data = blocks[currentBlock];
+        const c = data.centers[data.selected || 0];
+        const tableName = tr.dataset.table;
+        const idx = +tr.dataset.row;
+        const cells = tr.querySelectorAll("td[contenteditable='true']");
+        if (tableName === "formaciones") {
+          const [curso, superado, aplicado, mentoring] = Array.from(cells).map(x => x.textContent.trim());
+          c.formaciones[idx] = { curso, superado, aplicado, mentoring };
+        } else if (tableName === "visitas") {
+          const [fecha, checklist, , convPrueba, convVenta] = Array.from(cells).map(x => x.textContent.trim());
+          c.visitas[idx] = { fecha, checklist, convPrueba, convVenta };
+        }
+        persist();
+      }
+      // bloques simples
+      if (t.dataset && typeof t.dataset.idx !== "undefined" && t.dataset.field) {
+        const data = blocks[currentBlock];
+        const idx = +t.dataset.idx;
+        data.items[idx][t.dataset.field] = t.textContent.trim();
+        persist();
+      }
+    });
+
+    // descargas
+    document.getElementById("btnHTML").addEventListener("click", () => {
+      const blob = new Blob([document.documentElement.outerHTML], { type: "text/html" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = "seguimiento-audio-ar.html"; a.click();
+      URL.revokeObjectURL(url);
+    });
+    document.getElementById("btnPDF").addEventListener("click", () => { alert("Exportar a PDF: usa Imprimir > Guardar como PDF."); });
+    document.getElementById("btnXLS").addEventListener("click", () => {
+      const rows = [["Bloque","Campo1","Campo2","Campo3","Campo4"]];
+      Object.keys(blocks).forEach(bn => {
+        const b = blocks[bn];
+        if (bn === "CENTROS EXCLUSIVOS" || bn === "CENTROS FLOP") {
+          (b.centers || []).forEach(c => { rows.push([bn, c.nombre, c.delegado, c.audiologo, c.tipo]); });
+        } else {
+          (b.items || []).forEach(it => { rows.push([bn, it.titulo, it.detalle, it.fecha || "", ""]); });
+        }
+      });
+      const csv = rows.map(r => r.map(v => `"${(v||"").replace(/"/g,'""')}"`).join(",")).join("\n");
+      const blob = new Blob([csv], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a"); a.href = url; a.download = "seguimiento-audio-ar.csv"; a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    function runSmokeTests() {
+      console.log("[TEST] estructura básica cargada");
+      console.assert(!!document.getElementById("leftPanel"), "leftPanel no existe");
+      console.assert(!!document.getElementById("contentHolder"), "contentHolder no existe");
+    }
+
+    renderCurrentBlock();
+    runSmokeTests();
+
+    // guardar local manual
+    saveLocalBtn.addEventListener("click", () => {
+      persist();
+      editStatus.textContent = "Guardado local";
+      setTimeout(() => {
+        editStatus.textContent = editable ? "Edición activada" : "Solo lectura";
+      }, 2000);
+    });
+  </script>
 </body>
 </html>
