@@ -73,10 +73,6 @@
     .flex-split { display: flex; gap: 14px; align-items: stretch; }
     .centers-list { width: 240px; background: #fff; border-radius: 14px; border: 1px solid rgba(0,0,0,0.03); box-shadow: 0 2px 6px rgba(0,0,0,0.02); padding: 10px; display: flex; flex-direction: column; gap: 10px; }
     .centers-list-header { display:flex; justify-content:space-between; align-items:center; gap:6px; }
-    .center-item { background: rgba(0,0,0,0.02); border: 1px solid transparent; border-radius: 10px; padding: 6px 8px; display:flex; justify-content:space-between; align-items:center; gap:6px; cursor:pointer; font-size:0.75rem; }
-    .center-item.active { background: #000; color:#fff; }
-    .center-item .name { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    .center-item .actions { display:flex; gap:4px; }
     .center-right { flex: 1; display: flex; min-height: 360px; }
     .center-content { flex: 1; display: flex; flex-direction: column; gap: 10px; }
     .center-subnav { width: 100%; display: flex; flex-direction: row; gap: 8px; margin-top: 4px; }
@@ -159,7 +155,7 @@
 
     let editable = false;
 
-    // CARGA TU ESTRUCTURA ACTUAL
+    /* CARGA DESDE LOCALSTORAGE TU ESTRUCTURA */
     let blocks = JSON.parse(localStorage.getItem("audioar_blocks") || "null") || {
       "OBJETIVOS": {
         color: "var(--obj)",
@@ -185,6 +181,12 @@
             ],
             visitas: [
               { fecha: "2025-11-02", checklist: "90", convPrueba: "85", convVenta: "80" }
+            ],
+            servicios: [
+              { nombre: "Tinnitus-TRT", activo: "No", ventas: "" },
+              { nombre: "Pediátrico", activo: "No", ventas: "" },
+              { nombre: "AAR", activo: "No", ventas: "" },
+              { nombre: "HIT", activo: "No", ventas: "" }
             ]
           }
         ]
@@ -207,6 +209,12 @@
             ],
             visitas: [
               { fecha: "2025-11-05", checklist: "70", convPrueba: "60", convVenta: "50" }
+            ],
+            servicios: [
+              { nombre: "Tinnitus-TRT", activo: "No", ventas: "" },
+              { nombre: "Pediátrico", activo: "No", ventas: "" },
+              { nombre: "AAR", activo: "No", ventas: "" },
+              { nombre: "HIT", activo: "No", ventas: "" }
             ]
           }
         ]
@@ -242,7 +250,9 @@
 
     let currentBlock = "OBJETIVOS";
 
-    function persist() { localStorage.setItem("audioar_blocks", JSON.stringify(blocks)); }
+    function persist() {
+      localStorage.setItem("audioar_blocks", JSON.stringify(blocks));
+    }
 
     function setEditable(on) {
       editable = on;
@@ -251,6 +261,7 @@
       renderCurrentBlock();
     }
 
+    /* --- RENDER OBJETIVOS --- */
     function renderObjectives(data) {
       contentHolder.innerHTML = "";
       const list = document.createElement("div");
@@ -258,35 +269,57 @@
       data.items.forEach((item, idx) => {
         const div = document.createElement("div");
         div.className = "item";
-        div.innerHTML = `<div class="item-header"><strong>${item.titulo}</strong>${editable ? `<div class="item-actions"><button class="ghost-icon" data-act="edit-obj" data-idx="${idx}">✏</button><button class="ghost-icon" data-act="add-obj" data-idx="${idx}">＋</button><button class="ghost-icon" data-act="del-obj" data-idx="${idx}">−</button></div>` : ""}</div><small>${item.detalle}</small><small>📅 ${item.fecha || ""}</small>`;
+        div.innerHTML = `
+          <div class="item-header">
+            <strong>${item.titulo}</strong>
+            ${editable ? `
+              <div class="item-actions">
+                <button class="ghost-icon" data-act="edit-obj" data-idx="${idx}">✏</button>
+                <button class="ghost-icon" data-act="add-obj" data-idx="${idx}">＋</button>
+                <button class="ghost-icon" data-act="del-obj" data-idx="${idx}">−</button>
+              </div>` : ""}
+          </div>
+          <small>${item.detalle}</small>
+          <small>📅 ${item.fecha || ""}</small>
+        `;
         list.appendChild(div);
       });
       if (editable) {
         const addBtn = document.createElement("button");
         addBtn.textContent = "+ Añadir objetivo";
         addBtn.className = "tiny-btn";
-        addBtn.onclick = () => { data.items.push({ titulo: "Nuevo objetivo", detalle: "", fecha: "" }); persist(); renderCurrentBlock(); };
+        addBtn.onclick = () => {
+          data.items.push({ titulo: "Nuevo objetivo", detalle: "", fecha: "" });
+          persist(); renderCurrentBlock();
+        };
         list.appendChild(addBtn);
       }
       contentHolder.appendChild(list);
     }
+
+    /* --- RENDER CENTROS --- */
+    const ACCIONES_OPTIONS = ["Azafata","Cashback","Ruleta","Stand","Call center","Mailing","Buzoneo","Bono","Otro"];
 
     function renderCentersBlock(blockName, data) {
       contentHolder.innerHTML = "";
       const wrap = document.createElement("div");
       wrap.className = "flex-split";
 
+      /* LISTA IZQUIERDA (dentro del bloque) */
       const left = document.createElement("div");
       left.className = "centers-list";
-      left.innerHTML = `<div class="centers-list-header">
+      left.innerHTML = `
+        <div class="centers-list-header">
           <strong>${blockName === "CENTROS EXCLUSIVOS" ? "Centros exclusivos" : "Centros flop"}</strong>
-          ${editable ? `<div style="display:flex;gap:4px;">
-              <button class="tiny-btn" data-act="add-center">+</button>
-              <button class="tiny-btn" data-act="del-center">−</button>
-              <button class="tiny-btn" data-act="rename-center-head">✏</button>
-              <button class="tiny-btn" data-act="save-centers">Guardar</button>
-            </div>` : ""}
-        </div>`;
+          ${editable ? `
+          <div style="display:flex;gap:4px;">
+            <button class="tiny-btn" data-act="add-center">+</button>
+            <button class="tiny-btn" data-act="del-center">−</button>
+            <button class="tiny-btn" data-act="rename-center-head">✏</button>
+            <button class="tiny-btn" data-act="save-centers">Guardar</button>
+          </div>` : ""}
+        </div>
+      `;
       const select = document.createElement("select");
       select.className = "centers-select";
       select.dataset.act = "select-center";
@@ -300,20 +333,60 @@
       left.appendChild(select);
       wrap.appendChild(left);
 
+      /* CONTENIDO DERECHA */
       const right = document.createElement("div");
       right.className = "center-right";
+
       const sel = data.selected || 0;
-      const center = data.centers[sel] || { nombre:"", delegado:"", audiologo:"", tipo:"Sucursal", acciones:[], formaciones:[], visitas:[] };
+      const center = data.centers[sel] || {
+        nombre: "",
+        delegado: "",
+        audiologo: "",
+        tipo: "Sucursal",
+        acciones: [],
+        formaciones: [],
+        visitas: [],
+        servicios: [
+          { nombre: "Tinnitus-TRT", activo: "No", ventas: "" },
+          { nombre: "Pediátrico", activo: "No", ventas: "" },
+          { nombre: "AAR", activo: "No", ventas: "" },
+          { nombre: "HIT", activo: "No", ventas: "" }
+        ]
+      };
+      center.servicios = center.servicios || [
+        { nombre: "Tinnitus-TRT", activo: "No", ventas: "" },
+        { nombre: "Pediátrico", activo: "No", ventas: "" },
+        { nombre: "AAR", activo: "No", ventas: "" },
+        { nombre: "HIT", activo: "No", ventas: "" }
+      ];
       if (!data.view) data.view = "acciones";
 
       const mainContent = document.createElement("div");
       mainContent.className = "center-content";
+
       const info = document.createElement("div");
       info.className = "grid-3";
-      info.innerHTML = `<div class="field"><label>Nombre del centro</label><input ${editable?"":"disabled"} data-field="nombre" value="${center.nombre||""}"></div>
-        <div class="field"><label>Delegado</label><input ${editable?"":"disabled"} data-field="delegado" value="${center.delegado||""}"></div>
-        <div class="field"><label>Audiólogo</label><input ${editable?"":"disabled"} data-field="audiologo" value="${center.audiologo||""}"></div>
-        <div class="field"><label>Sucursal / Franquicia</label><select ${editable?"":"disabled"} data-field="tipo"><option value="Sucursal" ${center.tipo==="Sucursal"?"selected":""}>Sucursal</option><option value="Franquicia" ${center.tipo==="Franquicia"?"selected":""}>Franquicia</option></select></div>`;
+      info.innerHTML = `
+        <div class="field">
+          <label>Nombre del centro</label>
+          <input ${editable?"":"disabled"} data-field="nombre" value="${center.nombre||""}">
+        </div>
+        <div class="field">
+          <label>Delegado</label>
+          <input ${editable?"":"disabled"} data-field="delegado" value="${center.delegado||""}">
+        </div>
+        <div class="field">
+          <label>Audiólogo</label>
+          <input ${editable?"":"disabled"} data-field="audiologo" value="${center.audiologo||""}">
+        </div>
+        <div class="field">
+          <label>Sucursal / Franquicia</label>
+          <select ${editable?"":"disabled"} data-field="tipo">
+            <option value="Sucursal" ${center.tipo==="Sucursal"?"selected":""}>Sucursal</option>
+            <option value="Franquicia" ${center.tipo==="Franquicia"?"selected":""}>Franquicia</option>
+          </select>
+        </div>
+      `;
       mainContent.appendChild(info);
 
       const subnav = document.createElement("div");
@@ -322,6 +395,7 @@
         { id: "acciones", label: "📋 Acciones" },
         { id: "formaciones", label: "📚 Formaciones y refuerzo" },
         { id: "visitas", label: "🗓️ Visitas" },
+        { id: "servicios", label: "🧩 Servicios" }
       ].forEach(b => {
         const bb = document.createElement("button");
         bb.dataset.sub = b.id;
@@ -331,28 +405,171 @@
       });
       mainContent.appendChild(subnav);
 
+      /* --- ACCIONES --- */
       if (data.view === "acciones") {
         const box = document.createElement("div");
-        box.innerHTML = `<div class="table-toolbar" style="justify-content:flex-end;"><strong style="margin-right:auto; font-size:0.8rem;">Acciones</strong>${editable ? `<button class="tiny-btn" data-act="add-accion">+ Acción</button>` : ""}</div>`;
+        box.innerHTML = `
+          <div class="table-toolbar" style="justify-content:flex-end;">
+            <strong style="margin-right:auto; font-size:0.8rem;">Acciones</strong>
+            ${editable ? `<button class="tiny-btn" data-act="add-accion">+ Acción</button>` : ""}
+          </div>
+        `;
         const t = document.createElement("table");
         t.className = "table-like";
-        t.innerHTML = `<thead><tr><th>Tipo de acción</th><th>Fecha</th><th>Derivaciones</th><th>Citas</th><th>Ventas</th><th>Observaciones</th>${editable?`<th></th>`:""}</tr></thead><tbody>${(center.acciones||[]).map((a,i)=>`<tr data-row="${i}" data-table="acciones"><td contenteditable="${editable}">${a.tipo||""}</td><td contenteditable="${editable}">${a.fecha||""}</td><td contenteditable="${editable}">${a.derivaciones||""}</td><td contenteditable="${editable}">${a.citas||""}</td><td contenteditable="${editable}">${a.ventas||""}</td><td contenteditable="${editable}">${a.obs||""}</td>${editable?`<td><button class="ghost-icon" data-act="del-row">−</button></td>`:""}</tr>`).join("")}</tbody>`;
+        t.innerHTML = `
+          <thead>
+            <tr>
+              <th>Tipo de acción</th>
+              <th>Fecha</th>
+              <th>Derivaciones</th>
+              <th>Citas</th>
+              <th>Ventas</th>
+              <th>Observaciones</th>
+              ${editable?`<th></th>`:""}
+            </tr>
+          </thead>
+          <tbody>
+            ${(center.acciones||[]).map((a,i)=>{
+              return `
+                <tr data-row="${i}" data-table="acciones">
+                  <td>
+                    ${editable
+                      ? `<select data-table="acciones" data-row="${i}" data-field="tipo">
+                          ${ACCIONES_OPTIONS.map(op=>`<option value="${op}" ${a.tipo===op?"selected":""}>${op}</option>`).join("")}
+                        </select>`
+                      : (a.tipo||"")}
+                  </td>
+                  <td>
+                    ${editable
+                      ? `<input type="date" data-table="acciones" data-row="${i}" data-field="fecha" value="${a.fecha||""}">`
+                      : (a.fecha||"")}
+                  </td>
+                  <td>${editable?`<input type="number" min="0" data-table="acciones" data-row="${i}" data-field="derivaciones" value="${a.derivaciones||""}" style="width:70px;">`:(a.derivaciones||"")}</td>
+                  <td>${editable?`<input type="number" min="0" data-table="acciones" data-row="${i}" data-field="citas" value="${a.citas||""}" style="width:70px;">`:(a.citas||"")}</td>
+                  <td>${editable?`<input type="number" min="0" data-table="acciones" data-row="${i}" data-field="ventas" value="${a.ventas||""}" style="width:70px;">`:(a.ventas||"")}</td>
+                  <td>${editable?`<input type="text" data-table="acciones" data-row="${i}" data-field="obs" value="${a.obs||""}" style="width:160px;">`:(a.obs||"")}</td>
+                  ${editable?`<td><button class="ghost-icon" data-act="del-row">−</button></td>`:""}
+                </tr>
+              `;
+            }).join("")}
+          </tbody>
+        `;
         box.appendChild(t);
         mainContent.appendChild(box);
-      } else if (data.view === "formaciones") {
+      }
+
+      /* --- FORMACIONES --- */
+      if (data.view === "formaciones") {
         const box = document.createElement("div");
-        box.innerHTML = `<div class="table-toolbar" style="justify-content:flex-end;"><strong style="margin-right:auto; font-size:0.8rem;">Formaciones y refuerzo</strong>${editable ? `<button class="tiny-btn" data-act="add-forma">+ Formación</button>` : ""}</div>`;
+        box.innerHTML = `
+          <div class="table-toolbar" style="justify-content:flex-end;">
+            <strong style="margin-right:auto; font-size:0.8rem;">Formaciones y refuerzo</strong>
+            ${editable ? `<button class="tiny-btn" data-act="add-forma">+ Formación</button>` : ""}
+          </div>
+        `;
         const t = document.createElement("table");
         t.className = "table-like";
-        t.innerHTML = `<thead><tr><th>Curso relevante</th><th>Superado</th><th>Aplicado</th><th>Mentoring-Coaching</th>${editable?`<th></th>`:""}</tr></thead><tbody>${(center.formaciones||[]).map((f,i)=>`<tr data-row="${i}" data-table="formaciones"><td contenteditable="${editable}">${f.curso||""}</td><td contenteditable="${editable}">${f.superado||"No"}</td><td contenteditable="${editable}">${f.aplicado||"No"}</td><td contenteditable="${editable}">${f.mentoring||"No"}</td>${editable?`<td><button class="ghost-icon" data-act="del-row">−</button></td>`:""}</tr>`).join("")}</tbody>`;
+        t.innerHTML = `
+          <thead>
+            <tr>
+              <th>Curso relevante</th>
+              <th>Superado</th>
+              <th>Aplicado</th>
+              <th>Mentoring-Coaching</th>
+              ${editable?`<th></th>`:""}
+            </tr>
+          </thead>
+          <tbody>
+            ${(center.formaciones||[]).map((f,i)=>`
+              <tr data-row="${i}" data-table="formaciones">
+                <td>${editable?`<input type="text" data-table="formaciones" data-row="${i}" data-field="curso" value="${f.curso||""}">`:(f.curso||"")}</td>
+                <td>${editable?`<select data-table="formaciones" data-row="${i}" data-field="superado"><option value="Sí" ${f.superado==="Sí"?"selected":""}>Sí</option><option value="No" ${f.superado==="No"?"selected":""}>No</option></select>`:(f.superado||"")}</td>
+                <td>${editable?`<select data-table="formaciones" data-row="${i}" data-field="aplicado"><option value="Sí" ${f.aplicado==="Sí"?"selected":""}>Sí</option><option value="No" ${f.aplicado==="No"?"selected":""}>No</option></select>`:(f.aplicado||"")}</td>
+                <td>${editable?`<select data-table="formaciones" data-row="${i}" data-field="mentoring"><option value="Sí" ${f.mentoring==="Sí"?"selected":""}>Sí</option><option value="No" ${f.mentoring==="No"?"selected":""}>No</option></select>`:(f.mentoring||"")}</td>
+                ${editable?`<td><button class="ghost-icon" data-act="del-row">−</button></td>`:""}
+              </tr>
+            `).join("")}
+          </tbody>
+        `;
         box.appendChild(t);
         mainContent.appendChild(box);
-      } else if (data.view === "visitas") {
+      }
+
+      /* --- VISITAS DEL CENTRO --- */
+      if (data.view === "visitas") {
         const box = document.createElement("div");
-        box.innerHTML = `<div class="table-toolbar" style="justify-content:flex-end;"><strong style="margin-right:auto; font-size:0.8rem;">Visitas</strong>${editable ? `<button class="tiny-btn" data-act="add-visita">+ Visita</button>` : ""}</div>`;
+        box.innerHTML = `
+          <div class="table-toolbar" style="justify-content:flex-end;">
+            <strong style="margin-right:auto; font-size:0.8rem;">Visitas</strong>
+            ${editable ? `<button class="tiny-btn" data-act="add-visita">+ Visita</button>` : ""}
+          </div>
+        `;
         const t = document.createElement("table");
         t.className = "table-like";
-        t.innerHTML = `<thead><tr><th style="width:110px;">Fecha</th><th style="width:110px;">Checklist %</th><th style="width:75px;">Estado</th><th style="width:120px;">Conv. prueba %</th><th style="width:120px;">Conv. venta %</th>${editable?`<th style="width:35px;"></th>`:""}</tr></thead><tbody>${(center.visitas||[]).map((v,i)=>{const estado = Number(v.checklist||0) < 85 ? '<span class="badge-bad">ROJO</span>' : '<span class="badge-ok">VERDE</span>'; const clasePrueba = Number(v.convPrueba||0) < 80 ? 'text-red' : 'text-green'; const claseVenta = Number(v.convVenta||0) < 80 ? 'text-red' : 'text-green'; return `<tr data-row="${i}" data-table="visitas"><td contenteditable="${editable}">${v.fecha||""}</td><td contenteditable="${editable}">${v.checklist||""}</td><td>${estado}</td><td contenteditable="${editable}" class="${clasePrueba}">${v.convPrueba||""}</td><td contenteditable="${editable}" class="${claseVenta}">${v.convVenta||""}</td>${editable?`<td><button class="ghost-icon" data-act="del-row">−</button></td>`:""}</tr>`;}).join("")}</tbody>`;
+        t.innerHTML = `
+          <thead>
+            <tr>
+              <th style="width:120px;">Fecha</th>
+              <th>Checklist %</th>
+              <th>Estado</th>
+              <th>Conv. prueba %</th>
+              <th>Conv. venta %</th>
+              ${editable?`<th></th>`:""}
+            </tr>
+          </thead>
+          <tbody>
+            ${(center.visitas||[]).map((v,i)=>{
+              const estado = Number(v.checklist||0) < 85 ? '<span class="badge-bad">ROJO</span>' : '<span class="badge-ok">VERDE</span>';
+              const clasePrueba = Number(v.convPrueba||0) < 80 ? 'text-red' : 'text-green';
+              const claseVenta = Number(v.convVenta||0) < 80 ? 'text-red' : 'text-green';
+              return `
+                <tr data-row="${i}" data-table="visitas">
+                  <td>${editable?`<input type="date" data-table="visitas" data-row="${i}" data-field="fecha" value="${v.fecha||""}">`:(v.fecha||"")}</td>
+                  <td>${editable?`<input type="number" min="0" max="100" data-table="visitas" data-row="${i}" data-field="checklist" value="${v.checklist||""}" style="width:70px;">`:(v.checklist||"")}</td>
+                  <td>${estado}</td>
+                  <td class="${clasePrueba}">${editable?`<input type="number" min="0" max="100" data-table="visitas" data-row="${i}" data-field="convPrueba" value="${v.convPrueba||""}" style="width:80px;">`:(v.convPrueba||"")}</td>
+                  <td class="${claseVenta}">${editable?`<input type="number" min="0" max="100" data-table="visitas" data-row="${i}" data-field="convVenta" value="${v.convVenta||""}" style="width:80px;">`:(v.convVenta||"")}</td>
+                  ${editable?`<td><button class="ghost-icon" data-act="del-row">−</button></td>`:""}
+                </tr>
+              `;
+            }).join("")}
+          </tbody>
+        `;
+        box.appendChild(t);
+        mainContent.appendChild(box);
+      }
+
+      /* --- SERVICIOS --- */
+      if (data.view === "servicios") {
+        const box = document.createElement("div");
+        box.innerHTML = `
+          <div class="table-toolbar" style="justify-content:flex-end;">
+            <strong style="margin-right:auto; font-size:0.8rem;">Servicios</strong>
+            ${editable ? `<button class="tiny-btn" data-act="add-servicio">+ Servicio</button>` : ""}
+          </div>
+        `;
+        const t = document.createElement("table");
+        t.className = "table-like";
+        t.innerHTML = `
+          <thead>
+            <tr>
+              <th>Servicio</th>
+              <th>¿Se ofrece?</th>
+              <th>Ventas</th>
+              ${editable?`<th></th>`:""}
+            </tr>
+          </thead>
+          <tbody>
+            ${(center.servicios||[]).map((s,i)=>`
+              <tr data-row="${i}" data-table="servicios">
+                <td>${editable?`<input type="text" data-table="servicios" data-row="${i}" data-field="nombre" value="${s.nombre||""}">`:(s.nombre||"")}</td>
+                <td>${editable?`<select data-table="servicios" data-row="${i}" data-field="activo"><option value="Sí" ${s.activo==="Sí"?"selected":""}>Sí</option><option value="No" ${s.activo==="No"?"selected":""}>No</option></select>`:(s.activo||"")}</td>
+                <td>${editable?`<input type="number" min="0" data-table="servicios" data-row="${i}" data-field="ventas" value="${s.ventas||""}" style="width:90px;">`:(s.ventas||"")}</td>
+                ${editable?`<td><button class="ghost-icon" data-act="del-row">−</button></td>`:""}
+              </tr>
+            `).join("")}
+          </tbody>
+        `;
         box.appendChild(t);
         mainContent.appendChild(box);
       }
@@ -362,7 +579,7 @@
       contentHolder.appendChild(wrap);
     }
 
-    // FORMACIONES (solo cambio el título)
+    /* --- FORMACIONES BLOCK (con calendario y suc/franq select) --- */
     function renderFormacionesBlock(data) {
       contentHolder.innerHTML = "";
       const sel = data.selected || 0;
@@ -395,7 +612,7 @@
       t.innerHTML = `
         <thead>
           <tr>
-            <th style="width:110px;">Fecha</th>
+            <th style="width:120px;">Fecha</th>
             <th style="min-width:200px;">Centros</th>
             <th style="width:130px;">Suc./Franq.</th>
             <th>Tema formación</th>
@@ -408,13 +625,13 @@
         <tbody>
           ${(delegado.tabla || []).map((r,i)=>`
             <tr data-row="${i}">
-              <td contenteditable="${editable}">${r.fecha || ""}</td>
-              <td contenteditable="${editable}">${r.centros || ""}</td>
-              <td contenteditable="${editable}">${r.sucursal || ""}</td>
-              <td contenteditable="${editable}">${r.tema || ""}</td>
-              <td contenteditable="${editable}">${r.superado || ""}</td>
-              <td contenteditable="${editable}">${r.aplicado || ""}</td>
-              <td contenteditable="${editable}">${r.obs || ""}</td>
+              <td>${editable?`<input type="date" data-form-row="${i}" data-form-field="fecha" value="${r.fecha||""}">`:(r.fecha||"")}</td>
+              <td>${editable?`<input type="text" data-form-row="${i}" data-form-field="centros" value="${r.centros||""}" style="width:100%;">`:(r.centros||"")}</td>
+              <td>${editable?`<select data-form-row="${i}" data-form-field="sucursal"><option value="Sucursal" ${r.sucursal==="Sucursal"?"selected":""}>Sucursal</option><option value="Franquicia" ${r.sucursal==="Franquicia"?"selected":""}>Franquicia</option></select>`:(r.sucursal||"")}</td>
+              <td>${editable?`<input type="text" data-form-row="${i}" data-form-field="tema" value="${r.tema||""}" style="width:100%;">`:(r.tema||"")}</td>
+              <td>${editable?`<select data-form-row="${i}" data-form-field="superado"><option value="Sí" ${r.superado==="Sí"?"selected":""}>Sí</option><option value="No" ${r.superado==="No"?"selected":""}>No</option></select>`:(r.superado||"")}</td>
+              <td>${editable?`<select data-form-row="${i}" data-form-field="aplicado"><option value="Sí" ${r.aplicado==="Sí"?"selected":""}>Sí</option><option value="No" ${r.aplicado==="No"?"selected":""}>No</option></select>`:(r.aplicado||"")}</td>
+              <td>${editable?`<input type="text" data-form-row="${i}" data-form-field="obs" value="${r.obs||""}" style="width:100%;">`:(r.obs||"")}</td>
               ${editable ? `<td><button class="ghost-icon" data-act="form-del-row" data-row="${i}">−</button></td>` : ``}
             </tr>
           `).join("")}
@@ -424,7 +641,7 @@
       contentHolder.appendChild(box);
     }
 
-    // VISITAS (cambio titulo + campo visitador + anchos)
+    /* --- VISITAS BLOCK (con visitador, calendario, selects) --- */
     function renderVisitasBlock(data) {
       contentHolder.innerHTML = "";
       const sel = data.selected || 0;
@@ -461,7 +678,7 @@
       t.innerHTML = `
         <thead>
           <tr>
-            <th style="width:110px;">Fecha</th>
+            <th style="width:115px;">Fecha</th>
             <th style="min-width:220px;">Centros</th>
             <th style="width:120px;">Suc./Franq.</th>
             <th style="width:110px;">Audiólogo</th>
@@ -469,8 +686,8 @@
             <th style="width:70px;">Estado</th>
             <th style="width:95px;">Conv. prueba %</th>
             <th style="width:95px;">Conv. venta %</th>
-            <th style="width:70px;">HIT</th>
-            <th style="width:70px;">ARR</th>
+            <th style="width:75px;">HIT</th>
+            <th style="width:75px;">AAR</th>
             <th style="width:95px;">RT-equipo</th>
             <th style="min-width:220px;">Observaciones</th>
             ${editable ? `<th style="width:35px;"></th>` : ``}
@@ -484,18 +701,18 @@
             const ventaMala = Number(v.convVenta || 0) < 80;
             return `
               <tr data-row="${i}">
-                <td contenteditable="${editable}">${v.fecha || ""}</td>
-                <td contenteditable="${editable}">${v.centros || ""}</td>
-                <td contenteditable="${editable}">${v.sucursal || ""}</td>
-                <td contenteditable="${editable}">${v.audiologo || ""}</td>
-                <td contenteditable="${editable}">${v.checklist || ""}</td>
+                <td>${editable?`<input type="date" data-vis-row="${i}" data-vis-field="fecha" value="${v.fecha||""}">`:(v.fecha||"")}</td>
+                <td>${editable?`<input type="text" data-vis-row="${i}" data-vis-field="centros" value="${v.centros||""}" style="width:100%;">`:(v.centros||"")}</td>
+                <td>${editable?`<select data-vis-row="${i}" data-vis-field="sucursal"><option value="Sucursal" ${v.sucursal==="Sucursal"?"selected":""}>Sucursal</option><option value="Franquicia" ${v.sucursal==="Franquicia"?"selected":""}>Franquicia</option></select>`:(v.sucursal||"")}</td>
+                <td>${editable?`<input type="text" data-vis-row="${i}" data-vis-field="audiologo" value="${v.audiologo||""}" style="width:100%;">`:(v.audiologo||"")}</td>
+                <td>${editable?`<input type="number" min="0" max="100" data-vis-row="${i}" data-vis-field="checklist" value="${v.checklist||""}" style="width:70px;">`:(v.checklist||"")}</td>
                 <td>${estado}</td>
-                <td contenteditable="${editable}" class="${pruebaMala?"text-red":"text-green"}">${v.convPrueba || ""}</td>
-                <td contenteditable="${editable}" class="${ventaMala?"text-red":"text-green"}">${v.convVenta || ""}</td>
-                <td contenteditable="${editable}">${v.hit || "No"}</td>
-                <td contenteditable="${editable}">${v.arr || "No"}</td>
-                <td contenteditable="${editable}">${v.rt || ""}</td>
-                <td contenteditable="${editable}">${v.obs || ""}</td>
+                <td class="${pruebaMala?"text-red":"text-green"}">${editable?`<input type="number" min="0" max="100" data-vis-row="${i}" data-vis-field="convPrueba" value="${v.convPrueba||""}" style="width:80px;">`:(v.convPrueba||"")}</td>
+                <td class="${ventaMala?"text-red":"text-green"}">${editable?`<input type="number" min="0" max="100" data-vis-row="${i}" data-vis-field="convVenta" value="${v.convVenta||""}" style="width:80px;">`:(v.convVenta||"")}</td>
+                <td>${editable?`<select data-vis-row="${i}" data-vis-field="hit"><option value="Sí" ${v.hit==="Sí"?"selected":""}>Sí</option><option value="No" ${v.hit==="No"?"selected":""}>No</option></select>`:(v.hit||"")}</td>
+                <td>${editable?`<select data-vis-row="${i}" data-vis-field="arr"><option value="Sí" ${v.arr==="Sí"?"selected":""}>Sí</option><option value="No" ${v.arr==="No"?"selected":""}>No</option></select>`:(v.arr||"")}</td>
+                <td>${editable?`<select data-vis-row="${i}" data-vis-field="rt"><option value="Sí" ${v.rt==="Sí"?"selected":""}>Sí</option><option value="No" ${v.rt==="No"?"selected":""}>No</option></select>`:(v.rt||"")}</td>
+                <td>${editable?`<input type="text" data-vis-row="${i}" data-vis-field="obs" value="${v.obs||""}" style="width:100%;">`:(v.obs||"")}</td>
                 ${editable ? `<td><button class="ghost-icon" data-act="vis-del-row" data-row="${i}">−</button></td>` : ``}
               </tr>
             `;
@@ -506,26 +723,44 @@
       contentHolder.appendChild(box);
     }
 
+    /* --- RENDER SIMPLE --- */
     function renderSimple(data) {
       contentHolder.innerHTML = "";
-      const list = document.createElement("div"); list.className = "list";
+      const list = document.createElement("div");
+      list.className = "list";
       (data.items || []).forEach((item, idx) => {
-        const div = document.createElement("div"); div.className = "item";
-        div.innerHTML = `<div class="item-header"><strong ${editable ? `contenteditable="true" data-idx="${idx}" data-field="titulo"` : ""}>${item.titulo}</strong>${editable ? `<div class="item-actions"><button class="tiny-btn" data-act="del-simple" data-idx="${idx}">✖</button></div>` : ""}</div><small ${editable ? `contenteditable="true" data-idx="${idx}" data-field="detalle"` : ""}>${item.detalle}</small><small>📅 <span ${editable ? `contenteditable="true" data-idx="${idx}" data-field="fecha"` : ""}>${item.fecha || ""}</span></small>`;
+        const div = document.createElement("div");
+        div.className = "item";
+        div.innerHTML = `
+          <div class="item-header">
+            <strong ${editable ? `contenteditable="true" data-idx="${idx}" data-field="titulo"` : ""}>${item.titulo}</strong>
+            ${editable ? `<div class="item-actions"><button class="tiny-btn" data-act="del-simple" data-idx="${idx}">✖</button></div>` : ""}
+          </div>
+          <small ${editable ? `contenteditable="true" data-idx="${idx}" data-field="detalle"` : ""}>${item.detalle}</small>
+          <small>📅 <span ${editable ? `contenteditable="true" data-idx="${idx}" data-field="fecha"` : ""}>${item.fecha || ""}</span></small>
+        `;
         list.appendChild(div);
       });
       if (editable) {
-        const addBtn = document.createElement("button"); addBtn.textContent = "+ Añadir elemento"; addBtn.className = "tiny-btn"; addBtn.onclick = () => { data.items.push({ titulo: "Nuevo", detalle: "", fecha: "" }); persist(); renderCurrentBlock(); };
+        const addBtn = document.createElement("button");
+        addBtn.textContent = "+ Añadir elemento";
+        addBtn.className = "tiny-btn";
+        addBtn.onclick = () => {
+          data.items.push({ titulo: "Nuevo", detalle: "", fecha: "" });
+          persist(); renderCurrentBlock();
+        };
         list.appendChild(addBtn);
       }
       contentHolder.appendChild(list);
     }
 
+    /* --- RENDER PRINCIPAL --- */
     function renderCurrentBlock() {
       const data = blocks[currentBlock]; if (!data) return;
       badgeColor.style.background = data.color || "#fff";
       sectionTitle.textContent = currentBlock;
       if (!editable) contentWrap.classList.add("locked"); else contentWrap.classList.remove("locked");
+
       if (currentBlock === "OBJETIVOS") {
         renderObjectives(data);
       } else if (currentBlock === "CENTROS EXCLUSIVOS" || currentBlock === "CENTROS FLOP") {
@@ -539,7 +774,7 @@
       }
     }
 
-    // PIN
+    /* --- PIN --- */
     pinBtn.addEventListener("click", () => {
       const v = pinInput.value.trim();
       if (v === PIN_MASTER) setEditable(true);
@@ -553,7 +788,7 @@
       }
     });
 
-    // cambiar de bloque
+    /* --- CAMBIO DE BLOQUE --- */
     leftPanel.addEventListener("click", (e) => {
       const btn = e.target.closest(".block-btn");
       if (!btn) return;
@@ -563,7 +798,7 @@
       renderCurrentBlock();
     });
 
-    // añadir bloque
+    /* --- AÑADIR BLOQUE --- */
     addBlock.addEventListener("click", () => {
       if (!editable) return alert("Primero desbloquea edición con el PIN AR4321.");
       const name = prompt("Nombre del nuevo bloque:");
@@ -578,10 +813,11 @@
       leftPanel.appendChild(btn);
     });
 
-    // clicks dentro de contenido
+    /* --- CLICS DENTRO DEL CONTENIDO --- */
     contentHolder.addEventListener("click", (e) => {
       const t = e.target;
-      // OBJETIVOS
+
+      /* OBJETIVOS */
       if (t.dataset.act === "edit-obj") {
         const idx = +t.dataset.idx;
         const item = blocks["OBJETIVOS"].items[idx];
@@ -602,14 +838,14 @@
         persist(); renderCurrentBlock(); return;
       }
 
-      // SELECTOR centro
+      /* SELECTOR CENTRO DE ESTE BLOQUE */
       if (t.dataset.act === "select-center") {
         const data = blocks[currentBlock];
         data.selected = parseInt(t.value, 10) || 0;
         persist(); renderCurrentBlock(); return;
       }
 
-      // cambiar subvista en centros
+      /* SUBTABS DE CENTROS */
       if (t.closest(".center-subnav") && (currentBlock === "CENTROS EXCLUSIVOS" || currentBlock === "CENTROS FLOP")) {
         const btn = t.closest("button[data-sub]");
         if (btn) {
@@ -620,14 +856,26 @@
         return;
       }
 
-      // añadir centro
+      /* AÑADIR / BORRAR / RENOMBRAR CENTRO */
       if (t.dataset.act === "add-center") {
         const data = blocks[currentBlock];
-        data.centers.push({ nombre: currentBlock === "CENTROS EXCLUSIVOS" ? "Centro exclusivo nuevo" : "Centro flop nuevo", delegado: "", audiologo: "", tipo: "Sucursal", acciones: [], formaciones: [], visitas: [] });
+        data.centers.push({
+          nombre: currentBlock === "CENTROS EXCLUSIVOS" ? "Centro exclusivo nuevo" : "Centro flop nuevo",
+          delegado: "",
+          audiologo: "",
+          tipo: "Sucursal",
+          acciones: [],
+          formaciones: [],
+          visitas: [],
+          servicios: [
+            { nombre: "Tinnitus-TRT", activo: "No", ventas: "" },
+            { nombre: "Pediátrico", activo: "No", ventas: "" },
+            { nombre: "AAR", activo: "No", ventas: "" },
+            { nombre: "HIT", activo: "No", ventas: "" }
+          ]
+        });
         data.selected = data.centers.length - 1;
-        persist();
-        renderCurrentBlock();
-        return;
+        persist(); renderCurrentBlock(); return;
       }
       if (t.dataset.act === "del-center") {
         const data = blocks[currentBlock];
@@ -635,9 +883,7 @@
         const idx = data.selected || 0;
         data.centers.splice(idx, 1);
         if (data.selected > 0) data.selected -= 1;
-        persist();
-        renderCurrentBlock();
-        return;
+        persist(); renderCurrentBlock(); return;
       }
       if (t.dataset.act === "rename-center-head") {
         const data = blocks[currentBlock];
@@ -646,8 +892,7 @@
         const nuevo = prompt("Nombre del centro:", c.nombre || "");
         if (nuevo !== null) {
           c.nombre = nuevo.trim();
-          persist();
-          renderCurrentBlock();
+          persist(); renderCurrentBlock();
         }
         return;
       }
@@ -656,63 +901,79 @@
         alert("Centros guardados en este bloque.");
         return;
       }
+
+      /* TABLAS DE CENTROS: AÑADIR FILAS */
+      if (t.dataset.act === "add-accion") {
+        const d = blocks[currentBlock];
+        const c = d.centers[d.selected || 0];
+        c.acciones.push({ tipo: "Azafata", fecha: "", derivaciones: "", citas: "", ventas: "", obs: "" });
+        persist(); renderCurrentBlock(); return;
+      }
       if (t.dataset.act === "add-forma") {
-        const data = blocks[currentBlock];
-        const c = data.centers[data.selected || 0];
+        const d = blocks[currentBlock];
+        const c = d.centers[d.selected || 0];
         c.formaciones.push({ curso: "", superado: "No", aplicado: "No", mentoring: "No" });
         persist(); renderCurrentBlock(); return;
       }
       if (t.dataset.act === "add-visita") {
-        const data = blocks[currentBlock];
-        const c = data.centers[data.selected || 0];
+        const d = blocks[currentBlock];
+        const c = d.centers[d.selected || 0];
         c.visitas.push({ fecha: "", checklist: "", convPrueba: "", convVenta: "" });
         persist(); renderCurrentBlock(); return;
       }
-      if (t.dataset.act === "del-row") {
+      if (t.dataset.act === "add-servicio") {
+        const d = blocks[currentBlock];
+        const c = d.centers[d.selected || 0];
+        c.servicios.push({ nombre: "Servicio nuevo", activo: "No", ventas: "" });
+        persist(); renderCurrentBlock(); return;
+      }
+
+      /* BORRAR FILA DE TABLA DE CENTRO */
+      if (t.dataset.act === "del-row" && (currentBlock === "CENTROS EXCLUSIVOS" || currentBlock === "CENTROS FLOP")) {
         const tr = t.closest("tr");
-        const data = blocks[currentBlock];
-        const c = data.centers[data.selected || 0];
+        const d = blocks[currentBlock];
+        const c = d.centers[d.selected || 0];
         const tableName = tr.dataset.table;
         const idx = +tr.dataset.row;
         c[tableName].splice(idx, 1);
         persist(); renderCurrentBlock(); return;
       }
 
-      // FORMACIONES (borrar fila)
+      /* FORMACIONES BLOQUE */
+      if (t.dataset.act === "form-add-row") {
+        const d = blocks["FORMACIONES Y MENTORING"];
+        const del = d.delegados[d.selected || 0];
+        del.tabla.push({ fecha:"", centros:"", sucursal:"Sucursal", tema:"", superado:"No", aplicado:"No", obs:"" });
+        persist(); renderCurrentBlock(); return;
+      }
       if (t.dataset.act === "form-del-row") {
         const d = blocks["FORMACIONES Y MENTORING"];
         const del = d.delegados[d.selected || 0];
         del.tabla.splice(+t.dataset.row, 1);
         persist(); renderCurrentBlock(); return;
       }
-      if (t.dataset.act === "form-add-row") {
-        const d = blocks["FORMACIONES Y MENTORING"];
-        const del = d.delegados[d.selected || 0];
-        del.tabla.push({ fecha:"", centros:"", sucursal:"", tema:"", superado:"No", aplicado:"No", obs:"" });
-        persist(); renderCurrentBlock(); return;
-      }
       if (t.dataset.act === "form-save-block") {
         persist(); alert("Formaciones guardadas."); return;
       }
 
-      // VISITAS (borrar fila)
+      /* VISITAS BLOQUE */
+      if (t.dataset.act === "vis-add-row") {
+        const v = blocks["VISITAS"];
+        const del = v.delegados[v.selected || 0];
+        del.visitas.push({ fecha:"", centros:"", sucursal:"Sucursal", audiologo:"", checklist:"", convPrueba:"", convVenta:"", hit:"No", arr:"No", rt:"No", obs:"" });
+        persist(); renderCurrentBlock(); return;
+      }
       if (t.dataset.act === "vis-del-row") {
         const v = blocks["VISITAS"];
         const del = v.delegados[v.selected || 0];
         del.visitas.splice(+t.dataset.row, 1);
         persist(); renderCurrentBlock(); return;
       }
-      if (t.dataset.act === "vis-add-row") {
-        const v = blocks["VISITAS"];
-        const del = v.delegados[v.selected || 0];
-        del.visitas.push({ fecha:"", centros:"", sucursal:"", audiologo:"", checklist:"", convPrueba:"", convVenta:"", hit:"No", arr:"No", rt:"No", obs:"" });
-        persist(); renderCurrentBlock(); return;
-      }
       if (t.dataset.act === "vis-save-block") {
         persist(); alert("Visitas guardadas."); return;
       }
 
-      // borrar simple
+      /* borrar simple */
       if (t.dataset.act === "del-simple") {
         const data = blocks[currentBlock];
         data.items.splice(+t.dataset.idx, 1);
@@ -720,79 +981,77 @@
       }
     });
 
-    // edición en línea / cambios
-    contentHolder.addEventListener("input", (e) => {
+    /* --- INPUTS / CAMBIOS --- */
+    contentHolder.addEventListener("input", handleChange);
+    contentHolder.addEventListener("change", handleChange);
+
+    function handleChange(e) {
       const t = e.target;
-      // campos de centro
+
+      /* CAMPOS DE CENTRO (nombre, delegado, audiologo, tipo) */
       if ((currentBlock === "CENTROS EXCLUSIVOS" || currentBlock === "CENTROS FLOP") && t.dataset.field) {
-        const data = blocks[currentBlock];
-        const c = data.centers[data.selected || 0];
+        const d = blocks[currentBlock];
+        const c = d.centers[d.selected || 0];
         c[t.dataset.field] = t.value;
         persist();
         return;
       }
-      // tablas de centros (contenteditable)
-      const tr = t.closest("tr[data-table]");
-      if (tr && (currentBlock === "CENTROS EXCLUSIVOS" || currentBlock === "CENTROS FLOP")) {
-        const data = blocks[currentBlock];
-        const c = data.centers[data.selected || 0];
-        const tableName = tr.dataset.table;
-        const idx = +tr.dataset.row;
-        const cells = tr.querySelectorAll("td[contenteditable='true']");
-        if (tableName === "acciones") {
-          const [tipo, fecha, derivaciones, citas, ventas, obs] = Array.from(cells).map(x => x.textContent.trim());
-          c.acciones[idx] = { tipo, fecha, derivaciones, citas, ventas, obs };
-        } else if (tableName === "formaciones") {
-          const [curso, superado, aplicado, mentoring] = Array.from(cells).map(x => x.textContent.trim());
-          c.formaciones[idx] = { curso, superado, aplicado, mentoring };
-        } else if (tableName === "visitas") {
-          const [fecha, checklist, , convPrueba, convVenta] = Array.from(cells).map(x => x.textContent.trim());
-          c.visitas[idx] = { fecha, checklist, convPrueba, convVenta };
+
+      /* TABLAS DE CENTROS */
+      if ((currentBlock === "CENTROS EXCLUSIVOS" || currentBlock === "CENTROS FLOP") && t.dataset.table) {
+        const d = blocks[currentBlock];
+        const c = d.centers[d.selected || 0];
+        const table = t.dataset.table;
+        const row = +t.dataset.row;
+        if (table === "acciones") {
+          const a = c.acciones[row] || {};
+          a[t.dataset.field] = t.value;
+          c.acciones[row] = a;
+        } else if (table === "formaciones") {
+          const f = c.formaciones[row] || {};
+          f[t.dataset.field] = t.value;
+          c.formaciones[row] = f;
+        } else if (table === "visitas") {
+          const v = c.visitas[row] || {};
+          v[t.dataset.field] = t.value;
+          c.visitas[row] = v;
+        } else if (table === "servicios") {
+          const s = c.servicios[row] || {};
+          s[t.dataset.field] = t.value;
+          c.servicios[row] = s;
         }
         persist();
+        if (table === "visitas") renderCurrentBlock();
         return;
       }
 
-      // formaciones detalle
-      if (currentBlock === "FORMACIONES Y MENTORING" && t.closest("tbody")) {
+      /* FORMACIONES BLOQUE */
+      if (currentBlock === "FORMACIONES Y MENTORING" && (t.dataset.formRow !== undefined)) {
         const d = blocks["FORMACIONES Y MENTORING"];
         const del = d.delegados[d.selected || 0];
-        const row = +t.closest("tr").dataset.row;
-        const r = del.tabla[row];
-        const cells = t.closest("tr").querySelectorAll("td[contenteditable='true']");
-        const [fecha, centros, sucursal, tema, superado, aplicado, obs] = Array.from(cells).map(x => x.textContent.trim());
-        del.tabla[row] = { fecha, centros, sucursal, tema, superado, aplicado, obs };
+        const row = +t.dataset.formRow;
+        const r = del.tabla[row] || {};
+        r[t.dataset.formField] = t.value;
+        del.tabla[row] = r;
         persist();
         return;
       }
 
-      // visitas detalle
-      if (currentBlock === "VISITAS" && t.closest("tbody")) {
+      /* VISITAS BLOQUE */
+      if (currentBlock === "VISITAS" && (t.dataset.visRow !== undefined)) {
         const v = blocks["VISITAS"];
         const del = v.delegados[v.selected || 0];
-        const row = +t.closest("tr").dataset.row;
-        const cells = t.closest("tr").querySelectorAll("td[contenteditable='true']");
-        // orden: fecha, centros, sucursal, audiologo, checklist, (estado no editable), convPrueba, convVenta, hit, arr, rt, obs
-        const fecha   = cells[0] ? cells[0].textContent.trim() : "";
-        const centros = cells[1] ? cells[1].textContent.trim() : "";
-        const sucursal= cells[2] ? cells[2].textContent.trim() : "";
-        const audiologo= cells[3] ? cells[3].textContent.trim() : "";
-        const checklist= cells[4] ? cells[4].textContent.trim() : "";
-        const convPrueba= cells[5] ? cells[5].textContent.trim() : "";
-        const convVenta= cells[6] ? cells[6].textContent.trim() : "";
-        const hit= cells[7] ? cells[7].textContent.trim() : "No";
-        const arr= cells[8] ? cells[8].textContent.trim() : "No";
-        const rt= cells[9] ? cells[9].textContent.trim() : "";
-        const obs= cells[10] ? cells[10].textContent.trim() : "";
-        del.visitas[row] = { fecha, centros, sucursal, audiologo, checklist, convPrueba, convVenta, hit, arr, rt, obs };
+        const row = +t.dataset.visRow;
+        const r = del.visitas[row] || {};
+        r[t.dataset.visField] = t.value;
+        del.visitas[row] = r;
         persist();
-        // recolorear estado
         renderVisitasBlock(v);
         return;
       }
 
-      // visitas meta (visitador)
-      if (t.dataset.visMeta === "visitador") {
+      /* VISITAS: visitador */
+      if (currentBlock === "VISITAS" && t.dataset.visMeta === "visitador") {
         const v = blocks["VISITAS"];
         const del = v.delegados[v.selected || 0];
         del.visitador = t.value;
@@ -800,16 +1059,16 @@
         return;
       }
 
-      // bloques simples
+      /* bloques simples */
       if (t.dataset && typeof t.dataset.idx !== "undefined" && t.dataset.field) {
         const data = blocks[currentBlock];
         const idx = +t.dataset.idx;
         data.items[idx][t.dataset.field] = t.textContent.trim();
         persist();
       }
-    });
+    }
 
-    // descargas
+    /* --- DESCARGAS --- */
     document.getElementById("btnHTML").addEventListener("click", () => {
       const blob = new Blob([document.documentElement.outerHTML], { type: "text/html" });
       const url = URL.createObjectURL(blob);
@@ -835,6 +1094,7 @@
       URL.revokeObjectURL(url);
     });
 
+    /* --- TEST --- */
     function runSmokeTests() {
       console.log("[TEST] estructura básica cargada");
       console.assert(!!document.getElementById("leftPanel"), "leftPanel no existe");
@@ -844,7 +1104,6 @@
     renderCurrentBlock();
     runSmokeTests();
 
-    // guardar local manual
     saveLocalBtn.addEventListener("click", () => {
       persist();
       editStatus.textContent = "Guardado local";
