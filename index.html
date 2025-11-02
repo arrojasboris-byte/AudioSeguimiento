@@ -43,6 +43,8 @@
     .pin-box input { all: unset; background: rgba(0,0,0,0.3); padding: 3px 6px; border-radius: 8px; font-size: 0.7rem; }
     .status-pill { background: rgba(0,0,0,0.2); padding: 3px 10px; border-radius: 99px; font-size: 0.68rem; }
     main { flex: 1; display: flex; gap: 10px; padding: 12px; overflow: hidden; }
+
+    /* IZQUIERDA */
     .left-panel { width: 268px; background: var(--panel); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); padding: 10px; display: flex; flex-direction: column; gap: 6px; overflow-y: auto; }
     .left-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
     .block-btn { display: flex; align-items: center; gap: 10px; background: #f3f3f3; border: 1px solid transparent; border-radius: 14px; padding: 6px 10px; cursor: pointer; transition: 0.15s ease; font-size: 0.78rem; }
@@ -54,14 +56,18 @@
     .block-btn[data-type="CENTROS FLOP"] { background: var(--cflop); }
     .block-btn[data-type="FORMACIONES Y MENTORING"] { background: var(--form); }
     .block-btn[data-type="VISITAS"] { background: var(--vis); }
+
+    /* DERECHA */
     .right-panel { flex: 1; background: var(--panel); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); display: flex; flex-direction: column; overflow: hidden; }
     .right-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid rgba(0,0,0,0.05); }
     .right-header .title { display: flex; gap: 8px; align-items: center; }
     .badge-color { width: 18px; height: 18px; border-radius: 6px; }
     .content-area { flex: 1; padding: 16px; overflow-y: auto; background: #f9f9f9; }
-    .locked-overlay { background: rgba(255,255,255,0.75); border: 2px dashed rgba(183, 28, 28, 0.3); border-radius: 16px; display: none; align-items: center; justify-content: center; gap: 10px; font-weight: 500; color: #b71c1c; padding: 10px; }
     .content-wrap { position: relative; }
+    .locked-overlay { background: rgba(255,255,255,0.75); border: 2px dashed rgba(183, 28, 28, 0.3); border-radius: 16px; display: none; align-items: center; justify-content: center; gap: 10px; font-weight: 500; color: #b71c1c; padding: 10px; }
     .content-wrap.locked .locked-overlay { display: flex; position: absolute; inset: 0; backdrop-filter: blur(1px); }
+
+    /* LISTAS */
     .list { display: grid; gap: 10px; }
     .item { background: #fff; border: 1px solid rgba(0,0,0,0.04); border-left: 4px solid rgba(183,28,28,0.6); border-radius: 12px; padding: 8px 10px 6px 10px; display: flex; flex-direction: column; gap: 4px; box-shadow: 0 1px 6px rgba(0,0,0,0.02); }
     .item-header { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
@@ -69,29 +75,12 @@
     .tiny-btn, .ghost-icon { background: rgba(0,0,0,0.04); padding: 2px 6px; border-radius: 6px; border: none; cursor: pointer; font-size: 0.7rem; display: inline-flex; align-items: center; gap: 2px; }
     .ghost-icon { background: rgba(0,0,0,0.02); }
 
-    /* NUEVO: cabecera de centros DENTRO del bloque */
-    .center-top {
-      background: #fff;
-      border-radius: 14px;
-      padding: 8px 10px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      border: 1px solid rgba(0,0,0,0.03);
-      margin-bottom: 10px;
-      width: 100%;
-    }
-    .center-top strong { font-size: 0.78rem; }
-    .center-top select {
-      border-radius: 10px;
-      border: 1px solid rgba(0,0,0,0.12);
-      padding: 4px 8px;
-      font-size: 0.75rem;
-      min-width: 180px;
-      background: #fff;
-    }
-
-    .center-content { display: flex; flex-direction: column; gap: 10px; }
+    /* layout centros (dentro del bloque) */
+    .flex-split { display: flex; gap: 14px; align-items: stretch; }
+    .centers-list { width: 240px; background: #fff; border-radius: 14px; border: 1px solid rgba(0,0,0,0.03); box-shadow: 0 2px 6px rgba(0,0,0,0.02); padding: 10px; display: flex; flex-direction: column; gap: 10px; }
+    .centers-list-header { display:flex; justify-content:space-between; align-items:center; gap:6px; }
+    .center-right { flex: 1; display: flex; min-height: 360px; }
+    .center-content { flex: 1; display: flex; flex-direction: column; gap: 10px; }
     .center-subnav { width: 100%; display: flex; flex-direction: row; gap: 8px; margin-top: 4px; }
     .center-subnav button { background: #000; color: #fff; border: none; border-radius: 12px; padding: 6px 10px; font-size: 0.72rem; cursor: pointer; display: flex; align-items: center; gap: 6px; }
     .center-subnav button.active { background: #b71c1c; }
@@ -107,11 +96,8 @@
     .text-red { color: #b71c1c; }
     .text-green { color: #0b7a3a; }
 
-    @media (max-width: 960px) {
-      main { flex-direction: column; }
-      .left-panel { width: 100%; flex-direction: row; overflow-x: auto; }
-      .right-panel { height: 60vh; }
-    }
+    @media (max-width: 1080px) { .flex-split { flex-direction: column; } .centers-list { width: 100%; } }
+    @media (max-width: 960px) { main { flex-direction: column; } .left-panel { width: 100%; flex-direction: row; overflow-x: auto; } .right-panel { height: 60vh; } }
   </style>
 </head>
 <body>
@@ -133,8 +119,8 @@
     <aside class="left-panel" id="leftPanel">
       <div class="left-header">
         <strong>Bloques</strong>
-        <button id="addBlock" class="tiny-btn">+ Añadir</button>
       </div>
+      <!-- SOLO 5 BLOQUES -->
       <button class="block-btn active" data-type="OBJETIVOS" data-color="var(--obj)">
         <div class="tag" style="background: rgba(183,28,28,0.2);">🎯</div>
         <div><div>OBJETIVOS</div><small>KPIs, % logro</small></div>
@@ -188,10 +174,10 @@
     const leftPanel = document.getElementById("leftPanel");
     const badgeColor = document.getElementById("badgeColor");
     const sectionTitle = document.getElementById("sectionTitle");
-    const addBlock = document.getElementById("addBlock");
 
     let editable = false;
 
+    // el mismo estado que ya tenías
     let blocks = JSON.parse(localStorage.getItem("audioar_blocks") || "null") || {
       "OBJETIVOS": {
         color: "var(--obj)",
@@ -284,7 +270,7 @@
       renderCurrentBlock();
     }
 
-    /* ===== OBJETIVOS ===== */
+    /* ====== RENDER OBJETIVOS ====== */
     function renderObjectives(data) {
       contentHolder.innerHTML = "";
       const list = document.createElement("div");
@@ -320,38 +306,53 @@
       contentHolder.appendChild(list);
     }
 
-    /* ===== CENTROS (EXCLUSIVOS / FLOP) ===== */
+    /* ====== RENDER CENTROS (EXCLUSIVOS / FLOP) ====== */
     function renderCentersBlock(blockName, data) {
       contentHolder.innerHTML = "";
-
-      // barra superior de centros DENTRO del bloque
-      const top = document.createElement("div");
-      top.className = "center-top";
-      top.innerHTML = `
-        <strong>${blockName === "CENTROS EXCLUSIVOS" ? "Centros exclusivos" : "Centros flop"}</strong>
-        <select data-act="select-center" class="centers-select">
-          ${(data.centers || []).map((c,idx) => `
-            <option value="${idx}" ${idx === (data.selected||0) ? "selected" : ""}>
-              ${c.nombre || (blockName === "CENTROS EXCLUSIVOS" ? "Exclusivo" : "Flop") + " " + (idx+1)}
-            </option>
-          `).join("")}
-        </select>
-        ${editable ? `
-          <button class="tiny-btn" data-act="add-center">+</button>
-          <button class="tiny-btn" data-act="del-center">−</button>
-          <button class="tiny-btn" data-act="rename-center-head">✏</button>
-          <button class="tiny-btn" data-act="save-centers">Guardar</button>
-        ` : ""}
-      `;
-      contentHolder.appendChild(top);
-
       const wrap = document.createElement("div");
-      wrap.className = "center-content";
+      wrap.className = "flex-split";
+
+      // panel de centros (dentro del bloque, a la izquierda)
+      const left = document.createElement("div");
+      left.className = "centers-list";
+      left.innerHTML = `
+        <div class="centers-list-header">
+          <strong>${blockName === "CENTROS EXCLUSIVOS" ? "Centros exclusivos" : "Centros flop"}</strong>
+          ${editable ? `
+            <div style="display:flex;gap:4px;">
+              <button class="tiny-btn" data-act="add-center">+</button>
+              <button class="tiny-btn" data-act="del-center">−</button>
+              <button class="tiny-btn" data-act="rename-center-head">✏</button>
+              <button class="tiny-btn" data-act="save-centers">Guardar</button>
+            </div>
+          ` : ""}
+        </div>
+      `;
+      const select = document.createElement("select");
+      select.className = "centers-select";
+      select.dataset.act = "select-center";
+      (data.centers || []).forEach((c, idx) => {
+        const opt = document.createElement("option");
+        opt.value = idx;
+        opt.textContent = c.nombre || `${blockName === "CENTROS EXCLUSIVOS" ? "Exclusivo" : "Flop"} ${idx+1}`;
+        if (idx === (data.selected || 0)) opt.selected = true;
+        select.appendChild(opt);
+      });
+      left.appendChild(select);
+      wrap.appendChild(left);
+
+      // parte derecha (detalle del centro)
+      const right = document.createElement("div");
+      right.className = "center-right";
 
       const sel = data.selected || 0;
       const center = data.centers[sel] || { nombre:"", delegado:"", audiologo:"", tipo:"Sucursal", acciones:[], formaciones:[], visitas:[] };
       if (!data.view) data.view = "acciones";
 
+      const mainContent = document.createElement("div");
+      mainContent.className = "center-content";
+
+      // datos del centro
       const info = document.createElement("div");
       info.className = "grid-3";
       info.innerHTML = `
@@ -365,8 +366,9 @@
           </select>
         </div>
       `;
-      wrap.appendChild(info);
+      mainContent.appendChild(info);
 
+      // submenú interior
       const subnav = document.createElement("div");
       subnav.className = "center-subnav";
       [
@@ -380,8 +382,9 @@
         if (data.view === b.id) bb.classList.add("active");
         subnav.appendChild(bb);
       });
-      wrap.appendChild(subnav);
+      mainContent.appendChild(subnav);
 
+      // vista: acciones
       if (data.view === "acciones") {
         const box = document.createElement("div");
         box.innerHTML = `<div class="table-toolbar" style="justify-content:flex-end;"><strong style="margin-right:auto; font-size:0.8rem;">Acciones</strong>${editable ? `<button class="tiny-btn" data-act="add-accion">+ Acción</button>` : ""}</div>`;
@@ -389,29 +392,37 @@
         t.className = "table-like";
         t.innerHTML = `<thead><tr><th>Tipo de acción</th><th>Fecha</th><th>Derivaciones</th><th>Citas</th><th>Ventas</th><th>Observaciones</th>${editable?`<th></th>`:""}</tr></thead><tbody>${(center.acciones||[]).map((a,i)=>`<tr data-row="${i}" data-table="acciones"><td contenteditable="${editable}">${a.tipo||""}</td><td contenteditable="${editable}">${a.fecha||""}</td><td contenteditable="${editable}">${a.derivaciones||""}</td><td contenteditable="${editable}">${a.citas||""}</td><td contenteditable="${editable}">${a.ventas||""}</td><td contenteditable="${editable}">${a.obs||""}</td>${editable?`<td><button class="ghost-icon" data-act="del-row">−</button></td>`:""}</tr>`).join("")}</tbody>`;
         box.appendChild(t);
-        wrap.appendChild(box);
-      } else if (data.view === "formaciones") {
+        mainContent.appendChild(box);
+      }
+
+      // vista: formaciones
+      else if (data.view === "formaciones") {
         const box = document.createElement("div");
         box.innerHTML = `<div class="table-toolbar" style="justify-content:flex-end;"><strong style="margin-right:auto; font-size:0.8rem;">Formaciones y refuerzo</strong>${editable ? `<button class="tiny-btn" data-act="add-forma">+ Formación</button>` : ""}</div>`;
         const t = document.createElement("table");
         t.className = "table-like";
         t.innerHTML = `<thead><tr><th>Curso relevante</th><th>Superado</th><th>Aplicado</th><th>Mentoring-Coaching</th>${editable?`<th></th>`:""}</tr></thead><tbody>${(center.formaciones||[]).map((f,i)=>`<tr data-row="${i}" data-table="formaciones"><td contenteditable="${editable}">${f.curso||""}</td><td contenteditable="${editable}">${f.superado||"No"}</td><td contenteditable="${editable}">${f.aplicado||"No"}</td><td contenteditable="${editable}">${f.mentoring||"No"}</td>${editable?`<td><button class="ghost-icon" data-act="del-row">−</button></td>`:""}</tr>`).join("")}</tbody>`;
         box.appendChild(t);
-        wrap.appendChild(box);
-      } else if (data.view === "visitas") {
+        mainContent.appendChild(box);
+      }
+
+      // vista: visitas
+      else if (data.view === "visitas") {
         const box = document.createElement("div");
         box.innerHTML = `<div class="table-toolbar" style="justify-content:flex-end;"><strong style="margin-right:auto; font-size:0.8rem;">Visitas</strong>${editable ? `<button class="tiny-btn" data-act="add-visita">+ Visita</button>` : ""}</div>`;
         const t = document.createElement("table");
         t.className = "table-like";
         t.innerHTML = `<thead><tr><th>Fecha</th><th>Checklist %</th><th>Estado</th><th>Conv. prueba %</th><th>Conv. venta %</th>${editable?`<th></th>`:""}</tr></thead><tbody>${(center.visitas||[]).map((v,i)=>{const estado = Number(v.checklist||0) < 85 ? '<span class="badge-bad">ROJO</span>' : '<span class="badge-ok">VERDE</span>'; const clasePrueba = Number(v.convPrueba||0) < 80 ? 'text-red' : 'text-green'; const claseVenta = Number(v.convVenta||0) < 80 ? 'text-red' : 'text-green'; return `<tr data-row="${i}" data-table="visitas"><td contenteditable="${editable}">${v.fecha||""}</td><td contenteditable="${editable}">${v.checklist||""}</td><td>${estado}</td><td contenteditable="${editable}" class="${clasePrueba}">${v.convPrueba||""}</td><td contenteditable="${editable}" class="${claseVenta}">${v.convVenta||""}</td>${editable?`<td><button class="ghost-icon" data-act="del-row">−</button></td>`:""}</tr>`;}).join("")}</tbody>`;
         box.appendChild(t);
-        wrap.appendChild(box);
+        mainContent.appendChild(box);
       }
 
+      right.appendChild(mainContent);
+      wrap.appendChild(right);
       contentHolder.appendChild(wrap);
     }
 
-    /* ===== FORMACIONES ===== */
+    /* ====== RENDER FORMACIONES ====== */
     function renderFormacionesBlock(data) {
       contentHolder.innerHTML = "";
       const sel = data.selected || 0;
@@ -473,7 +484,7 @@
       contentHolder.appendChild(box);
     }
 
-    /* ===== VISITAS (igual que tenías) ===== */
+    /* ====== RENDER VISITAS ====== */
     function renderVisitasBlock(data) {
       contentHolder.innerHTML = "";
       const sel = data.selected || 0;
@@ -550,7 +561,6 @@
       contentHolder.appendChild(box);
     }
 
-    /* ===== RENDER PRINCIPAL ===== */
     function renderCurrentBlock() {
       const data = blocks[currentBlock]; if (!data) return;
       badgeColor.style.background = data.color || "#fff";
@@ -568,7 +578,7 @@
       }
     }
 
-    /* ===== PIN ===== */
+    /* ==== PIN ==== */
     pinBtn.addEventListener("click", () => {
       const v = pinInput.value.trim();
       if (v === PIN_MASTER) setEditable(true);
@@ -582,7 +592,7 @@
       }
     });
 
-    /* ===== BLOQUES IZQUIERDA ===== */
+    /* ==== CAMBIO DE BLOQUE ==== */
     leftPanel.addEventListener("click", (e) => {
       const btn = e.target.closest(".block-btn");
       if (!btn) return;
@@ -592,22 +602,7 @@
       renderCurrentBlock();
     });
 
-    /* ===== AÑADIR BLOQUE (dejas como lo tenías) ===== */
-    addBlock.addEventListener("click", () => {
-      if (!editable) return alert("Primero desbloquea edición con el PIN AR4321.");
-      const name = prompt("Nombre del nuevo bloque:");
-      if (!name) return;
-      blocks[name] = { color: "#fff5d9", items: [] };
-      persist();
-      const btn = document.createElement("button");
-      btn.className = "block-btn";
-      btn.dataset.type = name;
-      btn.dataset.color = "#fff5d9";
-      btn.innerHTML = `<div class="tag" style="background: rgba(0,0,0,0.04);">🆕</div><div><div>${name}</div><small>Nuevo bloque</small></div>`;
-      leftPanel.appendChild(btn);
-    });
-
-    /* ===== CLICS EN CONTENIDO ===== */
+    /* ==== CLICS EN CONTENIDO ==== */
     contentHolder.addEventListener("click", (e) => {
       const t = e.target;
 
@@ -632,16 +627,23 @@
         persist(); renderCurrentBlock(); return;
       }
 
-      // CENTROS: select
+      // CENTROS
       if (t.dataset.act === "select-center") {
         const data = blocks[currentBlock];
         data.selected = parseInt(t.value, 10) || 0;
         persist(); renderCurrentBlock(); return;
       }
-      // CENTROS: botones
       if (t.dataset.act === "add-center") {
         const data = blocks[currentBlock];
-        data.centers.push({ nombre: currentBlock === "CENTROS EXCLUSIVOS" ? "Centro exclusivo nuevo" : "Centro flop nuevo", delegado: "", audiologo: "", tipo: "Sucursal", acciones: [], formaciones: [], visitas: [] });
+        data.centers.push({
+          nombre: currentBlock === "CENTROS EXCLUSIVOS" ? "Centro exclusivo nuevo" : "Centro flop nuevo",
+          delegado: "",
+          audiologo: "",
+          tipo: "Sucursal",
+          acciones: [],
+          formaciones: [],
+          visitas: []
+        });
         data.selected = data.centers.length - 1;
         persist(); renderCurrentBlock(); return;
       }
@@ -664,9 +666,11 @@
         }
         return;
       }
-      if (t.dataset.act === "save-centers") { persist(); alert("Centros guardados en este bloque."); return; }
+      if (t.dataset.act === "save-centers") {
+        persist(); alert("Centros guardados."); return;
+      }
 
-      // SUBNAV de centros
+      // subnav de centros
       if (t.closest(".center-subnav") && (currentBlock === "CENTROS EXCLUSIVOS" || currentBlock === "CENTROS FLOP")) {
         const btn = t.closest("button[data-sub]");
         if (btn) {
@@ -677,11 +681,34 @@
         return;
       }
 
-      // TABLAS centros
-      if (t.dataset.act === "add-accion") { const data = blocks[currentBlock]; const c = data.centers[data.selected || 0]; c.acciones.push({ tipo:"", fecha:"", derivaciones:"", citas:"", ventas:"", obs:"" }); persist(); renderCurrentBlock(); return; }
-      if (t.dataset.act === "add-forma") { const data = blocks[currentBlock]; const c = data.centers[data.selected || 0]; c.formaciones.push({ curso:"", superado:"No", aplicado:"No", mentoring:"No" }); persist(); renderCurrentBlock(); return; }
-      if (t.dataset.act === "add-visita") { const data = blocks[currentBlock]; const c = data.centers[data.selected || 0]; c.visitas.push({ fecha:"", checklist:"", convPrueba:"", convVenta:"" }); persist(); renderCurrentBlock(); return; }
-      if (t.dataset.act === "del-row") { const tr = t.closest("tr"); const data = blocks[currentBlock]; const c = data.centers[data.selected || 0]; const tableName = tr.dataset.table; const idx = +tr.dataset.row; c[tableName].splice(idx, 1); persist(); renderCurrentBlock(); return; }
+      // filas de centros
+      if (t.dataset.act === "add-accion") {
+        const data = blocks[currentBlock];
+        const c = data.centers[data.selected || 0];
+        c.acciones.push({ tipo:"", fecha:"", derivaciones:"", citas:"", ventas:"", obs:"" });
+        persist(); renderCurrentBlock(); return;
+      }
+      if (t.dataset.act === "add-forma") {
+        const data = blocks[currentBlock];
+        const c = data.centers[data.selected || 0];
+        c.formaciones.push({ curso:"", superado:"No", aplicado:"No", mentoring:"No" });
+        persist(); renderCurrentBlock(); return;
+      }
+      if (t.dataset.act === "add-visita") {
+        const data = blocks[currentBlock];
+        const c = data.centers[data.selected || 0];
+        c.visitas.push({ fecha:"", checklist:"", convPrueba:"", convVenta:"" });
+        persist(); renderCurrentBlock(); return;
+      }
+      if (t.dataset.act === "del-row") {
+        const tr = t.closest("tr");
+        const data = blocks[currentBlock];
+        const c = data.centers[data.selected || 0];
+        const tableName = tr.dataset.table;
+        const idx = +tr.dataset.row;
+        c[tableName].splice(idx, 1);
+        persist(); renderCurrentBlock(); return;
+      }
 
       // FORMACIONES
       if (t.dataset.act === "form-add-row") {
@@ -716,10 +743,11 @@
       if (t.dataset.act === "vis-save-block") { persist(); alert("Visitas guardadas"); return; }
     });
 
-    /* ===== INPUTS ===== */
+    /* ==== INPUTS ==== */
     contentHolder.addEventListener("input", (e) => {
       const t = e.target;
 
+      // campos de centro
       if ((currentBlock === "CENTROS EXCLUSIVOS" || currentBlock === "CENTROS FLOP") && t.dataset.field) {
         const data = blocks[currentBlock];
         const c = data.centers[data.selected || 0];
@@ -728,6 +756,7 @@
         return;
       }
 
+      // tablas de centros
       const tr = t.closest("tr[data-table]");
       if (tr && (currentBlock === "CENTROS EXCLUSIVOS" || currentBlock === "CENTROS FLOP")) {
         const data = blocks[currentBlock];
@@ -758,10 +787,11 @@
         const cells = row.querySelectorAll("td[contenteditable='true']");
         const [fecha, centros, sucursal, tema, superado, aplicado, obs] = Array.from(cells).map(x=>x.textContent.trim());
         d.tabla[idx] = { fecha, centros, sucursal, tema, superado, aplicado, obs };
-        persist(); return;
+        persist();
+        return;
       }
 
-      // VISITAS (texto)
+      // VISITAS
       if (currentBlock === "VISITAS" && t.closest("tr[data-row]")) {
         const data = blocks["VISITAS"];
         const d = data.delegados[data.selected || 0];
@@ -773,18 +803,19 @@
         const sucursal = cells[2] ? cells[2].textContent.trim() : "";
         const audiologo = cells[3] ? cells[3].textContent.trim() : "";
         const checklist = cells[4] ? cells[4].textContent.trim() : "";
-        const convPrueba = cells[6] ? cells[6].textContent.trim() : (cells[5] ? cells[5].textContent.trim() : "");
+        const convPrueba = cells[6] ? cells[6].textContent.trim() : "";
         const convVenta = cells[7] ? cells[7].textContent.trim() : "";
         const hit = cells[8] ? cells[8].textContent.trim() : "";
         const arr = cells[9] ? cells[9].textContent.trim() : "";
         const rt = cells[10] ? cells[10].textContent.trim() : "";
         const obs = cells[11] ? cells[11].textContent.trim() : "";
         d.visitas[idx] = { fecha, centros, sucursal, audiologo, checklist, convPrueba, convVenta, hit, arr, rt, obs };
-        persist(); return;
+        persist();
+        return;
       }
     });
 
-    /* ===== EXPORTS ===== */
+    /* ==== EXPORTAR ==== */
     document.getElementById("btnHTML").addEventListener("click", () => {
       const blob = new Blob([document.documentElement.outerHTML], { type: "text/html" });
       const url = URL.createObjectURL(blob);
@@ -810,7 +841,7 @@
       URL.revokeObjectURL(url);
     });
 
-    // guardar local manual
+    // guardar local
     saveLocalBtn.addEventListener("click", () => {
       persist();
       editStatus.textContent = "Guardado local";
