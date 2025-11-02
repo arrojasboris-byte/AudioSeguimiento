@@ -93,9 +93,6 @@
     .badge-bad { background: rgba(211,47,47,0.12); color: #b71c1c; padding: 2px 6px; border-radius: 6px; font-size: 0.65rem; }
     .text-red { color: #b71c1c; }
     .text-green { color: #0b7a3a; }
-    .date-wrap { position:relative; }
-    .date-wrap::after { content:"📅"; position:absolute; right:5px; top:50%; transform:translateY(-50%); font-size:.6rem; opacity:.6; pointer-events:none; }
-    input[type="date"]::-webkit-calendar-picker-indicator { opacity:0; cursor:pointer; }
     @media (max-width: 1080px) { .flex-split { flex-direction: column; } .centers-list { width: 100%; } }
     @media (max-width: 960px) { main { flex-direction: column; } .left-panel { width: 100%; flex-direction: row; overflow-x: auto; } .right-panel { height: 60vh; } }
   </style>
@@ -112,8 +109,6 @@
       <button id="saveCloud" class="btn disabled">☁️ Guardar en nube</button>
       <button id="loadCloud" class="btn disabled">🔄 Actualizar de nube</button>
       <button id="saveLocal" class="btn secondary">💾 Guardar local</button>
-      <!-- NUEVO BOTÓN PARA BORRAR LOCAL -->
-      <button id="resetLocal" class="btn secondary">🧹 Reset local</button>
       <div class="status-pill" id="editStatus">Solo lectura</div>
     </div>
   </header>
@@ -150,14 +145,11 @@
     </section>
   </main>
   <script>
-    // opciones de acción que pediste
-    const ACTION_TYPES = ["Azafata","Cashback","Ruleta","Stand","Call center","Mailing","Buzoneo","Bono","Otro"];
     const PIN_MASTER = "AR4321";
     const pinInput = document.getElementById("pinInput");
     const pinBtn = document.getElementById("pinBtn");
     const editStatus = document.getElementById("editStatus");
     const saveLocalBtn = document.getElementById("saveLocal");
-    const resetLocalBtn = document.getElementById("resetLocal");
     const contentWrap = document.getElementById("contentWrap");
     const contentHolder = document.getElementById("contentHolder");
     const leftPanel = document.getElementById("leftPanel");
@@ -167,7 +159,7 @@
 
     let editable = false;
 
-    // CARGAMOS TAL CUAL TENÍAS
+    // CARGA TU ESTRUCTURA ACTUAL
     let blocks = JSON.parse(localStorage.getItem("audioar_blocks") || "null") || {
       "OBJETIVOS": {
         color: "var(--obj)",
@@ -193,12 +185,6 @@
             ],
             visitas: [
               { fecha: "2025-11-02", checklist: "90", convPrueba: "85", convVenta: "80" }
-            ],
-            servicios: [
-              { nombre: "Tinnitus-TRT", tiene: "No", ventas: "" },
-              { nombre: "Pediátrico", tiene: "No", ventas: "" },
-              { nombre: "AAR", tiene: "No", ventas: "" },
-              { nombre: "HIT", tiene: "No", ventas: "" }
             ]
           }
         ]
@@ -221,12 +207,6 @@
             ],
             visitas: [
               { fecha: "2025-11-05", checklist: "70", convPrueba: "60", convVenta: "50" }
-            ],
-            servicios: [
-              { nombre: "Tinnitus-TRT", tiene: "No", ventas: "" },
-              { nombre: "Pediátrico", tiene: "No", ventas: "" },
-              { nombre: "AAR", tiene: "No", ventas: "" },
-              { nombre: "HIT", tiene: "No", ventas: "" }
             ]
           }
         ]
@@ -250,6 +230,7 @@
         delegados: [
           {
             nombre: "Delegado 1",
+            visitador: "",
             visitas: [
               { fecha: "2025-11-06", centros: "Centro Tetuán", sucursal: "Sucursal", audiologo: "", checklist: "82", convPrueba: "75", convVenta: "60", hit: "No", arr: "No", rt: "No", obs: "Reforzar cierre" }
             ],
@@ -259,38 +240,15 @@
       }
     };
 
-    // si algún centro no tiene servicios, se los añadimos sin romper nada
-    ["CENTROS EXCLUSIVOS","CENTROS FLOP"].forEach(bn=>{
-      if (blocks[bn] && Array.isArray(blocks[bn].centers)) {
-        blocks[bn].centers.forEach(c=>{
-          if (!c.servicios) {
-            c.servicios = [
-              { nombre: "Tinnitus-TRT", tiene: "No", ventas: "" },
-              { nombre: "Pediátrico", tiene: "No", ventas: "" },
-              { nombre: "AAR", tiene: "No", ventas: "" },
-              { nombre: "HIT", tiene: "No", ventas: "" }
-            ];
-          }
-        });
-      }
-    });
-
     let currentBlock = "OBJETIVOS";
 
-    function persist() {
-      localStorage.setItem("audioar_blocks", JSON.stringify(blocks));
-    }
+    function persist() { localStorage.setItem("audioar_blocks", JSON.stringify(blocks)); }
 
     function setEditable(on) {
       editable = on;
       editStatus.textContent = on ? "Edición activada" : "Solo lectura";
       editStatus.style.background = on ? "rgba(11,160,72,0.1)" : "rgba(0,0,0,0.2)";
       renderCurrentBlock();
-    }
-
-    function makeDateInput(value, attrs="") {
-      const v = value || "";
-      return `<div class="date-wrap"><input type="date" value="${v}" ${attrs}></div>`;
     }
 
     function renderObjectives(data) {
@@ -345,23 +303,17 @@
       const right = document.createElement("div");
       right.className = "center-right";
       const sel = data.selected || 0;
-      const center = data.centers[sel] || { nombre:"", delegado:"", audiologo:"", tipo:"Sucursal", acciones:[], formaciones:[], visitas:[], servicios:[] };
+      const center = data.centers[sel] || { nombre:"", delegado:"", audiologo:"", tipo:"Sucursal", acciones:[], formaciones:[], visitas:[] };
       if (!data.view) data.view = "acciones";
 
       const mainContent = document.createElement("div");
       mainContent.className = "center-content";
       const info = document.createElement("div");
       info.className = "grid-3";
-      info.innerHTML = `
-        <div class="field"><label>Nombre del centro</label><input ${editable?"":"disabled"} data-field="nombre" value="${center.nombre||""}"></div>
+      info.innerHTML = `<div class="field"><label>Nombre del centro</label><input ${editable?"":"disabled"} data-field="nombre" value="${center.nombre||""}"></div>
         <div class="field"><label>Delegado</label><input ${editable?"":"disabled"} data-field="delegado" value="${center.delegado||""}"></div>
         <div class="field"><label>Audiólogo</label><input ${editable?"":"disabled"} data-field="audiologo" value="${center.audiologo||""}"></div>
-        <div class="field"><label>Sucursal / Franquicia</label>
-          <select ${editable?"":"disabled"} data-field="tipo">
-            <option value="Sucursal" ${center.tipo==="Sucursal"?"selected":""}>Sucursal</option>
-            <option value="Franquicia" ${center.tipo==="Franquicia"?"selected":""}>Franquicia</option>
-          </select>
-        </div>`;
+        <div class="field"><label>Sucursal / Franquicia</label><select ${editable?"":"disabled"} data-field="tipo"><option value="Sucursal" ${center.tipo==="Sucursal"?"selected":""}>Sucursal</option><option value="Franquicia" ${center.tipo==="Franquicia"?"selected":""}>Franquicia</option></select></div>`;
       mainContent.appendChild(info);
 
       const subnav = document.createElement("div");
@@ -370,7 +322,6 @@
         { id: "acciones", label: "📋 Acciones" },
         { id: "formaciones", label: "📚 Formaciones y refuerzo" },
         { id: "visitas", label: "🗓️ Visitas" },
-        { id: "servicios", label: "🧩 Servicios" }
       ].forEach(b => {
         const bb = document.createElement("button");
         bb.dataset.sub = b.id;
@@ -385,33 +336,7 @@
         box.innerHTML = `<div class="table-toolbar" style="justify-content:flex-end;"><strong style="margin-right:auto; font-size:0.8rem;">Acciones</strong>${editable ? `<button class="tiny-btn" data-act="add-accion">+ Acción</button>` : ""}</div>`;
         const t = document.createElement("table");
         t.className = "table-like";
-        t.innerHTML = `<thead><tr><th>Tipo de acción</th><th>Fecha</th><th>Derivaciones</th><th>Citas</th><th>Ventas</th><th>Observaciones</th>${editable?`<th></th>`:""}</tr></thead>
-          <tbody>${
-            (center.acciones||[]).map((a,i)=>{
-              // Si el tipo guardado no está en la lista, lo mostramos igualmente
-              const isCustom = a.tipo && !ACTION_TYPES.includes(a.tipo);
-              return `
-                <tr data-row="${i}" data-table="acciones">
-                  <td>
-                    ${editable ? `
-                      <select data-cen-acc="tipo" data-row="${i}">
-                        ${ACTION_TYPES.map(opt=>`<option value="${opt}" ${a.tipo===opt?"selected":""}>${opt}</option>`).join("")}
-                        ${isCustom ? `<option value="${a.tipo}" selected>${a.tipo}</option>`:""}
-                      </select>
-                    ` : (a.tipo||"")}
-                  </td>
-                  <td>
-                    ${makeDateInput(a.fecha||"", editable?`data-cen-acc="fecha" data-row="${i}"`:"disabled")}
-                  </td>
-                  <td><input ${editable?"":"disabled"} data-cen-acc="derivaciones" data-row="${i}" value="${a.derivaciones||""}" style="width:70px;"></td>
-                  <td><input ${editable?"":"disabled"} data-cen-acc="citas" data-row="${i}" value="${a.citas||""}" style="width:70px;"></td>
-                  <td><input ${editable?"":"disabled"} data-cen-acc="ventas" data-row="${i}" value="${a.ventas||""}" style="width:70px;"></td>
-                  <td><input ${editable?"":"disabled"} data-cen-acc="obs" data-row="${i}" value="${a.obs||""}" style="width:100%;"></td>
-                  ${editable?`<td><button class="ghost-icon" data-act="del-row-accion" data-row="${i}">−</button></td>`:""}
-                </tr>
-              `;
-            }).join("")
-          }</tbody>`;
+        t.innerHTML = `<thead><tr><th>Tipo de acción</th><th>Fecha</th><th>Derivaciones</th><th>Citas</th><th>Ventas</th><th>Observaciones</th>${editable?`<th></th>`:""}</tr></thead><tbody>${(center.acciones||[]).map((a,i)=>`<tr data-row="${i}" data-table="acciones"><td contenteditable="${editable}">${a.tipo||""}</td><td contenteditable="${editable}">${a.fecha||""}</td><td contenteditable="${editable}">${a.derivaciones||""}</td><td contenteditable="${editable}">${a.citas||""}</td><td contenteditable="${editable}">${a.ventas||""}</td><td contenteditable="${editable}">${a.obs||""}</td>${editable?`<td><button class="ghost-icon" data-act="del-row">−</button></td>`:""}</tr>`).join("")}</tbody>`;
         box.appendChild(t);
         mainContent.appendChild(box);
       } else if (data.view === "formaciones") {
@@ -419,7 +344,7 @@
         box.innerHTML = `<div class="table-toolbar" style="justify-content:flex-end;"><strong style="margin-right:auto; font-size:0.8rem;">Formaciones y refuerzo</strong>${editable ? `<button class="tiny-btn" data-act="add-forma">+ Formación</button>` : ""}</div>`;
         const t = document.createElement("table");
         t.className = "table-like";
-        t.innerHTML = `<thead><tr><th>Curso relevante</th><th>Superado</th><th>Aplicado</th><th>Mentoring-Coaching</th>${editable?`<th></th>`:""}</tr></thead><tbody>${(center.formaciones||[]).map((f,i)=>`<tr data-row="${i}" data-table="formaciones"><td contenteditable="${editable}">${f.curso||""}</td><td contenteditable="${editable}">${f.superado||"No"}</td><td contenteditable="${editable}">${f.aplicado||"No"}</td><td contenteditable="${editable}">${f.mentoring||"No"}</td>${editable?`<td><button class="ghost-icon" data-act="del-row-forma" data-row="${i}">−</button></td>`:""}</tr>`).join("")}</tbody>`;
+        t.innerHTML = `<thead><tr><th>Curso relevante</th><th>Superado</th><th>Aplicado</th><th>Mentoring-Coaching</th>${editable?`<th></th>`:""}</tr></thead><tbody>${(center.formaciones||[]).map((f,i)=>`<tr data-row="${i}" data-table="formaciones"><td contenteditable="${editable}">${f.curso||""}</td><td contenteditable="${editable}">${f.superado||"No"}</td><td contenteditable="${editable}">${f.aplicado||"No"}</td><td contenteditable="${editable}">${f.mentoring||"No"}</td>${editable?`<td><button class="ghost-icon" data-act="del-row">−</button></td>`:""}</tr>`).join("")}</tbody>`;
         box.appendChild(t);
         mainContent.appendChild(box);
       } else if (data.view === "visitas") {
@@ -427,49 +352,7 @@
         box.innerHTML = `<div class="table-toolbar" style="justify-content:flex-end;"><strong style="margin-right:auto; font-size:0.8rem;">Visitas</strong>${editable ? `<button class="tiny-btn" data-act="add-visita">+ Visita</button>` : ""}</div>`;
         const t = document.createElement("table");
         t.className = "table-like";
-        t.innerHTML = `<thead><tr><th>Fecha</th><th>Checklist %</th><th>Estado</th><th>Conv. prueba %</th><th>Conv. venta %</th>${editable?`<th></th>`:""}</tr></thead>
-          <tbody>${
-            (center.visitas||[]).map((v,i)=>{
-              const malo = Number(v.checklist||0) < 85;
-              const estado = malo ? '<span class="badge-bad">ROJO</span>' : '<span class="badge-ok">VERDE</span>';
-              const pruebaMala = Number(v.convPrueba||0) < 80;
-              const ventaMala = Number(v.convVenta||0) < 80;
-              return `
-                <tr data-row="${i}" data-table="visitas">
-                  <td>${makeDateInput(v.fecha||"", editable?`data-cen-vis="fecha" data-row="${i}"`:"disabled")}</td>
-                  <td><input ${editable?"":"disabled"} data-cen-vis="checklist" data-row="${i}" value="${v.checklist||""}" style="width:70px;background:${malo?"#ffe1e1":"#d4f2dc"};"></td>
-                  <td>${estado}</td>
-                  <td><input ${editable?"":"disabled"} data-cen-vis="convPrueba" data-row="${i}" value="${v.convPrueba||""}" style="width:70px;background:${pruebaMala?"#ffe1e1":"#d4f2dc"};"></td>
-                  <td><input ${editable?"":"disabled"} data-cen-vis="convVenta" data-row="${i}" value="${v.convVenta||""}" style="width:70px;background:${ventaMala?"#ffe1e1":"#d4f2dc"};"></td>
-                  ${editable?`<td><button class="ghost-icon" data-act="del-row-visita" data-row="${i}">−</button></td>`:""}
-                </tr>
-              `;
-            }).join("")
-          }</tbody>`;
-        box.appendChild(t);
-        mainContent.appendChild(box);
-      } else if (data.view === "servicios") {
-        const box = document.createElement("div");
-        box.innerHTML = `<div class="table-toolbar" style="justify-content:flex-end;"><strong style="margin-right:auto; font-size:0.8rem;">Servicios</strong></div>`;
-        const t = document.createElement("table");
-        t.className = "table-like";
-        t.innerHTML = `<thead><tr><th>Servicio</th><th>¿Disponible?</th><th>Ventas</th></tr></thead>
-          <tbody>${
-            (center.servicios||[]).map((s,i)=>`
-              <tr data-row="${i}" data-table="servicios">
-                <td>${s.nombre}</td>
-                <td>
-                  ${editable ? `
-                    <select data-cen-serv="tiene" data-row="${i}" style="background:${s.tiene==="Sí"?"#d4f2dc":"#ffe1e1"};">
-                      <option value="Sí" ${s.tiene==="Sí"?"selected":""}>Sí</option>
-                      <option value="No" ${s.tiene!=="Sí"?"selected":""}>No</option>
-                    </select>
-                  ` : (s.tiene||"No")}
-                </td>
-                <td><input ${editable?"":"disabled"} data-cen-serv="ventas" data-row="${i}" value="${s.ventas||""}" style="width:80px;"></td>
-              </tr>
-            `).join("")
-          }</tbody>`;
+        t.innerHTML = `<thead><tr><th style="width:110px;">Fecha</th><th style="width:110px;">Checklist %</th><th style="width:75px;">Estado</th><th style="width:120px;">Conv. prueba %</th><th style="width:120px;">Conv. venta %</th>${editable?`<th style="width:35px;"></th>`:""}</tr></thead><tbody>${(center.visitas||[]).map((v,i)=>{const estado = Number(v.checklist||0) < 85 ? '<span class="badge-bad">ROJO</span>' : '<span class="badge-ok">VERDE</span>'; const clasePrueba = Number(v.convPrueba||0) < 80 ? 'text-red' : 'text-green'; const claseVenta = Number(v.convVenta||0) < 80 ? 'text-red' : 'text-green'; return `<tr data-row="${i}" data-table="visitas"><td contenteditable="${editable}">${v.fecha||""}</td><td contenteditable="${editable}">${v.checklist||""}</td><td>${estado}</td><td contenteditable="${editable}" class="${clasePrueba}">${v.convPrueba||""}</td><td contenteditable="${editable}" class="${claseVenta}">${v.convVenta||""}</td>${editable?`<td><button class="ghost-icon" data-act="del-row">−</button></td>`:""}</tr>`;}).join("")}</tbody>`;
         box.appendChild(t);
         mainContent.appendChild(box);
       }
@@ -479,6 +362,7 @@
       contentHolder.appendChild(wrap);
     }
 
+    // FORMACIONES (solo cambio el título)
     function renderFormacionesBlock(data) {
       contentHolder.innerHTML = "";
       const sel = data.selected || 0;
@@ -497,7 +381,7 @@
       const box = document.createElement("div");
       box.innerHTML = `
         <div class="table-toolbar" style="justify-content:flex-end;">
-          <strong style="margin-right:auto;">Formaciones del delegado</strong>
+          <strong style="margin-right:auto;">Formaciones</strong>
           ${editable ? `<button class="tiny-btn" data-act="form-add-row">+ Fila</button>` : ``}
           <label style="font-size:0.7rem;cursor:pointer;">
             ${delegado.adjunto ? "📎 " + delegado.adjunto : "📎 Adjuntar Excel"}
@@ -511,41 +395,26 @@
       t.innerHTML = `
         <thead>
           <tr>
-            <th>Fecha</th>
-            <th>Centros</th>
-            <th>Sucursal / Franquicia</th>
+            <th style="width:110px;">Fecha</th>
+            <th style="min-width:200px;">Centros</th>
+            <th style="width:130px;">Suc./Franq.</th>
             <th>Tema formación</th>
-            <th>Superado</th>
-            <th>Aplicado</th>
-            <th>Observaciones</th>
-            ${editable ? `<th></th>` : ``}
+            <th style="width:80px;">Superado</th>
+            <th style="width:80px;">Aplicado</th>
+            <th style="min-width:180px;">Observaciones</th>
+            ${editable ? `<th style="width:35px;"></th>` : ``}
           </tr>
         </thead>
         <tbody>
           ${(delegado.tabla || []).map((r,i)=>`
             <tr data-row="${i}">
-              <td>${makeDateInput(r.fecha||"", editable?`data-form="fecha" data-row="${i}"`:"disabled")}</td>
-              <td><input ${editable?"":"disabled"} data-form="centros" data-row="${i}" value="${r.centros||""}" style="width:100%;"></td>
-              <td>
-                <select ${editable?"":"disabled"} data-form="sucursal" data-row="${i}">
-                  <option value="Sucursal" ${r.sucursal==="Sucursal"?"selected":""}>Sucursal</option>
-                  <option value="Franquicia" ${r.sucursal==="Franquicia"?"selected":""}>Franquicia</option>
-                </select>
-              </td>
-              <td><input ${editable?"":"disabled"} data-form="tema" data-row="${i}" value="${r.tema||""}" style="width:100%;"></td>
-              <td>
-                <select ${editable?"":"disabled"} data-form="superado" data-row="${i}">
-                  <option value="Sí" ${r.superado==="Sí"?"selected":""}>Sí</option>
-                  <option value="No" ${r.superado!=="Sí"?"selected":""}>No</option>
-                </select>
-              </td>
-              <td>
-                <select ${editable?"":"disabled"} data-form="aplicado" data-row="${i}">
-                  <option value="Sí" ${r.aplicado==="Sí"?"selected":""}>Sí</option>
-                  <option value="No" ${r.aplicado!=="Sí"?"selected":""}>No</option>
-                </select>
-              </td>
-              <td><input ${editable?"":"disabled"} data-form="obs" data-row="${i}" value="${r.obs||""}" style="width:100%;"></td>
+              <td contenteditable="${editable}">${r.fecha || ""}</td>
+              <td contenteditable="${editable}">${r.centros || ""}</td>
+              <td contenteditable="${editable}">${r.sucursal || ""}</td>
+              <td contenteditable="${editable}">${r.tema || ""}</td>
+              <td contenteditable="${editable}">${r.superado || ""}</td>
+              <td contenteditable="${editable}">${r.aplicado || ""}</td>
+              <td contenteditable="${editable}">${r.obs || ""}</td>
               ${editable ? `<td><button class="ghost-icon" data-act="form-del-row" data-row="${i}">−</button></td>` : ``}
             </tr>
           `).join("")}
@@ -555,10 +424,11 @@
       contentHolder.appendChild(box);
     }
 
+    // VISITAS (cambio titulo + campo visitador + anchos)
     function renderVisitasBlock(data) {
       contentHolder.innerHTML = "";
       const sel = data.selected || 0;
-      const delegado = data.delegados[sel] || { nombre: "", visitas: [], adjunto: "" };
+      const delegado = data.delegados[sel] || { nombre: "", visitador: "", visitas: [], adjunto: "" };
 
       const info = document.createElement("div");
       info.className = "grid-3";
@@ -567,13 +437,17 @@
           <label>Delegado</label>
           <input disabled value="${delegado.nombre || ""}">
         </div>
+        <div class="field">
+          <label>Visitador</label>
+          <input ${editable?"":"disabled"} data-vis-meta="visitador" value="${delegado.visitador || ""}">
+        </div>
       `;
       contentHolder.appendChild(info);
 
       const box = document.createElement("div");
       box.innerHTML = `
         <div class="table-toolbar" style="justify-content:flex-end;">
-          <strong style="margin-right:auto;">Visitas del delegado</strong>
+          <strong style="margin-right:auto;">Visitas</strong>
           ${editable ? `<button class="tiny-btn" data-act="vis-add-row">+ Visita</button>` : ``}
           <label style="font-size:0.7rem;cursor:pointer;">
             ${delegado.adjunto ? "📎 " + delegado.adjunto : "📎 Adjuntar Excel"}
@@ -587,61 +461,41 @@
       t.innerHTML = `
         <thead>
           <tr>
-            <th>Fecha</th>
-            <th>Centros</th>
-            <th>Sucursal / Franquicia</th>
-            <th>Audiólogo</th>
-            <th>Checklist %</th>
-            <th>Estado</th>
-            <th>Conv. prueba %</th>
-            <th>Conv. venta %</th>
-            <th>HIT</th>
-            <th>ARR</th>
-            <th>RT-equipo</th>
-            <th>Observaciones</th>
-            ${editable ? `<th></th>` : ``}
+            <th style="width:110px;">Fecha</th>
+            <th style="min-width:220px;">Centros</th>
+            <th style="width:120px;">Suc./Franq.</th>
+            <th style="width:110px;">Audiólogo</th>
+            <th style="width:85px;">Checklist %</th>
+            <th style="width:70px;">Estado</th>
+            <th style="width:95px;">Conv. prueba %</th>
+            <th style="width:95px;">Conv. venta %</th>
+            <th style="width:70px;">HIT</th>
+            <th style="width:70px;">ARR</th>
+            <th style="width:95px;">RT-equipo</th>
+            <th style="min-width:220px;">Observaciones</th>
+            ${editable ? `<th style="width:35px;"></th>` : ``}
           </tr>
         </thead>
         <tbody>
           ${(delegado.visitas || []).map((v,i)=>{
             const malo = Number(v.checklist || 0) < 85;
             const estado = malo ? '<span class="badge-bad">ROJO</span>' : '<span class="badge-ok">VERDE</span>';
-            const pruebaMala = Number(v.convPrueba||0) < 80;
-            const ventaMala = Number(v.convVenta||0) < 80;
+            const pruebaMala = Number(v.convPrueba || 0) < 80;
+            const ventaMala = Number(v.convVenta || 0) < 80;
             return `
               <tr data-row="${i}">
-                <td>${makeDateInput(v.fecha||"", editable?`data-vis="fecha" data-row="${i}"`:"disabled")}</td>
-                <td><input ${editable?"":"disabled"} data-vis="centros" data-row="${i}" value="${v.centros||""}" style="width:100%;"></td>
-                <td>
-                  <select ${editable?"":"disabled"} data-vis="sucursal" data-row="${i}">
-                    <option value="Sucursal" ${v.sucursal==="Sucursal"?"selected":""}>Sucursal</option>
-                    <option value="Franquicia" ${v.sucursal==="Franquicia"?"selected":""}>Franquicia</option>
-                  </select>
-                </td>
-                <td><input ${editable?"":"disabled"} data-vis="audiologo" data-row="${i}" value="${v.audiologo||""}" style="width:100%;"></td>
-                <td><input ${editable?"":"disabled"} data-vis="checklist" data-row="${i}" value="${v.checklist||""}" style="width:70px;background:${malo?"#ffe1e1":"#d4f2dc"};"></td>
+                <td contenteditable="${editable}">${v.fecha || ""}</td>
+                <td contenteditable="${editable}">${v.centros || ""}</td>
+                <td contenteditable="${editable}">${v.sucursal || ""}</td>
+                <td contenteditable="${editable}">${v.audiologo || ""}</td>
+                <td contenteditable="${editable}">${v.checklist || ""}</td>
                 <td>${estado}</td>
-                <td><input ${editable?"":"disabled"} data-vis="convPrueba" data-row="${i}" value="${v.convPrueba||""}" style="width:70px;background:${pruebaMala?"#ffe1e1":"#d4f2dc"};"></td>
-                <td><input ${editable?"":"disabled"} data-vis="convVenta" data-row="${i}" value="${v.convVenta||""}" style="width:70px;background:${ventaMala?"#ffe1e1":"#d4f2dc"};"></td>
-                <td>
-                  <select ${editable?"":"disabled"} data-vis="hit" data-row="${i}" style="background:${v.hit==="Sí"?"#d4f2dc":"#ffe1e1"};">
-                    <option value="Sí" ${v.hit==="Sí"?"selected":""}>Sí</option>
-                    <option value="No" ${v.hit!=="Sí"?"selected":""}>No</option>
-                  </select>
-                </td>
-                <td>
-                  <select ${editable?"":"disabled"} data-vis="arr" data-row="${i}" style="background:${v.arr==="Sí"?"#d4f2dc":"#ffe1e1"};">
-                    <option value="Sí" ${v.arr==="Sí"?"selected":""}>Sí</option>
-                    <option value="No" ${v.arr!=="Sí"?"selected":""}>No</option>
-                  </select>
-                </td>
-                <td>
-                  <select ${editable?"":"disabled"} data-vis="rt" data-row="${i}" style="background:${v.rt==="Sí"?"#d4f2dc":"#ffe1e1"};">
-                    <option value="Sí" ${v.rt==="Sí"?"selected":""}>Sí</option>
-                    <option value="No" ${v.rt!=="Sí"?"selected":""}>No</option>
-                  </select>
-                </td>
-                <td><input ${editable?"":"disabled"} data-vis="obs" data-row="${i}" value="${v.obs||""}" style="width:100%;"></td>
+                <td contenteditable="${editable}" class="${pruebaMala?"text-red":"text-green"}">${v.convPrueba || ""}</td>
+                <td contenteditable="${editable}" class="${ventaMala?"text-red":"text-green"}">${v.convVenta || ""}</td>
+                <td contenteditable="${editable}">${v.hit || "No"}</td>
+                <td contenteditable="${editable}">${v.arr || "No"}</td>
+                <td contenteditable="${editable}">${v.rt || ""}</td>
+                <td contenteditable="${editable}">${v.obs || ""}</td>
                 ${editable ? `<td><button class="ghost-icon" data-act="vis-del-row" data-row="${i}">−</button></td>` : ``}
               </tr>
             `;
@@ -699,13 +553,6 @@
       }
     });
 
-    // RESET LOCAL
-    resetLocalBtn.addEventListener("click", () => {
-      localStorage.removeItem("audioar_blocks");
-      alert("Datos locales borrados. Recarga la página.");
-      location.reload();
-    });
-
     // cambiar de bloque
     leftPanel.addEventListener("click", (e) => {
       const btn = e.target.closest(".block-btn");
@@ -755,12 +602,14 @@
         persist(); renderCurrentBlock(); return;
       }
 
-      // CENTROS
+      // SELECTOR centro
       if (t.dataset.act === "select-center") {
         const data = blocks[currentBlock];
         data.selected = parseInt(t.value, 10) || 0;
         persist(); renderCurrentBlock(); return;
       }
+
+      // cambiar subvista en centros
       if (t.closest(".center-subnav") && (currentBlock === "CENTROS EXCLUSIVOS" || currentBlock === "CENTROS FLOP")) {
         const btn = t.closest("button[data-sub]");
         if (btn) {
@@ -770,21 +619,15 @@
         }
         return;
       }
+
+      // añadir centro
       if (t.dataset.act === "add-center") {
         const data = blocks[currentBlock];
-        data.centers.push({
-          nombre: currentBlock === "CENTROS EXCLUSIVOS" ? "Centro exclusivo nuevo" : "Centro flop nuevo",
-          delegado: "", audiologo: "", tipo: "Sucursal",
-          acciones: [], formaciones: [], visitas: [],
-          servicios: [
-            { nombre: "Tinnitus-TRT", tiene: "No", ventas: "" },
-            { nombre: "Pediátrico", tiene: "No", ventas: "" },
-            { nombre: "AAR", tiene: "No", ventas: "" },
-            { nombre: "HIT", tiene: "No", ventas: "" }
-          ]
-        });
+        data.centers.push({ nombre: currentBlock === "CENTROS EXCLUSIVOS" ? "Centro exclusivo nuevo" : "Centro flop nuevo", delegado: "", audiologo: "", tipo: "Sucursal", acciones: [], formaciones: [], visitas: [] });
         data.selected = data.centers.length - 1;
-        persist(); renderCurrentBlock(); return;
+        persist();
+        renderCurrentBlock();
+        return;
       }
       if (t.dataset.act === "del-center") {
         const data = blocks[currentBlock];
@@ -792,7 +635,9 @@
         const idx = data.selected || 0;
         data.centers.splice(idx, 1);
         if (data.selected > 0) data.selected -= 1;
-        persist(); renderCurrentBlock(); return;
+        persist();
+        renderCurrentBlock();
+        return;
       }
       if (t.dataset.act === "rename-center-head") {
         const data = blocks[currentBlock];
@@ -801,35 +646,20 @@
         const nuevo = prompt("Nombre del centro:", c.nombre || "");
         if (nuevo !== null) {
           c.nombre = nuevo.trim();
-          persist(); renderCurrentBlock();
+          persist();
+          renderCurrentBlock();
         }
         return;
       }
       if (t.dataset.act === "save-centers") {
-        persist(); alert("Centros guardados en este bloque."); return;
-      }
-      if (t.dataset.act === "add-accion") {
-        const data = blocks[currentBlock];
-        const c = data.centers[data.selected || 0];
-        c.acciones.push({ tipo: "Azafata", fecha: "", derivaciones: "", citas: "", ventas: "", obs: "" });
-        persist(); renderCurrentBlock(); return;
-      }
-      if (t.dataset.act === "del-row-accion") {
-        const data = blocks[currentBlock];
-        const c = data.centers[data.selected || 0];
-        c.acciones.splice(+t.dataset.row, 1);
-        persist(); renderCurrentBlock(); return;
+        persist();
+        alert("Centros guardados en este bloque.");
+        return;
       }
       if (t.dataset.act === "add-forma") {
         const data = blocks[currentBlock];
         const c = data.centers[data.selected || 0];
         c.formaciones.push({ curso: "", superado: "No", aplicado: "No", mentoring: "No" });
-        persist(); renderCurrentBlock(); return;
-      }
-      if (t.dataset.act === "del-row-forma") {
-        const data = blocks[currentBlock];
-        const c = data.centers[data.selected || 0];
-        c.formaciones.splice(+t.dataset.row, 1);
         persist(); renderCurrentBlock(); return;
       }
       if (t.dataset.act === "add-visita") {
@@ -838,58 +668,60 @@
         c.visitas.push({ fecha: "", checklist: "", convPrueba: "", convVenta: "" });
         persist(); renderCurrentBlock(); return;
       }
-      if (t.dataset.act === "del-row-visita") {
+      if (t.dataset.act === "del-row") {
+        const tr = t.closest("tr");
         const data = blocks[currentBlock];
         const c = data.centers[data.selected || 0];
-        c.visitas.splice(+t.dataset.row, 1);
+        const tableName = tr.dataset.table;
+        const idx = +tr.dataset.row;
+        c[tableName].splice(idx, 1);
         persist(); renderCurrentBlock(); return;
       }
 
-      // FORMACIONES
-      if (t.dataset.act === "form-add-row") {
-        const data = blocks["FORMACIONES Y MENTORING"];
-        const delegado = data.delegados[data.selected || 0];
-        delegado.tabla.push({ fecha: "", centros: "", sucursal: "Sucursal", tema: "", superado: "No", aplicado: "No", obs: "" });
+      // FORMACIONES (borrar fila)
+      if (t.dataset.act === "form-del-row") {
+        const d = blocks["FORMACIONES Y MENTORING"];
+        const del = d.delegados[d.selected || 0];
+        del.tabla.splice(+t.dataset.row, 1);
         persist(); renderCurrentBlock(); return;
       }
-      if (t.dataset.act === "form-del-row") {
-        const data = blocks["FORMACIONES Y MENTORING"];
-        const delegado = data.delegados[data.selected || 0];
-        delegado.tabla.splice(+t.dataset.row, 1);
+      if (t.dataset.act === "form-add-row") {
+        const d = blocks["FORMACIONES Y MENTORING"];
+        const del = d.delegados[d.selected || 0];
+        del.tabla.push({ fecha:"", centros:"", sucursal:"", tema:"", superado:"No", aplicado:"No", obs:"" });
         persist(); renderCurrentBlock(); return;
       }
       if (t.dataset.act === "form-save-block") {
         persist(); alert("Formaciones guardadas."); return;
       }
 
-      // VISITAS
-      if (t.dataset.act === "vis-add-row") {
-        const data = blocks["VISITAS"];
-        const delegado = data.delegados[data.selected || 0];
-        delegado.visitas.push({ fecha: "", centros: "", sucursal: "Sucursal", audiologo: "", checklist: "", convPrueba: "", convVenta: "", hit: "No", arr: "No", rt: "No", obs: "" });
+      // VISITAS (borrar fila)
+      if (t.dataset.act === "vis-del-row") {
+        const v = blocks["VISITAS"];
+        const del = v.delegados[v.selected || 0];
+        del.visitas.splice(+t.dataset.row, 1);
         persist(); renderCurrentBlock(); return;
       }
-      if (t.dataset.act === "vis-del-row") {
-        const data = blocks["VISITAS"];
-        const delegado = data.delegados[data.selected || 0];
-        delegado.visitas.splice(+t.dataset.row, 1);
+      if (t.dataset.act === "vis-add-row") {
+        const v = blocks["VISITAS"];
+        const del = v.delegados[v.selected || 0];
+        del.visitas.push({ fecha:"", centros:"", sucursal:"", audiologo:"", checklist:"", convPrueba:"", convVenta:"", hit:"No", arr:"No", rt:"No", obs:"" });
         persist(); renderCurrentBlock(); return;
       }
       if (t.dataset.act === "vis-save-block") {
         persist(); alert("Visitas guardadas."); return;
       }
 
-      // SIMPLE
+      // borrar simple
       if (t.dataset.act === "del-simple") {
         const data = blocks[currentBlock];
         data.items.splice(+t.dataset.idx, 1);
-        persist(); renderCurrentBlock();
-        return;
+        persist(); renderCurrentBlock(); return;
       }
     });
 
-    // cambios de inputs
-    contentHolder.addEventListener("change", (e) => {
+    // edición en línea / cambios
+    contentHolder.addEventListener("input", (e) => {
       const t = e.target;
       // campos de centro
       if ((currentBlock === "CENTROS EXCLUSIVOS" || currentBlock === "CENTROS FLOP") && t.dataset.field) {
@@ -899,70 +731,81 @@
         persist();
         return;
       }
-      // acciones de centro
-      if (t.dataset.cenAcc) {
+      // tablas de centros (contenteditable)
+      const tr = t.closest("tr[data-table]");
+      if (tr && (currentBlock === "CENTROS EXCLUSIVOS" || currentBlock === "CENTROS FLOP")) {
         const data = blocks[currentBlock];
         const c = data.centers[data.selected || 0];
-        const row = +t.dataset.row;
-        if (!c.acciones[row]) c.acciones[row] = {};
-        c.acciones[row][t.dataset.cenAcc] = t.value;
+        const tableName = tr.dataset.table;
+        const idx = +tr.dataset.row;
+        const cells = tr.querySelectorAll("td[contenteditable='true']");
+        if (tableName === "acciones") {
+          const [tipo, fecha, derivaciones, citas, ventas, obs] = Array.from(cells).map(x => x.textContent.trim());
+          c.acciones[idx] = { tipo, fecha, derivaciones, citas, ventas, obs };
+        } else if (tableName === "formaciones") {
+          const [curso, superado, aplicado, mentoring] = Array.from(cells).map(x => x.textContent.trim());
+          c.formaciones[idx] = { curso, superado, aplicado, mentoring };
+        } else if (tableName === "visitas") {
+          const [fecha, checklist, , convPrueba, convVenta] = Array.from(cells).map(x => x.textContent.trim());
+          c.visitas[idx] = { fecha, checklist, convPrueba, convVenta };
+        }
         persist();
         return;
       }
-      // visitas de centro
-      if (t.dataset.cenVis) {
-        const data = blocks[currentBlock];
-        const c = data.centers[data.selected || 0];
-        const row = +t.dataset.row;
-        if (!c.visitas[row]) c.visitas[row] = {};
-        c.visitas[row][t.dataset.cenVis] = t.value;
-        persist();
-        return;
-      }
-      // servicios de centro
-      if (t.dataset.cenServ) {
-        const data = blocks[currentBlock];
-        const c = data.centers[data.selected || 0];
-        const row = +t.dataset.row;
-        if (!c.servicios[row]) c.servicios[row] = {};
-        c.servicios[row][t.dataset.cenServ] = t.value;
-        persist();
-        renderCurrentBlock(); // recolor
-        return;
-      }
-      // formaciones
-      if (t.dataset.form) {
-        const data = blocks["FORMACIONES Y MENTORING"];
-        const delegado = data.delegados[data.selected || 0];
-        const row = +t.dataset.row;
-        if (!delegado.tabla[row]) delegado.tabla[row] = {};
-        delegado.tabla[row][t.dataset.form] = t.value;
-        persist();
-        return;
-      }
-      // visitas
-      if (t.dataset.vis) {
-        const data = blocks["VISITAS"];
-        const delegado = data.delegados[data.selected || 0];
-        const row = +t.dataset.row;
-        if (!delegado.visitas[row]) delegado.visitas[row] = {};
-        delegado.visitas[row][t.dataset.vis] = t.value;
-        persist();
-        renderVisitasBlock(data); // para recolorear
-        return;
-      }
-    });
 
-    // edición inline en tablas (texto)
-    contentHolder.addEventListener("input", (e) => {
-      const t = e.target;
+      // formaciones detalle
+      if (currentBlock === "FORMACIONES Y MENTORING" && t.closest("tbody")) {
+        const d = blocks["FORMACIONES Y MENTORING"];
+        const del = d.delegados[d.selected || 0];
+        const row = +t.closest("tr").dataset.row;
+        const r = del.tabla[row];
+        const cells = t.closest("tr").querySelectorAll("td[contenteditable='true']");
+        const [fecha, centros, sucursal, tema, superado, aplicado, obs] = Array.from(cells).map(x => x.textContent.trim());
+        del.tabla[row] = { fecha, centros, sucursal, tema, superado, aplicado, obs };
+        persist();
+        return;
+      }
+
+      // visitas detalle
+      if (currentBlock === "VISITAS" && t.closest("tbody")) {
+        const v = blocks["VISITAS"];
+        const del = v.delegados[v.selected || 0];
+        const row = +t.closest("tr").dataset.row;
+        const cells = t.closest("tr").querySelectorAll("td[contenteditable='true']");
+        // orden: fecha, centros, sucursal, audiologo, checklist, (estado no editable), convPrueba, convVenta, hit, arr, rt, obs
+        const fecha   = cells[0] ? cells[0].textContent.trim() : "";
+        const centros = cells[1] ? cells[1].textContent.trim() : "";
+        const sucursal= cells[2] ? cells[2].textContent.trim() : "";
+        const audiologo= cells[3] ? cells[3].textContent.trim() : "";
+        const checklist= cells[4] ? cells[4].textContent.trim() : "";
+        const convPrueba= cells[5] ? cells[5].textContent.trim() : "";
+        const convVenta= cells[6] ? cells[6].textContent.trim() : "";
+        const hit= cells[7] ? cells[7].textContent.trim() : "No";
+        const arr= cells[8] ? cells[8].textContent.trim() : "No";
+        const rt= cells[9] ? cells[9].textContent.trim() : "";
+        const obs= cells[10] ? cells[10].textContent.trim() : "";
+        del.visitas[row] = { fecha, centros, sucursal, audiologo, checklist, convPrueba, convVenta, hit, arr, rt, obs };
+        persist();
+        // recolorear estado
+        renderVisitasBlock(v);
+        return;
+      }
+
+      // visitas meta (visitador)
+      if (t.dataset.visMeta === "visitador") {
+        const v = blocks["VISITAS"];
+        const del = v.delegados[v.selected || 0];
+        del.visitador = t.value;
+        persist();
+        return;
+      }
+
       // bloques simples
       if (t.dataset && typeof t.dataset.idx !== "undefined" && t.dataset.field) {
         const data = blocks[currentBlock];
         const idx = +t.dataset.idx;
         data.items[idx][t.dataset.field] = t.textContent.trim();
         persist();
-        return;
       }
     });
 
@@ -981,18 +824,6 @@
         const b = blocks[bn];
         if (bn === "CENTROS EXCLUSIVOS" || bn === "CENTROS FLOP") {
           (b.centers || []).forEach(c => { rows.push([bn, c.nombre, c.delegado, c.audiologo, c.tipo]); });
-        } else if (bn === "FORMACIONES Y MENTORING") {
-          (b.delegados || []).forEach(d => {
-            (d.tabla || []).forEach(r => {
-              rows.push([bn, d.nombre, r.centros, r.tema, r.fecha]);
-            });
-          });
-        } else if (bn === "VISITAS") {
-          (b.delegados || []).forEach(d => {
-            (d.visitas || []).forEach(v => {
-              rows.push([bn, d.nombre, v.centros, v.sucursal, v.fecha]);
-            });
-          });
         } else {
           (b.items || []).forEach(it => { rows.push([bn, it.titulo, it.detalle, it.fecha || "", ""]); });
         }
@@ -1004,15 +835,6 @@
       URL.revokeObjectURL(url);
     });
 
-    // guardar local manual
-    saveLocalBtn.addEventListener("click", () => {
-      persist();
-      editStatus.textContent = "Guardado local";
-      setTimeout(() => {
-        editStatus.textContent = editable ? "Edición activada" : "Solo lectura";
-      }, 2000);
-    });
-
     function runSmokeTests() {
       console.log("[TEST] estructura básica cargada");
       console.assert(!!document.getElementById("leftPanel"), "leftPanel no existe");
@@ -1021,6 +843,15 @@
 
     renderCurrentBlock();
     runSmokeTests();
+
+    // guardar local manual
+    saveLocalBtn.addEventListener("click", () => {
+      persist();
+      editStatus.textContent = "Guardado local";
+      setTimeout(() => {
+        editStatus.textContent = editable ? "Edición activada" : "Solo lectura";
+      }, 2000);
+    });
   </script>
 </body>
 </html>
