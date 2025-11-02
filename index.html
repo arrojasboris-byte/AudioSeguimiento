@@ -33,11 +33,10 @@
       padding: 12px 26px;
       gap: 12px;
     }
-    header h1 { font-size: 1.1rem; letter-spacing: 0.04rem; display: flex; align-items: center; gap: 10px; }
+    header h1 { font-size: 1.1rem; display: flex; gap: 10px; align-items: center; }
     header h1 span.logo { background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 99px; font-weight: 700; }
     .top-actions { display: flex; gap: 10px; align-items: center; }
-    .btn { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff; border-radius: 14px; padding: 6px 12px; font-size: 0.78rem; display: inline-flex; gap: 6px; align-items: center; cursor: pointer; transition: 0.2s ease; }
-    .btn:hover { background: rgba(255,255,255,0.2); }
+    .btn { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff; border-radius: 14px; padding: 6px 12px; font-size: 0.78rem; display: inline-flex; gap: 6px; align-items: center; cursor: pointer; }
     .btn.secondary { background: rgba(0,0,0,0.3); }
     .pin-box { display: flex; gap: 6px; align-items: center; background: rgba(0,0,0,0.2); border-radius: 12px; padding: 3px 6px 3px 10px; }
     .pin-box input { all: unset; background: rgba(0,0,0,0.3); padding: 3px 6px; border-radius: 8px; font-size: 0.7rem; }
@@ -45,11 +44,34 @@
     main { flex: 1; display: flex; gap: 10px; padding: 12px; overflow: hidden; }
 
     /* PANEL IZQUIERDO */
-    .left-panel { width: 268px; background: var(--panel); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); padding: 10px; display: flex; flex-direction: column; gap: 6px; overflow-y: auto; }
-    .left-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
-    .block-btn { display: flex; align-items: center; gap: 10px; background: #f3f3f3; border: 1px solid transparent; border-radius: 14px; padding: 6px 10px; cursor: pointer; transition: 0.15s ease; font-size: 0.78rem; }
-    .block-btn .tag { width: 28px; height: 28px; border-radius: 12px; display: grid; place-items: center; font-size: 0.75rem; font-weight: 600; }
-    .block-btn small { opacity: 0.5; font-size: 0.65rem; }
+    .left-panel {
+      width: 268px;
+      background: var(--panel);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      overflow-y: auto;
+    }
+    .block-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #f3f3f3;
+      border: 1px solid transparent;
+      border-radius: 14px;
+      padding: 6px 10px;
+      cursor: pointer;
+      font-size: 0.78rem;
+    }
+    .block-btn .tag {
+      width: 28px; height: 28px; border-radius: 12px;
+      display: grid; place-items: center;
+      font-size: 0.75rem; font-weight: 600;
+    }
+    .block-btn small { opacity: .5; font-size: .65rem; }
     .block-btn.active { border: 1px solid rgba(0,0,0,0.12); background: #fff; box-shadow: 0 3px 12px rgba(0,0,0,0.03); }
     .block-btn[data-type="OBJETIVOS"] { background: var(--obj); }
     .block-btn[data-type="CENTROS EXCLUSIVOS"] { background: var(--cex); }
@@ -57,33 +79,39 @@
     .block-btn[data-type="FORMACIONES Y MENTORING"] { background: var(--form); }
     .block-btn[data-type="VISITAS"] { background: var(--vis); }
 
-    /* subpanel dinámico debajo de bloques */
-    #leftSubpanel {
-      margin-left: 6px;
-      margin-right: 6px;
-    }
-    .centers-subbox {
+    /* SUBPANELES QUE SE DESPLIEGAN BAJO EL BLOQUE */
+    .block-extra {
       background: #fff;
-      border: 1px solid rgba(0,0,0,0.04);
-      border-radius: 14px;
-      padding: 8px 8px 10px;
+      border: 1px solid rgba(0,0,0,0.03);
+      border-radius: 12px;
+      padding: 8px;
+      margin-left: 38px;
       display: flex;
       flex-direction: column;
       gap: 6px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.02);
     }
-    .centers-subbox-header {
+    .block-extra-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 6px;
     }
     .centers-select {
       width: 100%;
-      padding: 6px 8px;
+      padding: 5px 8px;
       border-radius: 10px;
       border: 1px solid rgba(0,0,0,0.08);
-      font-size: 0.78rem;
       background: #fff;
+      font-size: .75rem;
+    }
+    .tiny-btn, .ghost-icon {
+      background: rgba(0,0,0,0.04);
+      border: none;
+      border-radius: 6px;
+      padding: 2px 6px;
+      font-size: .7rem;
+      cursor: pointer;
     }
 
     /* PANEL DERECHO */
@@ -96,57 +124,47 @@
     .locked-overlay { background: rgba(255,255,255,0.75); border: 2px dashed rgba(183, 28, 28, 0.3); border-radius: 16px; display: none; align-items: center; justify-content: center; gap: 10px; font-weight: 500; color: #b71c1c; padding: 10px; }
     .content-wrap.locked .locked-overlay { display: flex; position: absolute; inset: 0; backdrop-filter: blur(1px); }
 
-    /* campos centros */
+    /* campos ficha centro */
     .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
     .field { display: flex; flex-direction: column; gap: 4px; }
-    .field label { font-size: 0.7rem; opacity: 0.8; }
-    .field input, .field select { border-radius: 10px; border: 1px solid rgba(0,0,0,0.1); padding: 5px 8px; font-size: 0.78rem; background: #fff; }
+    .field label { font-size: .7rem; opacity: .75; }
+    .field input, .field select { border-radius: 10px; border: 1px solid rgba(0,0,0,0.1); padding: 5px 8px; font-size: .78rem; background: #fff; }
 
-    /* subnav centros */
-    .center-subnav { width: 100%; display: flex; gap: 8px; margin-top: 8px; }
-    .center-subnav button { background: #000; color: #fff; border: none; border-radius: 12px; padding: 6px 10px; font-size: 0.72rem; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+    /* subnav centro */
+    .center-subnav { display: flex; gap: 8px; margin-top: 6px; }
+    .center-subnav button { background: #000; color: #fff; border: none; border-radius: 12px; padding: 6px 10px; font-size: .72rem; cursor: pointer; }
     .center-subnav button.active { background: #b71c1c; }
 
-    /* TABLAS */
-    .table-like { width: 100%; border-collapse: collapse; background: #fff; border-radius: 12px; overflow: hidden; font-size: 0.74rem; }
+    /* tablas */
+    .table-like { width: 100%; border-collapse: collapse; background: #fff; border-radius: 12px; overflow: hidden; font-size: .74rem; }
     .table-like th, .table-like td { border: 1px solid rgba(0,0,0,0.12); padding: 4px 6px; }
-    .table-toolbar { display: flex; gap: 6px; margin-bottom: 4px; align-items: center; justify-content: flex-end; }
-    .ghost-icon, .tiny-btn { background: rgba(0,0,0,0.04); padding: 2px 6px; border-radius: 6px; border: none; cursor: pointer; font-size: 0.7rem; display: inline-flex; align-items: center; gap: 2px; }
-    .badge-ok { background: rgba(11,160,72,0.1); color: #0b7a3a; padding: 2px 6px; border-radius: 6px; font-size: 0.65rem; }
-    .badge-bad { background: rgba(211,47,47,0.12); color: #b71c1c; padding: 2px 6px; border-radius: 6px; font-size: 0.65rem; }
+    .table-toolbar { display: flex; gap: 6px; align-items: center; justify-content: flex-end; margin-bottom: 4px; }
+    .badge-ok { background: rgba(11,160,72,0.1); color: #0b7a3a; padding: 2px 6px; border-radius: 6px; font-size: .65rem; }
+    .badge-bad { background: rgba(211,47,47,0.12); color: #b71c1c; padding: 2px 6px; border-radius: 6px; font-size: .65rem; }
     .text-red { color: #b71c1c; }
     .text-green { color: #0b7a3a; }
 
-    @media (max-width: 960px) {
-      main { flex-direction: column; }
-      .left-panel { width: 100%; flex-direction: row; overflow-x: auto; }
-      #leftSubpanel { min-width: 240px; }
-    }
+    @media (max-width: 960px) { main { flex-direction: column; } .left-panel { width: 100%; flex-direction: row; overflow-x: auto; } }
   </style>
 </head>
 <body>
   <header>
-    <h1><span class="logo">SEGUIMIENTO</span> AUDIO-AR <small style="opacity:0.6; font-size:0.65rem;">Panel de seguimiento formación & ventas</small></h1>
+    <h1><span class="logo">SEGUIMIENTO</span> AUDIO-AR <small style="opacity:.6;font-size:.65rem;">Panel de seguimiento formación & ventas</small></h1>
     <div class="top-actions">
       <div class="pin-box">
         <span>🔐 PIN:</span>
         <input id="pinInput" type="password" maxlength="6" placeholder="••••••" />
         <button id="pinBtn" class="btn secondary" style="padding:4px 8px;">OK</button>
       </div>
-      <button id="saveCloud" class="btn disabled">☁️ Guardar en nube</button>
-      <button id="loadCloud" class="btn disabled">🔄 Actualizar de nube</button>
+      <button class="btn disabled">☁️ Guardar en nube</button>
+      <button class="btn disabled">🔄 Actualizar de nube</button>
       <div class="status-pill" id="editStatus">Solo lectura</div>
     </div>
   </header>
 
   <main>
-    <!-- PANEL IZQUIERDO -->
+    <!-- IZQUIERDA: SOLO 5 BLOQUES -->
     <aside class="left-panel" id="leftPanel">
-      <div class="left-header">
-        <strong>Bloques</strong>
-        <button id="addBlock" class="tiny-btn">+ Añadir</button>
-      </div>
-
       <button class="block-btn active" data-type="OBJETIVOS" data-color="var(--obj)">
         <div class="tag" style="background: rgba(183,28,28,0.2);">🎯</div>
         <div>
@@ -154,6 +172,7 @@
           <small>KPIs, % logro</small>
         </div>
       </button>
+      <div id="extra-OBJETIVOS"></div>
 
       <button class="block-btn" data-type="CENTROS EXCLUSIVOS" data-color="var(--cex)">
         <div class="tag" style="background: rgba(47,52,55,0.05);">🏢</div>
@@ -162,6 +181,7 @@
           <small>Seguimiento premium</small>
         </div>
       </button>
+      <div id="extra-CENTROS EXCLUSIVOS"></div>
 
       <button class="block-btn" data-type="CENTROS FLOP" data-color="var(--cflop)">
         <div class="tag" style="background: rgba(183,28,28,0.17);">⚠️</div>
@@ -170,6 +190,7 @@
           <small>Alarmas & plan</small>
         </div>
       </button>
+      <div id="extra-CENTROS FLOP"></div>
 
       <button class="block-btn" data-type="FORMACIONES Y MENTORING" data-color="var(--form)">
         <div class="tag" style="background: rgba(24,24,24,0.05);">📚</div>
@@ -178,6 +199,7 @@
           <small>Plan de aulas</small>
         </div>
       </button>
+      <div id="extra-FORMACIONES Y MENTORING"></div>
 
       <button class="block-btn" data-type="VISITAS" data-color="var(--vis)">
         <div class="tag" style="background: rgba(0,0,0,0.04);">🗓️</div>
@@ -186,17 +208,15 @@
           <small>Agenda & report</small>
         </div>
       </button>
-
-      <!-- aquí pintamos los centros cuando toque -->
-      <div id="leftSubpanel"></div>
+      <div id="extra-VISITAS"></div>
     </aside>
 
-    <!-- PANEL DERECHO -->
+    <!-- DERECHA -->
     <section class="right-panel">
-      <div class="right-header" id="rightHeader">
+      <div class="right-header">
         <div class="title">
-          <div class="badge-color" id="badgeColor" style="background: var(--obj);"></div>
-          <h2 id="sectionTitle" style="font-size:0.95rem;">OBJETIVOS</h2>
+          <div class="badge-color" id="badgeColor" style="background:var(--obj);"></div>
+          <h2 id="sectionTitle" style="font-size:.95rem;">OBJETIVOS</h2>
         </div>
         <div class="footer-tools">
           <button id="btnHTML" class="btn secondary">⬇︎ HTML</button>
@@ -215,34 +235,22 @@
 
   <script>
     const PIN_MASTER = "AR4321";
-
     const pinInput = document.getElementById("pinInput");
     const pinBtn = document.getElementById("pinBtn");
     const editStatus = document.getElementById("editStatus");
     const contentWrap = document.getElementById("contentWrap");
     const contentHolder = document.getElementById("contentHolder");
     const leftPanel = document.getElementById("leftPanel");
-    const leftSubpanel = document.getElementById("leftSubpanel");
     const badgeColor = document.getElementById("badgeColor");
     const sectionTitle = document.getElementById("sectionTitle");
-    const addBlock = document.getElementById("addBlock");
 
     let editable = false;
 
-    // estado base
     let blocks = JSON.parse(localStorage.getItem("audioar_blocks") || "null") || {
       "OBJETIVOS": {
         color: "var(--obj)",
         items: [
-          {
-            titulo: "Ventas Q4",
-            detalle: "Objetivo 140% sobre 2024",
-            fecha: "2025-11-02",
-            acciones: [
-              { tipo: "Refuerzo comercial", fecha: "2025-11-10", derivaciones: "2", citas: "1", ventas: "1", obs: "" }
-            ],
-            adjunto: ""
-          }
+          { titulo: "Ventas Q4", detalle: "Objetivo 140% sobre 2024", fecha: "2025-11-02" }
         ]
       },
       "CENTROS EXCLUSIVOS": {
@@ -251,7 +259,7 @@
         view: "acciones",
         centers: [
           {
-            nombre: "Centro 1",
+            nombre: "Centro exclusivo 1",
             delegado: "",
             audiologo: "",
             tipo: "Sucursal",
@@ -273,7 +281,7 @@
         view: "acciones",
         centers: [
           {
-            nombre: "Centro Tetuán",
+            nombre: "Centro flop 1",
             delegado: "",
             audiologo: "",
             tipo: "Franquicia",
@@ -309,157 +317,95 @@
       localStorage.setItem("audioar_blocks", JSON.stringify(blocks));
     }
 
-    // aseguramos que objetivos tiene acciones
-    function normalizeObjectives() {
-      const obj = blocks["OBJETIVOS"];
-      if (!obj || !obj.items) return;
-      obj.items.forEach(it => {
-        if (!it.acciones) it.acciones = [];
-        if (typeof it.adjunto === "undefined") it.adjunto = "";
-      });
-    }
-
     function setEditable(on) {
       editable = on;
       editStatus.textContent = on ? "Edición activada" : "Solo lectura";
       editStatus.style.background = on ? "rgba(11,160,72,0.1)" : "rgba(0,0,0,0.2)";
       renderCurrentBlock();
-      renderLeftSubpanel();
+      renderLeftExtras();
     }
 
-    /* ----------- RENDER SUBPANEL IZQUIERDA (centros) ----------- */
-    function renderLeftSubpanel() {
-      leftSubpanel.innerHTML = "";
-      if (currentBlock !== "CENTROS EXCLUSIVOS" && currentBlock !== "CENTROS FLOP") return;
-      const data = blocks[currentBlock];
-      const box = document.createElement("div");
-      box.className = "centers-subbox";
-      box.innerHTML = `
-        <div class="centers-subbox-header">
-          <strong>Centros</strong>
-          ${editable ? `<button class="tiny-btn" data-act="add-center-left">+ Añadir</button>` : ""}
-        </div>
-      `;
-      const sel = document.createElement("select");
-      sel.className = "centers-select";
-      sel.dataset.act = "select-center-left";
-      (data.centers || []).forEach((c, idx) => {
-        const opt = document.createElement("option");
-        opt.value = idx;
-        opt.textContent = c.nombre || `Centro ${idx + 1}`;
-        if (idx === (data.selected || 0)) opt.selected = true;
-        sel.appendChild(opt);
+    function renderLeftExtras() {
+      // limpiamos extras
+      ["OBJETIVOS","CENTROS EXCLUSIVOS","CENTROS FLOP","FORMACIONES Y MENTORING","VISITAS"].forEach(name => {
+        const c = document.getElementById("extra-" + name);
+        if (!c) return;
+        c.innerHTML = "";
       });
-      box.appendChild(sel);
-      leftSubpanel.appendChild(box);
-    }
 
-    /* ----------- RENDER OBJETIVOS con subtabla ----------- */
-    function renderObjectives(data) {
-      normalizeObjectives();
-      contentHolder.innerHTML = "";
-      data.items.forEach((item, idx) => {
-        const cont = document.createElement("div");
-        cont.className = "item";
-        cont.style.borderLeftColor = "rgba(183,28,28,0.6)";
-        cont.innerHTML = `
-          <div class="item-header">
-            <div>
-              <strong ${editable ? `contenteditable="true" data-obj-idx="${idx}" data-field="titulo"` : ""}>${item.titulo}</strong>
-              <div style="font-size:0.68rem;opacity:.6;" ${editable ? `contenteditable="true" data-obj-idx="${idx}" data-field="detalle"` : ""}>${item.detalle}</div>
-              <div style="font-size:0.68rem;">📅 <span ${editable ? `contenteditable="true" data-obj-idx="${idx}" data-field="fecha"` : ""}>${item.fecha || ""}</span></div>
-            </div>
-            ${
-              editable
-                ? `<div class="item-actions">
-                    <button class="ghost-icon" data-act="add-obj-after" data-idx="${idx}">＋</button>
-                    <button class="ghost-icon" data-act="del-obj" data-idx="${idx}">−</button>
-                  </div>`
-                : ""
-            }
-          </div>
-        `;
-
-        // tabla de acciones del objetivo
+      if (currentBlock === "CENTROS EXCLUSIVOS" || currentBlock === "CENTROS FLOP") {
+        const data = blocks[currentBlock];
+        const extra = document.getElementById("extra-" + currentBlock);
         const box = document.createElement("div");
-        box.style.marginTop = "6px";
+        box.className = "block-extra";
         box.innerHTML = `
-          <div class="table-toolbar" style="justify-content:flex-end;">
-            <strong style="margin-right:auto;font-size:0.75rem;">Acciones del objetivo</strong>
-            ${editable ? `<button class="tiny-btn" data-act="add-row-objetivo" data-idx="${idx}">+ Fila</button>` : ""}
-            <label style="font-size:0.7rem; cursor:pointer;">
-              ${item.adjunto ? "📎 " + item.adjunto : "📎 Adjuntar Excel"}
-              <input type="file" accept=".xls,.xlsx,.csv" data-act="attach-excel" data-idx="${idx}" style="display:none;">
-            </label>
+          <div class="block-extra-header">
+            <strong>${currentBlock === "CENTROS EXCLUSIVOS" ? "Centros exclusivos" : "Centros flop"}</strong>
+            ${editable ? `
+              <div style="display:flex;gap:4px;">
+                <button class="tiny-btn" data-act="block-add-center">+</button>
+                <button class="tiny-btn" data-act="block-del-center">−</button>
+                <button class="tiny-btn" data-act="block-rename-center">✏</button>
+                <button class="tiny-btn" data-act="block-save-centers">Guardar</button>
+              </div>
+            ` : ``}
           </div>
         `;
-        const t = document.createElement("table");
-        t.className = "table-like";
-        t.innerHTML = `
-          <thead>
-            <tr>
-              <th>Tipo de acción</th>
-              <th>Fecha</th>
-              <th>Derivaciones</th>
-              <th>Citas</th>
-              <th>Ventas</th>
-              <th>Observaciones</th>
-              ${editable ? `<th></th>` : ""}
-            </tr>
-          </thead>
-          <tbody>
-            ${(item.acciones || []).map((a,i)=>`
-              <tr data-obj="${idx}" data-row="${i}">
-                <td contenteditable="${editable}">${a.tipo || ""}</td>
-                <td contenteditable="${editable}">${a.fecha || ""}</td>
-                <td contenteditable="${editable}">${a.derivaciones || ""}</td>
-                <td contenteditable="${editable}">${a.citas || ""}</td>
-                <td contenteditable="${editable}">${a.ventas || ""}</td>
-                <td contenteditable="${editable}">${a.obs || ""}</td>
-                ${editable ? `<td><button class="ghost-icon" data-act="del-row-objetivo" data-obj="${idx}" data-row="${i}">−</button></td>` : ""}
-              </tr>
-            `).join("")}
-          </tbody>
-        `;
-        box.appendChild(t);
-        cont.appendChild(box);
-
-        contentHolder.appendChild(cont);
-      });
-
-      if (editable) {
-        const addBtn = document.createElement("button");
-        addBtn.textContent = "+ Añadir objetivo";
-        addBtn.className = "tiny-btn";
-        addBtn.onclick = () => {
-          data.items.push({
-            titulo: "Nuevo objetivo",
-            detalle: "",
-            fecha: "",
-            acciones: [],
-            adjunto: ""
-          });
-          persist();
-          renderCurrentBlock();
-        };
-        contentHolder.appendChild(addBtn);
+        const sel = document.createElement("select");
+        sel.className = "centers-select";
+        sel.dataset.act = "block-select-center";
+        (data.centers || []).forEach((c, idx) => {
+          const opt = document.createElement("option");
+          opt.value = idx;
+          opt.textContent = c.nombre || (currentBlock === "CENTROS EXCLUSIVOS" ? "Exclusivo " : "Flop ") + (idx + 1);
+          if (idx === (data.selected || 0)) opt.selected = true;
+          sel.appendChild(opt);
+        });
+        box.appendChild(sel);
+        extra.appendChild(box);
       }
     }
 
-    /* ----------- RENDER CENTROS (solo derecha, los centros ya están en izquierda) ----------- */
+    function renderObjectives(data) {
+      contentHolder.innerHTML = "";
+      const list = document.createElement("div");
+      list.style.display = "grid";
+      list.style.gap = "10px";
+      (data.items || []).forEach((item, idx) => {
+        const div = document.createElement("div");
+        div.className = "item";
+        div.innerHTML = `
+          <div class="item-header">
+            <strong>${item.titulo}</strong>
+            ${editable ? `<div class="item-actions">
+              <button class="tiny-btn" data-act="edit-obj" data-idx="${idx}">✏</button>
+              <button class="tiny-btn" data-act="add-obj" data-idx="${idx}">+</button>
+              <button class="tiny-btn" data-act="del-obj" data-idx="${idx}">−</button>
+            </div>` : ``}
+          </div>
+          <small>${item.detalle || ""}</small>
+          <small>📅 ${item.fecha || ""}</small>
+        `;
+        list.appendChild(div);
+      });
+      if (editable) {
+        const btn = document.createElement("button");
+        btn.textContent = "+ Añadir objetivo";
+        btn.className = "tiny-btn";
+        btn.onclick = () => {
+          data.items.push({ titulo: "Nuevo objetivo", detalle: "", fecha: "" });
+          persist();
+          renderCurrentBlock();
+        };
+        list.appendChild(btn);
+      }
+      contentHolder.appendChild(list);
+    }
+
     function renderCentersBlock(blockName, data) {
       contentHolder.innerHTML = "";
-
       const sel = data.selected || 0;
-      const center = data.centers[sel] || {
-        nombre: "",
-        delegado: "",
-        audiologo: "",
-        tipo: "Sucursal",
-        acciones: [],
-        formaciones: [],
-        visitas: []
-      };
+      const center = data.centers[sel] || { nombre:"", delegado:"", audiologo:"", tipo:"Sucursal", acciones:[], formaciones:[], visitas:[] };
       if (!data.view) data.view = "acciones";
 
       const main = document.createElement("div");
@@ -468,25 +414,13 @@
       const info = document.createElement("div");
       info.className = "grid-3";
       info.innerHTML = `
-        <div class="field">
-          <label>Nombre del centro</label>
-          <input ${editable ? "" : "disabled"} data-field="nombre" value="${center.nombre || ""}">
-        </div>
-        <div class="field">
-          <label>Delegado</label>
-          <input ${editable ? "" : "disabled"} data-field="delegado" value="${center.delegado || ""}">
-        </div>
-        <div class="field">
-          <label>Audiólogo</label>
-          <input ${editable ? "" : "disabled"} data-field="audiologo" value="${center.audiologo || ""}">
-        </div>
-        <div class="field">
-          <label>Sucursal / Franquicia</label>
-          <select ${editable ? "" : "disabled"} data-field="tipo">
-            <option value="Sucursal" ${center.tipo === "Sucursal" ? "selected" : ""}>Sucursal</option>
-            <option value="Franquicia" ${center.tipo === "Franquicia" ? "selected" : ""}>Franquicia</option>
-          </select>
-        </div>
+        <div class="field"><label>Nombre del centro</label><input ${editable?"":"disabled"} data-field="nombre" value="${center.nombre||""}"></div>
+        <div class="field"><label>Delegado</label><input ${editable?"":"disabled"} data-field="delegado" value="${center.delegado||""}"></div>
+        <div class="field"><label>Audiólogo</label><input ${editable?"":"disabled"} data-field="audiologo" value="${center.audiologo||""}"></div>
+        <div class="field"><label>Sucursal / Franquicia</label><select ${editable?"":"disabled"} data-field="tipo">
+          <option value="Sucursal" ${center.tipo==="Sucursal"?"selected":""}>Sucursal</option>
+          <option value="Franquicia" ${center.tipo==="Franquicia"?"selected":""}>Franquicia</option>
+        </select></div>
       `;
       main.appendChild(info);
 
@@ -505,112 +439,66 @@
       });
       main.appendChild(subnav);
 
-      // vista
       if (data.view === "acciones") {
         const box = document.createElement("div");
-        box.innerHTML = `
-          <div class="table-toolbar" style="justify-content:flex-end;">
-            <strong style="margin-right:auto; font-size:0.8rem;">Acciones</strong>
-            ${editable ? `<button class="tiny-btn" data-act="add-accion">+ Acción</button>` : ""}
-          </div>
-        `;
+        box.innerHTML = `<div class="table-toolbar" style="justify-content:flex-end;"><strong style="margin-right:auto;">Acciones</strong>${editable?`<button class="tiny-btn" data-act="add-accion">+ Acción</button>`:""}</div>`;
         const t = document.createElement("table");
         t.className = "table-like";
-        t.innerHTML = `
-          <thead><tr>
-            <th>Tipo de acción</th>
-            <th>Fecha</th>
-            <th>Derivaciones</th>
-            <th>Citas</th>
-            <th>Ventas</th>
-            <th>Observaciones</th>
-            ${editable ? `<th></th>` : ""}
-          </tr></thead>
-          <tbody>
-            ${(center.acciones || []).map((a,i)=>`
-              <tr data-row="${i}" data-table="acciones">
-                <td contenteditable="${editable}">${a.tipo || ""}</td>
-                <td contenteditable="${editable}">${a.fecha || ""}</td>
-                <td contenteditable="${editable}">${a.derivaciones || ""}</td>
-                <td contenteditable="${editable}">${a.citas || ""}</td>
-                <td contenteditable="${editable}">${a.ventas || ""}</td>
-                <td contenteditable="${editable}">${a.obs || ""}</td>
-                ${editable ? `<td><button class="ghost-icon" data-act="del-row">−</button></td>` : ""}
-              </tr>
-            `).join("")}
-          </tbody>
-        `;
+        t.innerHTML = `<thead><tr><th>Tipo de acción</th><th>Fecha</th><th>Derivaciones</th><th>Citas</th><th>Ventas</th><th>Observaciones</th>${editable?`<th></th>`:""}</tr></thead><tbody>${
+          (center.acciones||[]).map((a,i)=>`
+            <tr data-row="${i}" data-table="acciones">
+              <td contenteditable="${editable}">${a.tipo||""}</td>
+              <td contenteditable="${editable}">${a.fecha||""}</td>
+              <td contenteditable="${editable}">${a.derivaciones||""}</td>
+              <td contenteditable="${editable}">${a.citas||""}</td>
+              <td contenteditable="${editable}">${a.ventas||""}</td>
+              <td contenteditable="${editable}">${a.obs||""}</td>
+              ${editable?`<td><button class="ghost-icon" data-act="del-row">−</button></td>`:""}
+            </tr>
+          `).join("")
+        }</tbody>`;
         box.appendChild(t);
         main.appendChild(box);
       } else if (data.view === "formaciones") {
         const box = document.createElement("div");
-        box.innerHTML = `
-          <div class="table-toolbar" style="justify-content:flex-end;">
-            <strong style="margin-right:auto; font-size:0.8rem;">Formaciones y refuerzo</strong>
-            ${editable ? `<button class="tiny-btn" data-act="add-forma">+ Formación</button>` : ""}
-          </div>
-        `;
+        box.innerHTML = `<div class="table-toolbar" style="justify-content:flex-end;"><strong style="margin-right:auto;">Formaciones y refuerzo</strong>${editable?`<button class="tiny-btn" data-act="add-forma">+ Formación</button>`:""}</div>`;
         const t = document.createElement("table");
         t.className = "table-like";
-        t.innerHTML = `
-          <thead><tr>
-            <th>Curso relevante</th>
-            <th>Superado</th>
-            <th>Aplicado</th>
-            <th>Mentoring-Coaching</th>
-            ${editable ? `<th></th>` : ""}
-          </tr></thead>
-          <tbody>
-            ${(center.formaciones || []).map((f,i)=>`
-              <tr data-row="${i}" data-table="formaciones">
-                <td contenteditable="${editable}">${f.curso || ""}</td>
-                <td contenteditable="${editable}">${f.superado || "No"}</td>
-                <td contenteditable="${editable}">${f.aplicado || "No"}</td>
-                <td contenteditable="${editable}">${f.mentoring || "No"}</td>
-                ${editable ? `<td><button class="ghost-icon" data-act="del-row">−</button></td>` : ""}
-              </tr>
-            `).join("")}
-          </tbody>
-        `;
+        t.innerHTML = `<thead><tr><th>Curso relevante</th><th>Superado</th><th>Aplicado</th><th>Mentoring-Coaching</th>${editable?`<th></th>`:""}</tr></thead><tbody>${
+          (center.formaciones||[]).map((f,i)=>`
+            <tr data-row="${i}" data-table="formaciones">
+              <td contenteditable="${editable}">${f.curso||""}</td>
+              <td contenteditable="${editable}">${f.superado||"No"}</td>
+              <td contenteditable="${editable}">${f.aplicado||"No"}</td>
+              <td contenteditable="${editable}">${f.mentoring||"No"}</td>
+              ${editable?`<td><button class="ghost-icon" data-act="del-row">−</button></td>`:""}
+            </tr>
+          `).join("")
+        }</tbody>`;
         box.appendChild(t);
         main.appendChild(box);
       } else if (data.view === "visitas") {
         const box = document.createElement("div");
-        box.innerHTML = `
-          <div class="table-toolbar" style="justify-content:flex-end;">
-            <strong style="margin-right:auto; font-size:0.8rem;">Visitas</strong>
-            ${editable ? `<button class="tiny-btn" data-act="add-visita">+ Visita</button>` : ""}
-          </div>
-        `;
+        box.innerHTML = `<div class="table-toolbar" style="justify-content:flex-end;"><strong style="margin-right:auto;">Visitas</strong>${editable?`<button class="tiny-btn" data-act="add-visita">+ Visita</button>`:""}</div>`;
         const t = document.createElement("table");
         t.className = "table-like";
-        t.innerHTML = `
-          <thead><tr>
-            <th>Fecha</th>
-            <th>Checklist %</th>
-            <th>Estado</th>
-            <th>Conv. prueba %</th>
-            <th>Conv. venta %</th>
-            ${editable ? `<th></th>` : ""}
-          </tr></thead>
-          <tbody>
-            ${(center.visitas || []).map((v,i)=>{
-              const estado = Number(v.checklist || 0) < 85 ? '<span class="badge-bad">ROJO</span>' : '<span class="badge-ok">VERDE</span>';
-              const clasePrueba = Number(v.convPrueba || 0) < 80 ? "text-red" : "text-green";
-              const claseVenta = Number(v.convVenta || 0) < 80 ? "text-red" : "text-green";
-              return `
-                <tr data-row="${i}" data-table="visitas">
-                  <td contenteditable="${editable}">${v.fecha || ""}</td>
-                  <td contenteditable="${editable}">${v.checklist || ""}</td>
-                  <td>${estado}</td>
-                  <td contenteditable="${editable}" class="${clasePrueba}">${v.convPrueba || ""}</td>
-                  <td contenteditable="${editable}" class="${claseVenta}">${v.convVenta || ""}</td>
-                  ${editable ? `<td><button class="ghost-icon" data-act="del-row">−</button></td>` : ""}
-                </tr>
-              `;
-            }).join("")}
-          </tbody>
-        `;
+        t.innerHTML = `<thead><tr><th>Fecha</th><th>Checklist %</th><th>Estado</th><th>Conv. prueba %</th><th>Conv. venta %</th>${editable?`<th></th>`:""}</tr></thead><tbody>${
+          (center.visitas||[]).map((v,i)=>{
+            const estado = Number(v.checklist||0) < 85 ? '<span class="badge-bad">ROJO</span>' : '<span class="badge-ok">VERDE</span>';
+            const clasePrueba = Number(v.convPrueba||0) < 80 ? "text-red" : "text-green";
+            const claseVenta = Number(v.convVenta||0) < 80 ? "text-red" : "text-green";
+            return `
+              <tr data-row="${i}" data-table="visitas">
+                <td contenteditable="${editable}">${v.fecha||""}</td>
+                <td contenteditable="${editable}">${v.checklist||""}</td>
+                <td>${estado}</td>
+                <td contenteditable="${editable}" class="${clasePrueba}">${v.convPrueba||""}</td>
+                <td contenteditable="${editable}" class="${claseVenta}">${v.convVenta||""}</td>
+                ${editable?`<td><button class="ghost-icon" data-act="del-row">−</button></td>`:""}
+              </tr>
+            `;
+          }).join("")
+        }</tbody>`;
         box.appendChild(t);
         main.appendChild(box);
       }
@@ -618,76 +506,66 @@
       contentHolder.appendChild(main);
     }
 
-    /* ----------- RENDER SIMPLE ----------- */
     function renderSimple(data) {
       contentHolder.innerHTML = "";
       const list = document.createElement("div");
-      (data.items || []).forEach((item, idx) => {
+      list.style.display = "grid";
+      list.style.gap = "10px";
+      (data.items || []).forEach((it, idx) => {
         const div = document.createElement("div");
         div.className = "item";
         div.innerHTML = `
           <div class="item-header">
-            <strong ${editable ? `contenteditable="true" data-idx="${idx}" data-field="titulo"` : ""}>${item.titulo}</strong>
-            ${editable ? `<div class="item-actions"><button class="tiny-btn" data-act="del-simple" data-idx="${idx}">✖</button></div>` : ""}
+            <strong ${editable?`contenteditable="true" data-idx="${idx}" data-field="titulo"`:""}>${it.titulo}</strong>
+            ${editable?`<button class="tiny-btn" data-act="del-simple" data-idx="${idx}">✖</button>`:""}
           </div>
-          <small ${editable ? `contenteditable="true" data-idx="${idx}" data-field="detalle"` : ""}>${item.detalle}</small>
-          <small>📅 <span ${editable ? `contenteditable="true" data-idx="${idx}" data-field="fecha"` : ""}>${item.fecha || ""}</span></small>
+          <small ${editable?`contenteditable="true" data-idx="${idx}" data-field="detalle"`:""}>${it.detalle||""}</small>
+          <small>📅 <span ${editable?`contenteditable="true" data-idx="${idx}" data-field="fecha"`:""}>${it.fecha||""}</span></small>
         `;
         list.appendChild(div);
       });
       if (editable) {
-        const addBtn = document.createElement("button");
-        addBtn.textContent = "+ Añadir elemento";
-        addBtn.className = "tiny-btn";
-        addBtn.onclick = () => {
+        const btn = document.createElement("button");
+        btn.textContent = "+ Añadir elemento";
+        btn.className = "tiny-btn";
+        btn.onclick = () => {
           data.items.push({ titulo: "Nuevo", detalle: "", fecha: "" });
           persist();
           renderCurrentBlock();
         };
-        list.appendChild(addBtn);
+        list.appendChild(btn);
       }
       contentHolder.appendChild(list);
     }
 
     function renderCurrentBlock() {
       const data = blocks[currentBlock];
-      if (!data) return;
       badgeColor.style.background = data.color || "#fff";
       sectionTitle.textContent = currentBlock;
-      if (!editable) contentWrap.classList.add("locked");
-      else contentWrap.classList.remove("locked");
+      if (!editable) contentWrap.classList.add("locked"); else contentWrap.classList.remove("locked");
 
-      if (currentBlock === "OBJETIVOS") {
-        renderObjectives(data);
-      } else if (currentBlock === "CENTROS EXCLUSIVOS" || currentBlock === "CENTROS FLOP") {
-        renderCentersBlock(currentBlock, data);
-      } else {
-        renderSimple(data);
-      }
-      renderLeftSubpanel();
+      if (currentBlock === "OBJETIVOS") renderObjectives(data);
+      else if (currentBlock === "CENTROS EXCLUSIVOS" || currentBlock === "CENTROS FLOP") renderCentersBlock(currentBlock, data);
+      else renderSimple(data);
+
+      renderLeftExtras();
     }
 
-    /* ----------- EVENTOS ----------- */
+    // PIN
     pinBtn.addEventListener("click", () => {
       const v = pinInput.value.trim();
       if (v === PIN_MASTER) setEditable(true);
-      else {
-        alert("PIN incorrecto. Usa AR4321");
-        setEditable(false);
-      }
+      else { alert("PIN incorrecto. Usa AR4321"); setEditable(false); }
     });
     pinInput.addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
         const v = pinInput.value.trim();
         if (v === PIN_MASTER) setEditable(true);
-        else {
-          alert("PIN incorrecto. Usa AR4321");
-          setEditable(false);
-        }
+        else { alert("PIN incorrecto. Usa AR4321"); setEditable(false); }
       }
     });
 
-    // cambiar bloque
+    // CAMBIO DE BLOQUE
     leftPanel.addEventListener("click", (e) => {
       const btn = e.target.closest(".block-btn");
       if (!btn) return;
@@ -697,13 +575,14 @@
       renderCurrentBlock();
     });
 
-    // acciones en subpanel izquierda
-    leftSubpanel.addEventListener("click", (e) => {
+    // eventos del subpanel de centros (izquierda)
+    leftPanel.addEventListener("click", (e) => {
       const t = e.target;
-      if (t.dataset.act === "add-center-left") {
+      if (!t.dataset.act) return;
+      if (t.dataset.act === "block-add-center") {
         const data = blocks[currentBlock];
         data.centers.push({
-          nombre: "Centro nuevo",
+          nombre: currentBlock === "CENTROS EXCLUSIVOS" ? "Centro exclusivo nuevo" : "Centro flop nuevo",
           delegado: "",
           audiologo: "",
           tipo: "Sucursal",
@@ -714,11 +593,34 @@
         data.selected = data.centers.length - 1;
         persist();
         renderCurrentBlock();
+      } else if (t.dataset.act === "block-del-center") {
+        const data = blocks[currentBlock];
+        if (!data.centers || data.centers.length === 0) return;
+        const idx = data.selected || 0;
+        data.centers.splice(idx, 1);
+        if (data.selected > 0) data.selected -= 1;
+        persist();
+        renderCurrentBlock();
+      } else if (t.dataset.act === "block-rename-center") {
+        const data = blocks[currentBlock];
+        const idx = data.selected || 0;
+        const c = data.centers[idx];
+        const nuevo = prompt("Nombre del centro:", c.nombre || "");
+        if (nuevo !== null) {
+          c.nombre = nuevo.trim();
+          persist();
+          renderCurrentBlock();
+        }
+      } else if (t.dataset.act === "block-save-centers") {
+        persist();
+        alert("Centros guardados en " + currentBlock);
       }
     });
-    leftSubpanel.addEventListener("change", (e) => {
+
+    // cambio en desplegable de centros (izquierda)
+    leftPanel.addEventListener("change", (e) => {
       const t = e.target;
-      if (t.dataset.act === "select-center-left") {
+      if (t.dataset.act === "block-select-center") {
         const data = blocks[currentBlock];
         data.selected = parseInt(t.value, 10) || 0;
         persist();
@@ -726,19 +628,29 @@
       }
     });
 
-    // clicks en contenido
+    // clicks dentro del contenido derecho
     contentHolder.addEventListener("click", (e) => {
       const t = e.target;
 
-      // OBJETIVOS
-      if (t.dataset.act === "add-obj-after") {
+      // objetivos
+      if (t.dataset.act === "edit-obj") {
         const idx = +t.dataset.idx;
-        blocks["OBJETIVOS"].items.splice(idx + 1, 0, {
+        const item = blocks["OBJETIVOS"].items[idx];
+        const nt = prompt("Título del objetivo", item.titulo || "");
+        if (nt !== null) item.titulo = nt;
+        const nd = prompt("Detalle / KPI", item.detalle || "");
+        if (nd !== null) item.detalle = nd;
+        const nf = prompt("Fecha", item.fecha || "");
+        if (nf !== null) item.fecha = nf;
+        persist();
+        renderCurrentBlock();
+        return;
+      }
+      if (t.dataset.act === "add-obj") {
+        blocks["OBJETIVOS"].items.splice(+t.dataset.idx + 1, 0, {
           titulo: "Nuevo objetivo",
           detalle: "",
-          fecha: "",
-          acciones: [],
-          adjunto: ""
+          fecha: ""
         });
         persist();
         renderCurrentBlock();
@@ -750,62 +662,35 @@
         renderCurrentBlock();
         return;
       }
-      if (t.dataset.act === "add-row-objetivo") {
-        const idx = +t.dataset.idx;
-        blocks["OBJETIVOS"].items[idx].acciones.push({
-          tipo: "",
-          fecha: "",
-          derivaciones: "",
-          citas: "",
-          ventas: "",
-          obs: ""
-        });
-        persist();
-        renderCurrentBlock();
-        return;
-      }
-      if (t.dataset.act === "del-row-objetivo") {
-        const ob = +t.dataset.obj;
-        const rw = +t.dataset.row;
-        blocks["OBJETIVOS"].items[ob].acciones.splice(rw, 1);
-        persist();
-        renderCurrentBlock();
+
+      if ((currentBlock === "CENTROS EXCLUSIVOS" || currentBlock === "CENTROS FLOP") && t.closest(".center-subnav")) {
+        const b = t.closest("button[data-sub]");
+        if (b) {
+          const data = blocks[currentBlock];
+          data.view = b.dataset.sub;
+          persist();
+          renderCurrentBlock();
+        }
         return;
       }
 
-      // CENTROS subnav
-      if (t.closest(".center-subnav") && t.dataset.sub) {
-        const data = blocks[currentBlock];
-        data.view = t.dataset.sub;
-        persist();
-        renderCurrentBlock();
-        return;
-      }
-
-      // añadir centro (desde derecha, por si lo quieres también)
       if (t.dataset.act === "add-accion") {
         const data = blocks[currentBlock];
         const c = data.centers[data.selected || 0];
-        c.acciones.push({ tipo: "", fecha: "", derivaciones: "", citas: "", ventas: "", obs: "" });
-        persist();
-        renderCurrentBlock();
-        return;
+        c.acciones.push({ tipo:"", fecha:"", derivaciones:"", citas:"", ventas:"", obs:"" });
+        persist(); renderCurrentBlock(); return;
       }
       if (t.dataset.act === "add-forma") {
         const data = blocks[currentBlock];
         const c = data.centers[data.selected || 0];
-        c.formaciones.push({ curso: "", superado: "No", aplicado: "No", mentoring: "No" });
-        persist();
-        renderCurrentBlock();
-        return;
+        c.formaciones.push({ curso:"", superado:"No", aplicado:"No", mentoring:"No" });
+        persist(); renderCurrentBlock(); return;
       }
       if (t.dataset.act === "add-visita") {
         const data = blocks[currentBlock];
         const c = data.centers[data.selected || 0];
-        c.visitas.push({ fecha: "", checklist: "", convPrueba: "", convVenta: "" });
-        persist();
-        renderCurrentBlock();
-        return;
+        c.visitas.push({ fecha:"", checklist:"", convPrueba:"", convVenta:"" });
+        persist(); renderCurrentBlock(); return;
       }
       if (t.dataset.act === "del-row") {
         const tr = t.closest("tr");
@@ -818,36 +703,19 @@
         renderCurrentBlock();
         return;
       }
+
+      if (t.dataset.act === "del-simple") {
+        const data = blocks[currentBlock];
+        data.items.splice(+t.dataset.idx,1);
+        persist();
+        renderCurrentBlock();
+        return;
+      }
     });
 
-    // input en tablas de objetivos y centros
+    // edición en línea
     contentHolder.addEventListener("input", (e) => {
       const t = e.target;
-
-      // OBJETIVOS texto
-      if (t.dataset && t.dataset.objIdx !== undefined) {
-        const idx = +t.dataset.objIdx;
-        const field = t.dataset.field;
-        blocks["OBJETIVOS"].items[idx][field] = t.textContent.trim();
-        persist();
-        return;
-      }
-
-      // OBJETIVOS tabla
-      const trObj = t.closest("tr[data-obj]");
-      if (trObj) {
-        const objIdx = +trObj.dataset.obj;
-        const rowIdx = +trObj.dataset.row;
-        const cells = trObj.querySelectorAll("td[contenteditable='true']");
-        const [tipo, fecha, deriv, citas, ventas, obs] = Array.from(cells).map(c => c.textContent.trim());
-        blocks["OBJETIVOS"].items[objIdx].acciones[rowIdx] = {
-          tipo, fecha, derivaciones: deriv, citas, ventas, obs
-        };
-        persist();
-        return;
-      }
-
-      // CENTROS campos
       if ((currentBlock === "CENTROS EXCLUSIVOS" || currentBlock === "CENTROS FLOP") && t.dataset.field) {
         const data = blocks[currentBlock];
         const c = data.centers[data.selected || 0];
@@ -855,8 +723,6 @@
         persist();
         return;
       }
-
-      // CENTROS tablas
       const tr = t.closest("tr[data-table]");
       if (tr && (currentBlock === "CENTROS EXCLUSIVOS" || currentBlock === "CENTROS FLOP")) {
         const data = blocks[currentBlock];
@@ -865,34 +731,26 @@
         const idx = +tr.dataset.row;
         const cells = tr.querySelectorAll("td[contenteditable='true']");
         if (tableName === "acciones") {
-          const [tipo, fecha, deriv, citas, ventas, obs] = Array.from(cells).map(el => el.textContent.trim());
-          c.acciones[idx] = { tipo, fecha, derivaciones: deriv, citas, ventas, obs };
+          const [tipo,fecha,derivaciones,citas,ventas,obs] = Array.from(cells).map(x => x.textContent.trim());
+          c.acciones[idx] = { tipo, fecha, derivaciones, citas, ventas, obs };
         } else if (tableName === "formaciones") {
-          const [curso, superado, aplicado, mentoring] = Array.from(cells).map(el => el.textContent.trim());
+          const [curso,superado,aplicado,mentoring] = Array.from(cells).map(x => x.textContent.trim());
           c.formaciones[idx] = { curso, superado, aplicado, mentoring };
         } else if (tableName === "visitas") {
-          const [fecha, checklist, , convPrueba, convVenta] = Array.from(cells).map(el => el.textContent.trim());
+          const [fecha,checklist,,convPrueba,convVenta] = Array.from(cells).map(x => x.textContent.trim());
           c.visitas[idx] = { fecha, checklist, convPrueba, convVenta };
         }
         persist();
       }
-    });
-
-    // adjuntar excel en objetivos
-    contentHolder.addEventListener("change", (e) => {
-      const t = e.target;
-      if (t.dataset.act === "attach-excel") {
+      if (t.dataset && typeof t.dataset.idx !== "undefined" && t.dataset.field) {
+        const data = blocks[currentBlock];
         const idx = +t.dataset.idx;
-        const file = t.files[0];
-        if (file) {
-          blocks["OBJETIVOS"].items[idx].adjunto = file.name;
-          persist();
-          renderCurrentBlock();
-        }
+        data.items[idx][t.dataset.field] = t.textContent.trim();
+        persist();
       }
     });
 
-    // botones exportar
+    // exportaciones
     document.getElementById("btnHTML").addEventListener("click", () => {
       const blob = new Blob([document.documentElement.outerHTML], { type: "text/html" });
       const url = URL.createObjectURL(blob);
@@ -901,38 +759,32 @@
       URL.revokeObjectURL(url);
     });
     document.getElementById("btnPDF").addEventListener("click", () => {
-      alert("Exportar a PDF: usa Imprimir > Guardar como PDF.");
+      alert("Exportar a PDF: usa Imprimir > Guardar como PDF");
     });
     document.getElementById("btnXLS").addEventListener("click", () => {
       const rows = [["Bloque","Campo1","Campo2","Campo3","Campo4"]];
       Object.keys(blocks).forEach(bn => {
         const b = blocks[bn];
         if (bn === "CENTROS EXCLUSIVOS" || bn === "CENTROS FLOP") {
-          (b.centers || []).forEach(c => { rows.push([bn, c.nombre, c.delegado, c.audiologo, c.tipo]); });
-        } else if (bn === "OBJETIVOS") {
-          (b.items || []).forEach(it => {
-            rows.push([bn, it.titulo, it.detalle, it.fecha || "", (it.adjunto || "")]);
+          (b.centers || []).forEach(c => {
+            rows.push([bn, c.nombre, c.delegado, c.audiologo, c.tipo]);
           });
         } else {
-          (b.items || []).forEach(it => { rows.push([bn, it.titulo, it.detalle, it.fecha || "", ""]); });
+          (b.items || []).forEach(it => {
+            rows.push([bn, it.titulo, it.detalle, it.fecha || "", ""]);
+          });
         }
       });
       const csv = rows.map(r => r.map(v => `"${(v||"").replace(/"/g,'""')}"`).join(",")).join("\n");
       const blob = new Blob([csv], { type: "text/csv" });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement("a"); a.href = url; a.download = "seguimiento-audio-ar.csv"; a.click();
+      const a = document.createElement("a");
+      a.href = url; a.download = "seguimiento-audio-ar.csv"; a.click();
       URL.revokeObjectURL(url);
     });
 
-    function runSmokeTests() {
-      console.log("[TEST] estructura básica cargada");
-      console.assert(!!document.getElementById("leftPanel"), "leftPanel no existe");
-      console.assert(!!document.getElementById("contentHolder"), "contentHolder no existe");
-    }
-
-    normalizeObjectives();
+    // inicial
     renderCurrentBlock();
-    runSmokeTests();
   </script>
 </body>
 </html>
