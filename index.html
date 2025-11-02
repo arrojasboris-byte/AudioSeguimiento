@@ -43,8 +43,6 @@
     .pin-box input { all: unset; background: rgba(0,0,0,0.3); padding: 3px 6px; border-radius: 8px; font-size: 0.7rem; }
     .status-pill { background: rgba(0,0,0,0.2); padding: 3px 10px; border-radius: 99px; font-size: 0.68rem; }
     main { flex: 1; display: flex; gap: 10px; padding: 12px; overflow: hidden; }
-
-    /* IZQUIERDA */
     .left-panel { width: 268px; background: var(--panel); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); padding: 10px; display: flex; flex-direction: column; gap: 6px; overflow-y: auto; }
     .left-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
     .block-btn { display: flex; align-items: center; gap: 10px; background: #f3f3f3; border: 1px solid transparent; border-radius: 14px; padding: 6px 10px; cursor: pointer; transition: 0.15s ease; font-size: 0.78rem; }
@@ -56,18 +54,14 @@
     .block-btn[data-type="CENTROS FLOP"] { background: var(--cflop); }
     .block-btn[data-type="FORMACIONES Y MENTORING"] { background: var(--form); }
     .block-btn[data-type="VISITAS"] { background: var(--vis); }
-
-    /* DERECHA */
     .right-panel { flex: 1; background: var(--panel); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); display: flex; flex-direction: column; overflow: hidden; }
     .right-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid rgba(0,0,0,0.05); }
     .right-header .title { display: flex; gap: 8px; align-items: center; }
     .badge-color { width: 18px; height: 18px; border-radius: 6px; }
     .content-area { flex: 1; padding: 16px; overflow-y: auto; background: #f9f9f9; }
-    .content-wrap { position: relative; }
     .locked-overlay { background: rgba(255,255,255,0.75); border: 2px dashed rgba(183, 28, 28, 0.3); border-radius: 16px; display: none; align-items: center; justify-content: center; gap: 10px; font-weight: 500; color: #b71c1c; padding: 10px; }
+    .content-wrap { position: relative; }
     .content-wrap.locked .locked-overlay { display: flex; position: absolute; inset: 0; backdrop-filter: blur(1px); }
-
-    /* LISTAS */
     .list { display: grid; gap: 10px; }
     .item { background: #fff; border: 1px solid rgba(0,0,0,0.04); border-left: 4px solid rgba(183,28,28,0.6); border-radius: 12px; padding: 8px 10px 6px 10px; display: flex; flex-direction: column; gap: 4px; box-shadow: 0 1px 6px rgba(0,0,0,0.02); }
     .item-header { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
@@ -75,32 +69,49 @@
     .tiny-btn, .ghost-icon { background: rgba(0,0,0,0.04); padding: 2px 6px; border-radius: 6px; border: none; cursor: pointer; font-size: 0.7rem; display: inline-flex; align-items: center; gap: 2px; }
     .ghost-icon { background: rgba(0,0,0,0.02); }
 
-    /* BLOQUE CENTROS */
-    .flex-split { display: flex; gap: 14px; align-items: stretch; }
-    .centers-list { width: 240px; background: #fff; border-radius: 14px; border: 1px solid rgba(0,0,0,0.03); box-shadow: 0 2px 6px rgba(0,0,0,0.02); padding: 10px; display: flex; flex-direction: column; gap: 10px; }
-    .centers-list-header { display:flex; justify-content:space-between; align-items:center; gap:6px; }
-    .center-right { flex: 1; display: flex; min-height: 360px; }
-    .center-content { flex: 1; display: flex; flex-direction: column; gap: 10px; }
+    /* NUEVO: cabecera de centros DENTRO del bloque */
+    .center-top {
+      background: #fff;
+      border-radius: 14px;
+      padding: 8px 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid rgba(0,0,0,0.03);
+      margin-bottom: 10px;
+      width: 100%;
+    }
+    .center-top strong { font-size: 0.78rem; }
+    .center-top select {
+      border-radius: 10px;
+      border: 1px solid rgba(0,0,0,0.12);
+      padding: 4px 8px;
+      font-size: 0.75rem;
+      min-width: 180px;
+      background: #fff;
+    }
+
+    .center-content { display: flex; flex-direction: column; gap: 10px; }
     .center-subnav { width: 100%; display: flex; flex-direction: row; gap: 8px; margin-top: 4px; }
     .center-subnav button { background: #000; color: #fff; border: none; border-radius: 12px; padding: 6px 10px; font-size: 0.72rem; cursor: pointer; display: flex; align-items: center; gap: 6px; }
     .center-subnav button.active { background: #b71c1c; }
-
     .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
     .field { display: flex; flex-direction: column; gap: 4px; }
     .field label { font-size: 0.7rem; opacity: 0.8; }
     .field input, .field select { border-radius: 10px; border: 1px solid rgba(0,0,0,0.1); padding: 5px 8px; font-size: 0.78rem; background: #fff; }
-
     .table-like { width: 100%; border-collapse: collapse; background: #fff; border-radius: 12px; overflow: hidden; font-size: 0.74rem; }
-    .table-like th, .table-like td { border: 1px solid rgba(0,0,0,0.12); padding: 4px 6px; vertical-align: middle; }
+    .table-like th, .table-like td { border: 1px solid rgba(0,0,0,0.12); padding: 4px 6px; }
     .table-toolbar { display: flex; gap: 6px; margin-bottom: 4px; align-items: center; justify-content: flex-end; }
+    .badge-ok { background: rgba(11,160,72,0.1); color: #0b7a3a; padding: 2px 6px; border-radius: 6px; font-size: 0.65rem; }
+    .badge-bad { background: rgba(211,47,47,0.12); color: #b71c1c; padding: 2px 6px; border-radius: 6px; font-size: 0.65rem; }
+    .text-red { color: #b71c1c; }
+    .text-green { color: #0b7a3a; }
 
-    .cell-bad { background: rgba(211,47,47,0.15); }
-    .cell-ok { background: rgba(11,160,72,0.12); }
-    .select-mini { border-radius: 8px; border: 1px solid rgba(0,0,0,0.15); padding: 2px 4px; font-size: 0.7rem; background: #fff; }
-    .input-mini { border-radius: 8px; border: 1px solid rgba(0,0,0,0.12); padding: 3px 6px; font-size: 0.7rem; background: #fff; }
-
-    @media (max-width: 1080px) { .flex-split { flex-direction: column; } .centers-list { width: 100%; } }
-    @media (max-width: 960px) { main { flex-direction: column; } .left-panel { width: 100%; flex-direction: row; overflow-x: auto; } .right-panel { height: 60vh; } }
+    @media (max-width: 960px) {
+      main { flex-direction: column; }
+      .left-panel { width: 100%; flex-direction: row; overflow-x: auto; }
+      .right-panel { height: 60vh; }
+    }
   </style>
 </head>
 <body>
@@ -112,8 +123,8 @@
         <input id="pinInput" type="password" maxlength="6" placeholder="••••••" />
         <button id="pinBtn" class="btn secondary" style="padding:4px 8px;">OK</button>
       </div>
-      <button id="saveCloud" class="btn" disabled style="opacity:.4;cursor:not-allowed;">☁️ Guardar en nube</button>
-      <button id="loadCloud" class="btn" disabled style="opacity:.4;cursor:not-allowed;">🔄 Actualizar de nube</button>
+      <button id="saveCloud" class="btn disabled">☁️ Guardar en nube</button>
+      <button id="loadCloud" class="btn disabled">🔄 Actualizar de nube</button>
       <button id="saveLocal" class="btn secondary">💾 Guardar local</button>
       <div class="status-pill" id="editStatus">Solo lectura</div>
     </div>
@@ -122,8 +133,8 @@
     <aside class="left-panel" id="leftPanel">
       <div class="left-header">
         <strong>Bloques</strong>
+        <button id="addBlock" class="tiny-btn">+ Añadir</button>
       </div>
-      <!-- SOLO 5 BLOQUES -->
       <button class="block-btn active" data-type="OBJETIVOS" data-color="var(--obj)">
         <div class="tag" style="background: rgba(183,28,28,0.2);">🎯</div>
         <div><div>OBJETIVOS</div><small>KPIs, % logro</small></div>
@@ -177,10 +188,10 @@
     const leftPanel = document.getElementById("leftPanel");
     const badgeColor = document.getElementById("badgeColor");
     const sectionTitle = document.getElementById("sectionTitle");
+    const addBlock = document.getElementById("addBlock");
 
     let editable = false;
 
-    // ESTADO INICIAL (mismo que tenías, pero VISITAS con visitador + filtro)
     let blocks = JSON.parse(localStorage.getItem("audioar_blocks") || "null") || {
       "OBJETIVOS": {
         color: "var(--obj)",
@@ -251,8 +262,6 @@
         delegados: [
           {
             nombre: "Delegado 1",
-            visitador: "",
-            filtro: "",
             visitas: [
               { fecha: "2025-11-06", centros: "Centro Tetuán", sucursal: "Sucursal", audiologo: "", checklist: "82", convPrueba: "75", convVenta: "60", hit: "No", arr: "No", rt: "No", obs: "Reforzar cierre" }
             ],
@@ -275,8 +284,7 @@
       renderCurrentBlock();
     }
 
-    /* =============== RENDERS =============== */
-
+    /* ===== OBJETIVOS ===== */
     function renderObjectives(data) {
       contentHolder.innerHTML = "";
       const list = document.createElement("div");
@@ -312,47 +320,37 @@
       contentHolder.appendChild(list);
     }
 
+    /* ===== CENTROS (EXCLUSIVOS / FLOP) ===== */
     function renderCentersBlock(blockName, data) {
       contentHolder.innerHTML = "";
-      const wrap = document.createElement("div");
-      wrap.className = "flex-split";
 
-      const left = document.createElement("div");
-      left.className = "centers-list";
-      left.innerHTML = `
-        <div class="centers-list-header">
-          <strong>${blockName === "CENTROS EXCLUSIVOS" ? "Centros exclusivos" : "Centros flop"}</strong>
-          ${editable ? `
-            <div style="display:flex;gap:4px;">
-              <button class="tiny-btn" data-act="add-center">+</button>
-              <button class="tiny-btn" data-act="del-center">−</button>
-              <button class="tiny-btn" data-act="rename-center-head">✏</button>
-              <button class="tiny-btn" data-act="save-centers">Guardar</button>
-            </div>` : ""}
-        </div>
+      // barra superior de centros DENTRO del bloque
+      const top = document.createElement("div");
+      top.className = "center-top";
+      top.innerHTML = `
+        <strong>${blockName === "CENTROS EXCLUSIVOS" ? "Centros exclusivos" : "Centros flop"}</strong>
+        <select data-act="select-center" class="centers-select">
+          ${(data.centers || []).map((c,idx) => `
+            <option value="${idx}" ${idx === (data.selected||0) ? "selected" : ""}>
+              ${c.nombre || (blockName === "CENTROS EXCLUSIVOS" ? "Exclusivo" : "Flop") + " " + (idx+1)}
+            </option>
+          `).join("")}
+        </select>
+        ${editable ? `
+          <button class="tiny-btn" data-act="add-center">+</button>
+          <button class="tiny-btn" data-act="del-center">−</button>
+          <button class="tiny-btn" data-act="rename-center-head">✏</button>
+          <button class="tiny-btn" data-act="save-centers">Guardar</button>
+        ` : ""}
       `;
-      const select = document.createElement("select");
-      select.className = "centers-select";
-      select.dataset.act = "select-center";
-      (data.centers || []).forEach((c, idx) => {
-        const opt = document.createElement("option");
-        opt.value = idx;
-        opt.textContent = c.nombre || `${blockName === "CENTROS EXCLUSIVOS" ? "Exclusivo" : "Flop"} ${idx+1}`;
-        if (idx === (data.selected || 0)) opt.selected = true;
-        select.appendChild(opt);
-      });
-      left.appendChild(select);
-      wrap.appendChild(left);
+      contentHolder.appendChild(top);
 
-      const right = document.createElement("div");
-      right.className = "center-right";
+      const wrap = document.createElement("div");
+      wrap.className = "center-content";
 
       const sel = data.selected || 0;
       const center = data.centers[sel] || { nombre:"", delegado:"", audiologo:"", tipo:"Sucursal", acciones:[], formaciones:[], visitas:[] };
       if (!data.view) data.view = "acciones";
-
-      const mainContent = document.createElement("div");
-      mainContent.className = "center-content";
 
       const info = document.createElement("div");
       info.className = "grid-3";
@@ -367,7 +365,7 @@
           </select>
         </div>
       `;
-      mainContent.appendChild(info);
+      wrap.appendChild(info);
 
       const subnav = document.createElement("div");
       subnav.className = "center-subnav";
@@ -382,7 +380,7 @@
         if (data.view === b.id) bb.classList.add("active");
         subnav.appendChild(bb);
       });
-      mainContent.appendChild(subnav);
+      wrap.appendChild(subnav);
 
       if (data.view === "acciones") {
         const box = document.createElement("div");
@@ -391,7 +389,7 @@
         t.className = "table-like";
         t.innerHTML = `<thead><tr><th>Tipo de acción</th><th>Fecha</th><th>Derivaciones</th><th>Citas</th><th>Ventas</th><th>Observaciones</th>${editable?`<th></th>`:""}</tr></thead><tbody>${(center.acciones||[]).map((a,i)=>`<tr data-row="${i}" data-table="acciones"><td contenteditable="${editable}">${a.tipo||""}</td><td contenteditable="${editable}">${a.fecha||""}</td><td contenteditable="${editable}">${a.derivaciones||""}</td><td contenteditable="${editable}">${a.citas||""}</td><td contenteditable="${editable}">${a.ventas||""}</td><td contenteditable="${editable}">${a.obs||""}</td>${editable?`<td><button class="ghost-icon" data-act="del-row">−</button></td>`:""}</tr>`).join("")}</tbody>`;
         box.appendChild(t);
-        mainContent.appendChild(box);
+        wrap.appendChild(box);
       } else if (data.view === "formaciones") {
         const box = document.createElement("div");
         box.innerHTML = `<div class="table-toolbar" style="justify-content:flex-end;"><strong style="margin-right:auto; font-size:0.8rem;">Formaciones y refuerzo</strong>${editable ? `<button class="tiny-btn" data-act="add-forma">+ Formación</button>` : ""}</div>`;
@@ -399,22 +397,21 @@
         t.className = "table-like";
         t.innerHTML = `<thead><tr><th>Curso relevante</th><th>Superado</th><th>Aplicado</th><th>Mentoring-Coaching</th>${editable?`<th></th>`:""}</tr></thead><tbody>${(center.formaciones||[]).map((f,i)=>`<tr data-row="${i}" data-table="formaciones"><td contenteditable="${editable}">${f.curso||""}</td><td contenteditable="${editable}">${f.superado||"No"}</td><td contenteditable="${editable}">${f.aplicado||"No"}</td><td contenteditable="${editable}">${f.mentoring||"No"}</td>${editable?`<td><button class="ghost-icon" data-act="del-row">−</button></td>`:""}</tr>`).join("")}</tbody>`;
         box.appendChild(t);
-        mainContent.appendChild(box);
+        wrap.appendChild(box);
       } else if (data.view === "visitas") {
         const box = document.createElement("div");
         box.innerHTML = `<div class="table-toolbar" style="justify-content:flex-end;"><strong style="margin-right:auto; font-size:0.8rem;">Visitas</strong>${editable ? `<button class="tiny-btn" data-act="add-visita">+ Visita</button>` : ""}</div>`;
         const t = document.createElement("table");
         t.className = "table-like";
-        t.innerHTML = `<thead><tr><th>Fecha</th><th>Checklist %</th><th>Conv. prueba %</th><th>Conv. venta %</th>${editable?`<th></th>`:""}</tr></thead><tbody>${(center.visitas||[]).map((v,i)=>{const clasePrueba = Number(v.convPrueba||0) < 80 ? 'text-red' : 'text-green'; const claseVenta = Number(v.convVenta||0) < 80 ? 'text-red' : 'text-green'; const clsChk = Number(v.checklist||0) < 85 ? 'cell-bad' : 'cell-ok'; return `<tr data-row="${i}" data-table="visitas"><td contenteditable="${editable}">${v.fecha||""}</td><td contenteditable="${editable}" class="${clsChk}">${v.checklist||""}</td><td contenteditable="${editable}" class="${clasePrueba}">${v.convPrueba||""}</td><td contenteditable="${editable}" class="${claseVenta}">${v.convVenta||""}</td>${editable?`<td><button class="ghost-icon" data-act="del-row">−</button></td>`:""}</tr>`;}).join("")}</tbody>`;
+        t.innerHTML = `<thead><tr><th>Fecha</th><th>Checklist %</th><th>Estado</th><th>Conv. prueba %</th><th>Conv. venta %</th>${editable?`<th></th>`:""}</tr></thead><tbody>${(center.visitas||[]).map((v,i)=>{const estado = Number(v.checklist||0) < 85 ? '<span class="badge-bad">ROJO</span>' : '<span class="badge-ok">VERDE</span>'; const clasePrueba = Number(v.convPrueba||0) < 80 ? 'text-red' : 'text-green'; const claseVenta = Number(v.convVenta||0) < 80 ? 'text-red' : 'text-green'; return `<tr data-row="${i}" data-table="visitas"><td contenteditable="${editable}">${v.fecha||""}</td><td contenteditable="${editable}">${v.checklist||""}</td><td>${estado}</td><td contenteditable="${editable}" class="${clasePrueba}">${v.convPrueba||""}</td><td contenteditable="${editable}" class="${claseVenta}">${v.convVenta||""}</td>${editable?`<td><button class="ghost-icon" data-act="del-row">−</button></td>`:""}</tr>`;}).join("")}</tbody>`;
         box.appendChild(t);
-        mainContent.appendChild(box);
+        wrap.appendChild(box);
       }
 
-      right.appendChild(mainContent);
-      wrap.appendChild(right);
       contentHolder.appendChild(wrap);
     }
 
+    /* ===== FORMACIONES ===== */
     function renderFormacionesBlock(data) {
       contentHolder.innerHTML = "";
       const sel = data.selected || 0;
@@ -476,13 +473,12 @@
       contentHolder.appendChild(box);
     }
 
-    // >>>>>>>>>> VISITAS ACTUALIZADO <<<<<<<<<<
+    /* ===== VISITAS (igual que tenías) ===== */
     function renderVisitasBlock(data) {
       contentHolder.innerHTML = "";
       const sel = data.selected || 0;
-      const delegado = data.delegados[sel] || { nombre: "", visitador: "", filtro: "", visitas: [], adjunto: "" };
+      const delegado = data.delegados[sel] || { nombre: "", visitas: [], adjunto: "" };
 
-      // cabecera
       const info = document.createElement("div");
       info.className = "grid-3";
       info.innerHTML = `
@@ -490,18 +486,13 @@
           <label>Delegado</label>
           <input disabled value="${delegado.nombre || ""}">
         </div>
-        <div class="field">
-          <label>Visitador</label>
-          <input ${editable?"":"disabled"} data-vis-head="visitador" value="${delegado.visitador || ""}">
-        </div>
       `;
       contentHolder.appendChild(info);
 
       const box = document.createElement("div");
       box.innerHTML = `
-        <div class="table-toolbar" style="justify-content:flex-end; gap:8px;">
+        <div class="table-toolbar" style="justify-content:flex-end;">
           <strong style="margin-right:auto;">Visitas del delegado</strong>
-          <input class="input-mini" style="width:140px;" placeholder="Buscar..." value="${delegado.filtro || ""}" data-act="vis-filter">
           ${editable ? `<button class="tiny-btn" data-act="vis-add-row">+ Visita</button>` : ``}
           <label style="font-size:0.7rem;cursor:pointer;">
             ${delegado.adjunto ? "📎 " + delegado.adjunto : "📎 Adjuntar Excel"}
@@ -510,14 +501,6 @@
           ${editable ? `<button class="tiny-btn" data-act="vis-save-block">Guardar</button>` : ``}
         </div>
       `;
-
-      const filtro = (delegado.filtro || "").toLowerCase();
-      const filas = (delegado.visitas || []).filter(v => {
-        if (!filtro) return true;
-        const cmp = (v.centros || "") + " " + (v.audiologo || "");
-        return cmp.toLowerCase().includes(filtro);
-      });
-
       const t = document.createElement("table");
       t.className = "table-like";
       t.innerHTML = `
@@ -525,9 +508,10 @@
           <tr>
             <th>Fecha</th>
             <th>Centros</th>
-            <th>Suc / Franquicia</th>
+            <th>Sucursal / Franquicia</th>
             <th>Audiólogo</th>
             <th>Checklist %</th>
+            <th>Estado</th>
             <th>Conv. prueba %</th>
             <th>Conv. venta %</th>
             <th>HIT</th>
@@ -538,48 +522,25 @@
           </tr>
         </thead>
         <tbody>
-          ${filas.map((v) => {
-            const realIndex = delegado.visitas.indexOf(v);
-            const chkClass = Number(v.checklist || 0) < 85 ? "cell-bad" : "cell-ok";
-            const convPClass = Number(v.convPrueba || 0) < 80 ? "text-red" : "text-green";
-            const convVClass = Number(v.convVenta || 0) < 80 ? "text-red" : "text-green";
-            const hitClass = (v.hit || "No") === "Sí" ? "cell-ok" : "cell-bad";
-            const arrClass = (v.arr || "No") === "Sí" ? "cell-ok" : "cell-bad";
-            const rtClass  = (v.rt  || "No") === "Sí" ? "cell-ok" : "cell-bad";
+          ${(delegado.visitas || []).map((v,i)=>{
+            const estado = Number(v.checklist || 0) < 85 ? '<span class="badge-bad">ROJO</span>' : '<span class="badge-ok">VERDE</span>';
+            const clasePrueba = Number(v.convPrueba || 0) < 80 ? "text-red" : "text-green";
+            const claseVenta = Number(v.convVenta || 0) < 80 ? "text-red" : "text-green";
             return `
-              <tr data-row="${realIndex}">
+              <tr data-row="${i}">
                 <td contenteditable="${editable}">${v.fecha || ""}</td>
                 <td contenteditable="${editable}">${v.centros || ""}</td>
-                <td>
-                  <select class="select-mini" data-vis-row="${realIndex}" data-field="sucursal" ${editable?"":"disabled"}>
-                    <option value="Sucursal" ${v.sucursal==="Sucursal"?"selected":""}>Sucursal</option>
-                    <option value="Franquicia" ${v.sucursal==="Franquicia"?"selected":""}>Franquicia</option>
-                  </select>
-                </td>
+                <td contenteditable="${editable}">${v.sucursal || ""}</td>
                 <td contenteditable="${editable}">${v.audiologo || ""}</td>
-                <td contenteditable="${editable}" class="${chkClass}">${v.checklist || ""}</td>
-                <td contenteditable="${editable}" class="${convPClass}">${v.convPrueba || ""}</td>
-                <td contenteditable="${editable}" class="${convVClass}">${v.convVenta || ""}</td>
-                <td>
-                  <select class="select-mini ${hitClass}" data-vis-row="${realIndex}" data-field="hit" ${editable?"":"disabled"}>
-                    <option value="Sí" ${(v.hit||"No")==="Sí"?"selected":""}>Sí</option>
-                    <option value="No" ${(v.hit||"No")!=="Sí"?"selected":""}>No</option>
-                  </select>
-                </td>
-                <td>
-                  <select class="select-mini ${arrClass}" data-vis-row="${realIndex}" data-field="arr" ${editable?"":"disabled"}>
-                    <option value="Sí" ${(v.arr||"No")==="Sí"?"selected":""}>Sí</option>
-                    <option value="No" ${(v.arr||"No")!=="Sí"?"selected":""}>No</option>
-                  </select>
-                </td>
-                <td>
-                  <select class="select-mini ${rtClass}" data-vis-row="${realIndex}" data-field="rt" ${editable?"":"disabled"}>
-                    <option value="Sí" ${(v.rt||"No")==="Sí"?"selected":""}>Sí</option>
-                    <option value="No" ${(v.rt||"No")!=="Sí"?"selected":""}>No</option>
-                  </select>
-                </td>
+                <td contenteditable="${editable}">${v.checklist || ""}</td>
+                <td>${estado}</td>
+                <td contenteditable="${editable}" class="${clasePrueba}">${v.convPrueba || ""}</td>
+                <td contenteditable="${editable}" class="${claseVenta}">${v.convVenta || ""}</td>
+                <td contenteditable="${editable}">${v.hit || "No"}</td>
+                <td contenteditable="${editable}">${v.arr || "No"}</td>
+                <td contenteditable="${editable}">${v.rt || ""}</td>
                 <td contenteditable="${editable}">${v.obs || ""}</td>
-                ${editable ? `<td><button class="ghost-icon" data-act="vis-del-row" data-row="${realIndex}">−</button></td>` : ``}
+                ${editable ? `<td><button class="ghost-icon" data-act="vis-del-row" data-row="${i}">−</button></td>` : ``}
               </tr>
             `;
           }).join("")}
@@ -589,7 +550,7 @@
       contentHolder.appendChild(box);
     }
 
-    /* =============== RENDER PRINCIPAL =============== */
+    /* ===== RENDER PRINCIPAL ===== */
     function renderCurrentBlock() {
       const data = blocks[currentBlock]; if (!data) return;
       badgeColor.style.background = data.color || "#fff";
@@ -604,13 +565,10 @@
         renderFormacionesBlock(data);
       } else if (currentBlock === "VISITAS") {
         renderVisitasBlock(data);
-      } else {
-        // fallback
-        renderObjectives(data);
       }
     }
 
-    /* =============== PIN =============== */
+    /* ===== PIN ===== */
     pinBtn.addEventListener("click", () => {
       const v = pinInput.value.trim();
       if (v === PIN_MASTER) setEditable(true);
@@ -624,7 +582,7 @@
       }
     });
 
-    /* =============== CAMBIO DE BLOQUE =============== */
+    /* ===== BLOQUES IZQUIERDA ===== */
     leftPanel.addEventListener("click", (e) => {
       const btn = e.target.closest(".block-btn");
       if (!btn) return;
@@ -634,7 +592,22 @@
       renderCurrentBlock();
     });
 
-    /* =============== CLICK EN CONTENIDO =============== */
+    /* ===== AÑADIR BLOQUE (dejas como lo tenías) ===== */
+    addBlock.addEventListener("click", () => {
+      if (!editable) return alert("Primero desbloquea edición con el PIN AR4321.");
+      const name = prompt("Nombre del nuevo bloque:");
+      if (!name) return;
+      blocks[name] = { color: "#fff5d9", items: [] };
+      persist();
+      const btn = document.createElement("button");
+      btn.className = "block-btn";
+      btn.dataset.type = name;
+      btn.dataset.color = "#fff5d9";
+      btn.innerHTML = `<div class="tag" style="background: rgba(0,0,0,0.04);">🆕</div><div><div>${name}</div><small>Nuevo bloque</small></div>`;
+      leftPanel.appendChild(btn);
+    });
+
+    /* ===== CLICS EN CONTENIDO ===== */
     contentHolder.addEventListener("click", (e) => {
       const t = e.target;
 
@@ -659,25 +632,13 @@
         persist(); renderCurrentBlock(); return;
       }
 
-      // CENTROS: seleccionar
+      // CENTROS: select
       if (t.dataset.act === "select-center") {
         const data = blocks[currentBlock];
         data.selected = parseInt(t.value, 10) || 0;
         persist(); renderCurrentBlock(); return;
       }
-
-      // CENTROS: subnav
-      if (t.closest(".center-subnav") && (currentBlock === "CENTROS EXCLUSIVOS" || currentBlock === "CENTROS FLOP")) {
-        const btn = t.closest("button[data-sub]");
-        if (btn) {
-          const data = blocks[currentBlock];
-          data.view = btn.dataset.sub;
-          persist(); renderCurrentBlock();
-        }
-        return;
-      }
-
-      // CENTROS: + - editar
+      // CENTROS: botones
       if (t.dataset.act === "add-center") {
         const data = blocks[currentBlock];
         data.centers.push({ nombre: currentBlock === "CENTROS EXCLUSIVOS" ? "Centro exclusivo nuevo" : "Centro flop nuevo", delegado: "", audiologo: "", tipo: "Sucursal", acciones: [], formaciones: [], visitas: [] });
@@ -703,38 +664,24 @@
         }
         return;
       }
-      if (t.dataset.act === "save-centers") {
-        persist(); alert("Centros guardados."); return;
+      if (t.dataset.act === "save-centers") { persist(); alert("Centros guardados en este bloque."); return; }
+
+      // SUBNAV de centros
+      if (t.closest(".center-subnav") && (currentBlock === "CENTROS EXCLUSIVOS" || currentBlock === "CENTROS FLOP")) {
+        const btn = t.closest("button[data-sub]");
+        if (btn) {
+          const data = blocks[currentBlock];
+          data.view = btn.dataset.sub;
+          persist(); renderCurrentBlock();
+        }
+        return;
       }
 
-      // CENTROS: filas
-      if (t.dataset.act === "add-accion") {
-        const data = blocks[currentBlock];
-        const c = data.centers[data.selected || 0];
-        c.acciones.push({ tipo:"", fecha:"", derivaciones:"", citas:"", ventas:"", obs:"" });
-        persist(); renderCurrentBlock(); return;
-      }
-      if (t.dataset.act === "add-forma") {
-        const data = blocks[currentBlock];
-        const c = data.centers[data.selected || 0];
-        c.formaciones.push({ curso:"", superado:"No", aplicado:"No", mentoring:"No" });
-        persist(); renderCurrentBlock(); return;
-      }
-      if (t.dataset.act === "add-visita") {
-        const data = blocks[currentBlock];
-        const c = data.centers[data.selected || 0];
-        c.visitas.push({ fecha:"", checklist:"", convPrueba:"", convVenta:"" });
-        persist(); renderCurrentBlock(); return;
-      }
-      if (t.dataset.act === "del-row") {
-        const tr = t.closest("tr");
-        const data = blocks[currentBlock];
-        const c = data.centers[data.selected || 0];
-        const tableName = tr.dataset.table;
-        const idx = +tr.dataset.row;
-        c[tableName].splice(idx, 1);
-        persist(); renderCurrentBlock(); return;
-      }
+      // TABLAS centros
+      if (t.dataset.act === "add-accion") { const data = blocks[currentBlock]; const c = data.centers[data.selected || 0]; c.acciones.push({ tipo:"", fecha:"", derivaciones:"", citas:"", ventas:"", obs:"" }); persist(); renderCurrentBlock(); return; }
+      if (t.dataset.act === "add-forma") { const data = blocks[currentBlock]; const c = data.centers[data.selected || 0]; c.formaciones.push({ curso:"", superado:"No", aplicado:"No", mentoring:"No" }); persist(); renderCurrentBlock(); return; }
+      if (t.dataset.act === "add-visita") { const data = blocks[currentBlock]; const c = data.centers[data.selected || 0]; c.visitas.push({ fecha:"", checklist:"", convPrueba:"", convVenta:"" }); persist(); renderCurrentBlock(); return; }
+      if (t.dataset.act === "del-row") { const tr = t.closest("tr"); const data = blocks[currentBlock]; const c = data.centers[data.selected || 0]; const tableName = tr.dataset.table; const idx = +tr.dataset.row; c[tableName].splice(idx, 1); persist(); renderCurrentBlock(); return; }
 
       // FORMACIONES
       if (t.dataset.act === "form-add-row") {
@@ -756,7 +703,7 @@
       if (t.dataset.act === "vis-add-row") {
         const data = blocks["VISITAS"];
         const d = data.delegados[data.selected || 0];
-        d.visitas.push({ fecha:"", centros:"", sucursal:"Sucursal", audiologo:"", checklist:"", convPrueba:"", convVenta:"", hit:"No", arr:"No", rt:"No", obs:"" });
+        d.visitas.push({ fecha:"", centros:"", sucursal:"", audiologo:"", checklist:"", convPrueba:"", convVenta:"", hit:"No", arr:"No", rt:"No", obs:"" });
         persist(); renderCurrentBlock(); return;
       }
       if (t.dataset.act === "vis-del-row") {
@@ -769,11 +716,10 @@
       if (t.dataset.act === "vis-save-block") { persist(); alert("Visitas guardadas"); return; }
     });
 
-    /* =============== INPUT / CHANGE =============== */
+    /* ===== INPUTS ===== */
     contentHolder.addEventListener("input", (e) => {
       const t = e.target;
 
-      // campos de centro
       if ((currentBlock === "CENTROS EXCLUSIVOS" || currentBlock === "CENTROS FLOP") && t.dataset.field) {
         const data = blocks[currentBlock];
         const c = data.centers[data.selected || 0];
@@ -782,7 +728,6 @@
         return;
       }
 
-      // tablas de centros
       const tr = t.closest("tr[data-table]");
       if (tr && (currentBlock === "CENTROS EXCLUSIVOS" || currentBlock === "CENTROS FLOP")) {
         const data = blocks[currentBlock];
@@ -797,7 +742,7 @@
           const [curso, superado, aplicado, mentoring] = Array.from(cells).map(x => x.textContent.trim());
           c.formaciones[idx] = { curso, superado, aplicado, mentoring };
         } else if (tableName === "visitas") {
-          const [fecha, checklist, convPrueba, convVenta] = Array.from(cells).map(x => x.textContent.trim());
+          const [fecha, checklist, , convPrueba, convVenta] = Array.from(cells).map(x => x.textContent.trim());
           c.visitas[idx] = { fecha, checklist, convPrueba, convVenta };
         }
         persist();
@@ -813,75 +758,33 @@
         const cells = row.querySelectorAll("td[contenteditable='true']");
         const [fecha, centros, sucursal, tema, superado, aplicado, obs] = Array.from(cells).map(x=>x.textContent.trim());
         d.tabla[idx] = { fecha, centros, sucursal, tema, superado, aplicado, obs };
-        persist();
-        return;
+        persist(); return;
       }
 
-      // VISITAS: editar celdas de texto
+      // VISITAS (texto)
       if (currentBlock === "VISITAS" && t.closest("tr[data-row]")) {
         const data = blocks["VISITAS"];
         const d = data.delegados[data.selected || 0];
         const row = t.closest("tr[data-row]");
         const idx = +row.dataset.row;
         const cells = row.querySelectorAll("td[contenteditable='true']");
-        // orden en la tabla de visitas: fecha, centros, (select suc), audiologo, checklist, convPrueba, convVenta, (3 selects), obs
         const fecha = cells[0] ? cells[0].textContent.trim() : "";
         const centros = cells[1] ? cells[1].textContent.trim() : "";
-        const audiologo = cells[2] ? cells[2].textContent.trim() : "";
-        const checklist = cells[3] ? cells[3].textContent.trim() : "";
-        const convPrueba = cells[4] ? cells[4].textContent.trim() : "";
-        const convVenta = cells[5] ? cells[5].textContent.trim() : "";
-        const obs = cells[cells.length - 1] ? cells[cells.length - 1].textContent.trim() : "";
-
-        const v = d.visitas[idx];
-        v.fecha = fecha;
-        v.centros = centros;
-        v.audiologo = audiologo;
-        v.checklist = checklist;
-        v.convPrueba = convPrueba;
-        v.convVenta = convVenta;
-        v.obs = obs;
-        persist();
-        renderCurrentBlock(); // para recolorear
-        return;
-      }
-    });
-
-    // cambios de select en VISITAS (sucursal, hit, arr, rt) + filtro + visitador
-    contentHolder.addEventListener("change", (e) => {
-      const t = e.target;
-
-      // filtro
-      if (t.dataset.act === "vis-filter") {
-        const data = blocks["VISITAS"];
-        const d = data.delegados[data.selected || 0];
-        d.filtro = t.value;
-        persist(); renderCurrentBlock(); return;
-      }
-
-      // visitador
-      if (t.dataset.visHead === "visitador") {
-        const data = blocks["VISITAS"];
-        const d = data.delegados[data.selected || 0];
-        d.visitador = t.value;
+        const sucursal = cells[2] ? cells[2].textContent.trim() : "";
+        const audiologo = cells[3] ? cells[3].textContent.trim() : "";
+        const checklist = cells[4] ? cells[4].textContent.trim() : "";
+        const convPrueba = cells[6] ? cells[6].textContent.trim() : (cells[5] ? cells[5].textContent.trim() : "");
+        const convVenta = cells[7] ? cells[7].textContent.trim() : "";
+        const hit = cells[8] ? cells[8].textContent.trim() : "";
+        const arr = cells[9] ? cells[9].textContent.trim() : "";
+        const rt = cells[10] ? cells[10].textContent.trim() : "";
+        const obs = cells[11] ? cells[11].textContent.trim() : "";
+        d.visitas[idx] = { fecha, centros, sucursal, audiologo, checklist, convPrueba, convVenta, hit, arr, rt, obs };
         persist(); return;
       }
-
-      // selects de la tabla
-      if (currentBlock === "VISITAS" && t.dataset.visRow !== undefined) {
-        const data = blocks["VISITAS"];
-        const d = data.delegados[data.selected || 0];
-        const idx = +t.dataset.visRow;
-        const v = d.visitas[idx];
-        const field = t.dataset.field;
-        v[field] = t.value;
-        persist();
-        renderCurrentBlock();
-        return;
-      }
     });
 
-    /* =============== EXPORTS =============== */
+    /* ===== EXPORTS ===== */
     document.getElementById("btnHTML").addEventListener("click", () => {
       const blob = new Blob([document.documentElement.outerHTML], { type: "text/html" });
       const url = URL.createObjectURL(blob);
@@ -889,17 +792,13 @@
       a.href = url; a.download = "seguimiento-audio-ar.html"; a.click();
       URL.revokeObjectURL(url);
     });
-    document.getElementById("btnPDF").addEventListener("click", () => {
-      alert("Exportar a PDF: usa Imprimir > Guardar como PDF.");
-    });
+    document.getElementById("btnPDF").addEventListener("click", () => { alert("Exportar a PDF: usa Imprimir > Guardar como PDF."); });
     document.getElementById("btnXLS").addEventListener("click", () => {
       const rows = [["Bloque","Campo1","Campo2","Campo3","Campo4"]];
       Object.keys(blocks).forEach(bn => {
         const b = blocks[bn];
         if (bn === "CENTROS EXCLUSIVOS" || bn === "CENTROS FLOP") {
           (b.centers || []).forEach(c => { rows.push([bn, c.nombre, c.delegado, c.audiologo, c.tipo]); });
-        } else if (bn === "VISITAS") {
-          (b.delegados || []).forEach(d => { rows.push([bn, d.nombre, (d.visitas||[]).length+" visitas", d.visitador || "", ""]); });
         } else {
           (b.items || []).forEach(it => { rows.push([bn, it.titulo, it.detalle, it.fecha || "", ""]); });
         }
@@ -911,7 +810,7 @@
       URL.revokeObjectURL(url);
     });
 
-    // guardar local
+    // guardar local manual
     saveLocalBtn.addEventListener("click", () => {
       persist();
       editStatus.textContent = "Guardado local";
