@@ -1,359 +1,39 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SEGUIMIENTO AUDIO-AR</title>
-  <style>
-    :root {
-      --bg: #f4f4f4;
-      --panel: #ffffff;
-      --gris: #2f3437;
-      --rojo: #b71c1c;
-      --blanco: #ffffff;
-      --negro: #181818;
-      --radius-lg: 18px;
-      --shadow-sm: 0 3px 10px rgba(0, 0, 0, 0.08);
-      --obj: #ffe6e6;
-      --cex: #f6f0ff;
-      --cflop: #ffe9d6;
-      --form: #e7f7ff;
-      --vis: #f9fbe7;
-      --ok: #0ba048;
-      --bad: #d32f2f;
-    }
-    * { box-sizing: border-box; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-    body { margin: 0; background: var(--bg); color: var(--negro); height: 100vh; display: flex; flex-direction: column; }
-    header {
-      background: linear-gradient(120deg, #000000 0%, #b71c1c 80%);
-      color: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 26px;
-      gap: 12px;
-    }
-    header h1 { font-size: 1.1rem; letter-spacing: 0.04rem; display: flex; align-items: center; gap: 10px; }
-    header h1 span.logo { background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 99px; font-weight: 700; }
-    .top-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
-    .btn {
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.15);
-      color: #fff;
-      border-radius: 14px;
-      padding: 6px 12px;
-      font-size: 0.78rem;
-      display: inline-flex;
-      gap: 6px;
-      align-items: center;
-      cursor: pointer;
-      transition: 0.2s ease;
-    }
-    .btn:hover { background: rgba(255,255,255,0.2); }
-    .btn.secondary { background: rgba(0,0,0,0.3); }
-    .pin-box { display: flex; gap: 6px; align-items: center; background: rgba(0,0,0,0.2); border-radius: 12px; padding: 3px 6px 3px 10px; }
-    .pin-box input { all: unset; background: rgba(0,0,0,0.3); padding: 3px 6px; border-radius: 8px; font-size: 0.7rem; }
-    .status-pill { background: rgba(0,0,0,0.2); padding: 3px 10px; border-radius: 99px; font-size: 0.68rem; }
-    main { flex: 1; display: flex; gap: 10px; padding: 12px; overflow: hidden; }
-    .left-panel {
-      width: 268px;
-      background: var(--panel);
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-sm);
-      padding: 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      overflow-y: auto;
-    }
-    .left-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
-    .block-btn {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      background: #f3f3f3;
-      border: 1px solid transparent;
-      border-radius: 14px;
-      padding: 6px 10px;
-      cursor: pointer;
-      transition: 0.15s ease;
-      font-size: 0.78rem;
-    }
-    .block-btn .tag { width: 28px; height: 28px; border-radius: 12px; display: grid; place-items: center; font-size: 0.75rem; font-weight: 600; }
-    .block-btn small { opacity: 0.5; font-size: 0.65rem; }
-    .block-btn.active { border: 1px solid rgba(0,0,0,0.12); background: #fff; box-shadow: 0 3px 12px rgba(0,0,0,0.03); }
-    .block-btn[data-type="OBJETIVOS"] { background: var(--obj); }
-    .block-btn[data-type="CENTROS EXCLUSIVOS"] { background: var(--cex); }
-    .block-btn[data-type="CENTROS FLOP"] { background: var(--cflop); }
-    .block-btn[data-type="FORMACIONES Y MENTORING"] { background: var(--form); }
-    .block-btn[data-type="VISITAS"] { background: var(--vis); }
-    .right-panel {
-      flex: 1;
-      background: var(--panel);
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-sm);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-    .right-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px 16px;
-      border-bottom: 1px solid rgba(0,0,0,0.05);
-    }
-    .right-header .title { display: flex; gap: 8px; align-items: center; }
-    .badge-color { width: 18px; height: 18px; border-radius: 6px; }
-    .content-area {
-      flex: 1;
-      padding: 16px;
-      overflow-y: auto;
-      background: #f9f9f9;
-    }
-    .locked-overlay {
-      background: rgba(255,255,255,0.75);
-      border: 2px dashed rgba(183, 28, 28, 0.3);
-      border-radius: 16px;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      font-weight: 500;
-      color: #b71c1c;
-      padding: 10px;
-    }
-    .content-wrap { position: relative; }
-    .content-wrap.locked .locked-overlay { display: flex; position: absolute; inset: 0; backdrop-filter: blur(1px); }
-    .list { display: grid; gap: 10px; }
-    .item {
-      background: #fff;
-      border: 1px solid rgba(0,0,0,0.04);
-      border-left: 4px solid rgba(183,28,28,0.6);
-      border-radius: 12px;
-      padding: 8px 10px 6px 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      box-shadow: 0 1px 6px rgba(0,0,0,0.02);
-    }
-    .item-header { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
-    .item small { opacity: 0.65; font-size: 0.68rem; }
-    .item-actions { display: flex; gap: 6px; }
-    .tiny-btn, .ghost-icon {
-      background: rgba(0,0,0,0.04);
-      padding: 2px 6px;
-      border-radius: 6px;
-      border: none;
-      cursor: pointer;
-      font-size: 0.7rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 2px;
-    }
-    .ghost-icon { background: rgba(0,0,0,0.02); }
-    .footer-tools { display: flex; gap: 8px; }
-    .disabled { opacity: 0.6; cursor: not-allowed; }
-    /* layout centros */
-    .flex-split {
-      display: flex;
-      gap: 14px;
-      align-items: flex-start;
-    }
-    .centers-list {
-      width: 210px;
-      background: #fff;
-      border-radius: 14px;
-      border: 1px solid rgba(0,0,0,0.03);
-      box-shadow: 0 2px 6px rgba(0,0,0,0.02);
-      padding: 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-    .centers-list-header { display: flex; align-items: center; justify-content: space-between; }
-    .center-item {
-      background: rgba(0,0,0,0.02);
-      border-radius: 10px;
-      padding: 6px 6px 4px 6px;
-      display: flex;
-      justify-content: space-between;
-      gap: 6px;
-      align-items: center;
-      cursor: pointer;
-    }
-    .center-item.active { background: rgba(183,28,28,0.12); }
-    .center-right {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-    .grid-3 {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 10px;
-    }
-    .field {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-    .field label { font-size: 0.7rem; opacity: 0.8; }
-    .field input, .field select {
-      border-radius: 10px;
-      border: 1px solid rgba(0,0,0,0.1);
-      padding: 5px 8px;
-      font-size: 0.78rem;
-      background: #fff;
-    }
-    .table-like {
-      width: 100%;
-      border-collapse: collapse;
-      background: #fff;
-      border-radius: 12px;
-      overflow: hidden;
-      font-size: 0.74rem;
-    }
-    .table-like thead { background: rgba(0,0,0,0.04); }
-    .table-like th, .table-like td {
-      border: 1px solid rgba(0,0,0,0.03);
-      padding: 4px 6px;
-      vertical-align: middle;
-    }
-    .table-like td[contenteditable="true"] { background: rgba(255,255,255,0.9); }
-    .table-toolbar { display: flex; gap: 6px; margin-bottom: 4px; align-items: center; justify-content: flex-end; }
-    .badge-ok {
-      background: rgba(11,160,72,0.1);
-      color: #0b7a3a;
-      padding: 2px 6px;
-      border-radius: 6px;
-      font-size: 0.65rem;
-    }
-    .badge-bad {
-      background: rgba(211,47,47,0.12);
-      color: #b71c1c;
-      padding: 2px 6px;
-      border-radius: 6px;
-      font-size: 0.65rem;
-    }
-    .text-red { color: #b71c1c; }
-    .text-green { color: #0b7a3a; }
-    @media (max-width: 1080px) {
-      .flex-split { flex-direction: column; }
-      .centers-list { width: 100%; flex-direction: row; overflow-x: auto; }
-    }
-    @media (max-width: 960px) {
-      main { flex-direction: column; }
-      .left-panel { width: 100%; flex-direction: row; overflow-x: auto; }
-      .right-panel { height: 60vh; }
-    }
-  </style>
-</head>
-<body>
-  <header>
-    <h1><span class="logo">SEGUIMIENTO</span> AUDIO-AR <small style="opacity:0.6; font-size:0.65rem;">Panel de seguimiento formación & ventas</small></h1>
-    <div class="top-actions">
-      <div class="pin-box">
-        <span>🔐 PIN:</span>
-        <input id="pinInput" type="password" maxlength="6" placeholder="••••••" />
-        <button id="pinBtn" class="btn secondary" style="padding:4px 8px;">OK</button>
-      </div>
-      <button id="resetLocal" class="btn secondary">🧹 Borrar datos</button>
-      <button id="saveCloud" class="btn disabled">☁️ Guardar en nube</button>
-      <button id="loadCloud" class="btn disabled">🔄 Actualizar de nube</button>
-      <div class="status-pill" id="editStatus">Solo lectura</div>
-    </div>
-  </header>
-  <main>
-    <aside class="left-panel" id="leftPanel">
-      <div class="left-header">
-        <strong>Bloques</strong>
-        <button id="addBlock" class="tiny-btn">+ Añadir</button>
-      </div>
-      <button class="block-btn active" data-type="OBJETIVOS" data-color="var(--obj)">
-        <div class="tag" style="background: rgba(183,28,28,0.2);">🎯</div>
-        <div>
-          <div>OBJETIVOS</div>
-          <small>KPIs, % logro</small>
-        </div>
-      </button>
-      <button class="block-btn" data-type="CENTROS EXCLUSIVOS" data-color="var(--cex)">
-        <div class="tag" style="background: rgba(47,52,55,0.05);">🏢</div>
-        <div>
-          <div>CENTROS EXCLUSIVOS</div>
-          <small>Seguimiento premium</small>
-        </div>
-      </button>
-      <button class="block-btn" data-type="CENTROS FLOP" data-color="var(--cflop)">
-        <div class="tag" style="background: rgba(183,28,28,0.17);">⚠️</div>
-        <div>
-          <div>CENTROS FLOP</div>
-          <small>Alarmas & plan</small>
-        </div>
-      </button>
-      <button class="block-btn" data-type="FORMACIONES Y MENTORING" data-color="var(--form)">
-        <div class="tag" style="background: rgba(24,24,24,0.05);">📚</div>
-        <div>
-          <div>FORMACIONES Y MENTORING</div>
-          <small>Plan de aulas</small>
-        </div>
-      </button>
-      <button class="block-btn" data-type="VISITAS" data-color="var(--vis)">
-        <div class="tag" style="background: rgba(0,0,0,0.04);">🗓️</div>
-        <div>
-          <div>VISITAS</div>
-          <small>Agenda & report</small>
-        </div>
-      </button>
-    </aside>
-    <section class="right-panel">
-      <div class="right-header" id="rightHeader">
-        <div class="title">
-          <div class="badge-color" id="badgeColor" style="background: var(--obj);"></div>
-          <h2 id="sectionTitle" style="font-size:0.95rem;">OBJETIVOS</h2>
-        </div>
-        <div class="footer-tools">
-          <button id="btnHTML" class="btn secondary">⬇︎ HTML</button>
-          <button id="btnPDF" class="btn secondary">⬇︎ PDF</button>
-          <button id="btnXLS" class="btn secondary">⬇︎ Excel</button>
-        </div>
-      </div>
-      <div class="content-area">
-        <div class="content-wrap" id="contentWrap">
-          <div class="locked-overlay">🔒 Edición bloqueada. Introduce PIN AR4321.</div>
-          <div id="contentHolder"></div>
-        </div>
-      </div>
-    </section>
-  </main>
-  <script>
-    // ----- CONFIGURACIÓN BÁSICA -----
-    const PIN_MASTER = "AR4321";
-    const pinInput = document.getElementById("pinInput");
-    const pinBtn = document.getElementById("pinBtn");
-    const editStatus = document.getElementById("editStatus");
-    const contentWrap = document.getElementById("contentWrap");
-    const contentHolder = document.getElementById("contentHolder");
-    const leftPanel = document.getElementById("leftPanel");
-    const badgeColor = document.getElementById("badgeColor");
-    const sectionTitle = document.getElementById("sectionTitle");
-    const addBlock = document.getElementById("addBlock");
-    const resetBtn = document.getElementById("resetLocal");
+<script>
+  // =========================
+  // CONFIG
+  // =========================
+  const PIN_MASTER = "AR4321";
+  const pinInput = document.getElementById("pinInput");
+  const pinBtn = document.getElementById("pinBtn");
+  const editStatus = document.getElementById("editStatus");
+  const contentWrap = document.getElementById("contentWrap");
+  const contentHolder = document.getElementById("contentHolder");
+  const leftPanel = document.getElementById("leftPanel");
+  const badgeColor = document.getElementById("badgeColor");
+  const sectionTitle = document.getElementById("sectionTitle");
+  const addBlock = document.getElementById("addBlock");
 
-    let editable = false;
+  let editable = false;
 
-    // ----- DATOS INICIALES -----
-    let blocks = JSON.parse(localStorage.getItem("audioar_blocks") || "null") || {
+  // =========================
+  // DATOS INICIALES
+  // =========================
+  let blocks =
+    JSON.parse(localStorage.getItem("audioar_blocks") || "null") || {
       "OBJETIVOS": {
         color: "var(--obj)",
         items: [
-          { titulo: "Ventas Q4", detalle: "Objetivo 140% sobre 2024", fecha: "2025-11-02" }
-        ]
+          {
+            titulo: "Ventas Q4",
+            detalle: "Objetivo 140% sobre 2024",
+            fecha: "2025-11-02",
+          },
+        ],
       },
       "CENTROS EXCLUSIVOS": {
         color: "var(--cex)",
         selected: 0,
+        view: "acciones",
         centers: [
           {
             nombre: "Centro 1",
@@ -361,20 +41,38 @@
             audiologo: "",
             tipo: "Sucursal",
             acciones: [
-              { tipo: "Seguimiento audífonos", fecha: "2025-11-03", derivaciones: "2", citas: "3", ventas: "1", obs: "Potencial en ORL" }
+              {
+                tipo: "Seguimiento audífonos",
+                fecha: "2025-11-03",
+                derivaciones: "2",
+                citas: "3",
+                ventas: "1",
+                obs: "Potencial en ORL",
+              },
             ],
             formaciones: [
-              { curso: "Teleaudiometría avanzada", superado: "Sí", aplicado: "Sí", mentoring: "No" }
+              {
+                curso: "Teleaudiometría avanzada",
+                superado: "Sí",
+                aplicado: "Sí",
+                mentoring: "No",
+              },
             ],
             visitas: [
-              { fecha: "2025-11-02", checklist: "90", convPrueba: "85", convVenta: "80" }
-            ]
-          }
-        ]
+              {
+                fecha: "2025-11-02",
+                checklist: "90",
+                convPrueba: "85",
+                convVenta: "80",
+              },
+            ],
+          },
+        ],
       },
       "CENTROS FLOP": {
         color: "var(--cflop)",
         selected: 0,
+        view: "acciones",
         centers: [
           {
             nombre: "Centro Tetuán",
@@ -382,143 +80,251 @@
             audiologo: "",
             tipo: "Franquicia",
             acciones: [
-              { tipo: "Alerta baja conversión", fecha: "2025-11-05", derivaciones: "0", citas: "1", ventas: "0", obs: "Revisar argumentario" }
+              {
+                tipo: "Alerta baja conversión",
+                fecha: "2025-11-05",
+                derivaciones: "0",
+                citas: "1",
+                ventas: "0",
+                obs: "Revisar argumentario",
+              },
             ],
             formaciones: [
-              { curso: "ACE / Rehabilitación", superado: "No", aplicado: "No", mentoring: "Sí" }
+              {
+                curso: "ACE / Rehabilitación",
+                superado: "No",
+                aplicado: "No",
+                mentoring: "Sí",
+              },
             ],
             visitas: [
-              { fecha: "2025-11-05", checklist: "70", convPrueba: "60", convVenta: "50" }
-            ]
-          }
-        ]
+              {
+                fecha: "2025-11-05",
+                checklist: "70",
+                convPrueba: "60",
+                convVenta: "50",
+              },
+            ],
+          },
+        ],
       },
       "FORMACIONES Y MENTORING": {
         color: "var(--form)",
         items: [
-          { titulo: "Mentoring MED-EL + Starkey", detalle: "DualSync / streaming bimodal", fecha: "2025-11-04" }
-        ]
+          {
+            titulo: "Mentoring MED-EL + Starkey",
+            detalle: "DualSync / streaming bimodal",
+            fecha: "2025-11-04",
+          },
+        ],
       },
       "VISITAS": {
         color: "var(--vis)",
         items: [
-          { titulo: "Visita ORL Dr. López", detalle: "Presentar dossier colaboración", fecha: "2025-11-06" }
-        ]
-      }
+          {
+            titulo: "Visita ORL Dr. López",
+            detalle: "Presentar dossier colaboración",
+            fecha: "2025-11-06",
+          },
+        ],
+      },
     };
 
-    let currentBlock = "OBJETIVOS";
+  let currentBlock = "OBJETIVOS";
 
-    function persist() {
-      localStorage.setItem("audioar_blocks", JSON.stringify(blocks));
+  // =========================
+  // HELPERS
+  // =========================
+  function persist() {
+    localStorage.setItem("audioar_blocks", JSON.stringify(blocks));
+  }
+
+  function setEditable(on) {
+    editable = on;
+    editStatus.textContent = on ? "Edición activada" : "Solo lectura";
+    editStatus.style.background = on
+      ? "rgba(11,160,72,0.1)"
+      : "rgba(0,0,0,0.2)";
+    renderCurrentBlock();
+  }
+
+  // =========================
+  // RENDER OBJETIVOS
+  // =========================
+  function renderObjectives(data) {
+    contentHolder.innerHTML = "";
+    const list = document.createElement("div");
+    list.className = "list";
+
+    data.items.forEach((item, idx) => {
+      const div = document.createElement("div");
+      div.className = "item";
+      div.innerHTML = `
+        <div class="item-header">
+          <strong>${item.titulo}</strong>
+          ${
+            editable
+              ? `<div class="item-actions">
+                  <button class="ghost-icon" data-act="edit-obj" data-idx="${idx}">✏</button>
+                  <button class="ghost-icon" data-act="add-obj" data-idx="${idx}">＋</button>
+                  <button class="ghost-icon" data-act="del-obj" data-idx="${idx}">−</button>
+                </div>`
+              : ""
+          }
+        </div>
+        <small>${item.detalle}</small>
+        <small>📅 ${item.fecha || ""}</small>
+      `;
+      list.appendChild(div);
+    });
+
+    if (editable) {
+      const addBtn = document.createElement("button");
+      addBtn.textContent = "+ Añadir objetivo";
+      addBtn.className = "tiny-btn";
+      addBtn.onclick = () => {
+        data.items.push({ titulo: "Nuevo objetivo", detalle: "", fecha: "" });
+        persist();
+        renderCurrentBlock();
+      };
+      list.appendChild(addBtn);
     }
 
-    function setEditable(on) {
-      editable = on;
-      editStatus.textContent = on ? "Edición activada" : "Solo lectura";
-      editStatus.style.background = on ? "rgba(11, 160, 72, 0.1)" : "rgba(0,0,0,0.2)";
-      renderCurrentBlock();
-    }
+    contentHolder.appendChild(list);
+  }
 
-    // ----- RENDER: OBJETIVOS -----
-    function renderObjectives(data) {
-      contentHolder.innerHTML = "";
-      const list = document.createElement("div");
-      list.className = "list";
-      data.items.forEach((item, idx) => {
-        const div = document.createElement("div");
-        div.className = "item";
-        div.innerHTML = `
-          <div class="item-header">
-            <strong>${item.titulo}</strong>
-            ${editable ? `
-            <div class="item-actions">
-              <button class="ghost-icon" data-act="edit-obj" data-idx="${idx}">✏</button>
-              <button class="ghost-icon" data-act="add-obj" data-idx="${idx}">＋</button>
-              <button class="ghost-icon" data-act="del-obj" data-idx="${idx}">−</button>
-            </div>` : ""}
-          </div>
-          <small>${item.detalle}</small>
-          <small>📅 ${item.fecha || ""}</small>
-        `;
-        list.appendChild(div);
-      });
-      if (editable) {
-        const addBtn = document.createElement("button");
-        addBtn.textContent = "+ Añadir objetivo";
-        addBtn.className = "tiny-btn";
-        addBtn.onclick = () => {
-          data.items.push({ titulo: "Nuevo objetivo", detalle: "", fecha: "" });
-          persist();
-          renderCurrentBlock();
-        };
-        list.appendChild(addBtn);
-      }
-      contentHolder.appendChild(list);
-    }
+  // =========================
+  // RENDER CENTROS (EXCLUSIVOS / FLOP)
+  // =========================
+  function renderCentersBlock(blockName, data) {
+    contentHolder.innerHTML = "";
 
-    // ----- RENDER: CENTROS (EXCLUSIVOS / FLOP) -----
-    function renderCentersBlock(blockName, data) {
-      contentHolder.innerHTML = "";
-      const wrap = document.createElement("div");
-      wrap.className = "flex-split";
-      // LEFT
-      const left = document.createElement("div");
-      left.className = "centers-list";
-      left.innerHTML = `<div class="centers-list-header"><strong>Centros</strong>${editable ? `<button class="tiny-btn" data-act="add-center">+ Añadir</button>` : ""}</div>`;
-      const centersBox = document.createElement("div");
-      (data.centers || []).forEach((c, idx) => {
-        const ci = document.createElement("div");
-        ci.className = "center-item" + (idx === (data.selected || 0) ? " active" : "");
-        ci.dataset.idx = idx;
-        ci.innerHTML = `
-          <span>${c.nombre}</span>
-          ${editable ? `<span>
-            <button class="ghost-icon" data-act="edit-center" data-idx="${idx}">✏</button>
-            <button class="ghost-icon" data-act="del-center" data-idx="${idx}">−</button>
-          </span>` : ""}
-        `;
-        centersBox.appendChild(ci);
-      });
-      left.appendChild(centersBox);
-      wrap.appendChild(left);
+    const wrap = document.createElement("div");
+    wrap.className = "flex-split";
 
-      // RIGHT detalle de centro
-      const right = document.createElement("div");
-      right.className = "center-right";
-      const sel = data.selected || 0;
-      const center = data.centers[sel] || { nombre: "", delegado: "", audiologo: "", tipo: "Sucursal", acciones: [], formaciones: [], visitas: [] };
-      const info = document.createElement("div");
-      info.className = "grid-3";
-      info.innerHTML = `
-        <div class="field">
-          <label>Nombre del centro</label>
-          <input ${editable ? "" : "disabled"} data-field="nombre" value="${center.nombre || ""}">
+    // panel de centros (izquierda)
+    const left = document.createElement("div");
+    left.className = "centers-list";
+    left.innerHTML = `
+      <div class="centers-list-header">
+        <strong>Centros</strong>
+        <div>
+          <button class="centers-toggle" data-act="toggle-centers">▼</button>
+          ${editable ? `<button class="tiny-btn" data-act="add-center">+ Añadir</button>` : ""}
         </div>
-        <div class="field">
-          <label>Delegado</label>
-          <input ${editable ? "" : "disabled"} data-field="delegado" value="${center.delegado || ""}">
-        </div>
-        <div class="field">
-          <label>Audiólogo</label>
-          <input ${editable ? "" : "disabled"} data-field="audiologo" value="${center.audiologo || ""}">
-        </div>
-        <div class="field">
-          <label>Sucursal / Franquicia</label>
-          <select ${editable ? "" : "disabled"} data-field="tipo">
-            <option value="Sucursal" ${center.tipo === "Sucursal" ? "selected" : ""}>Sucursal</option>
-            <option value="Franquicia" ${center.tipo === "Franquicia" ? "selected" : ""}>Franquicia</option>
-          </select>
+      </div>
+    `;
+    const centersBox = document.createElement("div");
+    (data.centers || []).forEach((c, idx) => {
+      const ci = document.createElement("div");
+      ci.className =
+        "center-item" + (idx === (data.selected || 0) ? " active" : "");
+      ci.dataset.idx = idx;
+      ci.innerHTML = `
+        <span>${c.nombre}</span>
+        ${
+          editable
+            ? `<span>
+                <button class="ghost-icon" data-act="edit-center" data-idx="${idx}">✏</button>
+                <button class="ghost-icon" data-act="del-center" data-idx="${idx}">−</button>
+               </span>`
+            : ""
+        }
+      `;
+      centersBox.appendChild(ci);
+    });
+    left.appendChild(centersBox);
+    wrap.appendChild(left);
+
+    // derecha (detalle)
+    const right = document.createElement("div");
+    right.className = "center-right";
+
+    const sel = data.selected || 0;
+    const center =
+      data.centers[sel] || {
+        nombre: "",
+        delegado: "",
+        audiologo: "",
+        tipo: "Sucursal",
+        acciones: [],
+        formaciones: [],
+        visitas: [],
+      };
+
+    if (!data.view) data.view = "acciones";
+
+    // submenú negro
+    const subnav = document.createElement("div");
+    subnav.className = "center-subnav";
+    subnav.innerHTML = `
+      <button data-sub="acciones" class="${
+        data.view === "acciones" ? "active" : ""
+      }">📋 Acciones</button>
+      <button data-sub="formaciones" class="${
+        data.view === "formaciones" ? "active" : ""
+      }">📚 Formaciones y refuerzo</button>
+      <button data-sub="visitas" class="${
+        data.view === "visitas" ? "active" : ""
+      }">🗓️ Visitas</button>
+    `;
+    right.appendChild(subnav);
+
+    const mainContent = document.createElement("div");
+    mainContent.className = "center-content";
+
+    // datos fijos
+    const info = document.createElement("div");
+    info.className = "grid-3";
+    info.innerHTML = `
+      <div class="field">
+        <label>Nombre del centro</label>
+        <input ${editable ? "" : "disabled"} data-field="nombre" value="${
+      center.nombre || ""
+    }">
+      </div>
+      <div class="field">
+        <label>Delegado</label>
+        <input ${editable ? "" : "disabled"} data-field="delegado" value="${
+      center.delegado || ""
+    }">
+      </div>
+      <div class="field">
+        <label>Audiólogo</label>
+        <input ${editable ? "" : "disabled"} data-field="audiologo" value="${
+      center.audiologo || ""
+    }">
+      </div>
+      <div class="field">
+        <label>Sucursal / Franquicia</label>
+        <select ${editable ? "" : "disabled"} data-field="tipo">
+          <option value="Sucursal" ${
+            center.tipo === "Sucursal" ? "selected" : ""
+          }>Sucursal</option>
+          <option value="Franquicia" ${
+            center.tipo === "Franquicia" ? "selected" : ""
+          }>Franquicia</option>
+        </select>
+      </div>
+    `;
+    mainContent.appendChild(info);
+
+    // vista dinámica
+    if (data.view === "acciones") {
+      const box = document.createElement("div");
+      box.innerHTML = `
+        <div class="table-toolbar">
+          <strong>Acciones</strong>
+          ${
+            editable
+              ? `<button class="tiny-btn" data-act="add-accion">+ Acción</button>`
+              : ""
+          }
         </div>
       `;
-      right.appendChild(info);
-
-      // TABLA ACCIONES
-      const accionesBox = document.createElement("div");
-      accionesBox.innerHTML = `<div class="table-toolbar"><strong>Acciones</strong>${editable ? `<button class="tiny-btn" data-act="add-accion">+ Acción</button>` : ""}</div>`;
-      const t1 = document.createElement("table");
-      t1.className = "table-like";
-      t1.innerHTML = `
+      const t = document.createElement("table");
+      t.className = "table-like";
+      t.innerHTML = `
         <thead>
           <tr>
             <th>Tipo de acción</th>
@@ -531,28 +337,44 @@
           </tr>
         </thead>
         <tbody>
-          ${(center.acciones || []).map((a, i) => `
-            <tr data-row="${i}" data-table="acciones">
-              <td contenteditable="${editable}">${a.tipo || ""}</td>
-              <td contenteditable="${editable}">${a.fecha || ""}</td>
-              <td contenteditable="${editable}">${a.derivaciones || ""}</td>
-              <td contenteditable="${editable}">${a.citas || ""}</td>
-              <td contenteditable="${editable}">${a.ventas || ""}</td>
-              <td contenteditable="${editable}">${a.obs || ""}</td>
-              ${editable ? `<td><button class="ghost-icon" data-act="del-row">−</button></td>` : ""}
-            </tr>
-          `).join("")}
+          ${(center.acciones || [])
+            .map((a, i) => {
+              return `
+                <tr data-row="${i}" data-table="acciones">
+                  <td contenteditable="${editable}">${a.tipo || ""}</td>
+                  <td contenteditable="${editable}">${a.fecha || ""}</td>
+                  <td contenteditable="${editable}">${a.derivaciones || ""}</td>
+                  <td contenteditable="${editable}">${a.citas || ""}</td>
+                  <td contenteditable="${editable}">${a.ventas || ""}</td>
+                  <td contenteditable="${editable}">${a.obs || ""}</td>
+                  ${
+                    editable
+                      ? `<td><button class="ghost-icon" data-act="del-row">−</button></td>`
+                      : ""
+                  }
+                </tr>
+              `;
+            })
+            .join("")}
         </tbody>
       `;
-      accionesBox.appendChild(t1);
-      right.appendChild(accionesBox);
-
-      // TABLA FORMACIONES
-      const formBox = document.createElement("div");
-      formBox.innerHTML = `<div class="table-toolbar"><strong>Formaciones y refuerzo</strong>${editable ? `<button class="tiny-btn" data-act="add-forma">+ Formación</button>` : ""}</div>`;
-      const t2 = document.createElement("table");
-      t2.className = "table-like";
-      t2.innerHTML = `
+      box.appendChild(t);
+      mainContent.appendChild(box);
+    } else if (data.view === "formaciones") {
+      const box = document.createElement("div");
+      box.innerHTML = `
+        <div class="table-toolbar">
+          <strong>Formaciones y refuerzo</strong>
+          ${
+            editable
+              ? `<button class="tiny-btn" data-act="add-forma">+ Formación</button>`
+              : ""
+          }
+        </div>
+      `;
+      const t = document.createElement("table");
+      t.className = "table-like";
+      t.innerHTML = `
         <thead>
           <tr>
             <th>Curso relevante</th>
@@ -563,26 +385,42 @@
           </tr>
         </thead>
         <tbody>
-          ${(center.formaciones || []).map((f, i) => `
-            <tr data-row="${i}" data-table="formaciones">
-              <td contenteditable="${editable}">${f.curso || ""}</td>
-              <td contenteditable="${editable}">${f.superado || "No"}</td>
-              <td contenteditable="${editable}">${f.aplicado || "No"}</td>
-              <td contenteditable="${editable}">${f.mentoring || "No"}</td>
-              ${editable ? `<td><button class="ghost-icon" data-act="del-row">−</button></td>` : ""}
-            </tr>
-          `).join("")}
+          ${(center.formaciones || [])
+            .map((f, i) => {
+              return `
+                <tr data-row="${i}" data-table="formaciones">
+                  <td contenteditable="${editable}">${f.curso || ""}</td>
+                  <td contenteditable="${editable}">${f.superado || "No"}</td>
+                  <td contenteditable="${editable}">${f.aplicado || "No"}</td>
+                  <td contenteditable="${editable}">${f.mentoring || "No"}</td>
+                  ${
+                    editable
+                      ? `<td><button class="ghost-icon" data-act="del-row">−</button></td>`
+                      : ""
+                  }
+                </tr>
+              `;
+            })
+            .join("")}
         </tbody>
       `;
-      formBox.appendChild(t2);
-      right.appendChild(formBox);
-
-      // TABLA VISITAS
-      const visBox = document.createElement("div");
-      visBox.innerHTML = `<div class="table-toolbar"><strong>Visitas</strong>${editable ? `<button class="tiny-btn" data-act="add-visita">+ Visita</button>` : ""}</div>`;
-      const t3 = document.createElement("table");
-      t3.className = "table-like";
-      t3.innerHTML = `
+      box.appendChild(t);
+      mainContent.appendChild(box);
+    } else if (data.view === "visitas") {
+      const box = document.createElement("div");
+      box.innerHTML = `
+        <div class="table-toolbar">
+          <strong>Visitas</strong>
+          ${
+            editable
+              ? `<button class="tiny-btn" data-act="add-visita">+ Visita</button>`
+              : ""
+          }
+        </div>
+      `;
+      const t = document.createElement("table");
+      t.className = "table-like";
+      t.innerHTML = `
         <thead>
           <tr>
             <th>Fecha</th>
@@ -594,313 +432,506 @@
           </tr>
         </thead>
         <tbody>
-          ${(center.visitas || []).map((v, i) => {
-            const estado = Number(v.checklist || 0) < 85 ? '<span class="badge-bad">ROJO</span>' : '<span class="badge-ok">VERDE</span>';
-            const clasePrueba = Number(v.convPrueba || 0) < 80 ? 'text-red' : 'text-green';
-            const claseVenta = Number(v.convVenta || 0) < 80 ? 'text-red' : 'text-green';
-            return `
-              <tr data-row="${i}" data-table="visitas">
-                <td contenteditable="${editable}">${v.fecha || ""}</td>
-                <td contenteditable="${editable}">${v.checklist || ""}</td>
-                <td>${estado}</td>
-                <td contenteditable="${editable}" class="${clasePrueba}">${v.convPrueba || ""}</td>
-                <td contenteditable="${editable}" class="${claseVenta}">${v.convVenta || ""}</td>
-                ${editable ? `<td><button class="ghost-icon" data-act="del-row">−</button></td>` : ""}
-              </tr>
-            `;
-          }).join("")}
+          ${(center.visitas || [])
+            .map((v, i) => {
+              const estado =
+                Number(v.checklist || 0) < 85
+                  ? '<span class="badge-bad">ROJO</span>'
+                  : '<span class="badge-ok">VERDE</span>';
+              const clasePrueba =
+                Number(v.convPrueba || 0) < 80 ? "text-red" : "text-green";
+              const claseVenta =
+                Number(v.convVenta || 0) < 80 ? "text-red" : "text-green";
+              return `
+                <tr data-row="${i}" data-table="visitas">
+                  <td contenteditable="${editable}">${v.fecha || ""}</td>
+                  <td contenteditable="${editable}">${v.checklist || ""}</td>
+                  <td>${estado}</td>
+                  <td contenteditable="${editable}" class="${clasePrueba}">${
+                v.convPrueba || ""
+              }</td>
+                  <td contenteditable="${editable}" class="${claseVenta}">${
+                v.convVenta || ""
+              }</td>
+                  ${
+                    editable
+                      ? `<td><button class="ghost-icon" data-act="del-row">−</button></td>`
+                      : ""
+                  }
+                </tr>
+              `;
+            })
+            .join("")}
         </tbody>
       `;
-      visBox.appendChild(t3);
-      right.appendChild(visBox);
-
-      wrap.appendChild(right);
-      contentHolder.appendChild(wrap);
+      box.appendChild(t);
+      mainContent.appendChild(box);
     }
 
-    // ----- RENDER: BLOQUES SIMPLES -----
-    function renderSimple(data) {
-      contentHolder.innerHTML = "";
-      const list = document.createElement("div");
-      list.className = "list";
-      (data.items || []).forEach((item, idx) => {
-        const div = document.createElement("div");
-        div.className = "item";
-        div.innerHTML = `
-          <div class="item-header">
-            <strong ${editable ? `contenteditable="true" data-idx="${idx}" data-field="titulo"` : ""}>${item.titulo}</strong>
-            ${editable ? `<div class="item-actions"><button class="tiny-btn" data-act="del" data-idx="${idx}">✖</button></div>` : ""}
-          </div>
-          <small ${editable ? `contenteditable="true" data-idx="${idx}" data-field="detalle"` : ""}>${item.detalle}</small>
-          <small>📅 <span ${editable ? `contenteditable="true" data-idx="${idx}" data-field="fecha"` : ""}>${item.fecha || ""}</span></small>
-        `;
-        list.appendChild(div);
-      });
-      if (editable) {
-        const addBtn = document.createElement("button");
-        addBtn.textContent = "+ Añadir elemento";
-        addBtn.className = "tiny-btn";
-        addBtn.onclick = () => {
-          data.items.push({ titulo: "Nuevo", detalle: "", fecha: "" });
-          persist();
-          renderCurrentBlock();
-        };
-        list.appendChild(addBtn);
-      }
-      contentHolder.appendChild(list);
+    right.appendChild(mainContent);
+    wrap.appendChild(right);
+    contentHolder.appendChild(wrap);
+  }
+
+  // =========================
+  // RENDER BLOQUES SIMPLES
+  // =========================
+  function renderSimple(data) {
+    contentHolder.innerHTML = "";
+    const list = document.createElement("div");
+    list.className = "list";
+
+    (data.items || []).forEach((item, idx) => {
+      const div = document.createElement("div");
+      div.className = "item";
+      div.innerHTML = `
+        <div class="item-header">
+          <strong ${
+            editable
+              ? `contenteditable="true" data-idx="${idx}" data-field="titulo"`
+              : ""
+          }>${item.titulo}</strong>
+          ${
+            editable
+              ? `<div class="item-actions">
+                  <button class="tiny-btn" data-act="del-simple" data-idx="${idx}">✖</button>
+                 </div>`
+              : ""
+          }
+        </div>
+        <small ${
+          editable
+            ? `contenteditable="true" data-idx="${idx}" data-field="detalle"`
+            : ""
+        }>${item.detalle}</small>
+        <small>📅 <span ${
+          editable
+            ? `contenteditable="true" data-idx="${idx}" data-field="fecha"`
+            : ""
+        }>${item.fecha || ""}</span></small>
+      `;
+      list.appendChild(div);
+    });
+
+    if (editable) {
+      const addBtn = document.createElement("button");
+      addBtn.textContent = "+ Añadir elemento";
+      addBtn.className = "tiny-btn";
+      addBtn.onclick = () => {
+        data.items.push({ titulo: "Nuevo", detalle: "", fecha: "" });
+        persist();
+        renderCurrentBlock();
+      };
+      list.appendChild(addBtn);
     }
 
-    // ----- RENDER PRINCIPAL -----
-    function renderCurrentBlock() {
-      const data = blocks[currentBlock];
-      if (!data) return;
-      badgeColor.style.background = data.color || "#fff";
-      sectionTitle.textContent = currentBlock;
-      if (!editable) {
-        contentWrap.classList.add("locked");
-      } else {
-        contentWrap.classList.remove("locked");
-      }
-      if (currentBlock === "OBJETIVOS") {
-        renderObjectives(data);
-      } else if (currentBlock === "CENTROS EXCLUSIVOS" || currentBlock === "CENTROS FLOP") {
-        renderCentersBlock(currentBlock, data);
-      } else {
-        renderSimple(data);
-      }
-    }
+    contentHolder.appendChild(list);
+  }
 
-    // ----- EVENTOS -----
-    pinBtn.addEventListener("click", () => {
+  // =========================
+  // RENDER GENERAL
+  // =========================
+  function renderCurrentBlock() {
+    const data = blocks[currentBlock];
+    if (!data) return;
+    badgeColor.style.background = data.color || "#fff";
+    sectionTitle.textContent = currentBlock;
+    if (!editable) contentWrap.classList.add("locked");
+    else contentWrap.classList.remove("locked");
+
+    if (currentBlock === "OBJETIVOS") renderObjectives(data);
+    else if (
+      currentBlock === "CENTROS EXCLUSIVOS" ||
+      currentBlock === "CENTROS FLOP"
+    )
+      renderCentersBlock(currentBlock, data);
+    else renderSimple(data);
+  }
+
+  // =========================
+  // EVENTOS PIN
+  // =========================
+  pinBtn.addEventListener("click", () => {
+    const val = pinInput.value.trim();
+    if (val === PIN_MASTER) setEditable(true);
+    else {
+      alert("PIN incorrecto. Usa AR4321");
+      setEditable(false);
+    }
+  });
+
+  pinInput.addEventListener("keydown", (ev) => {
+    if (ev.key === "Enter") {
       const val = pinInput.value.trim();
-      if (val === PIN_MASTER) {
-        setEditable(true);
-      } else {
+      if (val === PIN_MASTER) setEditable(true);
+      else {
         alert("PIN incorrecto. Usa AR4321");
         setEditable(false);
       }
-    });
-
-    // botón borrar datos locales
-    if (resetBtn) {
-      resetBtn.addEventListener("click", () => {
-        if (confirm("Esto borrará todos los datos locales de seguimiento. ¿Continuar?")) {
-          localStorage.removeItem("audioar_blocks");
-          location.reload();
-        }
-      });
     }
+  });
 
-    leftPanel.addEventListener("click", (e) => {
-      const btn = e.target.closest(".block-btn");
-      if (!btn) return;
-      document.querySelectorAll(".block-btn").forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-      currentBlock = btn.dataset.type;
-      renderCurrentBlock();
+  // =========================
+  // EVENTOS LADO IZQUIERDO
+  // =========================
+  leftPanel.addEventListener("click", (e) => {
+    const btn = e.target.closest(".block-btn");
+    if (!btn) return;
+    document.querySelectorAll(".block-btn").forEach((b) => {
+      b.classList.remove("active");
     });
-
-    addBlock.addEventListener("click", () => {
-      if (!editable) return alert("Primero desbloquea edición con el PIN AR4321.");
-      const name = prompt("Nombre del nuevo bloque:");
-      if (!name) return;
-      blocks[name] = { color: "#fff5d9", items: [] };
-      persist();
-      const btn = document.createElement("button");
-      btn.className = "block-btn";
-      btn.dataset.type = name;
-      btn.dataset.color = "#fff5d9";
-      btn.innerHTML = `<div class="tag" style="background: rgba(0,0,0,0.04);">🆕</div><div><div>${name}</div><small>Nuevo bloque</small></div>`;
-      leftPanel.appendChild(btn);
-    });
-
-    // Delegación dentro del contenido
-    contentHolder.addEventListener("click", (e) => {
-      const t = e.target;
-      // OBJETIVOS
-      if (t.dataset.act === "edit-obj") {
-        const idx = +t.dataset.idx;
-        const item = blocks["OBJETIVOS"].items[idx];
-        const nuevoTitulo = prompt("Título del objetivo", item.titulo || "");
-        if (nuevoTitulo !== null) item.titulo = nuevoTitulo;
-        const nuevoDetalle = prompt("Detalle / KPI", item.detalle || "");
-        if (nuevoDetalle !== null) item.detalle = nuevoDetalle;
-        const nuevaFecha = prompt("Fecha", item.fecha || "");
-        if (nuevaFecha !== null) item.fecha = nuevaFecha;
-        persist();
-        renderCurrentBlock();
-      }
-      if (t.dataset.act === "add-obj") {
-        blocks["OBJETIVOS"].items.splice(+t.dataset.idx + 1, 0, { titulo: "Nuevo objetivo", detalle: "", fecha: "" });
-        persist();
-        renderCurrentBlock();
-      }
-      if (t.dataset.act === "del-obj") {
-        blocks["OBJETIVOS"].items.splice(+t.dataset.idx, 1);
-        persist();
-        renderCurrentBlock();
-      }
-
-      // CENTROS: seleccionar
-      const ci = t.closest(".center-item");
-      if (ci && (currentBlock === "CENTROS EXCLUSIVOS" || currentBlock === "CENTROS FLOP")) {
-        const data = blocks[currentBlock];
-        data.selected = +ci.dataset.idx;
-        persist();
-        renderCurrentBlock();
-      }
-
-      // CENTROS: acciones
-      if (t.dataset.act === "add-center") {
-        const data = blocks[currentBlock];
-        data.centers.push({ nombre: "Centro nuevo", delegado: "", audiologo: "", tipo: "Sucursal", acciones: [], formaciones: [], visitas: [] });
-        data.selected = data.centers.length - 1;
-        persist();
-        renderCurrentBlock();
-      }
-      if (t.dataset.act === "edit-center") {
-        const idx = +t.dataset.idx;
-        const data = blocks[currentBlock];
-        const c = data.centers[idx];
-        const nuevo = prompt("Nombre del centro", c.nombre || "");
-        if (nuevo !== null) {
-          c.nombre = nuevo;
-          persist();
-          renderCurrentBlock();
-        }
-      }
-      if (t.dataset.act === "del-center") {
-        const data = blocks[currentBlock];
-        data.centers.splice(+t.dataset.idx, 1);
-        data.selected = 0;
-        persist();
-        renderCurrentBlock();
-      }
-
-      // TABLAS DENTRO DE CENTROS
-      if (t.dataset.act === "add-accion") {
-        const data = blocks[currentBlock];
-        const c = data.centers[data.selected || 0];
-        c.acciones.push({ tipo: "", fecha: "", derivaciones: "", citas: "", ventas: "", obs: "" });
-        persist();
-        renderCurrentBlock();
-      }
-      if (t.dataset.act === "add-forma") {
-        const data = blocks[currentBlock];
-        const c = data.centers[data.selected || 0];
-        c.formaciones.push({ curso: "", superado: "No", aplicado: "No", mentoring: "No" });
-        persist();
-        renderCurrentBlock();
-      }
-      if (t.dataset.act === "add-visita") {
-        const data = blocks[currentBlock];
-        const c = data.centers[data.selected || 0];
-        c.visitas.push({ fecha: "", checklist: "", convPrueba: "", convVenta: "" });
-        persist();
-        renderCurrentBlock();
-      }
-      if (t.dataset.act === "del-row") {
-        const tr = t.closest("tr");
-        const tableName = tr.dataset.table;
-        const idx = +tr.dataset.row;
-        const data = blocks[currentBlock];
-        const c = data.centers[data.selected || 0];
-        c[tableName].splice(idx, 1);
-        persist();
-        renderCurrentBlock();
-      }
-    });
-
-    // inputs (edición en línea)
-    contentHolder.addEventListener("input", (e) => {
-      const t = e.target;
-      // Edición de campos de centro
-      if ((currentBlock === "CENTROS EXCLUSIVOS" || currentBlock === "CENTROS FLOP") && t.dataset.field) {
-        const data = blocks[currentBlock];
-        const c = data.centers[data.selected || 0];
-        c[t.dataset.field] = t.value;
-        persist();
-      }
-      // Edición en tablas
-      const tr = t.closest("tr[data-table]");
-      if (tr && (currentBlock === "CENTROS EXCLUSIVOS" || currentBlock === "CENTROS FLOP")) {
-        const data = blocks[currentBlock];
-        const c = data.centers[data.selected || 0];
-        const tableName = tr.dataset.table;
-        const idx = +tr.dataset.row;
-        const cells = tr.querySelectorAll("td[contenteditable='true']");
-        if (tableName === "acciones") {
-          const [tipo, fecha, derivaciones, citas, ventas, obs] = Array.from(cells).map(x => x.textContent.trim());
-          c.acciones[idx] = { tipo, fecha, derivaciones, citas, ventas, obs };
-        }
-        if (tableName === "formaciones") {
-          const [curso, superado, aplicado, mentoring] = Array.from(cells).map(x => x.textContent.trim());
-          c.formaciones[idx] = { curso, superado, aplicado, mentoring };
-        }
-        if (tableName === "visitas") {
-          const [fecha, checklist, , convPrueba, convVenta] = Array.from(cells).map(x => x.textContent.trim());
-          c.visitas[idx] = { fecha, checklist, convPrueba, convVenta };
-        }
-        persist();
-      }
-    });
-
-    // ----- DESCARGAS -----
-    document.getElementById("btnHTML").addEventListener("click", () => {
-      const blob = new Blob([document.documentElement.outerHTML], { type: "text/html" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "seguimiento-audio-ar.html";
-      a.click();
-      URL.revokeObjectURL(url);
-    });
-
-    document.getElementById("btnPDF").addEventListener("click", () => {
-      alert("Exportar a PDF: usa Imprimir > Guardar como PDF. (Prototipo)");
-    });
-
-    document.getElementById("btnXLS").addEventListener("click", () => {
-      const rows = [["Bloque","Campo1","Campo2","Campo3","Campo4"]];
-      Object.keys(blocks).forEach(bn => {
-        const b = blocks[bn];
-        if (bn === "CENTROS EXCLUSIVOS" || bn === "CENTROS FLOP") {
-          (b.centers || []).forEach(c => {
-            rows.push([bn, c.nombre, c.delegado, c.audiologo, c.tipo]);
-          });
-        } else {
-          (b.items || []).forEach(it => {
-            rows.push([bn, it.titulo, it.detalle, it.fecha || "", ""]);
-          });
-        }
-      });
-      const csv = rows
-        .map(r => r.map(v => `"${(v||"").replace(/"/g,'""')}"`).join(","))
-        .join("\n");
-      const blob = new Blob([csv], { type: "text/csv" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "seguimiento-audio-ar.csv";
-      a.click();
-      URL.revokeObjectURL(url);
-    });
-
-    // ----- TESTS BÁSICOS -----
-    function runSmokeTests() {
-      const ok1 = typeof blocks === "object";
-      const ok2 = !!document.getElementById("leftPanel");
-      const ok3 = !!document.getElementById("contentHolder");
-      if (!ok1 || !ok2 || !ok3) {
-        console.warn("[TEST] Fallo de estructura básica", { ok1, ok2, ok3 });
-      } else {
-        console.log("[TEST] Estructura OK");
-      }
-    }
-
-    // inicio
+    btn.classList.add("active");
+    currentBlock = btn.dataset.type;
     renderCurrentBlock();
-    runSmokeTests();
-  </script>
-</body>
-</html>
+  });
+
+  // añadir bloque nuevo
+  addBlock.addEventListener("click", () => {
+    if (!editable) return alert("Primero desbloquea edición con el PIN AR4321.");
+    const name = prompt("Nombre del nuevo bloque:");
+    if (!name) return;
+    blocks[name] = { color: "#fff5d9", items: [] };
+    persist();
+    const btn = document.createElement("button");
+    btn.className = "block-btn";
+    btn.dataset.type = name;
+    btn.dataset.color = "#fff5d9";
+    btn.innerHTML = `
+      <div class="tag" style="background: rgba(0,0,0,0.04);">🆕</div>
+      <div>
+        <div>${name}</div>
+        <small>Nuevo bloque</small>
+      </div>
+    `;
+    leftPanel.appendChild(btn);
+  });
+
+  // =========================
+  // EVENTOS CONTENIDO (CLICK)
+  // =========================
+  contentHolder.addEventListener("click", (e) => {
+    const t = e.target;
+
+    // OBJETIVOS
+    if (t.dataset.act === "edit-obj") {
+      const idx = +t.dataset.idx;
+      const item = blocks["OBJETIVOS"].items[idx];
+      const nt = prompt("Título del objetivo", item.titulo || "");
+      if (nt !== null) item.titulo = nt;
+      const nd = prompt("Detalle / KPI", item.detalle || "");
+      if (nd !== null) item.detalle = nd;
+      const nf = prompt("Fecha", item.fecha || "");
+      if (nf !== null) item.fecha = nf;
+      persist();
+      renderCurrentBlock();
+      return;
+    }
+    if (t.dataset.act === "add-obj") {
+      blocks["OBJETIVOS"].items.splice(+t.dataset.idx + 1, 0, {
+        titulo: "Nuevo objetivo",
+        detalle: "",
+        fecha: "",
+      });
+      persist();
+      renderCurrentBlock();
+      return;
+    }
+    if (t.dataset.act === "del-obj") {
+      blocks["OBJETIVOS"].items.splice(+t.dataset.idx, 1);
+      persist();
+      renderCurrentBlock();
+      return;
+    }
+
+    // desplegar/plegar lista de centros
+    if (t.dataset.act === "toggle-centers") {
+      const panel = t.closest(".centers-list");
+      panel.classList.toggle("collapsed");
+      return;
+    }
+
+    // seleccionar centro
+    if (
+      t.closest(".center-item") &&
+      (currentBlock === "CENTROS EXCLUSIVOS" ||
+        currentBlock === "CENTROS FLOP")
+    ) {
+      const ci = t.closest(".center-item");
+      const data = blocks[currentBlock];
+      data.selected = +ci.dataset.idx;
+      persist();
+      renderCurrentBlock();
+      return;
+    }
+
+    // cambiar subvista (acciones / formaciones / visitas)
+    if (
+      t.closest(".center-subnav") &&
+      (currentBlock === "CENTROS EXCLUSIVOS" ||
+        currentBlock === "CENTROS FLOP")
+    ) {
+      const btn = t.closest("button[data-sub]");
+      if (btn) {
+        const data = blocks[currentBlock];
+        data.view = btn.dataset.sub;
+        persist();
+        renderCurrentBlock();
+      }
+      return;
+    }
+
+    // añadir centro
+    if (t.dataset.act === "add-center") {
+      const data = blocks[currentBlock];
+      data.centers.push({
+        nombre: "Centro nuevo",
+        delegado: "",
+        audiologo: "",
+        tipo: "Sucursal",
+        acciones: [],
+        formaciones: [],
+        visitas: [],
+      });
+      data.selected = data.centers.length - 1;
+      persist();
+      renderCurrentBlock();
+      return;
+    }
+
+    // editar nombre centro
+    if (t.dataset.act === "edit-center") {
+      const data = blocks[currentBlock];
+      const c = data.centers[+t.dataset.idx];
+      const nn = prompt("Nombre del centro", c.nombre || "");
+      if (nn !== null) c.nombre = nn;
+      persist();
+      renderCurrentBlock();
+      return;
+    }
+
+    // borrar centro
+    if (t.dataset.act === "del-center") {
+      const data = blocks[currentBlock];
+      data.centers.splice(+t.dataset.idx, 1);
+      data.selected = 0;
+      persist();
+      renderCurrentBlock();
+      return;
+    }
+
+    // añadir fila en tablas
+    if (t.dataset.act === "add-accion") {
+      const data = blocks[currentBlock];
+      const c = data.centers[data.selected || 0];
+      c.acciones.push({
+        tipo: "",
+        fecha: "",
+        derivaciones: "",
+        citas: "",
+        ventas: "",
+        obs: "",
+      });
+      persist();
+      renderCurrentBlock();
+      return;
+    }
+    if (t.dataset.act === "add-forma") {
+      const data = blocks[currentBlock];
+      const c = data.centers[data.selected || 0];
+      c.formaciones.push({
+        curso: "",
+        superado: "No",
+        aplicado: "No",
+        mentoring: "No",
+      });
+      persist();
+      renderCurrentBlock();
+      return;
+    }
+    if (t.dataset.act === "add-visita") {
+      const data = blocks[currentBlock];
+      const c = data.centers[data.selected || 0];
+      c.visitas.push({
+        fecha: "",
+        checklist: "",
+        convPrueba: "",
+        convVenta: "",
+      });
+      persist();
+      renderCurrentBlock();
+      return;
+    }
+
+    // borrar fila en tablas
+    if (t.dataset.act === "del-row") {
+      const tr = t.closest("tr");
+      const data = blocks[currentBlock];
+      const c = data.centers[data.selected || 0];
+      const tableName = tr.dataset.table;
+      const idx = +tr.dataset.row;
+      c[tableName].splice(idx, 1);
+      persist();
+      renderCurrentBlock();
+      return;
+    }
+
+    // borrar item simple (formaciones / visitas general)
+    if (t.dataset.act === "del-simple") {
+      const data = blocks[currentBlock];
+      data.items.splice(+t.dataset.idx, 1);
+      persist();
+      renderCurrentBlock();
+      return;
+    }
+  });
+
+  // =========================
+  // EVENTOS CONTENIDO (INPUT)
+  // =========================
+  contentHolder.addEventListener("input", (e) => {
+    const t = e.target;
+
+    // edición de campos fijos del centro
+    if (
+      (currentBlock === "CENTROS EXCLUSIVOS" ||
+        currentBlock === "CENTROS FLOP") &&
+      t.dataset.field
+    ) {
+      const data = blocks[currentBlock];
+      const c = data.centers[data.selected || 0];
+      c[t.dataset.field] = t.value;
+      persist();
+      return;
+    }
+
+    // edición de tablas
+    const tr = t.closest("tr[data-table]");
+    if (
+      tr &&
+      (currentBlock === "CENTROS EXCLUSIVOS" ||
+        currentBlock === "CENTROS FLOP")
+    ) {
+      const data = blocks[currentBlock];
+      const c = data.centers[data.selected || 0];
+      const tableName = tr.dataset.table;
+      const idx = +tr.dataset.row;
+      const cells = tr.querySelectorAll("td[contenteditable='true']");
+
+      if (tableName === "acciones") {
+        const [tipo, fecha, derivaciones, citas, ventas, obs] = Array.from(
+          cells
+        ).map((x) => x.textContent.trim());
+        c.acciones[idx] = {
+          tipo,
+          fecha,
+          derivaciones,
+          citas,
+          ventas,
+          obs,
+        };
+      } else if (tableName === "formaciones") {
+        const [curso, superado, aplicado, mentoring] = Array.from(
+          cells
+        ).map((x) => x.textContent.trim());
+        c.formaciones[idx] = {
+          curso,
+          superado,
+          aplicado,
+          mentoring,
+        };
+      } else if (tableName === "visitas") {
+        // aquí la tabla tiene una celda fija de estado, por eso se salta
+        const arr = Array.from(cells).map((x) => x.textContent.trim());
+        const fecha = arr[0] || "";
+        const checklist = arr[1] || "";
+        const convPrueba = arr[2] || "";
+        const convVenta = arr[3] || "";
+        c.visitas[idx] = {
+          fecha,
+          checklist,
+          convPrueba,
+          convVenta,
+        };
+      }
+      persist();
+      return;
+    }
+
+    // edición de bloques simples
+    if (t.dataset && typeof t.dataset.idx !== "undefined") {
+      const idx = +t.dataset.idx;
+      const field = t.dataset.field;
+      const data = blocks[currentBlock];
+      if (data && data.items && data.items[idx]) {
+        data.items[idx][field] = t.textContent.trim();
+        persist();
+      }
+    }
+  });
+
+  // =========================
+  // DESCARGAS
+  // =========================
+  document.getElementById("btnHTML").addEventListener("click", () => {
+    const blob = new Blob([document.documentElement.outerHTML], {
+      type: "text/html",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "seguimiento-audio-ar.html";
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  document.getElementById("btnPDF").addEventListener("click", () => {
+    alert("Exportar a PDF: usa Imprimir > Guardar como PDF.");
+  });
+
+  document.getElementById("btnXLS").addEventListener("click", () => {
+    const rows = [["Bloque", "Campo1", "Campo2", "Campo3", "Campo4"]];
+    Object.keys(blocks).forEach((bn) => {
+      const b = blocks[bn];
+      if (bn === "CENTROS EXCLUSIVOS" || bn === "CENTROS FLOP") {
+        (b.centers || []).forEach((c) => {
+          rows.push([bn, c.nombre, c.delegado, c.audiologo, c.tipo]);
+        });
+      } else {
+        (b.items || []).forEach((it) => {
+          rows.push([bn, it.titulo, it.detalle, it.fecha || "", ""]);
+        });
+      }
+    });
+    const csv = rows
+      .map((r) =>
+        r.map((v) => `"${(v || "").replace(/"/g, '""')}"`).join(",")
+      )
+      .join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "seguimiento-audio-ar.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  // =========================
+  // TESTS RÁPIDOS
+  // =========================
+  function runSmokeTests() {
+    console.log("[TEST] estructura básica cargada");
+    console.assert(
+      !!document.getElementById("leftPanel"),
+      "leftPanel no existe"
+    );
+    console.assert(
+      !!document.getElementById("contentHolder"),
+      "contentHolder no existe"
+    );
+  }
+
+  // INICIO
+  renderCurrentBlock();
+  runSmokeTests();
+</script>
