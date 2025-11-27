@@ -11,53 +11,21 @@
     <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
 
-    <!-- Babel para interpretar TSX/JSX en el navegador -->
+    <!-- Babel para interpretar JSX en el navegador -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   </head>
   <body class="bg-gray-100">
     <div id="root"></div>
 
-    <script type="text/babel" data-presets="typescript,react">
+    <!-- TODO EL CÓDIGO DE LA APP EN JS/JSX -->
+    <script type="text/babel" data-presets="react">
       const { useState } = React;
 
       // =====================
-      // Tipos (solo para TS, Babel los ignora)
-      // =====================
-      type Visit = {
-        id: number;
-        fecha: string; // dd/mm/aaaa
-        responsable: "" | "Sonia" | "Ary Rojas";
-        excelName?: string;
-        hit?: "" | "Sí" | "No";
-        aar?: number | null;
-        checklist?: number | null;
-      };
-
-      type Store = {
-        id: number;
-        raw: string;
-        codigo: string;
-        propietario: string;
-        centro: string;
-        provincia: string;
-        correo: string;
-        centroRegional: string;
-        region: string;
-        responsableAudio: "" | "Sonia" | "Ary Rojas";
-        centroAAR: "" | "Sí" | "No";
-        visitas: Visit[];
-      };
-
-      type ChecklistStage = {
-        etapa: string;
-        items: string[];
-      };
-
-      // =====================
-      // Checklist horizontal
+      // Datos estáticos (checklist)
       // =====================
 
-      const CHECKLIST: ChecklistStage[] = [
+      const CHECKLIST = [
         {
           etapa: "HOLA",
           items: [
@@ -167,23 +135,23 @@
         },
       ];
 
-      // =====================
-      // Utilidades
-      // =====================
-
-      const CENTER_TO_PROVINCE: Record<string, string> = {};
-
-      const CITY_TO_PROVINCE: Record<string, string> = {
+      // Mapeos simples para provincia (los puedes ampliar)
+      const CENTER_TO_PROVINCE = {};
+      const CITY_TO_PROVINCE = {
         NARON: "A CORUÑA (GALICIA)",
         "NARÓN": "A CORUÑA (GALICIA)",
         ONDARA: "ALICANTE (COMUNITAT VALENCIANA)",
       };
 
-      function normalizarCentro(nombre: string): string {
+      // =====================
+      // Funciones utilitarias
+      // =====================
+
+      function normalizarCentro(nombre) {
         return nombre.trim().toUpperCase();
       }
 
-      function createEmptyVisits(): Visit[] {
+      function createEmptyVisits() {
         return [1, 2, 3, 4].map((id) => ({
           id,
           fecha: "",
@@ -195,7 +163,7 @@
         }));
       }
 
-      function parseFecha(fecha: string): Date | null {
+      function parseFecha(fecha) {
         const regex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
         const match = fecha.match(regex);
         if (!match) return null;
@@ -213,30 +181,28 @@
         return d;
       }
 
-      function isValidFecha(fecha: string): boolean {
+      function isValidFecha(fecha) {
         if (!fecha) return true;
         return parseFecha(fecha) !== null;
       }
 
-      function media(valores: (number | null | undefined)[]): number | null {
+      function media(valores) {
         const nums = valores.filter(
-          (v): v is number => typeof v === "number" && !isNaN(v)
+          (v) => typeof v === "number" && !isNaN(v)
         );
         if (nums.length === 0) return null;
         const total = nums.reduce((sum, v) => sum + v, 0);
         return total / nums.length;
       }
 
-      function porcentajeSi(
-        valores: ("" | "Sí" | "No" | undefined)[]
-      ): number | null {
+      function porcentajeSi(valores) {
         const valid = valores.filter((v) => v === "Sí" || v === "No");
         if (valid.length === 0) return null;
         const countSi = valid.filter((v) => v === "Sí").length;
         return (countSi / valid.length) * 100;
       }
 
-      function donutStyle(percent: number | null): React.CSSProperties {
+      function donutStyle(percent) {
         const value = percent && percent > 0 ? Math.min(percent, 100) : 0;
         const color = percent !== null && percent >= 85 ? "#16a34a" : "#dc2626";
         return {
@@ -244,13 +210,13 @@
         };
       }
 
-      function kpiBadgeClass(percent: number | null): string {
+      function kpiBadgeClass(percent) {
         if (percent === null) return "bg-gray-200 text-gray-700";
         if (percent >= 85) return "bg-green-100 text-green-800";
         return "bg-red-100 text-red-700";
       }
 
-      function delegadoColor(delegado: string): React.CSSProperties {
+      function delegadoColor(delegado) {
         if (!delegado) return {};
         let hash = 0;
         const texto = delegado.trim().toUpperCase();
@@ -264,34 +230,29 @@
         };
       }
 
-      function inferProvincia(centro: string, provinciaExcel: string): string {
+      function inferProvincia(centro, provinciaExcel) {
         if (provinciaExcel && provinciaExcel.trim() !== "") {
           return provinciaExcel.trim().toUpperCase();
         }
-
         const centroNorm = normalizarCentro(centro);
-
         if (CENTER_TO_PROVINCE[centroNorm]) {
           return CENTER_TO_PROVINCE[centroNorm];
         }
-
         const tokens = centroNorm
-          .split(/[\,\-\(\)]/)
+          .split(/[,\-\()]/)
           .map((t) => t.trim())
           .filter(Boolean);
-
         for (let i = tokens.length - 1; i >= 0; i--) {
           const token = tokens[i];
           if (CITY_TO_PROVINCE[token]) {
             return CITY_TO_PROVINCE[token];
           }
         }
-
         return "";
       }
 
       // =====================
-      // Componente principal
+      // APP PRINCIPAL
       // =====================
 
       function App() {
@@ -311,10 +272,8 @@
         const [filterCorreo, setFilterCorreo] = useState("");
 
         const [storesInput, setStoresInput] = useState("");
-        const [stores, setStores] = useState<Store[]>([]);
-        const [selectedStoreId, setSelectedStoreId] = useState<number | null>(
-          null
-        );
+        const [stores, setStores] = useState([]);
+        const [selectedStoreId, setSelectedStoreId] = useState(null);
 
         const handlePin = () => {
           if (pin === "AR4321") setAuthorized(true);
@@ -328,7 +287,7 @@
             .map((line) => line.trim())
             .filter(Boolean);
 
-          const newStores: Store[] = lines.map((raw, index) => {
+          const newStores = lines.map((raw, index) => {
             const parts = raw.split("\t");
             const [
               codigo = "",
@@ -395,7 +354,9 @@
 
           if (
             filterProvincia &&
-            !store.provincia.toLowerCase().includes(filterProvincia.toLowerCase())
+            !store.provincia
+              .toLowerCase()
+              .includes(filterProvincia.toLowerCase())
           )
             return false;
 
@@ -427,9 +388,8 @@
           return true;
         });
 
-        const groupedStoresByDelegado: { delegado: string; stores: Store[] }[] =
-          [];
-        const mapDelegado = new Map<string, Store[]>();
+        const groupedStoresByDelegado = [];
+        const mapDelegado = new Map();
         filteredStores.forEach((store) => {
           const key = store.centroRegional || "Sin delegado";
           const current = mapDelegado.get(key) || [];
@@ -443,24 +403,15 @@
         const selectedStore =
           stores.find((store) => store.id === selectedStoreId) || null;
 
-        const updateStoreField = <K extends keyof Store>(
-          id: number,
-          field: K,
-          value: Store[K]
-        ) => {
+        function updateStoreField(id, field, value) {
           setStores((prev) =>
             prev.map((store) =>
               store.id === id ? { ...store, [field]: value } : store
             )
           );
-        };
+        }
 
-        const updateVisitField = <K extends keyof Visit>(
-          storeId: number,
-          visitId: number,
-          field: K,
-          value: Visit[K]
-        ) => {
+        function updateVisitField(storeId, visitId, field, value) {
           setStores((prev) =>
             prev.map((store) => {
               if (store.id !== storeId) return store;
@@ -472,9 +423,10 @@
               };
             })
           );
-        };
+        }
 
-        const allVisits: Visit[] = stores.flatMap((s) => s.visitas);
+        // Métricas globales
+        const allVisits = stores.flatMap((s) => s.visitas);
 
         const visitasValidasGlobal = allVisits.filter(
           (v) => v.fecha && v.excelName && isValidFecha(v.fecha)
@@ -497,7 +449,7 @@
         const hitMedia = porcentajeSi(visitasValidasGlobal.map((v) => v.hit));
 
         const visitasConAAR = visitasValidasGlobal.filter(
-          (v) => typeof v.aar === "number" && !isNaN(v.aar as number)
+          (v) => typeof v.aar === "number" && !isNaN(v.aar)
         );
         const conteoAAR = visitasConAAR.length;
         const aarMedia = media(visitasConAAR.map((v) => v.aar));
@@ -505,6 +457,10 @@
         const algunFechaInvalida = allVisits.some(
           (v) => v.fecha && !isValidFecha(v.fecha)
         );
+
+        // =====================
+        // RENDER
+        // =====================
 
         return (
           <div className="min-h-screen bg-gray-100 font-sans">
@@ -597,8 +553,7 @@
                       <div className="flex gap-4 overflow-x-auto pb-2">
                         {stores.map((store) => {
                           const visitasValidas = store.visitas.filter(
-                            (v) =>
-                              v.fecha && v.excelName && isValidFecha(v.fecha)
+                            (v) => v.fecha && v.excelName && isValidFecha(v.fecha)
                           );
                           const visitasCount = visitasValidas.length;
                           const checklistMedioTienda = media(
@@ -934,7 +889,7 @@
                                 updateStoreField(
                                   selectedStore.id,
                                   "responsableAudio",
-                                  e.target.value as Store["responsableAudio"]
+                                  e.target.value
                                 )
                               }
                             >
@@ -955,7 +910,7 @@
                                   updateStoreField(
                                     selectedStore.id,
                                     "centroAAR",
-                                    e.target.value as Store["centroAAR"]
+                                    e.target.value
                                   )
                                 }
                               >
@@ -1061,7 +1016,7 @@
                                         selectedStore.id,
                                         visit.id,
                                         "responsable",
-                                        e.target.value as Visit["responsable"]
+                                        e.target.value
                                       )
                                     }
                                   >
@@ -1084,9 +1039,7 @@
                                         selectedStore.id,
                                         visit.id,
                                         "checklist",
-                                        isNaN(num as number)
-                                          ? null
-                                          : (num as number)
+                                        isNaN(num) ? null : num
                                       );
                                     }}
                                   />
@@ -1098,7 +1051,7 @@
                                         selectedStore.id,
                                         visit.id,
                                         "hit",
-                                        e.target.value as Visit["hit"]
+                                        e.target.value
                                       )
                                     }
                                   >
@@ -1121,9 +1074,7 @@
                                         selectedStore.id,
                                         visit.id,
                                         "aar",
-                                        isNaN(num as number)
-                                          ? null
-                                          : (num as number)
+                                        isNaN(num) ? null : num
                                       );
                                     }}
                                   />
