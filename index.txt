@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Seguimiento de procesos de Audio</title>
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- React + ReactDOM (UMD) -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+
+    <!-- Babel para interpretar TSX/JSX en el navegador -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  </head>
+  <body class="bg-gray-100">
+    <div id="root"></div>
+
+    <script type="text/babel" data-presets="typescript,react">
+      const { useState } = React;
+
+      // =====================
+      // Tipos (solo para TS, Babel los ignora)
+      // =====================
+      type Visit = {
+        id: number;
+        fecha: string; // dd/mm/aaaa
+        responsable: "" | "Sonia" | "Ary Rojas";
+        excelName?: string;
+        hit?: "" | "Sí" | "No";
+        aar?: number | null;
+        checklist?: number | null;
+      };
+
+      type Store = {
+        id: number;
+        raw: string;
+        codigo: string;
+        propietario: string;
+        centro: string;
+        provincia: string;
+        correo: string;
+        centroRegional: string;
+        region: string;
+        responsableAudio: "" | "Sonia" | "Ary Rojas";
+        centroAAR: "" | "Sí" | "No";
+        visitas: Visit[];
+      };
+
+      type ChecklistStage = {
+        etapa: string;
+        items: string[];
+      };
+
+      // =====================
+      // Checklist horizontal
+      // =====================
+
+      const CHECKLIST: ChecklistStage[] = [
+        {
+          etapa: "HOLA",
+          items: [
+            "Espacio audio limpio, ordenado",
+            "Espéculos, olivas y cascos desinfectados",
+            "Acogida al cliente con una sonrisa, amable y cercana",
+            "Llamar al paciente por su nombre",
+            "Acompañar al paciente al gabinete para la revisión auditiva",
+            "Confirmar motivo de visita",
+          ],
+        },
+        {
+          etapa: "SOY ÚNICO",
+          items: [
+            "Abrir ficha y rellenar RGPD completa (incluidos checks comerciales)",
+            "Realizar anamnesis HACE (Hábitos, Antecedentes, Clínica, Expectativas)",
+            "Anotar al menos 2 expectativas/necesidades concretas",
+            "Recoger entorno sonoro y situaciones clave para el paciente",
+          ],
+        },
+        {
+          etapa: "MI AUDICIÓN",
+          items: [
+            "Explicar brevemente cada prueba y confirmar comprensión",
+            "Evaluar ambos oídos con videotoscopia y explicar procedimiento",
+            "Realizar timpanometría y explicar procedimiento",
+            "Realizar vía aérea y vía ósea explicando cada paso",
+            "Mantener TV encendida para comunicar audio y mostrar resultados",
+          ],
+        },
+        {
+          etapa: "MI SOLUCIÓN",
+          items: [
+            "Resumir claramente los resultados y su impacto",
+            "Usar gráficas para apoyar la explicación (severidad, área audible, fonemas)",
+            "Vincular resultados con síntomas y quejas de la anamnesis",
+            "Hacer visible la pérdida auditiva con preguntas de implicación",
+            "Simular sonidos para mostrar la diferencia con/ sin ayuda",
+          ],
+        },
+        {
+          etapa: "PRUEBO",
+          items: [
+            "Explicar la prueba de capacidad de adaptación como prueba de salud",
+            "Escoger audífono según perfil en gama adecuada (Diamante)",
+            "Realizar programación inicial y ajustes según perfil",
+            "Explicar funcionamiento y mantenimiento para llevarse audífonos a casa",
+            "Entregar documentación (contrato, presupuesto, pasaporte)",
+          ],
+        },
+        {
+          etapa: "ME COMPROMETO",
+          items: [
+            "Trabajar resolución de objeciones con lenguaje positivo",
+            "Explicar facilidades de pago (Infinity / NextYear)",
+            "Detallar pack Serenidad y Serenidad + (compromisos)",
+            "Explicar en detalle pruebas HIT y su utilidad",
+            "Recomendar accesorios de conectividad y productos de higiene",
+          ],
+        },
+        {
+          etapa: "ME CONVIERTO EN FAN",
+          items: [
+            "Explicar llamadas de seguimiento y agenda futura",
+            "Reforzar logros y mejoras conseguidas en cada visita",
+            "Aplicar técnicas de Neuroventas en el seguimiento",
+          ],
+        },
+        {
+          etapa: "SEGUIMIENTO Y AGENDA",
+          items: [
+            "Registrar prueba en el sistema (Gio)",
+            "Llamar al día siguiente de la prueba para seguimiento",
+            "Agendar visita en 4 días para revisión",
+          ],
+        },
+        {
+          etapa: "COMUNICACIÓN DEL CENTRO",
+          items: [
+            "Comunicación del centro adecuada a su perfil",
+            "Revisión de comunicación en RRSS",
+            "Uniformidad adecuada",
+            "Contacto con locales vecinos y colaboraciones",
+            "Escaparate atractivo con novedad de producto",
+          ],
+        },
+        {
+          etapa: "AYUDAS Y ACUERDOS",
+          items: [
+            "Conocer y activar acuerdos con FIAPAS y ONCE",
+            "Revisar convenios locales (anotar detalle en observaciones)",
+            "Conocer ayudas de comunidad autónoma",
+            "Conocer ayudas generales +65 años y hasta 26 años",
+          ],
+        },
+        {
+          etapa: "INCENTIVOS",
+          items: ["Incentivos por derivación", "Incentivos por AAR"],
+        },
+        {
+          etapa: "FORMACIÓN",
+          items: [
+            "Onboarding Academy realizado",
+            "Formaciones obligatorias de centros exclusivos cumplimentadas",
+            "Formaciones obligatorias de centros audio realizadas",
+          ],
+        },
+      ];
+
+      // =====================
+      // Utilidades
+      // =====================
+
+      const CENTER_TO_PROVINCE: Record<string, string> = {};
+
+      const CITY_TO_PROVINCE: Record<string, string> = {
+        NARON: "A CORUÑA (GALICIA)",
+        "NARÓN": "A CORUÑA (GALICIA)",
+        ONDARA: "ALICANTE (COMUNITAT VALENCIANA)",
+      };
+
+      function normalizarCentro(nombre: string): string {
+        return nombre.trim().toUpperCase();
+      }
+
+      function createEmptyVisits(): Visit[] {
+        return [1, 2, 3, 4].map((id) => ({
+          id,
+          fecha: "",
+          responsable: "",
+          excelName: "",
+          hit: "",
+          aar: null,
+          checklist: null,
+        }));
+      }
+
+      function parseFecha(fecha: string): Date | null {
+        const regex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+        const match = fecha.match(regex);
+        if (!match) return null;
+        const day = Number(match[1]);
+        const month = Number(match[2]);
+        const year = Number(match[3]);
+        const d = new Date(year, month - 1, day);
+        if (
+          d.getFullYear() !== year ||
+          d.getMonth() !== month - 1 ||
+          d.getDate() !== day
+        ) {
+          return null;
+        }
+        return d;
+      }
+
+      function isValidFecha(fecha: string): boolean {
+        if (!fecha) return true;
+        return parseFecha(fecha) !== null;
+      }
+
+      function media(valores: (number | null | undefined)[]): number | null {
+        const nums = valores.filter(
+          (v): v is number => typeof v === "number" && !isNaN(v)
+        );
+        if (nums.length === 0) return null;
+        const total = nums.reduce((sum, v) => sum + v, 0);
+        return total / nums.length;
+      }
+
+      function porcentajeSi(
+        valores: ("" | "Sí" | "No" | undefined)[]
+      ): number | null {
+        const valid = valores.filter((v) => v === "Sí" || v === "No");
+        if (valid.length === 0) return null;
+        const countSi = valid.filter((v) => v === "Sí").length;
+        return (countSi / valid.length) * 100;
+      }
+
+      function donutStyle(percent: number | null): React.CSSProperties {
+        const value = percent && percent > 0 ? Math.min(percent, 100) : 0;
+        const color = percent !== null && percent >= 85 ? "#16a34a" : "#dc2626";
+        return {
+          background: `conic-gradient(${color} ${value * 3.6}deg, #e5e7eb 0deg)`,
+        };
+      }
+
+      function kpiBadgeClass(percent: number | null): string {
+        if (percent === null) return "bg-gray-200 text-gray-700";
+        if (percent >= 85) return "bg-green-100 text-green-800";
+        return "bg-red-100 text-red-700";
+      }
+
+      function delegadoColor(delegado: string): React.CSSProperties {
+        if (!delegado) return {};
+        let hash = 0;
+        const texto = delegado.trim().toUpperCase();
+        for (let i = 0; i < texto.length; i++) {
+          hash = (hash * 31 + texto.charCodeAt(i)) | 0;
+        }
+        const hue = (Math.abs(hash) % 360 + 180) % 360;
+        return {
+          backgroundColor: `hsl(${hue}, 75%, 90%)`,
+          color: `hsl(${hue}, 35%, 28%)`,
+        };
+      }
+
+      function inferProvincia(centro: string, provinciaExcel: string): string {
+        if (provinciaExcel && provinciaExcel.trim() !== "") {
+          return provinciaExcel.trim().toUpperCase();
+        }
+
+        const centroNorm = normalizarCentro(centro);
+
+        if (CENTER_TO_PROVINCE[centroNorm]) {
+          return CENTER_TO_PROVINCE[centroNorm];
+        }
+
+        const tokens = centroNorm
+          .split(/[\,\-\(\)]/)
+          .map((t) => t.trim())
+          .filter(Boolean);
+
+        for (let i = tokens.length - 1; i >= 0; i--) {
+          const token = tokens[i];
+          if (CITY_TO_PROVINCE[token]) {
+            return CITY_TO_PROVINCE[token];
+          }
+        }
+
+        return "";
+      }
+
+      // =====================
+      // Componente principal
+      // =====================
+
+      function App() {
+        const [pin, setPin] = useState("");
+        const [authorized, setAuthorized] = useState(false);
+
+        const [search, setSearch] = useState("");
+        const [filterCodigo, setFilterCodigo] = useState("");
+        const [filterPropietario, setFilterPropietario] = useState("");
+        const [filterCentro, setFilterCentro] = useState("");
+        const [filterProvincia, setFilterProvincia] = useState("");
+        const [filterDelegado, setFilterDelegado] = useState("");
+        const [filterRegion, setFilterRegion] = useState("");
+        const [filterResponsableAudio, setFilterResponsableAudio] =
+          useState("");
+        const [filterCentroAAR, setFilterCentroAAR] = useState("");
+        const [filterCorreo, setFilterCorreo] = useState("");
+
+        const [storesInput, setStoresInput] = useState("");
+        const [stores, setStores] = useState<Store[]>([]);
+        const [selectedStoreId, setSelectedStoreId] = useState<number | null>(
+          null
+        );
+
+        const handlePin = () => {
+          if (pin === "AR4321") setAuthorized(true);
+        };
+
+        const handleApplyStores = () => {
+          if (!storesInput.trim()) return;
+
+          const lines = storesInput
+            .split("\n")
+            .map((line) => line.trim())
+            .filter(Boolean);
+
+          const newStores: Store[] = lines.map((raw, index) => {
+            const parts = raw.split("\t");
+            const [
+              codigo = "",
+              propietario = "",
+              centro = "",
+              provincia = "",
+              correo = "",
+              centroRegional = "",
+            ] = parts;
+
+            const provinciaInferida = inferProvincia(centro, provincia);
+
+            return {
+              id: index + 1,
+              raw,
+              codigo,
+              propietario,
+              centro,
+              provincia: provinciaInferida,
+              correo,
+              centroRegional,
+              region: "",
+              responsableAudio: "",
+              centroAAR: "",
+              visitas: createEmptyVisits(),
+            };
+          });
+
+          setStores(newStores);
+          setSelectedStoreId(newStores.length > 0 ? newStores[0].id : null);
+        };
+
+        const filteredStores = stores.filter((store) => {
+          const textoGlobal = `${store.codigo} ${store.propietario} ${store.centro} ${store.provincia} ${store.centroRegional} ${store.correo}`.toLowerCase();
+
+          if (search && !textoGlobal.includes(search.toLowerCase()))
+            return false;
+
+          if (
+            filterCodigo &&
+            !store.codigo.toLowerCase().includes(filterCodigo.toLowerCase())
+          )
+            return false;
+
+          if (
+            filterPropietario &&
+            !store.propietario
+              .toLowerCase()
+              .includes(filterPropietario.toLowerCase())
+          )
+            return false;
+
+          if (
+            filterCentro &&
+            !store.centro.toLowerCase().includes(filterCentro.toLowerCase())
+          )
+            return false;
+
+          if (
+            filterCorreo &&
+            !store.correo.toLowerCase().includes(filterCorreo.toLowerCase())
+          )
+            return false;
+
+          if (
+            filterProvincia &&
+            !store.provincia.toLowerCase().includes(filterProvincia.toLowerCase())
+          )
+            return false;
+
+          if (
+            filterDelegado &&
+            !store.centroRegional
+              .toLowerCase()
+              .includes(filterDelegado.toLowerCase())
+          )
+            return false;
+
+          if (
+            filterRegion &&
+            !store.region.toLowerCase().includes(filterRegion.toLowerCase())
+          )
+            return false;
+
+          if (
+            filterResponsableAudio &&
+            !store.responsableAudio
+              .toLowerCase()
+              .includes(filterResponsableAudio.toLowerCase())
+          )
+            return false;
+
+          if (filterCentroAAR && store.centroAAR !== filterCentroAAR)
+            return false;
+
+          return true;
+        });
+
+        const groupedStoresByDelegado: { delegado: string; stores: Store[] }[] =
+          [];
+        const mapDelegado = new Map<string, Store[]>();
+        filteredStores.forEach((store) => {
+          const key = store.centroRegional || "Sin delegado";
+          const current = mapDelegado.get(key) || [];
+          current.push(store);
+          mapDelegado.set(key, current);
+        });
+        mapDelegado.forEach((storesGrupo, delegado) => {
+          groupedStoresByDelegado.push({ delegado, stores: storesGrupo });
+        });
+
+        const selectedStore =
+          stores.find((store) => store.id === selectedStoreId) || null;
+
+        const updateStoreField = <K extends keyof Store>(
+          id: number,
+          field: K,
+          value: Store[K]
+        ) => {
+          setStores((prev) =>
+            prev.map((store) =>
+              store.id === id ? { ...store, [field]: value } : store
+            )
+          );
+        };
+
+        const updateVisitField = <K extends keyof Visit>(
+          storeId: number,
+          visitId: number,
+          field: K,
+          value: Visit[K]
+        ) => {
+          setStores((prev) =>
+            prev.map((store) => {
+              if (store.id !== storeId) return store;
+              return {
+                ...store,
+                visitas: store.visitas.map((visit) =>
+                  visit.id === visitId ? { ...visit, [field]: value } : visit
+                ),
+              };
+            })
+          );
+        };
+
+        const allVisits: Visit[] = stores.flatMap((s) => s.visitas);
+
+        const visitasValidasGlobal = allVisits.filter(
+          (v) => v.fecha && v.excelName && isValidFecha(v.fecha)
+        );
+
+        const totalVisitas = visitasValidasGlobal.length;
+
+        const totalTiendas = stores.length;
+        const tiendasConVisita = stores.filter((s) =>
+          s.visitas.some(
+            (v) => v.fecha && v.excelName && isValidFecha(v.fecha)
+          )
+        ).length;
+        const porcentajeTiendasVisitadas =
+          totalTiendas > 0 ? (tiendasConVisita / totalTiendas) * 100 : 0;
+
+        const checklistMedia = media(
+          visitasValidasGlobal.map((v) => v.checklist)
+        );
+        const hitMedia = porcentajeSi(visitasValidasGlobal.map((v) => v.hit));
+
+        const visitasConAAR = visitasValidasGlobal.filter(
+          (v) => typeof v.aar === "number" && !isNaN(v.aar as number)
+        );
+        const conteoAAR = visitasConAAR.length;
+        const aarMedia = media(visitasConAAR.map((v) => v.aar));
+
+        const algunFechaInvalida = allVisits.some(
+          (v) => v.fecha && !isValidFecha(v.fecha)
+        );
+
+        return (
+          <div className="min-h-screen bg-gray-100 font-sans">
+            {!authorized ? (
+              <div className="flex items-center justify-center h-screen">
+                <div className="bg-white p-10 rounded-2xl shadow-xl w-80">
+                  <h2 className="text-xl font-bold text-center mb-4">
+                    Acceso Plataforma
+                  </h2>
+                  <input
+                    type="password"
+                    className="w-full p-2 border rounded mb-4"
+                    placeholder="Introduce PIN"
+                    value={pin}
+                    onChange={(e) => setPin(e.target.value)}
+                  />
+                  <button
+                    onClick={handlePin}
+                    className="w-full bg-blue-600 text-white py-2 rounded-xl shadow"
+                  >
+                    Entrar
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="p-6">
+                {/* HEADER */}
+                <header className="bg-red-600 text-white p-5 rounded-2xl shadow flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <span className="text-3xl">🎧</span>
+                    <h1 className="text-2xl font-bold">
+                      Seguimiento de procesos de Audio
+                    </h1>
+                  </div>
+                  <button className="bg-white text-red-600 px-4 py-2 rounded-xl shadow font-semibold">
+                    Guardar
+                  </button>
+                </header>
+
+                {/* MAPA CHECKLIST + DASHBOARD HORIZONTAL */}
+                <section className="mt-6 space-y-6">
+                  {/* Mapa checklist */}
+                  <div className="bg-white p-6 rounded-2xl shadow">
+                    <h2 className="font-bold text-lg mb-2">
+                      Mapa horizontal de checklist de visita
+                    </h2>
+                    <p className="text-gray-500 mb-4 text-sm">
+                      Etapas del proceso de audio según el checklist oficial.
+                    </p>
+                    <div className="flex gap-4 overflow-x-auto pb-2">
+                      {CHECKLIST.map((stage) => (
+                        <div
+                          key={stage.etapa}
+                          className="min-w-[260px] max-w-xs bg-gray-50 border rounded-2xl px-4 py-3 flex-shrink-0"
+                        >
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-[11px] font-bold uppercase tracking-wide text-red-700">
+                              {stage.etapa}
+                            </span>
+                            <span className="text-[10px] text-gray-500">
+                              {stage.items.length} pts
+                            </span>
+                          </div>
+                          <ul className="space-y-1">
+                            {stage.items.map((item, idx) => (
+                              <li
+                                key={idx}
+                                className="text-[11px] text-gray-700 flex gap-1"
+                              >
+                                <span className="mt-1 h-1.5 w-1.5 rounded-full bg-red-500 flex-shrink-0" />
+                                <span className="leading-tight">{item}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Dashboard horizontal por tienda */}
+                  <div className="bg-white p-4 rounded-2xl shadow">
+                    <h3 className="font-bold text-sm mb-3">
+                      Dashboard horizontal por tienda (media de todos los Excel)
+                    </h3>
+                    {stores.length === 0 ? (
+                      <p className="text-xs text-gray-500">
+                        Aún no hay tiendas cargadas. Pega el listado y añade visitas.
+                      </p>
+                    ) : (
+                      <div className="flex gap-4 overflow-x-auto pb-2">
+                        {stores.map((store) => {
+                          const visitasValidas = store.visitas.filter(
+                            (v) =>
+                              v.fecha && v.excelName && isValidFecha(v.fecha)
+                          );
+                          const visitasCount = visitasValidas.length;
+                          const checklistMedioTienda = media(
+                            visitasValidas.map((v) => v.checklist)
+                          );
+                          const hitMedioTienda = porcentajeSi(
+                            visitasValidas.map((v) => v.hit)
+                          );
+
+                          return (
+                            <div
+                              key={store.id}
+                              className="min-w-[260px] max-w-xs bg-gray-50 rounded-2xl px-4 py-3 border flex-shrink-0 flex flex-col gap-2"
+                            >
+                              <div className="flex justify-between items-start mb-1">
+                                <div>
+                                  <p className="text-xs font-semibold">
+                                    {store.centro || store.codigo || store.raw}
+                                  </p>
+                                  <div className="flex items-center gap-2 mt-0.5">
+                                    <span
+                                      className="text-[10px] px-2 py-0.5 rounded-full"
+                                      style={delegadoColor(store.centroRegional)}
+                                    >
+                                      {store.provincia || "Provincia sin definir"}
+                                    </span>
+                                    <span
+                                      className="text-[10px] px-2 py-0.5 rounded-full"
+                                      style={delegadoColor(store.centroRegional)}
+                                    >
+                                      {store.centroRegional
+                                        ? `Delegado: ${store.centroRegional}`
+                                        : "Sin delegado"}
+                                    </span>
+                                  </div>
+                                </div>
+                                <span className="text-[10px] text-gray-500">
+                                  {visitasCount} visita(s)
+                                </span>
+                              </div>
+
+                              <div className="flex items-center justify-between gap-2 mt-1">
+                                <div className="flex items-center gap-2">
+                                  <div
+                                    className="w-10 h-10 rounded-full flex items-center justify-center text-[10px] font-bold text-red-700"
+                                    style={donutStyle(checklistMedioTienda)}
+                                  >
+                                    <div className="w-7 h-7 rounded-full bg-white flex items-center justify-center">
+                                      <span>
+                                        {checklistMedioTienda !== null
+                                          ? `${checklistMedioTienda.toFixed(0)}%`
+                                          : "--"}
+                                      </span>
+                                    </div>
+                                  </div>
+                                  <div className="text-[10px]">
+                                    <p className="font-semibold">Checklist</p>
+                                    <p className="text-gray-500 leading-tight">
+                                      % medio de checklist de todas las visitas.
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="mt-2 text-[10px] bg-white rounded-xl px-2 py-1 border flex items-center justify-between">
+                                <div>
+                                  <p className="font-semibold mb-0.5">HIT</p>
+                                  <p className="text-gray-700">
+                                    {hitMedioTienda !== null
+                                      ? `${hitMedioTienda.toFixed(
+                                          0
+                                        )}% visitas con HIT = Sí`
+                                      : "Sin datos de HIT"}
+                                  </p>
+                                </div>
+                                <div className="text-right text-[9px] text-gray-500">
+                                  <p>Total visitas válidas</p>
+                                  <p>{visitasCount}</p>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+
+                  {algunFechaInvalida && (
+                    <p className="text-xs text-red-500 mt-1">
+                      Hay fechas con formato incorrecto. Usa siempre el formato
+                      <strong> dd/mm/aaaa</strong>.
+                    </p>
+                  )}
+                </section>
+
+                {/* LISTADO DE TIENDAS + DETALLE */}
+                <div className="mt-10 grid grid-cols-1 md:grid-cols-[320px_1fr] gap-6">
+                  {/* Lateral listado */}
+                  <aside className="bg-white p-5 rounded-2xl shadow h-[70vh] overflow-auto">
+                    <h3 className="font-bold text-lg mb-3">Listado de tiendas</h3>
+                    <p className="text-xs text-gray-500 mb-2">
+                      Pega el listado de tiendas desde Excel (una fila por línea).
+                    </p>
+                    <textarea
+                      className="w-full p-2 border rounded mb-2 text-xs h-24"
+                      placeholder={
+                        "CODIGO\tPROPIETARIO\tCENTRO\tPROVINCIA\tCORREO\tDELEGADO REGIONAL"
+                      }
+                      value={storesInput}
+                      onChange={(e) => setStoresInput(e.target.value)}
+                    />
+                    <button
+                      onClick={handleApplyStores}
+                      className="mb-4 text-xs px-3 py-1 rounded-full bg-red-600 text-white font-semibold shadow"
+                    >
+                      Aplicar listado
+                    </button>
+
+                    {/* Buscador global */}
+                    <input
+                      type="text"
+                      placeholder="Buscar por cualquier campo..."
+                      className="w-full p-2 border rounded mb-3 text-xs"
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                    />
+
+                    {/* Filtros por campo */}
+                    <div className="grid grid-cols-1 gap-2 text-[11px] mb-4">
+                      <input
+                        type="text"
+                        className="w-full p-1.5 border rounded"
+                        placeholder="Filtrar código"
+                        value={filterCodigo}
+                        onChange={(e) => setFilterCodigo(e.target.value)}
+                      />
+                      <input
+                        type="text"
+                        className="w-full p-1.5 border rounded"
+                        placeholder="Filtrar propietario"
+                        value={filterPropietario}
+                        onChange={(e) => setFilterPropietario(e.target.value)}
+                      />
+                      <input
+                        type="text"
+                        className="w-full p-1.5 border rounded"
+                        placeholder="Filtrar centro"
+                        value={filterCentro}
+                        onChange={(e) => setFilterCentro(e.target.value)}
+                      />
+                      <input
+                        type="text"
+                        className="w-full p-1.5 border rounded"
+                        placeholder="Filtrar correo"
+                        value={filterCorreo}
+                        onChange={(e) => setFilterCorreo(e.target.value)}
+                      />
+                      <input
+                        type="text"
+                        className="w-full p-1.5 border rounded"
+                        placeholder="Filtrar provincia"
+                        value={filterProvincia}
+                        onChange={(e) => setFilterProvincia(e.target.value)}
+                      />
+                      <input
+                        type="text"
+                        className="w-full p-1.5 border rounded"
+                        placeholder="Filtrar delegado regional"
+                        value={filterDelegado}
+                        onChange={(e) => setFilterDelegado(e.target.value)}
+                      />
+                      <input
+                        type="text"
+                        className="w-full p-1.5 border rounded"
+                        placeholder="Filtrar región"
+                        value={filterRegion}
+                        onChange={(e) => setFilterRegion(e.target.value)}
+                      />
+                      <input
+                        type="text"
+                        className="w-full p-1.5 border rounded"
+                        placeholder="Filtrar responsable audio"
+                        value={filterResponsableAudio}
+                        onChange={(e) =>
+                          setFilterResponsableAudio(e.target.value)
+                        }
+                      />
+                      <select
+                        className="w-full p-1.5 border rounded"
+                        value={filterCentroAAR}
+                        onChange={(e) => setFilterCentroAAR(e.target.value)}
+                      >
+                        <option value="">Filtrar centro AAR...</option>
+                        <option value="Sí">Sí</option>
+                        <option value="No">No</option>
+                      </select>
+                    </div>
+
+                    {filteredStores.length === 0 && (
+                      <p className="text-xs text-gray-400">
+                        No hay tiendas cargadas o no coincide ninguna con los filtros.
+                      </p>
+                    )}
+
+                    {groupedStoresByDelegado.map((grupo) => (
+                      <div key={grupo.delegado} className="mb-3">
+                        <div
+                          className="text-[11px] font-semibold px-2 py-1 rounded-full inline-block mb-1"
+                          style={
+                            grupo.delegado === "Sin delegado"
+                              ? { backgroundColor: "#e5e7eb", color: "#374151" }
+                              : delegadoColor(grupo.delegado)
+                          }
+                        >
+                          {grupo.delegado === "Sin delegado"
+                            ? "Sin delegado asignado"
+                            : `Delegado: ${grupo.delegado}`}
+                        </div>
+                        {grupo.stores.map((store) => (
+                          <button
+                            key={store.id}
+                            type="button"
+                            onClick={() => setSelectedStoreId(store.id)}
+                            className={`w-full text-left border-b py-2 px-1 rounded hover:bg-red-50 transition ${
+                              selectedStoreId === store.id ? "bg-red-50" : ""
+                            }`}
+                          >
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm font-medium">
+                                {store.centro || store.codigo || "Sin centro"}
+                              </span>
+                              <span
+                                className="text-[10px] px-2 py-0.5 rounded-full"
+                                style={delegadoColor(store.centroRegional)}
+                              >
+                                {store.provincia || "Provincia sin definir"}
+                              </span>
+                            </div>
+                            <div className="text-[10px] text-gray-500 flex justify-between mt-1">
+                              <span>{store.propietario || "Sin propietario"}</span>
+                              <span className="italic">
+                                {store.codigo || "Sin código"}
+                              </span>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    ))}
+                  </aside>
+
+                  {/* Detalle de tienda */}
+                  <main className="bg-white p-6 rounded-2xl shadow h-[70vh] flex flex-col">
+                    <h3 className="text-xl font-bold mb-4">
+                      Detalle de tienda
+                      {selectedStore
+                        ? `: ${selectedStore.centro || selectedStore.codigo}`
+                        : ""}
+                    </h3>
+
+                    {!selectedStore ? (
+                      <p className="text-gray-500 text-sm">
+                        Carga primero el listado de tiendas y selecciona una.
+                      </p>
+                    ) : (
+                      <div className="flex-1 flex flex-col gap-6 overflow-auto pr-2">
+                        {/* Datos básicos */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs bg-gray-50 border rounded-2xl p-4">
+                          <div>
+                            <p className="font-semibold mb-0.5">Código</p>
+                            <p>{selectedStore.codigo || "-"}</p>
+                          </div>
+                          <div>
+                            <p className="font-semibold mb-0.5">Propietario</p>
+                            <p>{selectedStore.propietario || "-"}</p>
+                          </div>
+                          <div>
+                            <p className="font-semibold mb-0.5">Centro</p>
+                            <p>{selectedStore.centro || "-"}</p>
+                          </div>
+                          <div>
+                            <p className="font-semibold mb-0.5">Provincia</p>
+                            <span
+                              className="inline-block px-2 py-0.5 rounded-full"
+                              style={delegadoColor(selectedStore.centroRegional)}
+                            >
+                              {selectedStore.provincia || "Provincia sin definir"}
+                            </span>
+                          </div>
+                          <div>
+                            <p className="font-semibold mb-0.5">Correo</p>
+                            <p>{selectedStore.correo || "-"}</p>
+                          </div>
+                          <div>
+                            <p className="font-semibold mb-0.5">
+                              Delegado regional
+                            </p>
+                            <span
+                              className="inline-block px-2 py-0.5 rounded-full"
+                              style={delegadoColor(selectedStore.centroRegional)}
+                            >
+                              {selectedStore.centroRegional || "Sin delegado"}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Seguimiento general */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-semibold mb-1">
+                              Región
+                            </label>
+                            <input
+                              type="text"
+                              className="w-full p-2 border rounded text-sm"
+                              value={selectedStore.region}
+                              onChange={(e) =>
+                                updateStoreField(
+                                  selectedStore.id,
+                                  "region",
+                                  e.target.value
+                                )
+                              }
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-semibold mb-1">
+                              Responsable de audio (general)
+                            </label>
+                            <select
+                              className="w-full p-2 border rounded text-sm"
+                              value={selectedStore.responsableAudio}
+                              onChange={(e) =>
+                                updateStoreField(
+                                  selectedStore.id,
+                                  "responsableAudio",
+                                  e.target.value as Store["responsableAudio"]
+                                )
+                              }
+                            >
+                              <option value="">Selecciona...</option>
+                              <option value="Sonia">Sonia</option>
+                              <option value="Ary Rojas">Ary Rojas</option>
+                            </select>
+                          </div>
+                          <div className="md:col-span-2">
+                            <label className="block text-sm font-semibold mb-1">
+                              Centro AAR
+                            </label>
+                            <div className="flex flex-col md:flex-row gap-4 items-start">
+                              <select
+                                className="w-full md:w-40 p-2 border rounded text-sm"
+                                value={selectedStore.centroAAR}
+                                onChange={(e) =>
+                                  updateStoreField(
+                                    selectedStore.id,
+                                    "centroAAR",
+                                    e.target.value as Store["centroAAR"]
+                                  )
+                                }
+                              >
+                                <option value="">Selecciona...</option>
+                                <option value="Sí">Sí</option>
+                                <option value="No">No</option>
+                              </select>
+                              <div className="flex-1">
+                                <p className="text-xs font-semibold mb-1">
+                                  Visitas (fecha + Excel, hasta 4)
+                                </p>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                                  {selectedStore.visitas.map((visit) => (
+                                    <div
+                                      key={visit.id}
+                                      className="border rounded-xl p-2 text-[11px] bg-gray-50"
+                                    >
+                                      <p className="font-semibold mb-1">
+                                        Visita {visit.id}
+                                      </p>
+                                      <input
+                                        type="text"
+                                        placeholder="dd/mm/aaaa"
+                                        className={`w-full border rounded px-2 py-1 mb-2 ${
+                                          visit.fecha &&
+                                          !isValidFecha(visit.fecha)
+                                            ? "border-red-500 bg-red-50"
+                                            : ""
+                                        }`}
+                                        value={visit.fecha}
+                                        onChange={(e) =>
+                                          updateVisitField(
+                                            selectedStore.id,
+                                            visit.id,
+                                            "fecha",
+                                            e.target.value
+                                          )
+                                        }
+                                      />
+                                      <label className="inline-flex items-center px-3 py-1 rounded-xl border cursor-pointer hover:bg-white">
+                                        <span className="text-[11px] font-semibold">
+                                          Adjuntar Excel
+                                        </span>
+                                        <input
+                                          type="file"
+                                          accept=".xlsx,.xls,.csv"
+                                          className="hidden"
+                                          onChange={(e) => {
+                                            const file = e.target.files?.[0];
+                                            if (file) {
+                                              updateVisitField(
+                                                selectedStore.id,
+                                                visit.id,
+                                                "excelName",
+                                                file.name
+                                              );
+                                            }
+                                          }}
+                                        />
+                                      </label>
+                                      <p className="text-[10px] text-gray-500 mt-1 truncate">
+                                        {visit.excelName || "Sin archivo"}
+                                      </p>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Detalle KPIs visitas */}
+                        <div>
+                          <h4 className="text-sm font-semibold mb-2">
+                            Detalle de visitas (responsable, checklist, HIT y AAR)
+                          </h4>
+                          <p className="text-xs text-gray-500 mb-3">
+                            Indica quién visita, el % de checklist, si hubo HIT y el
+                            % AAR.
+                          </p>
+                          <div className="border rounded-2xl overflow-hidden">
+                            <div className="grid grid-cols-[40px,1.2fr,0.9fr,0.9fr,0.9fr] bg-gray-50 text-[11px] font-semibold px-3 py-2">
+                              <span>#</span>
+                              <span>Responsable audio</span>
+                              <span>Checklist %</span>
+                              <span>HIT (Sí/No)</span>
+                              <span>AAR %</span>
+                            </div>
+                            <div className="divide-y">
+                              {selectedStore.visitas.map((visit) => (
+                                <div
+                                  key={visit.id}
+                                  className="grid grid-cols-[40px,1.2fr,0.9fr,0.9fr,0.9fr] items-center px-3 py-2 text-[11px] gap-2"
+                                >
+                                  <span className="font-semibold">
+                                    V{visit.id}
+                                  </span>
+                                  <select
+                                    className="border rounded px-2 py-1 text-[11px]"
+                                    value={visit.responsable}
+                                    onChange={(e) =>
+                                      updateVisitField(
+                                        selectedStore.id,
+                                        visit.id,
+                                        "responsable",
+                                        e.target.value as Visit["responsable"]
+                                      )
+                                    }
+                                  >
+                                    <option value="">Selecciona...</option>
+                                    <option value="Sonia">Sonia</option>
+                                    <option value="Ary Rojas">Ary Rojas</option>
+                                  </select>
+                                  <input
+                                    type="number"
+                                    min={0}
+                                    max={100}
+                                    className="border rounded px-2 py-1 text-[11px]"
+                                    placeholder="%"
+                                    value={visit.checklist ?? ""}
+                                    onChange={(e) => {
+                                      const val = e.target.value;
+                                      const num =
+                                        val === "" ? null : Number(val);
+                                      updateVisitField(
+                                        selectedStore.id,
+                                        visit.id,
+                                        "checklist",
+                                        isNaN(num as number)
+                                          ? null
+                                          : (num as number)
+                                      );
+                                    }}
+                                  />
+                                  <select
+                                    className="border rounded px-2 py-1 text-[11px]"
+                                    value={visit.hit ?? ""}
+                                    onChange={(e) =>
+                                      updateVisitField(
+                                        selectedStore.id,
+                                        visit.id,
+                                        "hit",
+                                        e.target.value as Visit["hit"]
+                                      )
+                                    }
+                                  >
+                                    <option value="">Selecciona...</option>
+                                    <option value="Sí">Sí</option>
+                                    <option value="No">No</option>
+                                  </select>
+                                  <input
+                                    type="number"
+                                    min={0}
+                                    max={100}
+                                    className="border rounded px-2 py-1 text-[11px]"
+                                    placeholder="%"
+                                    value={visit.aar ?? ""}
+                                    onChange={(e) => {
+                                      const val = e.target.value;
+                                      const num =
+                                        val === "" ? null : Number(val);
+                                      updateVisitField(
+                                        selectedStore.id,
+                                        visit.id,
+                                        "aar",
+                                        isNaN(num as number)
+                                          ? null
+                                          : (num as number)
+                                      );
+                                    }}
+                                  />
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </main>
+                </div>
+
+                {/* RESUMEN GLOBAL */}
+                <section className="mt-10 bg-white p-6 rounded-2xl shadow">
+                  <h3 className="font-bold text-lg mb-4">
+                    Resumen de tiendas (vista tipo Excel)
+                  </h3>
+                  {stores.length === 0 ? (
+                    <p className="text-xs text-gray-500">
+                      Aún no hay tiendas cargadas.
+                    </p>
+                  ) : (
+                    <div className="overflow-auto">
+                      <table className="min-w-full text-[11px] border-collapse">
+                        <thead>
+                          <tr className="bg-gray-50 border-b">
+                            <th className="text-left px-2 py-2">Código</th>
+                            <th className="text-left px-2 py-2">Propietario</th>
+                            <th className="text-left px-2 py-2">Centro</th>
+                            <th className="text-left px-2 py-2">Provincia</th>
+                            <th className="text-left px-2 py-2">Correo</th>
+                            <th className="text-left px-2 py-2">
+                              Delegado regional
+                            </th>
+                            <th className="text-left px-2 py-2">Región</th>
+                            <th className="text-left px-2 py-2">Resp. audio</th>
+                            <th className="text-left px-2 py-2">Centro AAR</th>
+                            <th className="text-right px-2 py-2"># Visitas</th>
+                            <th className="text-right px-2 py-2">
+                              Checklist medio %
+                            </th>
+                            <th className="text-right px-2 py-2">
+                              HIT (visitas Sí %)
+                            </th>
+                            <th className="text-right px-2 py-2">
+                              AAR medio %
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {filteredStores.map((store) => {
+                            const visitasValidas = store.visitas.filter(
+                              (v) =>
+                                v.fecha &&
+                                v.excelName &&
+                                isValidFecha(v.fecha)
+                            );
+                            const checklistMedioTienda = media(
+                              visitasValidas.map((v) => v.checklist)
+                            );
+                            const hitMedioTienda = porcentajeSi(
+                              visitasValidas.map((v) => v.hit)
+                            );
+                            const aarMedioTienda = media(
+                              visitasValidas.map((v) => v.aar)
+                            );
+
+                            return (
+                              <tr
+                                key={store.id}
+                                className="border-b hover:bg-gray-50"
+                              >
+                                <td className="px-2 py-1 whitespace-nowrap">
+                                  {store.codigo || "-"}
+                                </td>
+                                <td className="px-2 py-1 whitespace-nowrap">
+                                  {store.propietario || "-"}
+                                </td>
+                                <td className="px-2 py-1 whitespace-nowrap">
+                                  {store.centro || "-"}
+                                </td>
+                                <td className="px-2 py-1 whitespace-nowrap">
+                                  <span
+                                    className="inline-block px-2 py-0.5 rounded-full"
+                                    style={delegadoColor(store.centroRegional)}
+                                  >
+                                    {store.provincia || "-"}
+                                  </span>
+                                </td>
+                                <td className="px-2 py-1 whitespace-nowrap">
+                                  {store.correo || "-"}
+                                </td>
+                                <td className="px-2 py-1 whitespace-nowrap">
+                                  <span
+                                    className="inline-block px-2 py-0.5 rounded-full"
+                                    style={delegadoColor(store.centroRegional)}
+                                  >
+                                    {store.centroRegional || "Sin delegado"}
+                                  </span>
+                                </td>
+                                <td className="px-2 py-1 whitespace-nowrap">
+                                  {store.region || "-"}
+                                </td>
+                                <td className="px-2 py-1 whitespace-nowrap">
+                                  {store.responsableAudio || "-"}
+                                </td>
+                                <td className="px-2 py-1 whitespace-nowrap">
+                                  {store.centroAAR || "-"}
+                                </td>
+                                <td className="px-2 py-1 text-right">
+                                  {visitasValidas.length}
+                                </td>
+                                <td className="px-2 py-1 text-right">
+                                  {checklistMedioTienda !== null
+                                    ? `${checklistMedioTienda.toFixed(0)}%`
+                                    : "-"}
+                                </td>
+                                <td className="px-2 py-1 text-right">
+                                  {hitMedioTienda !== null
+                                    ? `${hitMedioTienda.toFixed(0)}%`
+                                    : "-"}
+                                </td>
+                                <td className="px-2 py-1 text-right">
+                                  {aarMedioTienda !== null
+                                    ? `${aarMedioTienda.toFixed(0)}%`
+                                    : "-"}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+
+                      {/* KPIs globales */}
+                      <div className="mt-4 text-[11px] text-gray-600 flex flex-wrap gap-3">
+                        <span>
+                          Total tiendas: <strong>{totalTiendas}</strong>
+                        </span>
+                        <span>
+                          Tiendas con al menos 1 visita:{" "}
+                          <strong>
+                            {tiendasConVisita} (
+                            {porcentajeTiendasVisitadas.toFixed(0)}%)
+                          </strong>
+                        </span>
+                        <span>
+                          Total visitas válidas: <strong>{totalVisitas}</strong>
+                        </span>
+
+                        <span
+                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full ${kpiBadgeClass(
+                            checklistMedia
+                          )}`}
+                        >
+                          <span className="w-2 h-2 rounded-full bg-current/70" />
+                          <span>
+                            Checklist medio global:{" "}
+                            {checklistMedia !== null
+                              ? `${checklistMedia.toFixed(0)}%`
+                              : "-"}
+                          </span>
+                        </span>
+
+                        <span
+                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full ${kpiBadgeClass(
+                            hitMedia
+                          )}`}
+                        >
+                          <span className="w-2 h-2 rounded-full bg-current/70" />
+                          <span>
+                            % aplicación HIT global:{" "}
+                            {hitMedia !== null ? `${hitMedia.toFixed(0)}%` : "-"}
+                          </span>
+                        </span>
+
+                        <span>
+                          Visitas con AAR informado: <strong>{conteoAAR}</strong>
+                        </span>
+
+                        <span
+                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full ${kpiBadgeClass(
+                            aarMedia
+                          )}`}
+                        >
+                          <span className="w-2 h-2 rounded-full bg-current/70" />
+                          <span>
+                            % AAR global:{" "}
+                            {aarMedia !== null
+                              ? `${aarMedia.toFixed(0)}%`
+                              : "-"}
+                          </span>
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </section>
+              </div>
+            )}
+          </div>
+        );
+      }
+
+      const root = ReactDOM.createRoot(document.getElementById("root"));
+      root.render(<App />);
+    </script>
+  </body>
+</html>
