@@ -1,1116 +1,1335 @@
+
 <!DOCTYPE html>
 <html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SEGUIMIENTO AUDIO-AR</title>
-  <style>
-    :root {
-      --bg: #f4f4f4;
-      --panel: #ffffff;
-      --gris: #2f3437;
-      --rojo: #b71c1c;
-      --blanco: #ffffff;
-      --negro: #181818;
-      --radius-lg: 18px;
-      --shadow-sm: 0 3px 10px rgba(0, 0, 0, 0.08);
-      --obj: #ffe6e6;
-      --cex: #f6f0ff;
-      --cflop: #ffe9d6;
-      --form: #e7f7ff;
-      --vis: #f9fbe7;
-      --ok: #0ba048;
-      --bad: #d32f2f;
-    }
-    * { box-sizing: border-box; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-    body { margin: 0; background: var(--bg); color: var(--negro); height: 100vh; display: flex; flex-direction: column; }
-    header {
-      background: linear-gradient(120deg, #000000 0%, #b71c1c 80%);
-      color: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 26px;
-      gap: 12px;
-    }
-    header h1 { font-size: 1.1rem; letter-spacing: 0.04rem; display: flex; align-items: center; gap: 10px; }
-    header h1 span.logo { background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 99px; font-weight: 700; }
-    .top-actions { display: flex; gap: 10px; align-items: center; }
-    .btn { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff; border-radius: 14px; padding: 6px 12px; font-size: 0.78rem; display: inline-flex; gap: 6px; align-items: center; cursor: pointer; transition: 0.2s ease; }
-    .btn:hover { background: rgba(255,255,255,0.2); }
-    .btn.secondary { background: rgba(0,0,0,0.3); }
-    .pin-box { display: flex; gap: 6px; align-items: center; background: rgba(0,0,0,0.2); border-radius: 12px; padding: 3px 6px 3px 10px; }
-    .pin-box input { all: unset; background: rgba(0,0,0,0.3); padding: 3px 6px; border-radius: 8px; font-size: 0.7rem; }
-    .status-pill { background: rgba(0,0,0,0.2); padding: 3px 10px; border-radius: 99px; font-size: 0.68rem; }
-    main { flex: 1; display: flex; gap: 10px; padding: 12px; overflow: hidden; }
-    .left-panel { width: 268px; background: var(--panel); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); padding: 10px; display: flex; flex-direction: column; gap: 6px; overflow-y: auto; }
-    .left-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
-    .block-btn { display: flex; align-items: center; gap: 10px; background: #f3f3f3; border: 1px solid transparent; border-radius: 14px; padding: 6px 10px; cursor: pointer; transition: 0.15s ease; font-size: 0.78rem; }
-    .block-btn .tag { width: 28px; height: 28px; border-radius: 12px; display: grid; place-items: center; font-size: 0.75rem; font-weight: 600; }
-    .block-btn small { opacity: 0.5; font-size: 0.65rem; }
-    .block-btn.active { border: 1px solid rgba(0,0,0,0.12); background: #fff; box-shadow: 0 3px 12px rgba(0,0,0,0.03); }
-    .block-btn[data-type="OBJETIVOS"] { background: var(--obj); }
-    .block-btn[data-type="CENTROS EXCLUSIVOS"] { background: var(--cex); }
-    .block-btn[data-type="CENTROS FLOP"] { background: var(--cflop); }
-    .block-btn[data-type="FORMACIONES Y MENTORING"] { background: var(--form); }
-    .block-btn[data-type="VISITAS"] { background: var(--vis); }
-    .right-panel { flex: 1; background: var(--panel); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); display: flex; flex-direction: column; overflow: hidden; }
-    .right-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid rgba(0,0,0,0.05); }
-    .right-header .title { display: flex; gap: 8px; align-items: center; }
-    .badge-color { width: 18px; height: 18px; border-radius: 6px; }
-    .content-area { flex: 1; padding: 16px; overflow-y: auto; background: #f9f9f9; }
-    .locked-overlay { background: rgba(255,255,255,0.75); border: 2px dashed rgba(183, 28, 28, 0.3); border-radius: 16px; display: none; align-items: center; justify-content: center; gap: 10px; font-weight: 500; color: #b71c1c; padding: 10px; }
-    .content-wrap { position: relative; }
-    .content-wrap.locked .locked-overlay { display: flex; position: absolute; inset: 0; backdrop-filter: blur(1px); }
-    .list { display: grid; gap: 10px; }
-    .item { background: #fff; border: 1px solid rgba(0,0,0,0.04); border-left: 4px solid rgba(183,28,28,0.6); border-radius: 12px; padding: 8px 10px 6px 10px; display: flex; flex-direction: column; gap: 4px; box-shadow: 0 1px 6px rgba(0,0,0,0.02); }
-    .item-header { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
-    .item-actions { display: flex; gap: 6px; }
-    .tiny-btn, .ghost-icon { background: rgba(0,0,0,0.04); padding: 2px 6px; border-radius: 6px; border: none; cursor: pointer; font-size: 0.7rem; display: inline-flex; align-items: center; gap: 2px; }
-    .ghost-icon { background: rgba(0,0,0,0.02); }
-    .disabled { opacity: 0.6; cursor: not-allowed; }
-    /* layout centros */
-    .flex-split { display: flex; gap: 14px; align-items: stretch; }
-    .centers-list { width: 240px; background: #fff; border-radius: 14px; border: 1px solid rgba(0,0,0,0.03); box-shadow: 0 2px 6px rgba(0,0,0,0.02); padding: 10px; display: flex; flex-direction: column; gap: 10px; }
-    .centers-list-header { display:flex; justify-content:space-between; align-items:center; gap:6px; }
-    .center-right { flex: 1; display: flex; min-height: 360px; }
-    .center-content { flex: 1; display: flex; flex-direction: column; gap: 10px; }
-    .center-subnav { width: 100%; display: flex; flex-direction: row; gap: 8px; margin-top: 4px; }
-    .center-subnav button { background: #000; color: #fff; border: none; border-radius: 12px; padding: 6px 10px; font-size: 0.72rem; cursor: pointer; display: flex; align-items: center; gap: 6px; }
-    .center-subnav button.active { background: #b71c1c; }
-    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
-    .field { display: flex; flex-direction: column; gap: 4px; }
-    .field label { font-size: 0.7rem; opacity: 0.8; }
-    .field input, .field select { border-radius: 10px; border: 1px solid rgba(0,0,0,0.1); padding: 5px 8px; font-size: 0.78rem; background: #fff; }
-    .table-like { width: 100%; border-collapse: collapse; background: #fff; border-radius: 12px; overflow: hidden; font-size: 0.74rem; }
-    .table-like th, .table-like td { border: 1px solid rgba(0,0,0,0.12); padding: 4px 6px; }
-    .table-toolbar { display: flex; gap: 6px; margin-bottom: 4px; align-items: center; justify-content: flex-end; }
-    .badge-ok { background: rgba(11,160,72,0.1); color: #0b7a3a; padding: 2px 6px; border-radius: 6px; font-size: 0.65rem; }
-    .badge-bad { background: rgba(211,47,47,0.12); color: #b71c1c; padding: 2px 6px; border-radius: 6px; font-size: 0.65rem; }
-    .text-red { color: #b71c1c; }
-    .text-green { color: #0b7a3a; }
-    @media (max-width: 1080px) { .flex-split { flex-direction: column; } .centers-list { width: 100%; } }
-    @media (max-width: 960px) { main { flex-direction: column; } .left-panel { width: 100%; flex-direction: row; overflow-x: auto; } .right-panel { height: 60vh; } }
-  </style>
-</head>
-<body>
-  <header>
-    <h1><span class="logo">SEGUIMIENTO</span> AUDIO-AR <small style="opacity:0.6; font-size:0.65rem;">Panel de seguimiento formación & ventas</small></h1>
-    <div class="top-actions">
-      <div class="pin-box">
-        <span>🔐 PIN:</span>
-        <input id="pinInput" type="password" maxlength="6" placeholder="••••••" />
-        <button id="pinBtn" class="btn secondary" style="padding:4px 8px;">OK</button>
-      </div>
-      <button id="saveCloud" class="btn disabled">☁️ Guardar en nube</button>
-      <button id="loadCloud" class="btn disabled">🔄 Actualizar de nube</button>
-      <button id="saveLocal" class="btn secondary">💾 Guardar local</button>
-      <div class="status-pill" id="editStatus">Solo lectura</div>
-    </div>
-  </header>
-  <main>
-    <aside class="left-panel" id="leftPanel">
-      <div class="left-header">
-        <strong>Bloques</strong>
-        <button id="addBlock" class="tiny-btn">+ Añadir</button>
-      </div>
-      <button class="block-btn active" data-type="OBJETIVOS" data-color="var(--obj)"><div class="tag" style="background: rgba(183,28,28,0.2);">🎯</div><div><div>OBJETIVOS</div><small>KPIs, % logro</small></div></button>
-      <button class="block-btn" data-type="CENTROS EXCLUSIVOS" data-color="var(--cex)"><div class="tag" style="background: rgba(47,52,55,0.05);">🏢</div><div><div>CENTROS EXCLUSIVOS</div><small>Seguimiento premium</small></div></button>
-      <button class="block-btn" data-type="CENTROS FLOP" data-color="var(--cflop)"><div class="tag" style="background: rgba(183,28,28,0.17);">⚠️</div><div><div>CENTROS FLOP</div><small>Alarmas & plan</small></div></button>
-      <button class="block-btn" data-type="FORMACIONES Y MENTORING" data-color="var(--form)"><div class="tag" style="background: rgba(24,24,24,0.05);">📚</div><div><div>FORMACIONES Y MENTORING</div><small>Plan de aulas</small></div></button>
-      <button class="block-btn" data-type="VISITAS" data-color="var(--vis)"><div class="tag" style="background: rgba(0,0,0,0.04);">🗓️</div><div><div>VISITAS</div><small>Agenda & report</small></div></button>
-    </aside>
-    <section class="right-panel">
-      <div class="right-header" id="rightHeader">
-        <div class="title">
-          <div class="badge-color" id="badgeColor" style="background: var(--obj);"></div>
-          <h2 id="sectionTitle" style="font-size:0.95rem;">OBJETIVOS</h2>
-        </div>
-        <div class="footer-tools">
-          <button id="btnHTML" class="btn secondary">⬇︎ HTML</button>
-          <button id="btnPDF" class="btn secondary">⬇︎ PDF</button>
-          <button id="btnXLS" class="btn secondary">⬇︎ Excel</button>
-        </div>
-      </div>
-      <div class="content-area">
-        <div class="content-wrap" id="contentWrap">
-          <div class="locked-overlay">🔒 Edición bloqueada. Introduce PIN AR4321.</div>
-          <div id="contentHolder"></div>
-        </div>
-      </div>
-    </section>
-  </main>
-  <script>
-    const PIN_MASTER = "AR4321";
-    const pinInput = document.getElementById("pinInput");
-    const pinBtn = document.getElementById("pinBtn");
-    const editStatus = document.getElementById("editStatus");
-    const saveLocalBtn = document.getElementById("saveLocal");
-    const contentWrap = document.getElementById("contentWrap");
-    const contentHolder = document.getElementById("contentHolder");
-    const leftPanel = document.getElementById("leftPanel");
-    const badgeColor = document.getElementById("badgeColor");
-    const sectionTitle = document.getElementById("sectionTitle");
-    const addBlock = document.getElementById("addBlock");
+  <head>
+    <meta charset="UTF-8" />
+    <title>Seguimiento de procesos de Audio</title>
 
-    let editable = false;
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
 
-    /* CARGA DESDE LOCALSTORAGE TU ESTRUCTURA */
-    let blocks = JSON.parse(localStorage.getItem("audioar_blocks") || "null") || {
-      "OBJETIVOS": {
-        color: "var(--obj)",
-        items: [
-          { titulo: "Ventas Q4", detalle: "Objetivo 140% sobre 2024", fecha: "2025-11-02" }
-        ]
-      },
-      "CENTROS EXCLUSIVOS": {
-        color: "var(--cex)",
-        selected: 0,
-        view: "acciones",
-        centers: [
-          {
-            nombre: "Centro 1",
-            delegado: "",
-            audiologo: "",
-            tipo: "Sucursal",
-            acciones: [
-              { tipo: "Seguimiento audífonos", fecha: "2025-11-03", derivaciones: "2", citas: "3", ventas: "1", obs: "Potencial en ORL" }
-            ],
-            formaciones: [
-              { curso: "Teleaudiometría avanzada", superado: "Sí", aplicado: "Sí", mentoring: "No" }
-            ],
-            visitas: [
-              { fecha: "2025-11-02", checklist: "90", convPrueba: "85", convVenta: "80" }
-            ],
-            servicios: [
-              { nombre: "Tinnitus-TRT", activo: "No", ventas: "" },
-              { nombre: "Pediátrico", activo: "No", ventas: "" },
-              { nombre: "AAR", activo: "No", ventas: "" },
-              { nombre: "HIT", activo: "No", ventas: "" }
-            ]
-          }
-        ]
-      },
-      "CENTROS FLOP": {
-        color: "var(--cflop)",
-        selected: 0,
-        view: "acciones",
-        centers: [
-          {
-            nombre: "Centro Tetuán",
-            delegado: "",
-            audiologo: "",
-            tipo: "Franquicia",
-            acciones: [
-              { tipo: "Alerta baja conversión", fecha: "2025-11-05", derivaciones: "0", citas: "1", ventas: "0", obs: "Revisar argumentario" }
-            ],
-            formaciones: [
-              { curso: "ACE / Rehabilitación", superado: "No", aplicado: "No", mentoring: "Sí" }
-            ],
-            visitas: [
-              { fecha: "2025-11-05", checklist: "70", convPrueba: "60", convVenta: "50" }
-            ],
-            servicios: [
-              { nombre: "Tinnitus-TRT", activo: "No", ventas: "" },
-              { nombre: "Pediátrico", activo: "No", ventas: "" },
-              { nombre: "AAR", activo: "No", ventas: "" },
-              { nombre: "HIT", activo: "No", ventas: "" }
-            ]
-          }
-        ]
-      },
-      "FORMACIONES Y MENTORING": {
-        color: "var(--form)",
-        selected: 0,
-        delegados: [
-          {
-            nombre: "Delegado 1",
-            tabla: [
-              { fecha: "2025-11-04", centros: "Centro 1", sucursal: "Sucursal", tema: "Teleaudiometría", superado: "Sí", aplicado: "Sí", obs: "Buena participación" }
-            ],
-            adjunto: ""
-          }
-        ]
-      },
-      "VISITAS": {
-        color: "var(--vis)",
-        selected: 0,
-        delegados: [
-          {
-            nombre: "Delegado 1",
-            visitador: "",
-            visitas: [
-              { fecha: "2025-11-06", centros: "Centro Tetuán", sucursal: "Sucursal", audiologo: "", checklist: "82", convPrueba: "75", convVenta: "60", hit: "No", arr: "No", rt: "No", obs: "Reforzar cierre" }
-            ],
-            adjunto: ""
-          }
-        ]
-      }
-    };
+    <!-- React + ReactDOM (UMD) -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
 
-    let currentBlock = "OBJETIVOS";
+    <!-- Babel para interpretar TSX/JSX en el navegador -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  </head>
+  <body class="bg-gray-100">
+    <div id="root"></div>
 
-    function persist() {
-      localStorage.setItem("audioar_blocks", JSON.stringify(blocks));
-    }
+    <script type="text/babel" data-presets="typescript,react">
+      const { useState } = React;
 
-    function setEditable(on) {
-      editable = on;
-      editStatus.textContent = on ? "Edición activada" : "Solo lectura";
-      editStatus.style.background = on ? "rgba(11,160,72,0.1)" : "rgba(0,0,0,0.2)";
-      renderCurrentBlock();
-    }
-
-    /* --- RENDER OBJETIVOS --- */
-    function renderObjectives(data) {
-      contentHolder.innerHTML = "";
-      const list = document.createElement("div");
-      list.className = "list";
-      data.items.forEach((item, idx) => {
-        const div = document.createElement("div");
-        div.className = "item";
-        div.innerHTML = `
-          <div class="item-header">
-            <strong>${item.titulo}</strong>
-            ${editable ? `
-              <div class="item-actions">
-                <button class="ghost-icon" data-act="edit-obj" data-idx="${idx}">✏</button>
-                <button class="ghost-icon" data-act="add-obj" data-idx="${idx}">＋</button>
-                <button class="ghost-icon" data-act="del-obj" data-idx="${idx}">−</button>
-              </div>` : ""}
-          </div>
-          <small>${item.detalle}</small>
-          <small>📅 ${item.fecha || ""}</small>
-        `;
-        list.appendChild(div);
-      });
-      if (editable) {
-        const addBtn = document.createElement("button");
-        addBtn.textContent = "+ Añadir objetivo";
-        addBtn.className = "tiny-btn";
-        addBtn.onclick = () => {
-          data.items.push({ titulo: "Nuevo objetivo", detalle: "", fecha: "" });
-          persist(); renderCurrentBlock();
-        };
-        list.appendChild(addBtn);
-      }
-      contentHolder.appendChild(list);
-    }
-
-    /* --- RENDER CENTROS --- */
-    const ACCIONES_OPTIONS = ["Azafata","Cashback","Ruleta","Stand","Call center","Mailing","Buzoneo","Bono","Otro"];
-
-    function renderCentersBlock(blockName, data) {
-      contentHolder.innerHTML = "";
-      const wrap = document.createElement("div");
-      wrap.className = "flex-split";
-
-      /* LISTA IZQUIERDA (dentro del bloque) */
-      const left = document.createElement("div");
-      left.className = "centers-list";
-      left.innerHTML = `
-        <div class="centers-list-header">
-          <strong>${blockName === "CENTROS EXCLUSIVOS" ? "Centros exclusivos" : "Centros flop"}</strong>
-          ${editable ? `
-          <div style="display:flex;gap:4px;">
-            <button class="tiny-btn" data-act="add-center">+</button>
-            <button class="tiny-btn" data-act="del-center">−</button>
-            <button class="tiny-btn" data-act="rename-center-head">✏</button>
-            <button class="tiny-btn" data-act="save-centers">Guardar</button>
-          </div>` : ""}
-        </div>
-      `;
-      const select = document.createElement("select");
-      select.className = "centers-select";
-      select.dataset.act = "select-center";
-      (data.centers || []).forEach((c, idx) => {
-        const opt = document.createElement("option");
-        opt.value = idx;
-        opt.textContent = c.nombre || `${blockName === "CENTROS EXCLUSIVOS" ? "Exclusivo" : "Flop"} ${idx+1}`;
-        if (idx === (data.selected || 0)) opt.selected = true;
-        select.appendChild(opt);
-      });
-      left.appendChild(select);
-      wrap.appendChild(left);
-
-      /* CONTENIDO DERECHA */
-      const right = document.createElement("div");
-      right.className = "center-right";
-
-      const sel = data.selected || 0;
-      const center = data.centers[sel] || {
-        nombre: "",
-        delegado: "",
-        audiologo: "",
-        tipo: "Sucursal",
-        acciones: [],
-        formaciones: [],
-        visitas: [],
-        servicios: [
-          { nombre: "Tinnitus-TRT", activo: "No", ventas: "" },
-          { nombre: "Pediátrico", activo: "No", ventas: "" },
-          { nombre: "AAR", activo: "No", ventas: "" },
-          { nombre: "HIT", activo: "No", ventas: "" }
-        ]
+      // =====================
+      // Tipos (solo para TS, Babel los ignora en ejecución)
+      // =====================
+      type Visit = {
+        id: number;
+        fecha: string;
+        responsable: "" | "Sonia" | "Ary Rojas";
+        excelName?: string;
+        hit?: "" | "Sí" | "No";
+        aar?: number | null;
+        checklist?: number | null;
       };
-      center.servicios = center.servicios || [
-        { nombre: "Tinnitus-TRT", activo: "No", ventas: "" },
-        { nombre: "Pediátrico", activo: "No", ventas: "" },
-        { nombre: "AAR", activo: "No", ventas: "" },
-        { nombre: "HIT", activo: "No", ventas: "" }
+
+      type Store = {
+        id: number;
+        raw: string;
+        codigo: string;
+        propietario: string;
+        centro: string;
+        provincia: string;
+        correo: string;
+        centroRegional: string;
+        region: string;
+        responsableAudio: "" | "Sonia" | "Ary Rojas";
+        centroAAR: "" | "Sí" | "No";
+        visitas: Visit[];
+      };
+
+      type ChecklistStage = {
+        etapa: string;
+        items: string[];
+      };
+
+      // =====================
+      // Checklist horizontal
+      // =====================
+
+      const CHECKLIST: ChecklistStage[] = [
+        {
+          etapa: "HOLA",
+          items: [
+            "Espacio audio limpio, ordenado",
+            "Espéculos, olivas y cascos desinfectados",
+            "Acogida al cliente con una sonrisa, amable y cercana",
+            "Llamar al paciente por su nombre",
+            "Acompañar al paciente al gabinete para la revisión auditiva",
+            "Confirmar motivo de visita",
+          ],
+        },
+        {
+          etapa: "SOY ÚNICO",
+          items: [
+            "Abrir ficha y rellenar RGPD completa (incluidos checks comerciales)",
+            "Realizar anamnesis HACE (Hábitos, Antecedentes, Clínica, Expectativas)",
+            "Anotar al menos 2 expectativas/necesidades concretas",
+            "Recoger entorno sonoro y situaciones clave para el paciente",
+          ],
+        },
+        {
+          etapa: "MI AUDICIÓN",
+          items: [
+            "Explicar brevemente cada prueba y confirmar comprensión",
+            "Evaluar ambos oídos con videotoscopia y explicar procedimiento",
+            "Realizar timpanometría y explicar procedimiento",
+            "Realizar vía aérea y vía ósea explicando cada paso",
+            "Mantener TV encendida para comunicar audio y mostrar resultados",
+          ],
+        },
+        {
+          etapa: "MI SOLUCIÓN",
+          items: [
+            "Resumir claramente los resultados y su impacto",
+            "Usar gráficas para apoyar la explicación (severidad, área audible, fonemas)",
+            "Vincular resultados con síntomas y quejas de la anamnesis",
+            "Hacer visible la pérdida auditiva con preguntas de implicación",
+            "Simular sonidos para mostrar la diferencia con/ sin ayuda",
+          ],
+        },
+        {
+          etapa: "PRUEBO",
+          items: [
+            "Explicar la prueba de capacidad de adaptación como prueba de salud",
+            "Escoger audífono según perfil en gama adecuada (Diamante)",
+            "Realizar programación inicial y ajustes según perfil",
+            "Explicar funcionamiento y mantenimiento para llevarse audífonos a casa",
+            "Entregar documentación (contrato, presupuesto, pasaporte)",
+          ],
+        },
+        {
+          etapa: "ME COMPROMETO",
+          items: [
+            "Trabajar resolución de objeciones con lenguaje positivo",
+            "Explicar facilidades de pago (Infinity / NextYear)",
+            "Detallar pack Serenidad y Serenidad + (compromisos)",
+            "Explicar en detalle pruebas HIT y su utilidad",
+            "Recomendar accesorios de conectividad y productos de higiene",
+          ],
+        },
+        {
+          etapa: "ME CONVIERTO EN FAN",
+          items: [
+            "Explicar llamadas de seguimiento y agenda futura",
+            "Reforzar logros y mejoras conseguidas en cada visita",
+            "Aplicar técnicas de Neuroventas en el seguimiento",
+          ],
+        },
+        {
+          etapa: "SEGUIMIENTO Y AGENDA",
+          items: [
+            "Registrar prueba en el sistema (Gio)",
+            "Llamar al día siguiente de la prueba para seguimiento",
+            "Agendar visita en 4 días para revisión",
+          ],
+        },
+        {
+          etapa: "COMUNICACIÓN DEL CENTRO",
+          items: [
+            "Comunicación del centro adecuada a su perfil",
+            "Revisión de comunicación en RRSS",
+            "Uniformidad adecuada",
+            "Contacto con locales vecinos y colaboraciones",
+            "Escaparate atractivo con novedad de producto",
+          ],
+        },
+        {
+          etapa: "AYUDAS Y ACUERDOS",
+          items: [
+            "Conocer y activar acuerdos con FIAPAS y ONCE",
+            "Revisar convenios locales (anotar detalle en observaciones)",
+            "Conocer ayudas de comunidad autónoma",
+            "Conocer ayudas generales +65 años y hasta 26 años",
+          ],
+        },
+        {
+          etapa: "INCENTIVOS",
+          items: ["Incentivos por derivación", "Incentivos por AAR"],
+        },
+        {
+          etapa: "FORMACIÓN",
+          items: [
+            "Onboarding Academy realizado",
+            "Formaciones obligatorias de centros exclusivos cumplimentadas",
+            "Formaciones obligatorias de centros audio realizadas",
+          ],
+        },
       ];
-      if (!data.view) data.view = "acciones";
 
-      const mainContent = document.createElement("div");
-      mainContent.className = "center-content";
+      // =====================
+      // Utilidades
+      // =====================
 
-      const info = document.createElement("div");
-      info.className = "grid-3";
-      info.innerHTML = `
-        <div class="field">
-          <label>Nombre del centro</label>
-          <input ${editable?"":"disabled"} data-field="nombre" value="${center.nombre||""}">
-        </div>
-        <div class="field">
-          <label>Delegado</label>
-          <input ${editable?"":"disabled"} data-field="delegado" value="${center.delegado||""}">
-        </div>
-        <div class="field">
-          <label>Audiólogo</label>
-          <input ${editable?"":"disabled"} data-field="audiologo" value="${center.audiologo||""}">
-        </div>
-        <div class="field">
-          <label>Sucursal / Franquicia</label>
-          <select ${editable?"":"disabled"} data-field="tipo">
-            <option value="Sucursal" ${center.tipo==="Sucursal"?"selected":""}>Sucursal</option>
-            <option value="Franquicia" ${center.tipo==="Franquicia"?"selected":""}>Franquicia</option>
-          </select>
-        </div>
-      `;
-      mainContent.appendChild(info);
+      const CENTER_TO_PROVINCE: Record<string, string> = {};
 
-      const subnav = document.createElement("div");
-      subnav.className = "center-subnav";
-      [
-        { id: "acciones", label: "📋 Acciones" },
-        { id: "formaciones", label: "📚 Formaciones y refuerzo" },
-        { id: "visitas", label: "🗓️ Visitas" },
-        { id: "servicios", label: "🧩 Servicios" }
-      ].forEach(b => {
-        const bb = document.createElement("button");
-        bb.dataset.sub = b.id;
-        bb.textContent = b.label;
-        if (data.view === b.id) bb.classList.add("active");
-        subnav.appendChild(bb);
-      });
-      mainContent.appendChild(subnav);
+      const CITY_TO_PROVINCE: Record<string, string> = {
+        NARON: "A CORUÑA (GALICIA)",
+        "NARÓN": "A CORUÑA (GALICIA)",
+        ONDARA: "ALICANTE (COMUNITAT VALENCIANA)",
+      };
 
-      /* --- ACCIONES --- */
-      if (data.view === "acciones") {
-        const box = document.createElement("div");
-        box.innerHTML = `
-          <div class="table-toolbar" style="justify-content:flex-end;">
-            <strong style="margin-right:auto; font-size:0.8rem;">Acciones</strong>
-            ${editable ? `<button class="tiny-btn" data-act="add-accion">+ Acción</button>` : ""}
-          </div>
-        `;
-        const t = document.createElement("table");
-        t.className = "table-like";
-        t.innerHTML = `
-          <thead>
-            <tr>
-              <th>Tipo de acción</th>
-              <th>Fecha</th>
-              <th>Derivaciones</th>
-              <th>Citas</th>
-              <th>Ventas</th>
-              <th>Observaciones</th>
-              ${editable?`<th></th>`:""}
-            </tr>
-          </thead>
-          <tbody>
-            ${(center.acciones||[]).map((a,i)=>{
-              return `
-                <tr data-row="${i}" data-table="acciones">
-                  <td>
-                    ${editable
-                      ? `<select data-table="acciones" data-row="${i}" data-field="tipo">
-                          ${ACCIONES_OPTIONS.map(op=>`<option value="${op}" ${a.tipo===op?"selected":""}>${op}</option>`).join("")}
-                        </select>`
-                      : (a.tipo||"")}
-                  </td>
-                  <td>
-                    ${editable
-                      ? `<input type="date" data-table="acciones" data-row="${i}" data-field="fecha" value="${a.fecha||""}">`
-                      : (a.fecha||"")}
-                  </td>
-                  <td>${editable?`<input type="number" min="0" data-table="acciones" data-row="${i}" data-field="derivaciones" value="${a.derivaciones||""}" style="width:70px;">`:(a.derivaciones||"")}</td>
-                  <td>${editable?`<input type="number" min="0" data-table="acciones" data-row="${i}" data-field="citas" value="${a.citas||""}" style="width:70px;">`:(a.citas||"")}</td>
-                  <td>${editable?`<input type="number" min="0" data-table="acciones" data-row="${i}" data-field="ventas" value="${a.ventas||""}" style="width:70px;">`:(a.ventas||"")}</td>
-                  <td>${editable?`<input type="text" data-table="acciones" data-row="${i}" data-field="obs" value="${a.obs||""}" style="width:160px;">`:(a.obs||"")}</td>
-                  ${editable?`<td><button class="ghost-icon" data-act="del-row">−</button></td>`:""}
-                </tr>
-              `;
-            }).join("")}
-          </tbody>
-        `;
-        box.appendChild(t);
-        mainContent.appendChild(box);
+      function normalizarCentro(nombre: string): string {
+        return nombre.trim().toUpperCase();
       }
 
-      /* --- FORMACIONES --- */
-      if (data.view === "formaciones") {
-        const box = document.createElement("div");
-        box.innerHTML = `
-          <div class="table-toolbar" style="justify-content:flex-end;">
-            <strong style="margin-right:auto; font-size:0.8rem;">Formaciones y refuerzo</strong>
-            ${editable ? `<button class="tiny-btn" data-act="add-forma">+ Formación</button>` : ""}
-          </div>
-        `;
-        const t = document.createElement("table");
-        t.className = "table-like";
-        t.innerHTML = `
-          <thead>
-            <tr>
-              <th>Curso relevante</th>
-              <th>Superado</th>
-              <th>Aplicado</th>
-              <th>Mentoring-Coaching</th>
-              ${editable?`<th></th>`:""}
-            </tr>
-          </thead>
-          <tbody>
-            ${(center.formaciones||[]).map((f,i)=>`
-              <tr data-row="${i}" data-table="formaciones">
-                <td>${editable?`<input type="text" data-table="formaciones" data-row="${i}" data-field="curso" value="${f.curso||""}">`:(f.curso||"")}</td>
-                <td>${editable?`<select data-table="formaciones" data-row="${i}" data-field="superado"><option value="Sí" ${f.superado==="Sí"?"selected":""}>Sí</option><option value="No" ${f.superado==="No"?"selected":""}>No</option></select>`:(f.superado||"")}</td>
-                <td>${editable?`<select data-table="formaciones" data-row="${i}" data-field="aplicado"><option value="Sí" ${f.aplicado==="Sí"?"selected":""}>Sí</option><option value="No" ${f.aplicado==="No"?"selected":""}>No</option></select>`:(f.aplicado||"")}</td>
-                <td>${editable?`<select data-table="formaciones" data-row="${i}" data-field="mentoring"><option value="Sí" ${f.mentoring==="Sí"?"selected":""}>Sí</option><option value="No" ${f.mentoring==="No"?"selected":""}>No</option></select>`:(f.mentoring||"")}</td>
-                ${editable?`<td><button class="ghost-icon" data-act="del-row">−</button></td>`:""}
-              </tr>
-            `).join("")}
-          </tbody>
-        `;
-        box.appendChild(t);
-        mainContent.appendChild(box);
+      function createEmptyVisits(): Visit[] {
+        return [1, 2, 3, 4].map((id) => ({
+          id,
+          fecha: "",
+          responsable: "",
+          excelName: "",
+          hit: "",
+          aar: null,
+          checklist: null,
+        }));
       }
 
-      /* --- VISITAS DEL CENTRO --- */
-      if (data.view === "visitas") {
-        const box = document.createElement("div");
-        box.innerHTML = `
-          <div class="table-toolbar" style="justify-content:flex-end;">
-            <strong style="margin-right:auto; font-size:0.8rem;">Visitas</strong>
-            ${editable ? `<button class="tiny-btn" data-act="add-visita">+ Visita</button>` : ""}
-          </div>
-        `;
-        const t = document.createElement("table");
-        t.className = "table-like";
-        t.innerHTML = `
-          <thead>
-            <tr>
-              <th style="width:120px;">Fecha</th>
-              <th>Checklist %</th>
-              <th>Estado</th>
-              <th>Conv. prueba %</th>
-              <th>Conv. venta %</th>
-              ${editable?`<th></th>`:""}
-            </tr>
-          </thead>
-          <tbody>
-            ${(center.visitas||[]).map((v,i)=>{
-              const estado = Number(v.checklist||0) < 85 ? '<span class="badge-bad">ROJO</span>' : '<span class="badge-ok">VERDE</span>';
-              const clasePrueba = Number(v.convPrueba||0) < 80 ? 'text-red' : 'text-green';
-              const claseVenta = Number(v.convVenta||0) < 80 ? 'text-red' : 'text-green';
-              return `
-                <tr data-row="${i}" data-table="visitas">
-                  <td>${editable?`<input type="date" data-table="visitas" data-row="${i}" data-field="fecha" value="${v.fecha||""}">`:(v.fecha||"")}</td>
-                  <td>${editable?`<input type="number" min="0" max="100" data-table="visitas" data-row="${i}" data-field="checklist" value="${v.checklist||""}" style="width:70px;">`:(v.checklist||"")}</td>
-                  <td>${estado}</td>
-                  <td class="${clasePrueba}">${editable?`<input type="number" min="0" max="100" data-table="visitas" data-row="${i}" data-field="convPrueba" value="${v.convPrueba||""}" style="width:80px;">`:(v.convPrueba||"")}</td>
-                  <td class="${claseVenta}">${editable?`<input type="number" min="0" max="100" data-table="visitas" data-row="${i}" data-field="convVenta" value="${v.convVenta||""}" style="width:80px;">`:(v.convVenta||"")}</td>
-                  ${editable?`<td><button class="ghost-icon" data-act="del-row">−</button></td>`:""}
-                </tr>
-              `;
-            }).join("")}
-          </tbody>
-        `;
-        box.appendChild(t);
-        mainContent.appendChild(box);
+      function parseFecha(fecha: string): Date | null {
+        const regex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+        const match = fecha.match(regex);
+        if (!match) return null;
+        const day = Number(match[1]);
+        const month = Number(match[2]);
+        const year = Number(match[3]);
+        const d = new Date(year, month - 1, day);
+        if (
+          d.getFullYear() !== year ||
+          d.getMonth() !== month - 1 ||
+          d.getDate() !== day
+        ) {
+          return null;
+        }
+        return d;
       }
 
-      /* --- SERVICIOS --- */
-      if (data.view === "servicios") {
-        const box = document.createElement("div");
-        box.innerHTML = `
-          <div class="table-toolbar" style="justify-content:flex-end;">
-            <strong style="margin-right:auto; font-size:0.8rem;">Servicios</strong>
-            ${editable ? `<button class="tiny-btn" data-act="add-servicio">+ Servicio</button>` : ""}
-          </div>
-        `;
-        const t = document.createElement("table");
-        t.className = "table-like";
-        t.innerHTML = `
-          <thead>
-            <tr>
-              <th>Servicio</th>
-              <th>¿Se ofrece?</th>
-              <th>Ventas</th>
-              ${editable?`<th></th>`:""}
-            </tr>
-          </thead>
-          <tbody>
-            ${(center.servicios||[]).map((s,i)=>`
-              <tr data-row="${i}" data-table="servicios">
-                <td>${editable?`<input type="text" data-table="servicios" data-row="${i}" data-field="nombre" value="${s.nombre||""}">`:(s.nombre||"")}</td>
-                <td>${editable?`<select data-table="servicios" data-row="${i}" data-field="activo"><option value="Sí" ${s.activo==="Sí"?"selected":""}>Sí</option><option value="No" ${s.activo==="No"?"selected":""}>No</option></select>`:(s.activo||"")}</td>
-                <td>${editable?`<input type="number" min="0" data-table="servicios" data-row="${i}" data-field="ventas" value="${s.ventas||""}" style="width:90px;">`:(s.ventas||"")}</td>
-                ${editable?`<td><button class="ghost-icon" data-act="del-row">−</button></td>`:""}
-              </tr>
-            `).join("")}
-          </tbody>
-        `;
-        box.appendChild(t);
-        mainContent.appendChild(box);
+      function isValidFecha(fecha: string): boolean {
+        if (!fecha) return true;
+        return parseFecha(fecha) !== null;
       }
 
-      right.appendChild(mainContent);
-      wrap.appendChild(right);
-      contentHolder.appendChild(wrap);
-    }
+      function media(valores: (number | null | undefined)[]): number | null {
+        const nums = valores.filter(
+          (v): v is number => typeof v === "number" && !isNaN(v)
+        );
+        if (nums.length === 0) return null;
+        const total = nums.reduce((sum, v) => sum + v, 0);
+        return total / nums.length;
+      }
 
-    /* --- FORMACIONES BLOCK (con calendario y suc/franq select) --- */
-    function renderFormacionesBlock(data) {
-      contentHolder.innerHTML = "";
-      const sel = data.selected || 0;
-      const delegado = data.delegados[sel] || { nombre: "", tabla: [], adjunto: "" };
+      function porcentajeSi(
+        valores: ("" | "Sí" | "No" | undefined)[]
+      ): number | null {
+        const valid = valores.filter((v) => v === "Sí" || v === "No");
+        if (valid.length === 0) return null;
+        const countSi = valid.filter((v) => v === "Sí").length;
+        return (countSi / valid.length) * 100;
+      }
 
-      const info = document.createElement("div");
-      info.className = "grid-3";
-      info.innerHTML = `
-        <div class="field">
-          <label>Delegado</label>
-          <input disabled value="${delegado.nombre || ""}">
-        </div>
-      `;
-      contentHolder.appendChild(info);
-
-      const box = document.createElement("div");
-      box.innerHTML = `
-        <div class="table-toolbar" style="justify-content:flex-end;">
-          <strong style="margin-right:auto;">Formaciones</strong>
-          ${editable ? `<button class="tiny-btn" data-act="form-add-row">+ Fila</button>` : ``}
-          <label style="font-size:0.7rem;cursor:pointer;">
-            ${delegado.adjunto ? "📎 " + delegado.adjunto : "📎 Adjuntar Excel"}
-            <input type="file" data-act="form-attach" style="display:none;">
-          </label>
-          ${editable ? `<button class="tiny-btn" data-act="form-save-block">Guardar</button>` : ``}
-        </div>
-      `;
-      const t = document.createElement("table");
-      t.className = "table-like";
-      t.innerHTML = `
-        <thead>
-          <tr>
-            <th style="width:120px;">Fecha</th>
-            <th style="min-width:200px;">Centros</th>
-            <th style="width:130px;">Suc./Franq.</th>
-            <th>Tema formación</th>
-            <th style="width:80px;">Superado</th>
-            <th style="width:80px;">Aplicado</th>
-            <th style="min-width:180px;">Observaciones</th>
-            ${editable ? `<th style="width:35px;"></th>` : ``}
-          </tr>
-        </thead>
-        <tbody>
-          ${(delegado.tabla || []).map((r,i)=>`
-            <tr data-row="${i}">
-              <td>${editable?`<input type="date" data-form-row="${i}" data-form-field="fecha" value="${r.fecha||""}">`:(r.fecha||"")}</td>
-              <td>${editable?`<input type="text" data-form-row="${i}" data-form-field="centros" value="${r.centros||""}" style="width:100%;">`:(r.centros||"")}</td>
-              <td>${editable?`<select data-form-row="${i}" data-form-field="sucursal"><option value="Sucursal" ${r.sucursal==="Sucursal"?"selected":""}>Sucursal</option><option value="Franquicia" ${r.sucursal==="Franquicia"?"selected":""}>Franquicia</option></select>`:(r.sucursal||"")}</td>
-              <td>${editable?`<input type="text" data-form-row="${i}" data-form-field="tema" value="${r.tema||""}" style="width:100%;">`:(r.tema||"")}</td>
-              <td>${editable?`<select data-form-row="${i}" data-form-field="superado"><option value="Sí" ${r.superado==="Sí"?"selected":""}>Sí</option><option value="No" ${r.superado==="No"?"selected":""}>No</option></select>`:(r.superado||"")}</td>
-              <td>${editable?`<select data-form-row="${i}" data-form-field="aplicado"><option value="Sí" ${r.aplicado==="Sí"?"selected":""}>Sí</option><option value="No" ${r.aplicado==="No"?"selected":""}>No</option></select>`:(r.aplicado||"")}</td>
-              <td>${editable?`<input type="text" data-form-row="${i}" data-form-field="obs" value="${r.obs||""}" style="width:100%;">`:(r.obs||"")}</td>
-              ${editable ? `<td><button class="ghost-icon" data-act="form-del-row" data-row="${i}">−</button></td>` : ``}
-            </tr>
-          `).join("")}
-        </tbody>
-      `;
-      box.appendChild(t);
-      contentHolder.appendChild(box);
-    }
-
-    /* --- VISITAS BLOCK (con visitador, calendario, selects) --- */
-    function renderVisitasBlock(data) {
-      contentHolder.innerHTML = "";
-      const sel = data.selected || 0;
-      const delegado = data.delegados[sel] || { nombre: "", visitador: "", visitas: [], adjunto: "" };
-
-      const info = document.createElement("div");
-      info.className = "grid-3";
-      info.innerHTML = `
-        <div class="field">
-          <label>Delegado</label>
-          <input disabled value="${delegado.nombre || ""}">
-        </div>
-        <div class="field">
-          <label>Visitador</label>
-          <input ${editable?"":"disabled"} data-vis-meta="visitador" value="${delegado.visitador || ""}">
-        </div>
-      `;
-      contentHolder.appendChild(info);
-
-      const box = document.createElement("div");
-      box.innerHTML = `
-        <div class="table-toolbar" style="justify-content:flex-end;">
-          <strong style="margin-right:auto;">Visitas</strong>
-          ${editable ? `<button class="tiny-btn" data-act="vis-add-row">+ Visita</button>` : ``}
-          <label style="font-size:0.7rem;cursor:pointer;">
-            ${delegado.adjunto ? "📎 " + delegado.adjunto : "📎 Adjuntar Excel"}
-            <input type="file" data-act="vis-attach" style="display:none;">
-          </label>
-          ${editable ? `<button class="tiny-btn" data-act="vis-save-block">Guardar</button>` : ``}
-        </div>
-      `;
-      const t = document.createElement("table");
-      t.className = "table-like";
-      t.innerHTML = `
-        <thead>
-          <tr>
-            <th style="width:115px;">Fecha</th>
-            <th style="min-width:220px;">Centros</th>
-            <th style="width:120px;">Suc./Franq.</th>
-            <th style="width:110px;">Audiólogo</th>
-            <th style="width:85px;">Checklist %</th>
-            <th style="width:70px;">Estado</th>
-            <th style="width:95px;">Conv. prueba %</th>
-            <th style="width:95px;">Conv. venta %</th>
-            <th style="width:75px;">HIT</th>
-            <th style="width:75px;">AAR</th>
-            <th style="width:95px;">RT-equipo</th>
-            <th style="min-width:220px;">Observaciones</th>
-            ${editable ? `<th style="width:35px;"></th>` : ``}
-          </tr>
-        </thead>
-        <tbody>
-          ${(delegado.visitas || []).map((v,i)=>{
-            const malo = Number(v.checklist || 0) < 85;
-            const estado = malo ? '<span class="badge-bad">ROJO</span>' : '<span class="badge-ok">VERDE</span>';
-            const pruebaMala = Number(v.convPrueba || 0) < 80;
-            const ventaMala = Number(v.convVenta || 0) < 80;
-            return `
-              <tr data-row="${i}">
-                <td>${editable?`<input type="date" data-vis-row="${i}" data-vis-field="fecha" value="${v.fecha||""}">`:(v.fecha||"")}</td>
-                <td>${editable?`<input type="text" data-vis-row="${i}" data-vis-field="centros" value="${v.centros||""}" style="width:100%;">`:(v.centros||"")}</td>
-                <td>${editable?`<select data-vis-row="${i}" data-vis-field="sucursal"><option value="Sucursal" ${v.sucursal==="Sucursal"?"selected":""}>Sucursal</option><option value="Franquicia" ${v.sucursal==="Franquicia"?"selected":""}>Franquicia</option></select>`:(v.sucursal||"")}</td>
-                <td>${editable?`<input type="text" data-vis-row="${i}" data-vis-field="audiologo" value="${v.audiologo||""}" style="width:100%;">`:(v.audiologo||"")}</td>
-                <td>${editable?`<input type="number" min="0" max="100" data-vis-row="${i}" data-vis-field="checklist" value="${v.checklist||""}" style="width:70px;">`:(v.checklist||"")}</td>
-                <td>${estado}</td>
-                <td class="${pruebaMala?"text-red":"text-green"}">${editable?`<input type="number" min="0" max="100" data-vis-row="${i}" data-vis-field="convPrueba" value="${v.convPrueba||""}" style="width:80px;">`:(v.convPrueba||"")}</td>
-                <td class="${ventaMala?"text-red":"text-green"}">${editable?`<input type="number" min="0" max="100" data-vis-row="${i}" data-vis-field="convVenta" value="${v.convVenta||""}" style="width:80px;">`:(v.convVenta||"")}</td>
-                <td>${editable?`<select data-vis-row="${i}" data-vis-field="hit"><option value="Sí" ${v.hit==="Sí"?"selected":""}>Sí</option><option value="No" ${v.hit==="No"?"selected":""}>No</option></select>`:(v.hit||"")}</td>
-                <td>${editable?`<select data-vis-row="${i}" data-vis-field="arr"><option value="Sí" ${v.arr==="Sí"?"selected":""}>Sí</option><option value="No" ${v.arr==="No"?"selected":""}>No</option></select>`:(v.arr||"")}</td>
-                <td>${editable?`<select data-vis-row="${i}" data-vis-field="rt"><option value="Sí" ${v.rt==="Sí"?"selected":""}>Sí</option><option value="No" ${v.rt==="No"?"selected":""}>No</option></select>`:(v.rt||"")}</td>
-                <td>${editable?`<input type="text" data-vis-row="${i}" data-vis-field="obs" value="${v.obs||""}" style="width:100%;">`:(v.obs||"")}</td>
-                ${editable ? `<td><button class="ghost-icon" data-act="vis-del-row" data-row="${i}">−</button></td>` : ``}
-              </tr>
-            `;
-          }).join("")}
-        </tbody>
-      `;
-      box.appendChild(t);
-      contentHolder.appendChild(box);
-    }
-
-    /* --- RENDER SIMPLE --- */
-    function renderSimple(data) {
-      contentHolder.innerHTML = "";
-      const list = document.createElement("div");
-      list.className = "list";
-      (data.items || []).forEach((item, idx) => {
-        const div = document.createElement("div");
-        div.className = "item";
-        div.innerHTML = `
-          <div class="item-header">
-            <strong ${editable ? `contenteditable="true" data-idx="${idx}" data-field="titulo"` : ""}>${item.titulo}</strong>
-            ${editable ? `<div class="item-actions"><button class="tiny-btn" data-act="del-simple" data-idx="${idx}">✖</button></div>` : ""}
-          </div>
-          <small ${editable ? `contenteditable="true" data-idx="${idx}" data-field="detalle"` : ""}>${item.detalle}</small>
-          <small>📅 <span ${editable ? `contenteditable="true" data-idx="${idx}" data-field="fecha"` : ""}>${item.fecha || ""}</span></small>
-        `;
-        list.appendChild(div);
-      });
-      if (editable) {
-        const addBtn = document.createElement("button");
-        addBtn.textContent = "+ Añadir elemento";
-        addBtn.className = "tiny-btn";
-        addBtn.onclick = () => {
-          data.items.push({ titulo: "Nuevo", detalle: "", fecha: "" });
-          persist(); renderCurrentBlock();
+      function donutStyle(percent: number | null): React.CSSProperties {
+        const value = percent && percent > 0 ? Math.min(percent, 100) : 0;
+        const color = percent !== null && percent >= 85 ? "#16a34a" : "#dc2626";
+        return {
+          background: `conic-gradient(${color} ${value * 3.6}deg, #e5e7eb 0deg)`,
         };
-        list.appendChild(addBtn);
-      }
-      contentHolder.appendChild(list);
-    }
-
-    /* --- RENDER PRINCIPAL --- */
-    function renderCurrentBlock() {
-      const data = blocks[currentBlock]; if (!data) return;
-      badgeColor.style.background = data.color || "#fff";
-      sectionTitle.textContent = currentBlock;
-      if (!editable) contentWrap.classList.add("locked"); else contentWrap.classList.remove("locked");
-
-      if (currentBlock === "OBJETIVOS") {
-        renderObjectives(data);
-      } else if (currentBlock === "CENTROS EXCLUSIVOS" || currentBlock === "CENTROS FLOP") {
-        renderCentersBlock(currentBlock, data);
-      } else if (currentBlock === "FORMACIONES Y MENTORING") {
-        renderFormacionesBlock(data);
-      } else if (currentBlock === "VISITAS") {
-        renderVisitasBlock(data);
-      } else {
-        renderSimple(data);
-      }
-    }
-
-    /* --- PIN --- */
-    pinBtn.addEventListener("click", () => {
-      const v = pinInput.value.trim();
-      if (v === PIN_MASTER) setEditable(true);
-      else { alert("PIN incorrecto. Usa AR4321"); setEditable(false); }
-    });
-    pinInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        const v = pinInput.value.trim();
-        if (v === PIN_MASTER) setEditable(true);
-        else { alert("PIN incorrecto. Usa AR4321"); setEditable(false); }
-      }
-    });
-
-    /* --- CAMBIO DE BLOQUE --- */
-    leftPanel.addEventListener("click", (e) => {
-      const btn = e.target.closest(".block-btn");
-      if (!btn) return;
-      document.querySelectorAll(".block-btn").forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-      currentBlock = btn.dataset.type;
-      renderCurrentBlock();
-    });
-
-    /* --- AÑADIR BLOQUE --- */
-    addBlock.addEventListener("click", () => {
-      if (!editable) return alert("Primero desbloquea edición con el PIN AR4321.");
-      const name = prompt("Nombre del nuevo bloque:");
-      if (!name) return;
-      blocks[name] = { color: "#fff5d9", items: [] };
-      persist();
-      const btn = document.createElement("button");
-      btn.className = "block-btn";
-      btn.dataset.type = name;
-      btn.dataset.color = "#fff5d9";
-      btn.innerHTML = `<div class="tag" style="background: rgba(0,0,0,0.04);">🆕</div><div><div>${name}</div><small>Nuevo bloque</small></div>`;
-      leftPanel.appendChild(btn);
-    });
-
-    /* --- CLICS DENTRO DEL CONTENIDO --- */
-    contentHolder.addEventListener("click", (e) => {
-      const t = e.target;
-
-      /* OBJETIVOS */
-      if (t.dataset.act === "edit-obj") {
-        const idx = +t.dataset.idx;
-        const item = blocks["OBJETIVOS"].items[idx];
-        const nt = prompt("Título del objetivo", item.titulo || "");
-        if (nt !== null) item.titulo = nt;
-        const nd = prompt("Detalle / KPI", item.detalle || "");
-        if (nd !== null) item.detalle = nd;
-        const nf = prompt("Fecha", item.fecha || "");
-        if (nf !== null) item.fecha = nf;
-        persist(); renderCurrentBlock(); return;
-      }
-      if (t.dataset.act === "add-obj") {
-        blocks["OBJETIVOS"].items.splice(+t.dataset.idx + 1, 0, { titulo: "Nuevo objetivo", detalle: "", fecha: "" });
-        persist(); renderCurrentBlock(); return;
-      }
-      if (t.dataset.act === "del-obj") {
-        blocks["OBJETIVOS"].items.splice(+t.dataset.idx, 1);
-        persist(); renderCurrentBlock(); return;
       }
 
-      /* SELECTOR CENTRO DE ESTE BLOQUE */
-      if (t.dataset.act === "select-center") {
-        const data = blocks[currentBlock];
-        data.selected = parseInt(t.value, 10) || 0;
-        persist(); renderCurrentBlock(); return;
+      function kpiBadgeClass(percent: number | null): string {
+        if (percent === null) return "bg-gray-200 text-gray-700";
+        if (percent >= 85) return "bg-green-100 text-green-800";
+        return "bg-red-100 text-red-700";
       }
 
-      /* SUBTABS DE CENTROS */
-      if (t.closest(".center-subnav") && (currentBlock === "CENTROS EXCLUSIVOS" || currentBlock === "CENTROS FLOP")) {
-        const btn = t.closest("button[data-sub]");
-        if (btn) {
-          const data = blocks[currentBlock];
-          data.view = btn.dataset.sub;
-          persist(); renderCurrentBlock();
+      function delegadoColor(delegado: string): React.CSSProperties {
+        if (!delegado) return {};
+        let hash = 0;
+        const texto = delegado.trim().toUpperCase();
+        for (let i = 0; i < texto.length; i++) {
+          hash = (hash * 31 + texto.charCodeAt(i)) | 0;
         }
-        return;
+        const hue = (Math.abs(hash) % 360 + 180) % 360;
+        return {
+          backgroundColor: `hsl(${hue}, 75%, 90%)`,
+          color: `hsl(${hue}, 35%, 28%)`,
+        };
       }
 
-      /* AÑADIR / BORRAR / RENOMBRAR CENTRO */
-      if (t.dataset.act === "add-center") {
-        const data = blocks[currentBlock];
-        data.centers.push({
-          nombre: currentBlock === "CENTROS EXCLUSIVOS" ? "Centro exclusivo nuevo" : "Centro flop nuevo",
-          delegado: "",
-          audiologo: "",
-          tipo: "Sucursal",
-          acciones: [],
-          formaciones: [],
-          visitas: [],
-          servicios: [
-            { nombre: "Tinnitus-TRT", activo: "No", ventas: "" },
-            { nombre: "Pediátrico", activo: "No", ventas: "" },
-            { nombre: "AAR", activo: "No", ventas: "" },
-            { nombre: "HIT", activo: "No", ventas: "" }
-          ]
+      function inferProvincia(centro: string, provinciaExcel: string): string {
+        if (provinciaExcel && provinciaExcel.trim() !== "") {
+          return provinciaExcel.trim().toUpperCase();
+        }
+
+        const centroNorm = normalizarCentro(centro);
+
+        if (CENTER_TO_PROVINCE[centroNorm]) {
+          return CENTER_TO_PROVINCE[centroNorm];
+        }
+
+        const tokens = centroNorm
+          .split(/[\,\-\(\)]/)
+          .map((t) => t.trim())
+          .filter(Boolean);
+
+        for (let i = tokens.length - 1; i >= 0; i--) {
+          const token = tokens[i];
+          if (CITY_TO_PROVINCE[token]) {
+            return CITY_TO_PROVINCE[token];
+          }
+        }
+
+        return "";
+      }
+
+      // =====================
+      // Componente principal
+      // =====================
+
+      function App() {
+        const [pin, setPin] = useState("");
+        const [authorized, setAuthorized] = useState(false);
+
+        const [search, setSearch] = useState("");
+        const [filterCodigo, setFilterCodigo] = useState("");
+        const [filterPropietario, setFilterPropietario] = useState("");
+        const [filterCentro, setFilterCentro] = useState("");
+        const [filterProvincia, setFilterProvincia] = useState("");
+        const [filterDelegado, setFilterDelegado] = useState("");
+        const [filterRegion, setFilterRegion] = useState("");
+        const [filterResponsableAudio, setFilterResponsableAudio] =
+          useState("");
+        const [filterCentroAAR, setFilterCentroAAR] = useState("");
+        const [filterCorreo, setFilterCorreo] = useState("");
+
+        const [storesInput, setStoresInput] = useState("");
+        const [stores, setStores] = useState<Store[]>([]);
+        const [selectedStoreId, setSelectedStoreId] = useState<number | null>(
+          null
+        );
+
+        const handlePin = () => {
+          if (pin === "AR4321") setAuthorized(true);
+        };
+
+        const handleApplyStores = () => {
+          if (!storesInput.trim()) return;
+
+          const lines = storesInput
+            .split("\n")
+            .map((line) => line.trim())
+            .filter(Boolean);
+
+          const newStores: Store[] = lines.map((raw, index) => {
+            const parts = raw.split("\t");
+            const [
+              codigo = "",
+              propietario = "",
+              centro = "",
+              provincia = "",
+              correo = "",
+              centroRegional = "",
+            ] = parts;
+
+            const provinciaInferida = inferProvincia(centro, provincia);
+
+            return {
+              id: index + 1,
+              raw,
+              codigo,
+              propietario,
+              centro,
+              provincia: provinciaInferida,
+              correo,
+              centroRegional,
+              region: "",
+              responsableAudio: "",
+              centroAAR: "",
+              visitas: createEmptyVisits(),
+            };
+          });
+
+          setStores(newStores);
+          setSelectedStoreId(newStores.length > 0 ? newStores[0].id : null);
+        };
+
+        const filteredStores = stores.filter((store) => {
+          const textoGlobal = `${store.codigo} ${store.propietario} ${store.centro} ${store.provincia} ${store.centroRegional} ${store.correo}`.toLowerCase();
+
+          if (search && !textoGlobal.includes(search.toLowerCase()))
+            return false;
+
+          if (
+            filterCodigo &&
+            !store.codigo.toLowerCase().includes(filterCodigo.toLowerCase())
+          )
+            return false;
+
+          if (
+            filterPropietario &&
+            !store.propietario
+              .toLowerCase()
+              .includes(filterPropietario.toLowerCase())
+          )
+            return false;
+
+          if (
+            filterCentro &&
+            !store.centro.toLowerCase().includes(filterCentro.toLowerCase())
+          )
+            return false;
+
+          if (
+            filterCorreo &&
+            !store.correo.toLowerCase().includes(filterCorreo.toLowerCase())
+          )
+            return false;
+
+          if (
+            filterProvincia &&
+            !store.provincia.toLowerCase().includes(filterProvincia.toLowerCase())
+          )
+            return false;
+
+          if (
+            filterDelegado &&
+            !store.centroRegional
+              .toLowerCase()
+              .includes(filterDelegado.toLowerCase())
+          )
+            return false;
+
+          if (
+            filterRegion &&
+            !store.region.toLowerCase().includes(filterRegion.toLowerCase())
+          )
+            return false;
+
+          if (
+            filterResponsableAudio &&
+            !store.responsableAudio
+              .toLowerCase()
+              .includes(filterResponsableAudio.toLowerCase())
+          )
+            return false;
+
+          if (filterCentroAAR && store.centroAAR !== filterCentroAAR)
+            return false;
+
+          return true;
         });
-        data.selected = data.centers.length - 1;
-        persist(); renderCurrentBlock(); return;
-      }
-      if (t.dataset.act === "del-center") {
-        const data = blocks[currentBlock];
-        if (!data.centers || data.centers.length === 0) return;
-        const idx = data.selected || 0;
-        data.centers.splice(idx, 1);
-        if (data.selected > 0) data.selected -= 1;
-        persist(); renderCurrentBlock(); return;
-      }
-      if (t.dataset.act === "rename-center-head") {
-        const data = blocks[currentBlock];
-        const idx = data.selected || 0;
-        const c = data.centers[idx];
-        const nuevo = prompt("Nombre del centro:", c.nombre || "");
-        if (nuevo !== null) {
-          c.nombre = nuevo.trim();
-          persist(); renderCurrentBlock();
-        }
-        return;
-      }
-      if (t.dataset.act === "save-centers") {
-        persist();
-        alert("Centros guardados en este bloque.");
-        return;
+
+        const groupedStoresByDelegado: { delegado: string; stores: Store[] }[] =
+          [];
+        const mapDelegado = new Map<string, Store[]>();
+        filteredStores.forEach((store) => {
+          const key = store.centroRegional || "Sin delegado";
+          const current = mapDelegado.get(key) || [];
+          current.push(store);
+          mapDelegado.set(key, current);
+        });
+        mapDelegado.forEach((storesGrupo, delegado) => {
+          groupedStoresByDelegado.push({ delegado, stores: storesGrupo });
+        });
+
+        const selectedStore =
+          stores.find((store) => store.id === selectedStoreId) || null;
+
+        const updateStoreField = <K extends keyof Store>(
+          id: number,
+          field: K,
+          value: Store[K]
+        ) => {
+          setStores((prev) =>
+            prev.map((store) =>
+              store.id === id ? { ...store, [field]: value } : store
+            )
+          );
+        };
+
+        const updateVisitField = <K extends keyof Visit>(
+          storeId: number,
+          visitId: number,
+          field: K,
+          value: Visit[K]
+        ) => {
+          setStores((prev) =>
+            prev.map((store) => {
+              if (store.id !== storeId) return store;
+              return {
+                ...store,
+                visitas: store.visitas.map((visit) =>
+                  visit.id === visitId ? { ...visit, [field]: value } : visit
+                ),
+              };
+            })
+          );
+        };
+
+        const allVisits: Visit[] = stores.flatMap((s) => s.visitas);
+
+        const visitasValidasGlobal = allVisits.filter(
+          (v) => v.fecha && v.excelName && isValidFecha(v.fecha)
+        );
+
+        const totalVisitas = visitasValidasGlobal.length;
+
+        const totalTiendas = stores.length;
+        const tiendasConVisita = stores.filter((s) =>
+          s.visitas.some(
+            (v) => v.fecha && v.excelName && isValidFecha(v.fecha)
+          )
+        ).length;
+        const porcentajeTiendasVisitadas =
+          totalTiendas > 0 ? (tiendasConVisita / totalTiendas) * 100 : 0;
+
+        const checklistMedia = media(
+          visitasValidasGlobal.map((v) => v.checklist)
+        );
+        const hitMedia = porcentajeSi(visitasValidasGlobal.map((v) => v.hit));
+
+        const visitasConAAR = visitasValidasGlobal.filter(
+          (v) => typeof v.aar === "number" && !isNaN(v.aar as number)
+        );
+        const conteoAAR = visitasConAAR.length;
+        const aarMedia = media(visitasConAAR.map((v) => v.aar));
+
+        const algunFechaInvalida = allVisits.some(
+          (v) => v.fecha && !isValidFecha(v.fecha)
+        );
+
+        return (
+          <div className="min-h-screen bg-gray-100 font-sans">
+            {!authorized ? (
+              <div className="flex items-center justify-center h-screen">
+                <div className="bg-white p-10 rounded-2xl shadow-xl w-80">
+                  <h2 className="text-xl font-bold text-center mb-4">
+                    Acceso Plataforma
+                  </h2>
+                  <input
+                    type="password"
+                    className="w-full p-2 border rounded mb-4"
+                    placeholder="Introduce PIN"
+                    value={pin}
+                    onChange={(e) => setPin(e.target.value)}
+                  />
+                  <button
+                    onClick={handlePin}
+                    className="w-full bg-blue-600 text-white py-2 rounded-xl shadow"
+                  >
+                    Entrar
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="p-6">
+                {/* HEADER */}
+                <header className="bg-red-600 text-white p-5 rounded-2xl shadow flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <span className="text-3xl">🎧</span>
+                    <h1 className="text-2xl font-bold">
+                      Seguimiento de procesos de Audio
+                    </h1>
+                  </div>
+                  <button className="bg-white text-red-600 px-4 py-2 rounded-xl shadow font-semibold">
+                    Guardar
+                  </button>
+                </header>
+
+                {/* MAPA CHECKLIST + DASHBOARD HORIZONTAL */}
+                <section className="mt-6 space-y-6">
+                  {/* Mapa checklist */}
+                  <div className="bg-white p-6 rounded-2xl shadow">
+                    <h2 className="font-bold text-lg mb-2">
+                      Mapa horizontal de checklist de visita
+                    </h2>
+                    <p className="text-gray-500 mb-4 text-sm">
+                      Etapas del proceso de audio según el checklist oficial.
+                    </p>
+                    <div className="flex gap-4 overflow-x-auto pb-2">
+                      {CHECKLIST.map((stage) => (
+                        <div
+                          key={stage.etapa}
+                          className="min-w-[260px] max-w-xs bg-gray-50 border rounded-2xl px-4 py-3 flex-shrink-0"
+                        >
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-[11px] font-bold uppercase tracking-wide text-red-700">
+                              {stage.etapa}
+                            </span>
+                            <span className="text-[10px] text-gray-500">
+                              {stage.items.length} pts
+                            </span>
+                          </div>
+                          <ul className="space-y-1">
+                            {stage.items.map((item, idx) => (
+                              <li
+                                key={idx}
+                                className="text-[11px] text-gray-700 flex gap-1"
+                              >
+                                <span className="mt-1 h-1.5 w-1.5 rounded-full bg-red-500 flex-shrink-0" />
+                                <span className="leading-tight">{item}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Dashboard horizontal por tienda */}
+                  <div className="bg-white p-4 rounded-2xl shadow">
+                    <h3 className="font-bold text-sm mb-3">
+                      Dashboard horizontal por tienda (media de todos los Excel)
+                    </h3>
+                    {stores.length === 0 ? (
+                      <p className="text-xs text-gray-500">
+                        Aún no hay tiendas cargadas. Pega el listado y añade visitas.
+                      </p>
+                    ) : (
+                      <div className="flex gap-4 overflow-x-auto pb-2">
+                        {stores.map((store) => {
+                          const visitasValidas = store.visitas.filter(
+                            (v) =>
+                              v.fecha && v.excelName && isValidFecha(v.fecha)
+                          );
+                          const visitasCount = visitasValidas.length;
+                          const checklistMedioTienda = media(
+                            visitasValidas.map((v) => v.checklist)
+                          );
+                          const hitMedioTienda = porcentajeSi(
+                            visitasValidas.map((v) => v.hit)
+                          );
+
+                          return (
+                            <div
+                              key={store.id}
+                              className="min-w-[260px] max-w-xs bg-gray-50 rounded-2xl px-4 py-3 border flex-shrink-0 flex flex-col gap-2"
+                            >
+                              <div className="flex justify-between items-start mb-1">
+                                <div>
+                                  <p className="text-xs font-semibold">
+                                    {store.centro || store.codigo || store.raw}
+                                  </p>
+                                  <div className="flex items-center gap-2 mt-0.5">
+                                    <span
+                                      className="text-[10px] px-2 py-0.5 rounded-full"
+                                      style={delegadoColor(store.centroRegional)}
+                                    >
+                                      {store.provincia || "Provincia sin definir"}
+                                    </span>
+                                    <span
+                                      className="text-[10px] px-2 py-0.5 rounded-full"
+                                      style={delegadoColor(store.centroRegional)}
+                                    >
+                                      {store.centroRegional
+                                        ? `Delegado: ${store.centroRegional}`
+                                        : "Sin delegado"}
+                                    </span>
+                                  </div>
+                                </div>
+                                <span className="text-[10px] text-gray-500">
+                                  {visitasCount} visita(s)
+                                </span>
+                              </div>
+
+                              <div className="flex items-center justify-between gap-2 mt-1">
+                                <div className="flex items-center gap-2">
+                                  <div
+                                    className="w-10 h-10 rounded-full flex items-center justify-center text-[10px] font-bold text-red-700"
+                                    style={donutStyle(checklistMedioTienda)}
+                                  >
+                                    <div className="w-7 h-7 rounded-full bg-white flex items-center justify-center">
+                                      <span>
+                                        {checklistMedioTienda !== null
+                                          ? `${checklistMedioTienda.toFixed(0)}%`
+                                          : "--"}
+                                      </span>
+                                    </div>
+                                  </div>
+                                  <div className="text-[10px]">
+                                    <p className="font-semibold">Checklist</p>
+                                    <p className="text-gray-500 leading-tight">
+                                      % medio de checklist de todas las visitas.
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="mt-2 text-[10px] bg-white rounded-xl px-2 py-1 border flex items-center justify-between">
+                                <div>
+                                  <p className="font-semibold mb-0.5">HIT</p>
+                                  <p className="text-gray-700">
+                                    {hitMedioTienda !== null
+                                      ? `${hitMedioTienda.toFixed(
+                                          0
+                                        )}% visitas con HIT = Sí`
+                                      : "Sin datos de HIT"}
+                                  </p>
+                                </div>
+                                <div className="text-right text-[9px] text-gray-500">
+                                  <p>Total visitas válidas</p>
+                                  <p>{visitasCount}</p>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+
+                  {algunFechaInvalida && (
+                    <p className="text-xs text-red-500 mt-1">
+                      Hay fechas con formato incorrecto. Usa siempre el formato
+                      <strong> dd/mm/aaaa</strong>.
+                    </p>
+                  )}
+                </section>
+
+                {/* LISTADO DE TIENDAS + DETALLE */}
+                <div className="mt-10 grid grid-cols-1 md:grid-cols-[320px_1fr] gap-6">
+                  {/* Lateral listado */}
+                  <aside className="bg-white p-5 rounded-2xl shadow h-[70vh] overflow-auto">
+                    <h3 className="font-bold text-lg mb-3">Listado de tiendas</h3>
+                    <p className="text-xs text-gray-500 mb-2">
+                      Pega el listado de tiendas desde Excel (una fila por línea).
+                    </p>
+                    <textarea
+                      className="w-full p-2 border rounded mb-2 text-xs h-24"
+                      placeholder={
+                        "CODIGO\tPROPIETARIO\tCENTRO\tPROVINCIA\tCORREO\tDELEGADO REGIONAL"
+                      }
+                      value={storesInput}
+                      onChange={(e) => setStoresInput(e.target.value)}
+                    />
+                    <button
+                      onClick={handleApplyStores}
+                      className="mb-4 text-xs px-3 py-1 rounded-full bg-red-600 text-white font-semibold shadow"
+                    >
+                      Aplicar listado
+                    </button>
+
+                    {/* Buscador global */}
+                    <input
+                      type="text"
+                      placeholder="Buscar por cualquier campo..."
+                      className="w-full p-2 border rounded mb-3 text-xs"
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                    />
+
+                    {/* Filtros por campo */}
+                    <div className="grid grid-cols-1 gap-2 text-[11px] mb-4">
+                      <input
+                        type="text"
+                        className="w-full p-1.5 border rounded"
+                        placeholder="Filtrar código"
+                        value={filterCodigo}
+                        onChange={(e) => setFilterCodigo(e.target.value)}
+                      />
+                      <input
+                        type="text"
+                        className="w-full p-1.5 border rounded"
+                        placeholder="Filtrar propietario"
+                        value={filterPropietario}
+                        onChange={(e) => setFilterPropietario(e.target.value)}
+                      />
+                      <input
+                        type="text"
+                        className="w-full p-1.5 border rounded"
+                        placeholder="Filtrar centro"
+                        value={filterCentro}
+                        onChange={(e) => setFilterCentro(e.target.value)}
+                      />
+                      <input
+                        type="text"
+                        className="w-full p-1.5 border rounded"
+                        placeholder="Filtrar correo"
+                        value={filterCorreo}
+                        onChange={(e) => setFilterCorreo(e.target.value)}
+                      />
+                      <input
+                        type="text"
+                        className="w-full p-1.5 border rounded"
+                        placeholder="Filtrar provincia"
+                        value={filterProvincia}
+                        onChange={(e) => setFilterProvincia(e.target.value)}
+                      />
+                      <input
+                        type="text"
+                        className="w-full p-1.5 border rounded"
+                        placeholder="Filtrar delegado regional"
+                        value={filterDelegado}
+                        onChange={(e) => setFilterDelegado(e.target.value)}
+                      />
+                      <input
+                        type="text"
+                        className="w-full p-1.5 border rounded"
+                        placeholder="Filtrar región"
+                        value={filterRegion}
+                        onChange={(e) => setFilterRegion(e.target.value)}
+                      />
+                      <input
+                        type="text"
+                        className="w-full p-1.5 border rounded"
+                        placeholder="Filtrar responsable audio"
+                        value={filterResponsableAudio}
+                        onChange={(e) =>
+                          setFilterResponsableAudio(e.target.value)
+                        }
+                      />
+                      <select
+                        className="w-full p-1.5 border rounded"
+                        value={filterCentroAAR}
+                        onChange={(e) => setFilterCentroAAR(e.target.value)}
+                      >
+                        <option value="">Filtrar centro AAR...</option>
+                        <option value="Sí">Sí</option>
+                        <option value="No">No</option>
+                      </select>
+                    </div>
+
+                    {filteredStores.length === 0 && (
+                      <p className="text-xs text-gray-400">
+                        No hay tiendas cargadas o no coincide ninguna con los filtros.
+                      </p>
+                    )}
+
+                    {groupedStoresByDelegado.map((grupo) => (
+                      <div key={grupo.delegado} className="mb-3">
+                        <div
+                          className="text-[11px] font-semibold px-2 py-1 rounded-full inline-block mb-1"
+                          style={
+                            grupo.delegado === "Sin delegado"
+                              ? { backgroundColor: "#e5e7eb", color: "#374151" }
+                              : delegadoColor(grupo.delegado)
+                          }
+                        >
+                          {grupo.delegado === "Sin delegado"
+                            ? "Sin delegado asignado"
+                            : `Delegado: ${grupo.delegado}`}
+                        </div>
+                        {grupo.stores.map((store) => (
+                          <button
+                            key={store.id}
+                            type="button"
+                            onClick={() => setSelectedStoreId(store.id)}
+                            className={`w-full text-left border-b py-2 px-1 rounded hover:bg-red-50 transition ${
+                              selectedStoreId === store.id ? "bg-red-50" : ""
+                            }`}
+                          >
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm font-medium">
+                                {store.centro || store.codigo || "Sin centro"}
+                              </span>
+                              <span
+                                className="text-[10px] px-2 py-0.5 rounded-full"
+                                style={delegadoColor(store.centroRegional)}
+                              >
+                                {store.provincia || "Provincia sin definir"}
+                              </span>
+                            </div>
+                            <div className="text-[10px] text-gray-500 flex justify-between mt-1">
+                              <span>{store.propietario || "Sin propietario"}</span>
+                              <span className="italic">
+                                {store.codigo || "Sin código"}
+                              </span>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    ))}
+                  </aside>
+
+                  {/* Detalle de tienda */}
+                  <main className="bg-white p-6 rounded-2xl shadow h-[70vh] flex flex-col">
+                    <h3 className="text-xl font-bold mb-4">
+                      Detalle de tienda
+                      {selectedStore
+                        ? `: ${selectedStore.centro || selectedStore.codigo}`
+                        : ""}
+                    </h3>
+
+                    {!selectedStore ? (
+                      <p className="text-gray-500 text-sm">
+                        Carga primero el listado de tiendas y selecciona una.
+                      </p>
+                    ) : (
+                      <div className="flex-1 flex flex-col gap-6 overflow-auto pr-2">
+                        {/* Datos básicos */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs bg-gray-50 border rounded-2xl p-4">
+                          <div>
+                            <p className="font-semibold mb-0.5">Código</p>
+                            <p>{selectedStore.codigo || "-"}</p>
+                          </div>
+                          <div>
+                            <p className="font-semibold mb-0.5">Propietario</p>
+                            <p>{selectedStore.propietario || "-"}</p>
+                          </div>
+                          <div>
+                            <p className="font-semibold mb-0.5">Centro</p>
+                            <p>{selectedStore.centro || "-"}</p>
+                          </div>
+                          <div>
+                            <p className="font-semibold mb-0.5">Provincia</p>
+                            <span
+                              className="inline-block px-2 py-0.5 rounded-full"
+                              style={delegadoColor(selectedStore.centroRegional)}
+                            >
+                              {selectedStore.provincia || "Provincia sin definir"}
+                            </span>
+                          </div>
+                          <div>
+                            <p className="font-semibold mb-0.5">Correo</p>
+                            <p>{selectedStore.correo || "-"}</p>
+                          </div>
+                          <div>
+                            <p className="font-semibold mb-0.5">
+                              Delegado regional
+                            </p>
+                            <span
+                              className="inline-block px-2 py-0.5 rounded-full"
+                              style={delegadoColor(selectedStore.centroRegional)}
+                            >
+                              {selectedStore.centroRegional || "Sin delegado"}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Seguimiento general */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-semibold mb-1">
+                              Región
+                            </label>
+                            <input
+                              type="text"
+                              className="w-full p-2 border rounded text-sm"
+                              value={selectedStore.region}
+                              onChange={(e) =>
+                                updateStoreField(
+                                  selectedStore.id,
+                                  "region",
+                                  e.target.value
+                                )
+                              }
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-semibold mb-1">
+                              Responsable de audio (general)
+                            </label>
+                            <select
+                              className="w-full p-2 border rounded text-sm"
+                              value={selectedStore.responsableAudio}
+                              onChange={(e) =>
+                                updateStoreField(
+                                  selectedStore.id,
+                                  "responsableAudio",
+                                  e.target.value as Store["responsableAudio"]
+                                )
+                              }
+                            >
+                              <option value="">Selecciona...</option>
+                              <option value="Sonia">Sonia</option>
+                              <option value="Ary Rojas">Ary Rojas</option>
+                            </select>
+                          </div>
+                          <div className="md:col-span-2">
+                            <label className="block text-sm font-semibold mb-1">
+                              Centro AAR
+                            </label>
+                            <div className="flex flex-col md:flex-row gap-4 items-start">
+                              <select
+                                className="w-full md:w-40 p-2 border rounded text-sm"
+                                value={selectedStore.centroAAR}
+                                onChange={(e) =>
+                                  updateStoreField(
+                                    selectedStore.id,
+                                    "centroAAR",
+                                    e.target.value as Store["centroAAR"]
+                                  )
+                                }
+                              >
+                                <option value="">Selecciona...</option>
+                                <option value="Sí">Sí</option>
+                                <option value="No">No</option>
+                              </select>
+                              <div className="flex-1">
+                                <p className="text-xs font-semibold mb-1">
+                                  Visitas (fecha + Excel, hasta 4)
+                                </p>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                                  {selectedStore.visitas.map((visit) => (
+                                    <div
+                                      key={visit.id}
+                                      className="border rounded-xl p-2 text-[11px] bg-gray-50"
+                                    >
+                                      <p className="font-semibold mb-1">
+                                        Visita {visit.id}
+                                      </p>
+                                      <input
+                                        type="text"
+                                        placeholder="dd/mm/aaaa"
+                                        className={`w-full border rounded px-2 py-1 mb-2 ${
+                                          visit.fecha &&
+                                          !isValidFecha(visit.fecha)
+                                            ? "border-red-500 bg-red-50"
+                                            : ""
+                                        }`}
+                                        value={visit.fecha}
+                                        onChange={(e) =>
+                                          updateVisitField(
+                                            selectedStore.id,
+                                            visit.id,
+                                            "fecha",
+                                            e.target.value
+                                          )
+                                        }
+                                      />
+                                      <label className="inline-flex items-center px-3 py-1 rounded-xl border cursor-pointer hover:bg-white">
+                                        <span className="text-[11px] font-semibold">
+                                          Adjuntar Excel
+                                        </span>
+                                        <input
+                                          type="file"
+                                          accept=".xlsx,.xls,.csv"
+                                          className="hidden"
+                                          onChange={(e) => {
+                                            const file = e.target.files?.[0];
+                                            if (file) {
+                                              updateVisitField(
+                                                selectedStore.id,
+                                                visit.id,
+                                                "excelName",
+                                                file.name
+                                              );
+                                            }
+                                          }}
+                                        />
+                                      </label>
+                                      <p className="text-[10px] text-gray-500 mt-1 truncate">
+                                        {visit.excelName || "Sin archivo"}
+                                      </p>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Detalle KPIs visitas */}
+                        <div>
+                          <h4 className="text-sm font-semibold mb-2">
+                            Detalle de visitas (responsable, checklist, HIT y AAR)
+                          </h4>
+                          <p className="text-xs text-gray-500 mb-3">
+                            Indica quién visita, el % de checklist, si hubo HIT y el
+                            % AAR.
+                          </p>
+                          <div className="border rounded-2xl overflow-hidden">
+                            <div className="grid grid-cols-[40px,1.2fr,0.9fr,0.9fr,0.9fr] bg-gray-50 text-[11px] font-semibold px-3 py-2">
+                              <span>#</span>
+                              <span>Responsable audio</span>
+                              <span>Checklist %</span>
+                              <span>HIT (Sí/No)</span>
+                              <span>AAR %</span>
+                            </div>
+                            <div className="divide-y">
+                              {selectedStore.visitas.map((visit) => (
+                                <div
+                                  key={visit.id}
+                                  className="grid grid-cols-[40px,1.2fr,0.9fr,0.9fr,0.9fr] items-center px-3 py-2 text-[11px] gap-2"
+                                >
+                                  <span className="font-semibold">
+                                    V{visit.id}
+                                  </span>
+                                  <select
+                                    className="border rounded px-2 py-1 text-[11px]"
+                                    value={visit.responsable}
+                                    onChange={(e) =>
+                                      updateVisitField(
+                                        selectedStore.id,
+                                        visit.id,
+                                        "responsable",
+                                        e.target.value as Visit["responsable"]
+                                      )
+                                    }
+                                  >
+                                    <option value="">Selecciona...</option>
+                                    <option value="Sonia">Sonia</option>
+                                    <option value="Ary Rojas">Ary Rojas</option>
+                                  </select>
+                                  <input
+                                    type="number"
+                                    min={0}
+                                    max={100}
+                                    className="border rounded px-2 py-1 text-[11px]"
+                                    placeholder="%"
+                                    value={visit.checklist ?? ""}
+                                    onChange={(e) => {
+                                      const val = e.target.value;
+                                      const num =
+                                        val === "" ? null : Number(val);
+                                      updateVisitField(
+                                        selectedStore.id,
+                                        visit.id,
+                                        "checklist",
+                                        isNaN(num as number)
+                                          ? null
+                                          : (num as number)
+                                      );
+                                    }}
+                                  />
+                                  <select
+                                    className="border rounded px-2 py-1 text-[11px]"
+                                    value={visit.hit ?? ""}
+                                    onChange={(e) =>
+                                      updateVisitField(
+                                        selectedStore.id,
+                                        visit.id,
+                                        "hit",
+                                        e.target.value as Visit["hit"]
+                                      )
+                                    }
+                                  >
+                                    <option value="">Selecciona...</option>
+                                    <option value="Sí">Sí</option>
+                                    <option value="No">No</option>
+                                  </select>
+                                  <input
+                                    type="number"
+                                    min={0}
+                                    max={100}
+                                    className="border rounded px-2 py-1 text-[11px]"
+                                    placeholder="%"
+                                    value={visit.aar ?? ""}
+                                    onChange={(e) => {
+                                      const val = e.target.value;
+                                      const num =
+                                        val === "" ? null : Number(val);
+                                      updateVisitField(
+                                        selectedStore.id,
+                                        visit.id,
+                                        "aar",
+                                        isNaN(num as number)
+                                          ? null
+                                          : (num as number)
+                                      );
+                                    }}
+                                  />
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </main>
+                </div>
+
+                {/* RESUMEN GLOBAL */}
+                <section className="mt-10 bg-white p-6 rounded-2xl shadow">
+                  <h3 className="font-bold text-lg mb-4">
+                    Resumen de tiendas (vista tipo Excel)
+                  </h3>
+                  {stores.length === 0 ? (
+                    <p className="text-xs text-gray-500">
+                      Aún no hay tiendas cargadas.
+                    </p>
+                  ) : (
+                    <div className="overflow-auto">
+                      <table className="min-w-full text-[11px] border-collapse">
+                        <thead>
+                          <tr className="bg-gray-50 border-b">
+                            <th className="text-left px-2 py-2">Código</th>
+                            <th className="text-left px-2 py-2">Propietario</th>
+                            <th className="text-left px-2 py-2">Centro</th>
+                            <th className="text-left px-2 py-2">Provincia</th>
+                            <th className="text-left px-2 py-2">Correo</th>
+                            <th className="text-left px-2 py-2">
+                              Delegado regional
+                            </th>
+                            <th className="text-left px-2 py-2">Región</th>
+                            <th className="text-left px-2 py-2">Resp. audio</th>
+                            <th className="text-left px-2 py-2">Centro AAR</th>
+                            <th className="text-right px-2 py-2"># Visitas</th>
+                            <th className="text-right px-2 py-2">
+                              Checklist medio %
+                            </th>
+                            <th className="text-right px-2 py-2">
+                              HIT (visitas Sí %)
+                            </th>
+                            <th className="text-right px-2 py-2">
+                              AAR medio %
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {filteredStores.map((store) => {
+                            const visitasValidas = store.visitas.filter(
+                              (v) =>
+                                v.fecha &&
+                                v.excelName &&
+                                isValidFecha(v.fecha)
+                            );
+                            const checklistMedioTienda = media(
+                              visitasValidas.map((v) => v.checklist)
+                            );
+                            const hitMedioTienda = porcentajeSi(
+                              visitasValidas.map((v) => v.hit)
+                            );
+                            const aarMedioTienda = media(
+                              visitasValidas.map((v) => v.aar)
+                            );
+
+                            return (
+                              <tr
+                                key={store.id}
+                                className="border-b hover:bg-gray-50"
+                              >
+                                <td className="px-2 py-1 whitespace-nowrap">
+                                  {store.codigo || "-"}
+                                </td>
+                                <td className="px-2 py-1 whitespace-nowrap">
+                                  {store.propietario || "-"}
+                                </td>
+                                <td className="px-2 py-1 whitespace-nowrap">
+                                  {store.centro || "-"}
+                                </td>
+                                <td className="px-2 py-1 whitespace-nowrap">
+                                  <span
+                                    className="inline-block px-2 py-0.5 rounded-full"
+                                    style={delegadoColor(store.centroRegional)}
+                                  >
+                                    {store.provincia || "-"}
+                                  </span>
+                                </td>
+                                <td className="px-2 py-1 whitespace-nowrap">
+                                  {store.correo || "-"}
+                                </td>
+                                <td className="px-2 py-1 whitespace-nowrap">
+                                  <span
+                                    className="inline-block px-2 py-0.5 rounded-full"
+                                    style={delegadoColor(store.centroRegional)}
+                                  >
+                                    {store.centroRegional || "Sin delegado"}
+                                  </span>
+                                </td>
+                                <td className="px-2 py-1 whitespace-nowrap">
+                                  {store.region || "-"}
+                                </td>
+                                <td className="px-2 py-1 whitespace-nowrap">
+                                  {store.responsableAudio || "-"}
+                                </td>
+                                <td className="px-2 py-1 whitespace-nowrap">
+                                  {store.centroAAR || "-"}
+                                </td>
+                                <td className="px-2 py-1 text-right">
+                                  {visitasValidas.length}
+                                </td>
+                                <td className="px-2 py-1 text-right">
+                                  {checklistMedioTienda !== null
+                                    ? `${checklistMedioTienda.toFixed(0)}%`
+                                    : "-"}
+                                </td>
+                                <td className="px-2 py-1 text-right">
+                                  {hitMedioTienda !== null
+                                    ? `${hitMedioTienda.toFixed(0)}%`
+                                    : "-"}
+                                </td>
+                                <td className="px-2 py-1 text-right">
+                                  {aarMedioTienda !== null
+                                    ? `${aarMedioTienda.toFixed(0)}%`
+                                    : "-"}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+
+                      {/* KPIs globales */}
+                      <div className="mt-4 text-[11px] text-gray-600 flex flex-wrap gap-3">
+                        <span>
+                          Total tiendas: <strong>{totalTiendas}</strong>
+                        </span>
+                        <span>
+                          Tiendas con al menos 1 visita:{" "}
+                          <strong>
+                            {tiendasConVisita} (
+                            {porcentajeTiendasVisitadas.toFixed(0)}%)
+                          </strong>
+                        </span>
+                        <span>
+                          Total visitas válidas: <strong>{totalVisitas}</strong>
+                        </span>
+
+                        <span
+                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full ${kpiBadgeClass(
+                            checklistMedia
+                          )}`}
+                        >
+                          <span className="w-2 h-2 rounded-full bg-current/70" />
+                          <span>
+                            Checklist medio global:{" "}
+                            {checklistMedia !== null
+                              ? `${checklistMedia.toFixed(0)}%`
+                              : "-"}
+                          </span>
+                        </span>
+
+                        <span
+                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full ${kpiBadgeClass(
+                            hitMedia
+                          )}`}
+                        >
+                          <span className="w-2 h-2 rounded-full bg-current/70" />
+                          <span>
+                            % aplicación HIT global:{" "}
+                            {hitMedia !== null ? `${hitMedia.toFixed(0)}%` : "-"}
+                          </span>
+                        </span>
+
+                        <span>
+                          Visitas con AAR informado: <strong>{conteoAAR}</strong>
+                        </span>
+
+                        <span
+                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full ${kpiBadgeClass(
+                            aarMedia
+                          )}`}
+                        >
+                          <span className="w-2 h-2 rounded-full bg-current/70" />
+                          <span>
+                            % AAR global:{" "}
+                            {aarMedia !== null
+                              ? `${aarMedia.toFixed(0)}%`
+                              : "-"}
+                          </span>
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </section>
+              </div>
+            )}
+          </div>
+        );
       }
 
-      /* TABLAS DE CENTROS: AÑADIR FILAS */
-      if (t.dataset.act === "add-accion") {
-        const d = blocks[currentBlock];
-        const c = d.centers[d.selected || 0];
-        c.acciones.push({ tipo: "Azafata", fecha: "", derivaciones: "", citas: "", ventas: "", obs: "" });
-        persist(); renderCurrentBlock(); return;
-      }
-      if (t.dataset.act === "add-forma") {
-        const d = blocks[currentBlock];
-        const c = d.centers[d.selected || 0];
-        c.formaciones.push({ curso: "", superado: "No", aplicado: "No", mentoring: "No" });
-        persist(); renderCurrentBlock(); return;
-      }
-      if (t.dataset.act === "add-visita") {
-        const d = blocks[currentBlock];
-        const c = d.centers[d.selected || 0];
-        c.visitas.push({ fecha: "", checklist: "", convPrueba: "", convVenta: "" });
-        persist(); renderCurrentBlock(); return;
-      }
-      if (t.dataset.act === "add-servicio") {
-        const d = blocks[currentBlock];
-        const c = d.centers[d.selected || 0];
-        c.servicios.push({ nombre: "Servicio nuevo", activo: "No", ventas: "" });
-        persist(); renderCurrentBlock(); return;
-      }
-
-      /* BORRAR FILA DE TABLA DE CENTRO */
-      if (t.dataset.act === "del-row" && (currentBlock === "CENTROS EXCLUSIVOS" || currentBlock === "CENTROS FLOP")) {
-        const tr = t.closest("tr");
-        const d = blocks[currentBlock];
-        const c = d.centers[d.selected || 0];
-        const tableName = tr.dataset.table;
-        const idx = +tr.dataset.row;
-        c[tableName].splice(idx, 1);
-        persist(); renderCurrentBlock(); return;
-      }
-
-      /* FORMACIONES BLOQUE */
-      if (t.dataset.act === "form-add-row") {
-        const d = blocks["FORMACIONES Y MENTORING"];
-        const del = d.delegados[d.selected || 0];
-        del.tabla.push({ fecha:"", centros:"", sucursal:"Sucursal", tema:"", superado:"No", aplicado:"No", obs:"" });
-        persist(); renderCurrentBlock(); return;
-      }
-      if (t.dataset.act === "form-del-row") {
-        const d = blocks["FORMACIONES Y MENTORING"];
-        const del = d.delegados[d.selected || 0];
-        del.tabla.splice(+t.dataset.row, 1);
-        persist(); renderCurrentBlock(); return;
-      }
-      if (t.dataset.act === "form-save-block") {
-        persist(); alert("Formaciones guardadas."); return;
-      }
-
-      /* VISITAS BLOQUE */
-      if (t.dataset.act === "vis-add-row") {
-        const v = blocks["VISITAS"];
-        const del = v.delegados[v.selected || 0];
-        del.visitas.push({ fecha:"", centros:"", sucursal:"Sucursal", audiologo:"", checklist:"", convPrueba:"", convVenta:"", hit:"No", arr:"No", rt:"No", obs:"" });
-        persist(); renderCurrentBlock(); return;
-      }
-      if (t.dataset.act === "vis-del-row") {
-        const v = blocks["VISITAS"];
-        const del = v.delegados[v.selected || 0];
-        del.visitas.splice(+t.dataset.row, 1);
-        persist(); renderCurrentBlock(); return;
-      }
-      if (t.dataset.act === "vis-save-block") {
-        persist(); alert("Visitas guardadas."); return;
-      }
-
-      /* borrar simple */
-      if (t.dataset.act === "del-simple") {
-        const data = blocks[currentBlock];
-        data.items.splice(+t.dataset.idx, 1);
-        persist(); renderCurrentBlock(); return;
-      }
-    });
-
-    /* --- INPUTS / CAMBIOS --- */
-    contentHolder.addEventListener("input", handleChange);
-    contentHolder.addEventListener("change", handleChange);
-
-    function handleChange(e) {
-      const t = e.target;
-
-      /* CAMPOS DE CENTRO (nombre, delegado, audiologo, tipo) */
-      if ((currentBlock === "CENTROS EXCLUSIVOS" || currentBlock === "CENTROS FLOP") && t.dataset.field) {
-        const d = blocks[currentBlock];
-        const c = d.centers[d.selected || 0];
-        c[t.dataset.field] = t.value;
-        persist();
-        return;
-      }
-
-      /* TABLAS DE CENTROS */
-      if ((currentBlock === "CENTROS EXCLUSIVOS" || currentBlock === "CENTROS FLOP") && t.dataset.table) {
-        const d = blocks[currentBlock];
-        const c = d.centers[d.selected || 0];
-        const table = t.dataset.table;
-        const row = +t.dataset.row;
-        if (table === "acciones") {
-          const a = c.acciones[row] || {};
-          a[t.dataset.field] = t.value;
-          c.acciones[row] = a;
-        } else if (table === "formaciones") {
-          const f = c.formaciones[row] || {};
-          f[t.dataset.field] = t.value;
-          c.formaciones[row] = f;
-        } else if (table === "visitas") {
-          const v = c.visitas[row] || {};
-          v[t.dataset.field] = t.value;
-          c.visitas[row] = v;
-        } else if (table === "servicios") {
-          const s = c.servicios[row] || {};
-          s[t.dataset.field] = t.value;
-          c.servicios[row] = s;
-        }
-        persist();
-        if (table === "visitas") renderCurrentBlock();
-        return;
-      }
-
-      /* FORMACIONES BLOQUE */
-      if (currentBlock === "FORMACIONES Y MENTORING" && (t.dataset.formRow !== undefined)) {
-        const d = blocks["FORMACIONES Y MENTORING"];
-        const del = d.delegados[d.selected || 0];
-        const row = +t.dataset.formRow;
-        const r = del.tabla[row] || {};
-        r[t.dataset.formField] = t.value;
-        del.tabla[row] = r;
-        persist();
-        return;
-      }
-
-      /* VISITAS BLOQUE */
-      if (currentBlock === "VISITAS" && (t.dataset.visRow !== undefined)) {
-        const v = blocks["VISITAS"];
-        const del = v.delegados[v.selected || 0];
-        const row = +t.dataset.visRow;
-        const r = del.visitas[row] || {};
-        r[t.dataset.visField] = t.value;
-        del.visitas[row] = r;
-        persist();
-        renderVisitasBlock(v);
-        return;
-      }
-
-      /* VISITAS: visitador */
-      if (currentBlock === "VISITAS" && t.dataset.visMeta === "visitador") {
-        const v = blocks["VISITAS"];
-        const del = v.delegados[v.selected || 0];
-        del.visitador = t.value;
-        persist();
-        return;
-      }
-
-      /* bloques simples */
-      if (t.dataset && typeof t.dataset.idx !== "undefined" && t.dataset.field) {
-        const data = blocks[currentBlock];
-        const idx = +t.dataset.idx;
-        data.items[idx][t.dataset.field] = t.textContent.trim();
-        persist();
-      }
-    }
-
-    /* --- DESCARGAS --- */
-    document.getElementById("btnHTML").addEventListener("click", () => {
-      const blob = new Blob([document.documentElement.outerHTML], { type: "text/html" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url; a.download = "seguimiento-audio-ar.html"; a.click();
-      URL.revokeObjectURL(url);
-    });
-    document.getElementById("btnPDF").addEventListener("click", () => { alert("Exportar a PDF: usa Imprimir > Guardar como PDF."); });
-    document.getElementById("btnXLS").addEventListener("click", () => {
-      const rows = [["Bloque","Campo1","Campo2","Campo3","Campo4"]];
-      Object.keys(blocks).forEach(bn => {
-        const b = blocks[bn];
-        if (bn === "CENTROS EXCLUSIVOS" || bn === "CENTROS FLOP") {
-          (b.centers || []).forEach(c => { rows.push([bn, c.nombre, c.delegado, c.audiologo, c.tipo]); });
-        } else {
-          (b.items || []).forEach(it => { rows.push([bn, it.titulo, it.detalle, it.fecha || "", ""]); });
-        }
-      });
-      const csv = rows.map(r => r.map(v => `"${(v||"").replace(/"/g,'""')}"`).join(",")).join("\n");
-      const blob = new Blob([csv], { type: "text/csv" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a"); a.href = url; a.download = "seguimiento-audio-ar.csv"; a.click();
-      URL.revokeObjectURL(url);
-    });
-
-    /* --- TEST --- */
-    function runSmokeTests() {
-      console.log("[TEST] estructura básica cargada");
-      console.assert(!!document.getElementById("leftPanel"), "leftPanel no existe");
-      console.assert(!!document.getElementById("contentHolder"), "contentHolder no existe");
-    }
-
-    renderCurrentBlock();
-    runSmokeTests();
-
-    saveLocalBtn.addEventListener("click", () => {
-      persist();
-      editStatus.textContent = "Guardado local";
-      setTimeout(() => {
-        editStatus.textContent = editable ? "Edición activada" : "Solo lectura";
-      }, 2000);
-    });
-  </script>
-</body>
+      const root = ReactDOM.createRoot(document.getElementById("root"));
+      root.render(<App />);
+    </script>
+  </body>
 </html>
