@@ -21,11 +21,11 @@
       const { useState } = React;
 
       // =====================
-      // Tipos (solo para TS, Babel los ignora en ejecución)
+      // Tipos (solo para TS, Babel los ignora)
       // =====================
       type Visit = {
         id: number;
-        fecha: string;
+        fecha: string; // dd/mm/aaaa
         responsable: "" | "Sonia" | "Ary Rojas";
         excelName?: string;
         hit?: "" | "Sí" | "No";
