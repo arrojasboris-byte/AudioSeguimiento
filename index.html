@@ -1,1497 +1,1419 @@
-import React, { useState } from "react";
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>SEGUIMIENTO-VISITAS AUDIO</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-// =====================
-// Tipos
-// =====================
+  <!-- Leaflet (mapa) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
-type Visit = {
-  id: number;
-  fecha: string; // dd/mm/aaaa o aaaa-mm-dd
-  responsable: "" | "Sonia" | "Ary Rojas";
-  excelName?: string; // nombre del archivo adjunto (solo nombre)
-  hit?: "" | "Sí" | "No"; // HIT conseguido en la visita (sí/no)
-  aar?: number | null; // % AAR de esa visita
-  checklist?: number | null; // % cumplimiento checklist en esa visita
-};
+  <!-- Chart.js (gráficos) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-type Store = {
-  id: number;
-  raw: string; // línea original pegada
-  codigo: string;
-  propietario: string;
-  centro: string;
-  provincia: string;
-  correo: string;
-  centroRegional: string; // "delegado regional" en la UI
-  region: string;
-  responsableAudio: "" | "Sonia" | "Ary Rojas";
-  centroAAR: "" | "Sí" | "No";
-  visitas: Visit[]; // hasta 4 visitas
-};
+  <!-- SheetJS (leer Excel) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
-type ChecklistStage = {
-  etapa: string;
-  items: string[];
-};
+  <!-- Iconos (Font Awesome) -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    integrity="sha512-S+8Vs2RVr4YFvR9p1tWmZQYx8uX8yGBXvJ8TlatN4vVNyYoP2lV/nuYEM+J1EfrQaKd8t0lUz2Ce/Jb9x6WQ2g=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  />
 
-// =====================
-// Checklist horizontal
-// =====================
-
-const CHECKLIST: ChecklistStage[] = [
-  {
-    etapa: "HOLA",
-    items: [
-      "Espacio audio limpio, ordenado",
-      "Espéculos, olivas y cascos desinfectados",
-      "Acogida al cliente con una sonrisa, amable y cercana",
-      "Llamar al paciente por su nombre",
-      "Acompañar al paciente al gabinete para la revisión auditiva",
-      "Confirmar motivo de visita",
-    ],
-  },
-  {
-    etapa: "SOY ÚNICO",
-    items: [
-      "Abrir ficha y rellenar RGPD completa (incluidos checks comerciales)",
-      "Realizar anamnesis HACE (Hábitos, Antecedentes, Clínica, Expectativas)",
-      "Anotar al menos 2 expectativas/necesidades concretas",
-      "Recoger entorno sonoro y situaciones clave para el paciente",
-    ],
-  },
-  {
-    etapa: "MI AUDICIÓN",
-    items: [
-      "Explicar brevemente cada prueba y confirmar comprensión",
-      "Evaluar ambos oídos con videotoscopia y explicar procedimiento",
-      "Realizar timpanometría y explicar procedimiento",
-      "Realizar vía aérea y vía ósea explicando cada paso",
-      "Mantener TV encendida para comunicar audio y mostrar resultados",
-    ],
-  },
-  {
-    etapa: "MI SOLUCIÓN",
-    items: [
-      "Resumir claramente los resultados y su impacto",
-      "Usar gráficas para apoyar la explicación (severidad, área audible, fonemas)",
-      "Vincular resultados con síntomas y quejas de la anamnesis",
-      "Hacer visible la pérdida auditiva con preguntas de implicación",
-      "Simular sonidos para mostrar la diferencia con/ sin ayuda",
-    ],
-  },
-  {
-    etapa: "PRUEBO",
-    items: [
-      "Explicar la prueba de capacidad de adaptación como prueba de salud",
-      "Escoger audífono según perfil en gama adecuada (Diamante)",
-      "Realizar programación inicial y ajustes según perfil",
-      "Explicar funcionamiento y mantenimiento para llevarse audífonos a casa",
-      "Entregar documentación (contrato, presupuesto, pasaporte)",
-    ],
-  },
-  {
-    etapa: "ME COMPROMETO",
-    items: [
-      "Trabajar resolución de objeciones con lenguaje positivo",
-      "Explicar facilidades de pago (Infinity / NextYear)",
-      "Detallar pack Serenidad y Serenidad + (compromisos)",
-      "Explicar en detalle pruebas HIT y su utilidad",
-      "Recomendar accesorios de conectividad y productos de higiene",
-    ],
-  },
-  {
-    etapa: "ME CONVIERTO EN FAN",
-    items: [
-      "Explicar llamadas de seguimiento y agenda futura",
-      "Reforzar logros y mejoras conseguidas en cada visita",
-      "Aplicar técnicas de Neuroventas en el seguimiento",
-    ],
-  },
-  {
-    etapa: "SEGUIMIENTO Y AGENDA",
-    items: [
-      "Registrar prueba en el sistema (Gio)",
-      "Llamar al día siguiente de la prueba para seguimiento",
-      "Agendar visita en 4 días para revisión",
-    ],
-  },
-  {
-    etapa: "COMUNICACIÓN DEL CENTRO",
-    items: [
-      "Comunicación del centro adecuada a su perfil",
-      "Revisión de comunicación en RRSS",
-      "Uniformidad adecuada",
-      "Contacto con locales vecinos y colaboraciones",
-      "Escaparate atractivo con novedad de producto",
-    ],
-  },
-  {
-    etapa: "AYUDAS Y ACUERDOS",
-    items: [
-      "Conocer y activar acuerdos con FIAPAS y ONCE",
-      "Revisar convenios locales (anotar detalle en observaciones)",
-      "Conocer ayudas de comunidad autónoma",
-      "Conocer ayudas generales +65 años y hasta 26 años",
-    ],
-  },
-  {
-    etapa: "INCENTIVOS",
-    items: ["Incentivos por derivación", "Incentivos por AAR"],
-  },
-  {
-    etapa: "FORMACIÓN",
-    items: [
-      "Onboarding Academy realizado",
-      "Formaciones obligatorias de centros exclusivos cumplimentadas",
-      "Formaciones obligatorias de centros audio realizadas",
-    ],
-  },
-];
-
-// =====================
-// Utilidades
-// =====================
-
-// Mapeos (los puedes ampliar si quieres auto-completar provincias)
-const CENTER_TO_PROVINCE: Record<string, string> = {};
-const CITY_TO_PROVINCE: Record<string, string> = {
-  NARON: "A CORUÑA (GALICIA)",
-  "NARÓN": "A CORUÑA (GALICIA)",
-  ONDARA: "ALICANTE (COMUNITAT VALENCIANA)",
-};
-
-function normalizarCentro(nombre: string): string {
-  return nombre.trim().toUpperCase();
-}
-
-function createEmptyVisits(): Visit[] {
-  return [1, 2, 3, 4].map((id) => ({
-    id,
-    fecha: "",
-    responsable: "",
-    excelName: "",
-    hit: "",
-    aar: null,
-    checklist: null,
-  }));
-}
-
-// Acepta dd/mm/aaaa y aaaa-mm-dd (para input type="date")
-function parseFecha(fecha: string): Date | null {
-  if (!fecha) return null;
-
-  // dd/mm/aaaa
-  const regex1 = /^(\d{2})\/(\d{2})\/(\d{4})$/;
-  let match = fecha.match(regex1);
-  if (match) {
-    const day = Number(match[1]);
-    const month = Number(match[2]);
-    const year = Number(match[3]);
-    const d = new Date(year, month - 1, day);
-    if (
-      d.getFullYear() === year &&
-      d.getMonth() === month - 1 &&
-      d.getDate() === day
-    ) {
-      return d;
+  <style>
+    :root {
+      --color-bg: #0b0b0d;
+      --color-bg-alt: #141418;
+      --color-primary: #ff2b45;
+      --color-primary-soft: #ff4b5c;
+      --color-accent: #ffb347;
+      --color-text: #f7f7f7;
+      --color-text-soft: #c2c2c2;
+      --color-border: #262632;
+      --radius-xl: 18px;
+      --shadow-soft: 0 18px 40px rgba(0, 0, 0, 0.45);
+      --transition-fast: 0.2s ease;
+      --header-height: 70px;
     }
-  }
 
-  // aaaa-mm-dd (formato nativo del calendario)
-  const regex2 = /^(\d{4})-(\d{2})-(\d{2})$/;
-  match = fecha.match(regex2);
-  if (match) {
-    const year = Number(match[1]);
-    const month = Number(match[2]);
-    const day = Number(match[3]);
-    const d = new Date(year, month - 1, day);
-    if (
-      d.getFullYear() === year &&
-      d.getMonth() === month - 1 &&
-      d.getDate() === day
-    ) {
-      return d;
+    * {
+      box-sizing: border-box;
     }
-  }
 
-  return null;
-}
-
-function isValidFecha(fecha: string): boolean {
-  if (!fecha) return true;
-  return parseFecha(fecha) !== null;
-}
-
-function media(valores: (number | null | undefined)[]): number | null {
-  const nums = valores.filter(
-    (v): v is number => typeof v === "number" && !isNaN(v)
-  );
-  if (nums.length === 0) return null;
-  const total = nums.reduce((sum, v) => sum + v, 0);
-  return total / nums.length;
-}
-
-function porcentajeSi(valores: ("" | "Sí" | "No" | undefined)[]): number | null {
-  const valid = valores.filter((v) => v === "Sí" || v === "No");
-  if (valid.length === 0) return null;
-  const countSi = valid.filter((v) => v === "Sí").length;
-  return (countSi / valid.length) * 100;
-}
-
-function donutStyle(percent: number | null): React.CSSProperties {
-  const value = percent && percent > 0 ? Math.min(percent, 100) : 0;
-  const color = percent !== null && percent >= 85 ? "#16a34a" : "#dc2626"; // verde >=85, rojo <85
-  return {
-    background: `conic-gradient(${color} ${value * 3.6}deg, #e5e7eb 0deg)`,
-  };
-}
-
-function kpiBadgeClass(percent: number | null): string {
-  if (percent === null) return "bg-gray-200 text-gray-700";
-  if (percent >= 85) return "bg-green-100 text-green-800";
-  return "bg-red-100 text-red-700";
-}
-
-function delegadoColor(delegado: string): React.CSSProperties {
-  if (!delegado) return {};
-  let hash = 0;
-  const texto = delegado.trim().toUpperCase();
-  for (let i = 0; i < texto.length; i++) {
-    hash = (hash * 31 + texto.charCodeAt(i)) | 0;
-  }
-  const hue = (Math.abs(hash) % 360 + 180) % 360;
-  return {
-    backgroundColor: `hsl(${hue}, 75%, 90%)`,
-    color: `hsl(${hue}, 35%, 28%)`,
-  };
-}
-
-function inferProvincia(centro: string, provinciaExcel: string): string {
-  if (provinciaExcel && provinciaExcel.trim() !== "") {
-    return provinciaExcel.trim().toUpperCase();
-  }
-
-  const centroNorm = normalizarCentro(centro);
-
-  if (CENTER_TO_PROVINCE[centroNorm]) {
-    return CENTER_TO_PROVINCE[centroNorm];
-  }
-
-  const tokens = centroNorm
-    .split(/[,\-\(\)]/)
-    .map((t) => t.trim())
-    .filter(Boolean);
-
-  for (let i = tokens.length - 1; i >= 0; i--) {
-    const token = tokens[i];
-    if (CITY_TO_PROVINCE[token]) {
-      return CITY_TO_PROVINCE[token];
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #1a1a20 0, #050509 55%, #000 100%);
+      color: var(--color-text);
     }
-  }
 
-  return "";
-}
-
-// =====================
-// Componente principal
-// =====================
-
-export default function App() {
-  const [pin, setPin] = useState("");
-  const [authorized, setAuthorized] = useState(false);
-
-  const [search, setSearch] = useState("");
-  const [filterCodigo, setFilterCodigo] = useState("");
-  const [filterPropietario, setFilterPropietario] = useState("");
-  const [filterCentro, setFilterCentro] = useState("");
-  const [filterProvincia, setFilterProvincia] = useState("");
-  const [filterDelegado, setFilterDelegado] = useState("");
-  const [filterRegion, setFilterRegion] = useState("");
-  const [filterResponsableAudio, setFilterResponsableAudio] = useState("");
-  const [filterCentroAAR, setFilterCentroAAR] = useState("");
-  const [filterCorreo, setFilterCorreo] = useState("");
-
-  const [storesInput, setStoresInput] = useState("");
-  const [stores, setStores] = useState<Store[]>([]);
-  const [selectedStoreId, setSelectedStoreId] = useState<number | null>(null);
-
-  // PIN: acepta mayúsculas/minúsculas y espacios, y funciona con botón y Enter
-  const handlePin = () => {
-    if (pin.trim().toUpperCase() === "AR4321") {
-      setAuthorized(true);
+    body {
+      overflow: hidden;
     }
-  };
 
-  const handleApplyStores = () => {
-    if (!storesInput.trim()) return;
+    .hidden {
+      display: none !important;
+    }
 
-    const lines = storesInput
-      .split("\n")
-      .map((line) => line.trim())
-      .filter(Boolean);
+    /* --- PANTALLA DE PIN --- */
+    #pin-screen {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at top, #ff2b45 0, #050509 60%, #000 100%);
+      z-index: 9999;
+    }
 
-    const newStores: Store[] = lines.map((raw, index) => {
-      const parts = raw.split("\t");
-      const [
-        codigo = "",
-        propietario = "",
-        centro = "",
-        provincia = "",
-        correo = "",
-        centroRegional = "",
-      ] = parts;
+    .pin-card {
+      background: linear-gradient(135deg, rgba(15,15,25,0.9), rgba(0,0,0,0.95));
+      border-radius: 26px;
+      padding: 32px 40px;
+      box-shadow: var(--shadow-soft);
+      border: 1px solid rgba(255,255,255,0.06);
+      max-width: 420px;
+      width: 90%;
+      text-align: center;
+      backdrop-filter: blur(20px);
+    }
 
-      const provinciaInferida = inferProvincia(centro, provincia);
+    .pin-icon {
+      font-size: 52px;
+      color: var(--color-primary);
+      margin-bottom: 10px;
+    }
 
-      return {
-        id: index + 1,
-        raw,
-        codigo,
-        propietario,
-        centro,
-        provincia: provinciaInferida,
-        correo,
-        centroRegional,
-        region: "",
-        responsableAudio: "",
-        centroAAR: "",
-        visitas: createEmptyVisits(),
-      };
+    .pin-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .pin-subtitle {
+      font-size: 0.9rem;
+      color: var(--color-text-soft);
+      margin-bottom: 24px;
+    }
+
+    .pin-input-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+
+    .pin-input-wrapper input {
+      padding: 10px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(0,0,0,0.6);
+      color: var(--color-text);
+      outline: none;
+      min-width: 150px;
+      text-align: center;
+      font-size: 1rem;
+      letter-spacing: 0.1em;
+    }
+
+    .pin-input-wrapper input::placeholder {
+      color: #555;
+    }
+
+    .pin-button {
+      padding: 10px 20px;
+      border-radius: 999px;
+      border: none;
+      background: linear-gradient(135deg, var(--color-primary), var(--color-primary-soft));
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      text-transform: uppercase;
+      font-size: 0.85rem;
+      letter-spacing: 0.08em;
+      transition: transform var(--transition-fast), box-shadow var(--transition-fast), filter var(--transition-fast);
+      box-shadow: 0 14px 30px rgba(255, 43, 69, 0.6);
+    }
+
+    .pin-button:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.05);
+      box-shadow: 0 18px 40px rgba(255, 43, 69, 0.85);
+    }
+
+    .pin-error {
+      min-height: 18px;
+      font-size: 0.8rem;
+      color: #ff8b9c;
+      margin-top: 4px;
+    }
+
+    /* --- APP PRINCIPAL --- */
+    #app {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: radial-gradient(circle at top left, #20101a 0, #050509 50%, #010106 100%);
+    }
+
+    header.app-header {
+      height: var(--header-height);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 22px;
+      background: linear-gradient(90deg, #f0002b, #8b001b, #050509);
+      border-bottom: 1px solid rgba(255,255,255,0.12);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.8);
+      z-index: 10;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .header-logo {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 20%, #ff9f9f 0, #ff2b45 40%, #050509 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 20px rgba(255,255,255,0.12);
+    }
+
+    .header-logo i {
+      font-size: 24px;
+      color: #fff;
+    }
+
+    .header-title {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header-title-main {
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .header-title-sub {
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.7);
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .icon-button {
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(0,0,0,0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+      color: #fff;
+      position: relative;
+    }
+
+    .icon-button:hover {
+      background: rgba(0,0,0,0.7);
+      border-color: var(--color-accent);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 18px rgba(0,0,0,0.7);
+    }
+
+    .icon-button i {
+      font-size: 15px;
+    }
+
+    .icon-button span.tooltip {
+      position: absolute;
+      bottom: -26px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #000;
+      color: #fff;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--transition-fast), transform var(--transition-fast);
+    }
+
+    .icon-button:hover span.tooltip {
+      opacity: 1;
+      transform: translate(-50%, -2px);
+    }
+
+    /* --- CONTENIDO PRINCIPAL --- */
+    .app-main {
+      flex: 1;
+      padding: 14px 18px 18px;
+      overflow: auto;
+    }
+
+    .app-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+      gap: 14px;
+      min-height: 0;
+    }
+
+    @media (max-width: 1100px) {
+      .app-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .section {
+      background: radial-gradient(circle at top left, #1c141c 0, #090912 45%, #050509 100%);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--color-border);
+      box-shadow: var(--shadow-soft);
+      padding: 12px 12px 14px;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 4px 6px 8px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      margin-bottom: 8px;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--color-text-soft);
+    }
+
+    .section-title i {
+      color: var(--color-primary-soft);
+      font-size: 15px;
+    }
+
+    .section-header-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.75rem;
+      color: var(--color-text-soft);
+    }
+
+    .badge {
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.02);
+    }
+
+    /* --- REGIONES & MAPA --- */
+    .regiones-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+      gap: 10px;
+      flex: 1;
+      min-height: 0;
+    }
+
+    @media (max-width: 900px) {
+      .regiones-layout {
+        grid-template-columns: minmax(0,1fr);
+      }
+    }
+
+    .card {
+      background: radial-gradient(circle at top, #181821 0, #070711 55%, #050509 100%);
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.05);
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      position: relative;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+
+    .card-title {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--color-text-soft);
+    }
+
+    .card-subtitle {
+      font-size: 0.7rem;
+      color: #777;
+    }
+
+    .map-wrapper {
+      flex: 1;
+      min-height: 260px;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    #map {
+      width: 100%;
+      height: 100%;
+    }
+
+    .regiones-sidebar {
+      gap: 8px;
+    }
+
+    .sidebar-group {
+      margin-bottom: 8px;
+    }
+
+    .label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--color-text-soft);
+      margin-bottom: 4px;
+    }
+
+    .input {
+      width: 100%;
+      padding: 7px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.16);
+      background: rgba(5,5,10,0.9);
+      color: var(--color-text);
+      font-size: 0.8rem;
+      outline: none;
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
+    }
+
+    .input::placeholder {
+      color: #555;
+    }
+
+    .input:focus {
+      border-color: var(--color-primary-soft);
+      box-shadow: 0 0 0 1px rgba(255,43,69,0.5);
+      background: rgba(5,5,10,1);
+    }
+
+    .sidebar-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 4px;
+    }
+
+    .small-text {
+      font-size: 0.7rem;
+      color: var(--color-text-soft);
+    }
+
+    .add-button {
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: none;
+      background: linear-gradient(135deg, #2ecc71, #00b894);
+      color: #fff;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      box-shadow: 0 10px 22px rgba(0,184,148,0.6);
+      transition: transform var(--transition-fast), box-shadow var(--transition-fast), filter var(--transition-fast);
+    }
+
+    .add-button:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.05);
+      box-shadow: 0 14px 30px rgba(0,184,148,0.8);
+    }
+
+    .lista-regiones {
+      flex: 1;
+      overflow: auto;
+      margin-top: 6px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      padding-top: 6px;
+    }
+
+    .lista-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.76rem;
+      padding: 5px 6px;
+      border-radius: 10px;
+      margin-bottom: 3px;
+      background: rgba(255,255,255,0.01);
+    }
+
+    .lista-item-left {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .delegado-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      border: 1px solid rgba(0,0,0,0.6);
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.12);
+    }
+
+    .lista-item-provincia {
+      font-weight: 500;
+    }
+
+    .lista-item-delegados {
+      font-size: 0.7rem;
+      color: var(--color-text-soft);
+    }
+
+    /* --- CUADRO DE MANDOS --- */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      grid-auto-rows: minmax(180px, 1fr);
+      gap: 10px;
+      flex: 1;
+      min-height: 0;
+    }
+
+    @media (max-width: 900px) {
+      .dashboard-grid {
+        grid-template-columns: minmax(0,1fr);
+      }
+    }
+
+    .chart-container {
+      flex: 1;
+      position: relative;
+      min-height: 0;
+    }
+
+    .chart-container canvas {
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    .excel-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 0.75rem;
+      margin-bottom: 8px;
+      background: rgba(0,0,0,0.35);
+      border-radius: 999px;
+      padding: 6px 10px;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .excel-panel-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+
+    .excel-panel input[type="file"] {
+      font-size: 0.7rem;
+    }
+
+    /* --- TOAST --- */
+    .toast {
+      position: fixed;
+      bottom: 16px;
+      right: 16px;
+      padding: 8px 14px;
+      background: rgba(0,0,0,0.9);
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.18);
+      font-size: 0.8rem;
+      color: var(--color-text-soft);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(8px);
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      z-index: 999;
+    }
+
+    .toast.visible {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+
+    .toast i {
+      color: var(--color-primary-soft);
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #202028;
+      border-radius: 999px;
+    }
+  </style>
+</head>
+<body>
+  <!-- PANTALLA DE PIN -->
+  <div id="pin-screen">
+    <div class="pin-card">
+      <div class="pin-icon">
+        <i class="fa-solid fa-headphones"></i>
+      </div>
+      <div class="pin-title">SEGUIMIENTO-VISITAS AUDIO</div>
+      <div class="pin-subtitle">Introduce el PIN de acceso</div>
+
+      <div class="pin-input-wrapper">
+        <input
+          type="password"
+          id="pin-input"
+          placeholder="AR4321"
+          maxlength="6"
+          autocomplete="off"
+        />
+        <button class="pin-button" id="pin-button">Entrar</button>
+      </div>
+      <div class="pin-error" id="pin-error"></div>
+    </div>
+  </div>
+
+  <!-- APLICACIÓN PRINCIPAL -->
+  <div id="app" class="hidden">
+    <header class="app-header">
+      <div class="header-left">
+        <div class="header-logo">
+          <i class="fa-solid fa-headphones"></i>
+        </div>
+        <div class="header-title">
+          <div class="header-title-main">SEGUIMIENTO-VISITAS AUDIO</div>
+          <div class="header-title-sub">Panel de visitas · centros · ventas</div>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button class="icon-button" id="btn-save">
+          <i class="fa-solid fa-cloud-arrow-up"></i>
+          <span class="tooltip">Guardar en nube (local)</span>
+        </button>
+        <button class="icon-button" id="btn-load">
+          <i class="fa-solid fa-cloud-arrow-down"></i>
+          <span class="tooltip">Actualizar desde nube (local)</span>
+        </button>
+        <button class="icon-button" id="btn-print">
+          <i class="fa-solid fa-print"></i>
+          <span class="tooltip">Imprimir</span>
+        </button>
+        <button class="icon-button" id="btn-download">
+          <i class="fa-solid fa-file-arrow-down"></i>
+          <span class="tooltip">Descargar HTML</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="app-main">
+      <div class="app-grid">
+        <!-- SECCIÓN REGIONES / MAPA / CENTROS -->
+        <section class="section" id="section-regiones">
+          <div class="section-header">
+            <div class="section-title">
+              <i class="fa-solid fa-location-dot"></i>
+              REGIONES &amp; CENTROS
+            </div>
+            <div class="section-header-right">
+              <span class="badge">Mapa delegados</span>
+            </div>
+          </div>
+
+          <div class="regiones-layout">
+            <!-- MAPA -->
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">Mapa de delegados por provincia</div>
+                  <div class="card-subtitle">Colores por delegado regional</div>
+                </div>
+              </div>
+              <div class="map-wrapper">
+                <div id="map"></div>
+              </div>
+            </div>
+
+            <!-- BUSCADORES / LISTADO -->
+            <div class="card regiones-sidebar">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">Centros &amp; responsables</div>
+                  <div class="card-subtitle">Búsqueda rápida y altas</div>
+                </div>
+              </div>
+
+              <div class="sidebar-group">
+                <div class="label">Buscar centro</div>
+                <input
+                  type="text"
+                  id="search-centro"
+                  class="input"
+                  placeholder="Nombre de centro / provincia..."
+                />
+              </div>
+
+              <div class="sidebar-group">
+                <div class="label">Buscar delegado</div>
+                <input
+                  type="text"
+                  id="search-delegado"
+                  class="input"
+                  placeholder="Nombre de delegado..."
+                />
+              </div>
+
+              <div class="sidebar-actions">
+                <div class="small-text">
+                  Filtra el mapa en tiempo real por provincia / delegado.
+                </div>
+                <button class="add-button" id="btn-add-centro">
+                  <i class="fa-solid fa-plus"></i>
+                  Nuevo centro
+                </button>
+              </div>
+
+              <div class="lista-regiones" id="lista-regiones">
+                <!-- Rellenado por JS con provincias + delegados + color -->
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- SECCIÓN CUADRO DE MANDOS -->
+        <section class="section" id="section-dashboard">
+          <div class="section-header">
+            <div class="section-title">
+              <i class="fa-solid fa-chart-line"></i>
+              CUADRO DE MANDOS
+            </div>
+            <div class="section-header-right">
+              <span class="badge">Visitas · procesos · HIT · AAR</span>
+            </div>
+          </div>
+
+          <div class="excel-panel">
+            <div class="excel-panel-row">
+              <span>Vincular datos de checklist (Excel):</span>
+              <input
+                type="file"
+                id="excelChecklist"
+                accept=".xlsx"
+                multiple
+              />
+            </div>
+            <span class="small-text">
+              Sube tus archivos <b>CHECKLIST AUDIO Córners</b> y
+              <b>CHECKLIST AUDIO Exclusv</b>. El ejemplo de abajo agrupa por
+              criterio y actualiza el gráfico de barras de procesos.
+            </span>
+          </div>
+
+          <div class="dashboard-grid">
+            <!-- BARRAS: APLICACIÓN PROCESOS GENERAL -->
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">
+                    Aplicación de procesos (Checklist)
+                  </div>
+                  <div class="card-subtitle">
+                    Media por criterio de checklist
+                  </div>
+                </div>
+              </div>
+              <div class="chart-container">
+                <canvas id="chartProcesos"></canvas>
+              </div>
+            </div>
+
+            <!-- DONUT: APLICACIÓN GENERAL HIT -->
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">Aplicación general HIT</div>
+                  <div class="card-subtitle">
+                    % centros aplicando protocolo HIT
+                  </div>
+                </div>
+              </div>
+              <div class="chart-container">
+                <canvas id="chartHIT"></canvas>
+              </div>
+            </div>
+
+            <!-- DONUT: CAPACITACIÓN SERVICIO AAR -->
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">Capacitación servicio AAR</div>
+                  <div class="card-subtitle">
+                    % equipos formados en servicio AAR
+                  </div>
+                </div>
+              </div>
+              <div class="chart-container">
+                <canvas id="chartAAR"></canvas>
+              </div>
+            </div>
+
+            <!-- RADAR: VENTAS / FORMACIONES / DINAMIZACIONES -->
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">Indicadores clave</div>
+                  <div class="card-subtitle">
+                    Ventas · formaciones · dinamizaciones (% objetivo)
+                  </div>
+                </div>
+              </div>
+              <div class="chart-container">
+                <canvas id="chartRadar"></canvas>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast">
+    <i class="fa-solid fa-circle-info"></i>
+    <span id="toast-text"></span>
+  </div>
+
+  <script>
+    /* ===========================
+       LÓGICA PANTALLA PIN
+    ============================ */
+    const PIN_CODE = "AR4321";
+    const pinScreen = document.getElementById("pin-screen");
+    const app = document.getElementById("app");
+    const pinInput = document.getElementById("pin-input");
+    const pinButton = document.getElementById("pin-button");
+    const pinError = document.getElementById("pin-error");
+
+    function checkPin() {
+      const value = pinInput.value.trim();
+      if (value === PIN_CODE) {
+        pinScreen.classList.add("hidden");
+        app.classList.remove("hidden");
+      } else {
+        pinError.textContent = "PIN incorrecto. Vuelve a intentarlo.";
+        pinInput.focus();
+      }
+    }
+
+    pinButton.addEventListener("click", checkPin);
+    pinInput.addEventListener("keyup", (e) => {
+      if (e.key === "Enter") checkPin();
     });
 
-    setStores(newStores);
-    setSelectedStoreId(newStores.length > 0 ? newStores[0].id : null);
-  };
+    /* ===========================
+       TOAST
+    ============================ */
+    const toastEl = document.getElementById("toast");
+    const toastTextEl = document.getElementById("toast-text");
+    let toastTimeout = null;
 
-  const filteredStores = stores.filter((store) => {
-    const textoGlobal = `${store.codigo} ${store.propietario} ${store.centro} ${store.provincia} ${store.centroRegional} ${store.correo}`.toLowerCase();
+    function showToast(message) {
+      toastTextEl.textContent = message;
+      toastEl.classList.add("visible");
+      if (toastTimeout) clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toastEl.classList.remove("visible");
+      }, 2600);
+    }
 
-    if (search && !textoGlobal.includes(search.toLowerCase())) return false;
+    /* ===========================
+       BOTONES CABECERA
+    ============================ */
+    document.getElementById("btn-print").addEventListener("click", () => {
+      window.print();
+    });
 
-    if (
-      filterCodigo &&
-      !store.codigo.toLowerCase().includes(filterCodigo.toLowerCase())
-    )
-      return false;
+    document.getElementById("btn-download").addEventListener("click", () => {
+      try {
+        const html = document.documentElement.outerHTML;
+        const blob = new Blob([html], { type: "text/html" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "seguimiento-visitas-audio.html";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        showToast("Descarga de HTML iniciada.");
+      } catch (e) {
+        console.error(e);
+        showToast("No se pudo generar el HTML.");
+      }
+    });
 
-    if (
-      filterPropietario &&
-      !store.propietario.toLowerCase().includes(filterPropietario.toLowerCase())
-    )
-      return false;
+    const STORAGE_KEY = "seguimiento-visitas-audio";
 
-    if (
-      filterCentro &&
-      !store.centro.toLowerCase().includes(filterCentro.toLowerCase())
-    )
-      return false;
-
-    if (
-      filterCorreo &&
-      !store.correo.toLowerCase().includes(filterCorreo.toLowerCase())
-    )
-      return false;
-
-    if (
-      filterProvincia &&
-      !store.provincia.toLowerCase().includes(filterProvincia.toLowerCase())
-    )
-      return false;
-
-    if (
-      filterDelegado &&
-      !store.centroRegional.toLowerCase().includes(filterDelegado.toLowerCase())
-    )
-      return false;
-
-    if (
-      filterRegion &&
-      !store.region.toLowerCase().includes(filterRegion.toLowerCase())
-    )
-      return false;
-
-    if (
-      filterResponsableAudio &&
-      !store.responsableAudio
-        .toLowerCase()
-        .includes(filterResponsableAudio.toLowerCase())
-    )
-      return false;
-
-    if (filterCentroAAR && store.centroAAR !== filterCentroAAR) return false;
-
-    return true;
-  });
-
-  const groupedStoresByDelegado: { delegado: string; stores: Store[] }[] = [];
-  const mapDelegado = new Map<string, Store[]>();
-  filteredStores.forEach((store) => {
-    const key = store.centroRegional || "Sin delegado";
-    const current = mapDelegado.get(key) || [];
-    current.push(store);
-    mapDelegado.set(key, current);
-  });
-  mapDelegado.forEach((storesGrupo, delegado) => {
-    groupedStoresByDelegado.push({ delegado, stores: storesGrupo });
-  });
-
-  // Opciones únicas para desplegables tipo Excel
-  const getUniqueSorted = (values: string[]) => {
-    const set = new Set(
-      values
-        .map((v) => (v || "").trim())
-        .filter((v) => v.length > 0)
-    );
-    return Array.from(set).sort((a, b) =>
-      a.localeCompare(b, "es", { sensitivity: "base" })
-    );
-  };
-
-  const opcionesCodigo = getUniqueSorted(stores.map((s) => s.codigo));
-  const opcionesPropietario = getUniqueSorted(stores.map((s) => s.propietario));
-  const opcionesCentro = getUniqueSorted(stores.map((s) => s.centro));
-  const opcionesProvincia = getUniqueSorted(stores.map((s) => s.provincia));
-  const opcionesCorreo = getUniqueSorted(stores.map((s) => s.correo));
-  const opcionesDelegado = getUniqueSorted(stores.map((s) => s.centroRegional));
-  const opcionesRegion = getUniqueSorted(stores.map((s) => s.region));
-  const opcionesRespAudio = getUniqueSorted(
-    stores.map((s) => s.responsableAudio)
-  );
-
-  const selectedStore =
-    stores.find((store) => store.id === selectedStoreId) || null;
-
-  const updateStoreField = <K extends keyof Store>(
-    id: number,
-    field: K,
-    value: Store[K]
-  ) => {
-    setStores((prev) =>
-      prev.map((store) =>
-        store.id === id ? { ...store, [field]: value } : store
-      )
-    );
-  };
-
-  const updateVisitField = <K extends keyof Visit>(
-    storeId: number,
-    visitId: number,
-    field: K,
-    value: Visit[K]
-  ) => {
-    setStores((prev) =>
-      prev.map((store) => {
-        if (store.id !== storeId) return store;
-        return {
-          ...store,
-          visitas: store.visitas.map((visit) =>
-            visit.id === visitId ? { ...visit, [field]: value } : visit
-          ),
+    document.getElementById("btn-save").addEventListener("click", () => {
+      try {
+        const filtros = {
+          centro: document.getElementById("search-centro").value || "",
+          delegado: document.getElementById("search-delegado").value || "",
         };
-      })
-    );
-  };
 
-  // Métricas globales
-  const allVisits: Visit[] = stores.flatMap((s) => s.visitas);
+        const payload = {
+          timestamp: new Date().toISOString(),
+          filtros,
+          charts: {
+            procesos: chartProcesos ? chartProcesos.data : null,
+            hit: chartHIT ? chartHIT.data : null,
+            aar: chartAAR ? chartAAR.data : null,
+            radar: chartRadar ? chartRadar.data : null,
+          },
+        };
 
-  const visitasValidasGlobal = allVisits.filter(
-    (v) => v.fecha && v.excelName && isValidFecha(v.fecha)
-  );
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+        showToast("Datos guardados en nube local (navegador).");
+      } catch (e) {
+        console.error(e);
+        showToast("Error al guardar datos.");
+      }
+    });
 
-  const totalVisitas = visitasValidasGlobal.length;
+    document.getElementById("btn-load").addEventListener("click", () => {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) {
+          showToast("No hay datos guardados aún.");
+          return;
+        }
+        const payload = JSON.parse(raw);
+        if (payload.filtros) {
+          document.getElementById("search-centro").value =
+            payload.filtros.centro || "";
+          document.getElementById("search-delegado").value =
+            payload.filtros.delegado || "";
+          filtrarMapa();
+        }
 
-  const totalTiendas = stores.length;
-  const tiendasConVisita = stores.filter((s) =>
-    s.visitas.some((v) => v.fecha && v.excelName && isValidFecha(v.fecha))
-  ).length;
-  const porcentajeTiendasVisitadas =
-    totalTiendas > 0 ? (tiendasConVisita / totalTiendas) * 100 : 0;
+        if (payload.charts && payload.charts.procesos && chartProcesos) {
+          chartProcesos.data = payload.charts.procesos;
+          chartProcesos.update();
+        }
+        if (payload.charts && payload.charts.hit && chartHIT) {
+          chartHIT.data = payload.charts.hit;
+          chartHIT.update();
+        }
+        if (payload.charts && payload.charts.aar && chartAAR) {
+          chartAAR.data = payload.charts.aar;
+          chartAAR.update();
+        }
+        if (payload.charts && payload.charts.radar && chartRadar) {
+          chartRadar.data = payload.charts.radar;
+          chartRadar.update();
+        }
 
-  const checklistMedia = media(visitasValidasGlobal.map((v) => v.checklist));
-  const hitMedia = porcentajeSi(visitasValidasGlobal.map((v) => v.hit));
+        showToast("Datos cargados desde nube local.");
+      } catch (e) {
+        console.error(e);
+        showToast("Error al cargar datos.");
+      }
+    });
 
-  const visitasConAAR = visitasValidasGlobal.filter(
-    (v) => typeof v.aar === "number" && !isNaN(v.aar as number)
-  );
-  const conteoAAR = visitasConAAR.length;
-  const aarMedia = media(visitasConAAR.map((v) => v.aar));
+    /* ===========================
+       MAPA DELEGADOS (LEAFLET)
+       Datos integrados desde el HTML de mapa original
+    ============================ */
 
-  const algunFechaInvalida = allVisits.some(
-    (v) => v.fecha && !isValidFecha(v.fecha)
-  );
+    // Datos de provincias / delegados (extraídos del mapa que enviaste)
+    const markersData = [
+      {"provincia": "A CORUÑA", "delegados": ["Manuel Cánovas", "Marisa Carmona"], "lat": 43.3623, "lon": -8.4115},
+      {"provincia": "ALBACETE", "delegados": ["Manuel Cánovas"], "lat": 38.9941, "lon": -1.8589},
+      {"provincia": "ALICANTE", "delegados": ["Manuel Cánovas", "Martin SEBASTIÁN", "Verónica Alfonsín"], "lat": 38.3452, "lon": -0.481},
+      {"provincia": "ALMERIA", "delegados": ["LAURA RAMOS", "Maribel Amezcua"], "lat": 36.834, "lon": -2.4637},
+      {"provincia": "ASTURIAS", "delegados": ["Cecilia Pérez", "Maribel Amezcua"], "lat": 43.3614, "lon": -5.8593},
+      {"provincia": "BADAJOZ", "delegados": ["Cecilia Pérez", "LAURA PLAZAS"], "lat": 38.8794, "lon": -6.9707},
+      {"provincia": "BALEARES", "delegados": ["LAURA PLAZAS"], "lat": 39.5696, "lon": 2.6502},
+      {"provincia": "BARCELONA", "delegados": ["ENERITZ ARANGUREN", "LAURA PLAZAS", "LAURA RAMOS", "Laura Plazas", "Laura Ramos", "Maribel Amezcua", "Martin SEBASTIÁN", "Sonia Godino"], "lat": 41.3851, "lon": 2.1734},
+      {"provincia": "BURGOS", "delegados": ["Martin SEBASTIÁN"], "lat": 42.3439, "lon": -3.6969},
+      {"provincia": "CACERES", "delegados": ["Maribel Amezcua", "Sonia Godino"], "lat": 39.4763, "lon": -6.3727},
+      {"provincia": "CADIZ", "delegados": ["Sergio Perán"], "lat": 36.5271, "lon": -6.2886},
+      {"provincia": "CANTABRIA", "delegados": ["Cecilia Pérez", "ENERITZ ARANGUREN", "Marisa Carmona"], "lat": 43.4623, "lon": -3.8099},
+      {"provincia": "CASTELLON", "delegados": ["ENERITZ ARANGUREN", "Laura Plazas", "Marisa Carmona", "Martin SEBASTIÁN"], "lat": 39.9864, "lon": -0.0513},
+      {"provincia": "CORDOBA", "delegados": ["ENERITZ ARANGUREN", "Martin SEBASTIÁN"], "lat": 37.8882, "lon": -4.7794},
+      {"provincia": "CUENCA", "delegados": ["Maribel Amezcua"], "lat": 40.0704, "lon": -2.1374},
+      {"provincia": "GIRONA", "delegados": ["Maribel Amezcua", "SONIA GODINO", "Sonia Godino"], "lat": 41.9794, "lon": 2.8214},
+      {"provincia": "GRANADA", "delegados": ["ENERITZ ARANGUREN", "SONIA GODINO", "Sonia Godino"], "lat": 37.1773, "lon": -3.5986},
+      {"provincia": "GUIPUZCOA", "delegados": ["Daniel Chazo", "Martin SEBASTIÁN"], "lat": 43.3128, "lon": -1.974},
+      {"provincia": "HUESCA", "delegados": ["Daniel Chazo"], "lat": 42.1362, "lon": -0.4089},
+      {"provincia": "JAEN", "delegados": ["Daniel Chazo", "Verónica Alfonsín"], "lat": 37.7796, "lon": -3.7849},
+      {"provincia": "LA RIOJA", "delegados": ["SONIA GODINO"], "lat": 42.2871, "lon": -2.5396},
+      {"provincia": "LAS PALMAS", "delegados": ["Blanca Fdez. de la Pradilla"], "lat": 28.1235, "lon": -15.4363},
+      {"provincia": "LLEIDA", "delegados": ["ENERITZ ARANGUREN", "LAURA PLAZAS"], "lat": 41.6176, "lon": 0.62},
+      {"provincia": "LUGO", "delegados": ["Daniel Chazo"], "lat": 43.0125, "lon": -7.555},
+      {"provincia": "MADRID", "delegados": ["Blanca Fdez. de la Pradilla", "LAURA RAMOS", "Laura RAMOS", "Marisa Carmona", "Sergio Perán"], "lat": 40.4168, "lon": -3.7038},
+      {"provincia": "MALAGA", "delegados": ["Maribel Amezcua", "Martin SEBASTIÁN"], "lat": 36.7213, "lon": -4.4214},
+      {"provincia": "MURCIA", "delegados": ["Manuel Cánovas"], "lat": 37.9922, "lon": -1.1307},
+      {"provincia": "NAVARRA", "delegados": ["Sonia Godino"], "lat": 42.6954, "lon": -1.6761},
+      {"provincia": "OURENSE", "delegados": ["Daniel Chazo"], "lat": 42.3358, "lon": -7.8639},
+      {"provincia": "PONTEVEDRA", "delegados": ["Cecilia Pérez", "ENERITZ ARANGUREN", "Manuel Cánovas", "Verónica Alfonsín"], "lat": 42.4337, "lon": -8.6481},
+      {"provincia": "SALAMANCA", "delegados": ["Sergio Perán"], "lat": 40.9701, "lon": -5.6635},
+      {"provincia": "SEVILLA", "delegados": ["Maribel Amezcua", "Sergio Perán"], "lat": 37.3891, "lon": -5.9845},
+      {"provincia": "SORIA", "delegados": ["ENERITZ ARANGUREN"], "lat": 41.7662, "lon": -2.479},
+      {"provincia": "TARRAGONA", "delegados": ["Cecilia Pérez", "ENERITZ ARANGUREN", "LAURA PLAZAS"], "lat": 41.1189, "lon": 1.2445},
+      {"provincia": "TENERIFE", "delegados": ["Blanca Fdez. de la Pradilla"], "lat": 28.4636, "lon": -16.2518},
+      {"provincia": "TERUEL", "delegados": ["ENERITZ ARANGUREN"], "lat": 40.3456, "lon": -1.1065},
+      {"provincia": "TOLEDO", "delegados": ["Marisa Carmona"], "lat": 39.8628, "lon": -4.0273},
+      {"provincia": "VALENCIA", "delegados": ["Cecilia Pérez", "Marisa Carmona"], "lat": 39.4699, "lon": -0.3763},
+      {"provincia": "VALLADOLID", "delegados": ["Daniel Chazo"], "lat": 41.6523, "lon": -4.7245},
+      {"provincia": "VIZCAYA", "delegados": ["SONIA GODINO", "Sonia Godino"], "lat": 43.263, "lon": -2.935},
+      {"provincia": "ZAMORA", "delegados": ["Blanca Fdez. de la Pradilla"], "lat": 41.5035, "lon": -5.7445},
+      {"provincia": "ZARAGOZA", "delegados": ["ENERITZ ARANGUREN"], "lat": 41.6488, "lon": -0.8891}
+    ];
 
-  return (
-    <div className="min-h-screen bg-gray-100 font-sans">
-      {!authorized ? (
-        <div className="flex items-center justify-center h-screen">
-          <div className="bg-white p-10 rounded-2xl shadow-xl w-80">
-            <h2 className="text-xl font-bold text-center mb-4">
-              Acceso Plataforma
-            </h2>
-            <input
-              type="password"
-              className="w-full p-2 border rounded mb-4"
-              placeholder="Introduce PIN"
-              value={pin}
-              onChange={(e) => setPin(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  handlePin();
-                }
-              }}
-            />
-            <button
-              onClick={handlePin}
-              className="w-full bg-blue-600 text-white py-2 rounded-xl shadow"
-            >
-              Entrar
-            </button>
-          </div>
-        </div>
-      ) : (
-        <div className="p-6">
-          {/* HEADER */}
-          <header className="bg-red-600 text-white p-5 rounded-2xl shadow flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <span className="text-3xl">🎧</span>
-              <h1 className="text-2xl font-bold">
-                Seguimiento de procesos de Audio
-              </h1>
-            </div>
-            <button className="bg-white text-red-600 px-4 py-2 rounded-xl shadow font-semibold">
-              Guardar
-            </button>
-          </header>
+    let mapInstance = null;
+    const marcadorLayers = [];
+    const delegadoColors = {};
+    const colorPalette = [
+      "#ff4b5c",
+      "#ffb347",
+      "#4ecca3",
+      "#1e90ff",
+      "#9b59b6",
+      "#2ecc71",
+      "#e67e22",
+      "#e84393",
+      "#00cec9",
+      "#fdcb6e",
+      "#e74c3c",
+      "#16a085"
+    ];
+    let colorIndex = 0;
 
-          {/* MAPA CHECKLIST + DASHBOARD HORIZONTAL */}
-          <section className="mt-6 space-y-6">
-            {/* Mapa checklist */}
-            <div className="bg-white p-6 rounded-2xl shadow">
-              <h2 className="font-bold text-lg mb-2">
-                Mapa horizontal de checklist de visita
-              </h2>
-              <p className="text-gray-500 mb-4 text-sm">
-                Etapas del proceso de audio según el checklist oficial.
-              </p>
-              <div className="flex gap-4 overflow-x-auto pb-2">
-                {CHECKLIST.map((stage) => (
-                  <div
-                    key={stage.etapa}
-                    className="min-w-[260px] max-w-xs bg-gray-50 border rounded-2xl px-4 py-3 flex-shrink-0"
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-[11px] font-bold uppercase tracking-wide text-red-700">
-                        {stage.etapa}
-                      </span>
-                      <span className="text-[10px] text-gray-500">
-                        {stage.items.length} pts
-                      </span>
-                    </div>
-                    <ul className="space-y-1">
-                      {stage.items.map((item, idx) => (
-                        <li
-                          key={idx}
-                          className="text-[11px] text-gray-700 flex gap-1"
-                        >
-                          <span className="mt-1 h-1.5 w-1.5 rounded-full bg-red-500 flex-shrink-0" />
-                          <span className="leading-tight">{item}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-              </div>
-            </div>
+    function normalizarDelegado(nombre) {
+      if (!nombre) return "";
+      return nombre.trim().toLowerCase().replace(/\s+/g, " ");
+    }
 
-            {/* Dashboard horizontal por tienda */}
-            <div className="bg-white p-4 rounded-2xl shadow">
-              <h3 className="font-bold text-sm mb-3">
-                Dashboard horizontal por tienda (media de todos los Excel)
-              </h3>
-              {stores.length === 0 ? (
-                <p className="text-xs text-gray-500">
-                  Aún no hay tiendas cargadas. Pega el listado y añade visitas.
-                </p>
-              ) : (
-                <div className="flex gap-4 overflow-x-auto pb-2">
-                  {stores.map((store) => {
-                    const visitasValidas = store.visitas.filter(
-                      (v) => v.fecha && v.excelName && isValidFecha(v.fecha)
-                    );
-                    const visitasCount = visitasValidas.length;
-                    const checklistMedioTienda = media(
-                      visitasValidas.map((v) => v.checklist)
-                    );
-                    const hitMedioTienda = porcentajeSi(
-                      visitasValidas.map((v) => v.hit)
-                    );
+    function getColorDelegado(nombre) {
+      const key = normalizarDelegado(nombre);
+      if (!delegadoColors[key]) {
+        delegadoColors[key] = colorPalette[colorIndex % colorPalette.length];
+        colorIndex++;
+      }
+      return delegadoColors[key];
+    }
 
-                    return (
-                      <div
-                        key={store.id}
-                        className="min-w-[260px] max-w-xs bg-gray-50 rounded-2xl px-4 py-3 border flex-shrink-0 flex flex-col gap-2"
-                      >
-                        <div className="flex justify-between items-start mb-1">
-                          <div>
-                            <p className="text-xs font-semibold">
-                              {store.centro || store.codigo || store.raw}
-                            </p>
-                            <div className="flex items-center gap-2 mt-0.5">
-                              <span
-                                className="text-[10px] px-2 py-0.5 rounded-full"
-                                style={delegadoColor(store.centroRegional)}
-                              >
-                                {store.provincia || "Provincia sin definir"}
-                              </span>
-                              <span
-                                className="text-[10px] px-2 py-0.5 rounded-full"
-                                style={delegadoColor(store.centroRegional)}
-                              >
-                                {store.centroRegional
-                                  ? `Delegado: ${store.centroRegional}`
-                                  : "Sin delegado"}
-                              </span>
-                            </div>
-                          </div>
-                          <span className="text-[10px] text-gray-500">
-                            {visitasCount} visita(s)
-                          </span>
-                        </div>
+    function inicializarMapa() {
+      mapInstance = L.map("map").setView([40.3, -3.7], 6);
 
-                        <div className="flex items-center justify-between gap-2 mt-1">
-                          <div className="flex items-center gap-2">
-                            <div
-                              className="w-10 h-10 rounded-full flex items-center justify-center text-[10px] font-bold text-red-700"
-                              style={donutStyle(checklistMedioTienda)}
-                            >
-                              <div className="w-7 h-7 rounded-full bg-white flex items-center justify-center">
-                                <span>
-                                  {checklistMedioTienda !== null
-                                    ? `${checklistMedioTienda.toFixed(0)}%`
-                                    : "--"}
-                                </span>
-                              </div>
-                            </div>
-                            <div className="text-[10px]">
-                              <p className="font-semibold">Checklist</p>
-                              <p className="text-gray-500 leading-tight">
-                                % medio de checklist de todas las visitas.
-                              </p>
-                            </div>
-                          </div>
-                        </div>
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 18,
+        attribution: "&copy; OpenStreetMap contributors"
+      }).addTo(mapInstance);
 
-                        <div className="mt-2 text-[10px] bg-white rounded-xl px-2 py-1 border flex items-center justify-between">
-                          <div>
-                            <p className="font-semibold mb-0.5">HIT</p>
-                            <p className="text-gray-700">
-                              {hitMedioTienda !== null
-                                ? `${hitMedioTienda.toFixed(
-                                    0
-                                  )}% visitas con HIT = Sí`
-                                : "Sin datos de HIT"}
-                            </p>
-                          </div>
-                          <div className="text-right text-[9px] text-gray-500">
-                            <p>Total visitas válidas</p>
-                            <p>{visitasCount}</p>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
+      const listaRegiones = document.getElementById("lista-regiones");
+      listaRegiones.innerHTML = "";
 
-            {algunFechaInvalida && (
-              <p className="text-xs text-red-500 mt-1">
-                Hay fechas con formato incorrecto. Usa el calendario o formato
-                <strong> dd/mm/aaaa</strong>.
-              </p>
-            )}
-          </section>
+      markersData.forEach((m) => {
+        const principal = m.delegados && m.delegados.length ? m.delegados[0] : "Sin delegado";
+        const color = getColorDelegado(principal);
 
-          {/* LISTADO DE TIENDAS + DETALLE */}
-          <div className="mt-10 grid grid-cols-1 md:grid-cols-[320px_1fr] gap-6">
-            {/* Lateral listado */}
-            <aside className="bg-white p-5 rounded-2xl shadow h-[70vh] overflow-auto">
-              <h3 className="font-bold text-lg mb-3">Listado de tiendas</h3>
-              <p className="text-xs text-gray-500 mb-2">
-                Pega el listado de tiendas desde Excel (una fila por línea).
-              </p>
-              <textarea
-                className="w-full p-2 border rounded mb-2 text-xs h-24"
-                placeholder={
-                  "CODIGO\tPROPIETARIO\tCENTRO\tPROVINCIA\tCORREO\tDELEGADO REGIONAL"
-                }
-                value={storesInput}
-                onChange={(e) => setStoresInput(e.target.value)}
-              />
-              <button
-                onClick={handleApplyStores}
-                className="mb-4 text-xs px-3 py-1 rounded-full bg-red-600 text-white font-semibold shadow"
-              >
-                Aplicar listado
-              </button>
+        const delegadosList = (m.delegados || [])
+          .map((d) => "- " + d)
+          .join("<br/>");
 
-              {/* Buscador global */}
-              <input
-                type="text"
-                placeholder="Buscar por cualquier campo..."
-                className="w-full p-2 border rounded mb-3 text-xs"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
+        const popup =
+          "<b>" +
+          m.provincia +
+          "</b><br/><br/><b>Delegado(s):</b><br/>" +
+          delegadosList;
 
-              {/* Filtros por campo con faldón rojo (estilo Excel) */}
-              <div className="bg-red-600 text-white rounded-2xl p-3 mb-3">
-                <p className="text-[11px] font-semibold mb-2">
-                  Filtros rápidos por columna (tipo Excel)
-                </p>
-                <div className="flex flex-wrap gap-2 text-[11px]">
-                  <select
-                    className="bg-white text-red-700 rounded px-2 py-1 min-w-[120px]"
-                    value={filterCodigo}
-                    onChange={(e) => setFilterCodigo(e.target.value)}
-                  >
-                    <option value="">Código (todos)</option>
-                    {opcionesCodigo.map((op) => (
-                      <option key={op} value={op}>
-                        {op}
-                      </option>
-                    ))}
-                  </select>
+        const circle = L.circleMarker([m.lat, m.lon], {
+          radius: 8,
+          fillColor: color,
+          color: "#ffffff",
+          weight: 1,
+          opacity: 1,
+          fillOpacity: 0.9
+        }).addTo(mapInstance);
 
-                  <select
-                    className="bg-white text-red-700 rounded px-2 py-1 min-w-[140px]"
-                    value={filterPropietario}
-                    onChange={(e) => setFilterPropietario(e.target.value)}
-                  >
-                    <option value="">Propietario (todos)</option>
-                    {opcionesPropietario.map((op) => (
-                      <option key={op} value={op}>
-                        {op}
-                      </option>
-                    ))}
-                  </select>
+        circle.bindPopup(popup);
 
-                  <select
-                    className="bg-white text-red-700 rounded px-2 py-1 min-w-[160px]"
-                    value={filterCentro}
-                    onChange={(e) => setFilterCentro(e.target.value)}
-                  >
-                    <option value="">Centro (todos)</option>
-                    {opcionesCentro.map((op) => (
-                      <option key={op} value={op}>
-                        {op}
-                      </option>
-                    ))}
-                  </select>
+        marcadorLayers.push({
+          layer: circle,
+          provincia: m.provincia,
+          delegados: m.delegados || [],
+          color
+        });
 
-                  <select
-                    className="bg-white text-red-700 rounded px-2 py-1 min-w-[140px]"
-                    value={filterProvincia}
-                    onChange={(e) => setFilterProvincia(e.target.value)}
-                  >
-                    <option value="">Provincia (todas)</option>
-                    {opcionesProvincia.map((op) => (
-                      <option key={op} value={op}>
-                        {op}
-                      </option>
-                    ))}
-                  </select>
+        // Lista lateral
+        const item = document.createElement("div");
+        item.className = "lista-item";
 
-                  <select
-                    className="bg-white text-red-700 rounded px-2 py-1 min-w-[140px]"
-                    value={filterDelegado}
-                    onChange={(e) => setFilterDelegado(e.target.value)}
-                  >
-                    <option value="">Delegado (todos)</option>
-                    {opcionesDelegado.map((op) => (
-                      <option key={op} value={op}>
-                        {op || "Sin delegado"}
-                      </option>
-                    ))}
-                  </select>
+        const left = document.createElement("div");
+        left.className = "lista-item-left";
 
-                  <select
-                    className="bg-white text-red-700 rounded px-2 py-1 min-w-[120px]"
-                    value={filterRegion}
-                    onChange={(e) => setFilterRegion(e.target.value)}
-                  >
-                    <option value="">Región (todas)</option>
-                    {opcionesRegion.map((op) => (
-                      <option key={op} value={op}>
-                        {op}
-                      </option>
-                    ))}
-                  </select>
+        const dot = document.createElement("div");
+        dot.className = "delegado-dot";
+        dot.style.background = color;
 
-                  <select
-                    className="bg-white text-red-700 rounded px-2 py-1 min-w-[150px]"
-                    value={filterResponsableAudio}
-                    onChange={(e) => setFilterResponsableAudio(e.target.value)}
-                  >
-                    <option value="">Resp. audio (todos)</option>
-                    {opcionesRespAudio.map((op) => (
-                      <option key={op} value={op}>
-                        {op}
-                      </option>
-                    ))}
-                  </select>
+        const provSpan = document.createElement("span");
+        provSpan.className = "lista-item-provincia";
+        provSpan.textContent = m.provincia;
 
-                  <select
-                    className="bg-white text-red-700 rounded px-2 py-1 min-w-[120px]"
-                    value={filterCentroAAR}
-                    onChange={(e) => setFilterCentroAAR(e.target.value)}
-                  >
-                    <option value="">Centro AAR (todos)</option>
-                    <option value="Sí">Sí</option>
-                    <option value="No">No</option>
-                  </select>
-                </div>
-              </div>
+        const delSpan = document.createElement("span");
+        delSpan.className = "lista-item-delegados";
+        delSpan.textContent = (m.delegados || []).join(" · ");
 
-              {filteredStores.length === 0 && (
-                <p className="text-xs text-gray-400">
-                  No hay tiendas cargadas o no coincide ninguna con los filtros.
-                </p>
-              )}
+        left.appendChild(dot);
+        left.appendChild(provSpan);
 
-              {groupedStoresByDelegado.map((grupo) => (
-                <div key={grupo.delegado} className="mb-3">
-                  <div
-                    className="text-[11px] font-semibold px-2 py-1 rounded-full inline-block mb-1"
-                    style={
-                      grupo.delegado === "Sin delegado"
-                        ? { backgroundColor: "#e5e7eb", color: "#374151" }
-                        : delegadoColor(grupo.delegado)
-                    }
-                  >
-                    {grupo.delegado === "Sin delegado"
-                      ? "Sin delegado asignado"
-                      : `Delegado: ${grupo.delegado}`}
-                  </div>
-                  {grupo.stores.map((store) => (
-                    <button
-                      key={store.id}
-                      type="button"
-                      onClick={() => setSelectedStoreId(store.id)}
-                      className={`w-full text-left border-b py-2 px-1 rounded hover:bg-red-50 transition ${
-                        selectedStoreId === store.id ? "bg-red-50" : ""
-                      }`}
-                    >
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm font-medium">
-                          {store.centro || store.codigo || "Sin centro"}
-                        </span>
-                        <span
-                          className="text-[10px] px-2 py-0.5 rounded-full"
-                          style={delegadoColor(store.centroRegional)}
-                        >
-                          {store.provincia || "Provincia sin definir"}
-                        </span>
-                      </div>
-                      <div className="text-[10px] text-gray-500 flex justify-between mt-1">
-                        <span>{store.propietario || "Sin propietario"}</span>
-                        <span className="italic">
-                          {store.codigo || "Sin código"}
-                        </span>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              ))}
-            </aside>
+        item.appendChild(left);
+        item.appendChild(delSpan);
 
-            {/* Detalle de tienda */}
-            <main className="bg-white p-6 rounded-2xl shadow h-[70vh] flex flex-col">
-              <h3 className="text-xl font-bold mb-4">
-                Detalle de tienda
-                {selectedStore
-                  ? `: ${selectedStore.centro || selectedStore.codigo}`
-                  : ""}
-              </h3>
+        item.addEventListener("click", () => {
+          mapInstance.setView([m.lat, m.lon], 7);
+          circle.openPopup();
+        });
 
-              {!selectedStore ? (
-                <p className="text-gray-500 text-sm">
-                  Carga primero el listado de tiendas y selecciona una.
-                </p>
-              ) : (
-                <div className="flex-1 flex flex-col gap-6 overflow-auto pr-2">
-                  {/* Datos básicos */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs bg-gray-50 border rounded-2xl p-4">
-                    <div>
-                      <p className="font-semibold mb-0.5">Código</p>
-                      <p>{selectedStore.codigo || "-"}</p>
-                    </div>
-                    <div>
-                      <p className="font-semibold mb-0.5">Propietario</p>
-                      <p>{selectedStore.propietario || "-"}</p>
-                    </div>
-                    <div>
-                      <p className="font-semibold mb-0.5">Centro</p>
-                      <p>{selectedStore.centro || "-"}</p>
-                    </div>
-                    <div>
-                      <p className="font-semibold mb-0.5">Provincia</p>
-                      <span
-                        className="inline-block px-2 py-0.5 rounded-full"
-                        style={delegadoColor(selectedStore.centroRegional)}
-                      >
-                        {selectedStore.provincia || "Provincia sin definir"}
-                      </span>
-                    </div>
-                    <div>
-                      <p className="font-semibold mb-0.5">Correo</p>
-                      <p>{selectedStore.correo || "-"}</p>
-                    </div>
-                    <div>
-                      <p className="font-semibold mb-0.5">Delegado regional</p>
-                      <span
-                        className="inline-block px-2 py-0.5 rounded-full"
-                        style={delegadoColor(selectedStore.centroRegional)}
-                      >
-                        {selectedStore.centroRegional || "Sin delegado"}
-                      </span>
-                    </div>
-                  </div>
+        listaRegiones.appendChild(item);
+      });
+    }
 
-                  {/* Seguimiento general */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-semibold mb-1">
-                        Región
-                      </label>
-                      <input
-                        type="text"
-                        className="w-full p-2 border rounded text-sm"
-                        value={selectedStore.region}
-                        onChange={(e) =>
-                          updateStoreField(
-                            selectedStore.id,
-                            "region",
-                            e.target.value
-                          )
-                        }
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold mb-1">
-                        Responsable de audio (general)
-                      </label>
-                      <select
-                        className="w-full p-2 border rounded text-sm"
-                        value={selectedStore.responsableAudio}
-                        onChange={(e) =>
-                          updateStoreField(
-                            selectedStore.id,
-                            "responsableAudio",
-                            e.target.value as Store["responsableAudio"]
-                          )
-                        }
-                      >
-                        <option value="">Selecciona...</option>
-                        <option value="Sonia">Sonia</option>
-                        <option value="Ary Rojas">Ary Rojas</option>
-                      </select>
-                    </div>
-                    <div className="md:col-span-2">
-                      <label className="block text-sm font-semibold mb-1">
-                        Centro AAR
-                      </label>
-                      <div className="flex flex-col md:flex-row gap-4 items-start">
-                        <select
-                          className="w-full md:w-40 p-2 border rounded text-sm"
-                          value={selectedStore.centroAAR}
-                          onChange={(e) =>
-                            updateStoreField(
-                              selectedStore.id,
-                              "centroAAR",
-                              e.target.value as Store["centroAAR"]
-                            )
-                          }
-                        >
-                          <option value="">Selecciona...</option>
-                          <option value="Sí">Sí</option>
-                          <option value="No">No</option>
-                        </select>
-                        <div className="flex-1">
-                          <p className="text-xs font-semibold mb-1">
-                            Visitas (fecha + documento checklist, hasta 4)
-                          </p>
-                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                            {selectedStore.visitas.map((visit) => (
-                              <div
-                                key={visit.id}
-                                className="border rounded-xl p-2 text-[11px] bg-gray-50"
-                              >
-                                <p className="font-semibold mb-1">
-                                  Visita {visit.id}
-                                </p>
-                                <input
-                                  type="date"
-                                  className={`w-full border rounded px-2 py-1 mb-2 ${
-                                    visit.fecha && !isValidFecha(visit.fecha)
-                                      ? "border-red-500 bg-red-50"
-                                      : ""
-                                  }`}
-                                  value={visit.fecha}
-                                  onChange={(e) =>
-                                    updateVisitField(
-                                      selectedStore.id,
-                                      visit.id,
-                                      "fecha",
-                                      e.target.value
-                                    )
-                                  }
-                                />
-                                <label className="inline-flex items-center px-3 py-1 rounded-xl border cursor-pointer hover:bg-white">
-                                  <span className="text-[11px] font-semibold">
-                                    Adjuntar documento checklist
-                                  </span>
-                                  <input
-                                    type="file"
-                                    accept=".xlsx,.xls,.csv,.pdf"
-                                    className="hidden"
-                                    onChange={(e) => {
-                                      const file = e.target.files?.[0];
-                                      if (file) {
-                                        updateVisitField(
-                                          selectedStore.id,
-                                          visit.id,
-                                          "excelName",
-                                          file.name
-                                        );
-                                      }
-                                    }}
-                                  />
-                                </label>
-                                <p className="text-[10px] text-gray-500 mt-1 truncate">
-                                  {visit.excelName || "Sin archivo"}
-                                </p>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+    function filtrarMapa() {
+      const searchCentro = document
+        .getElementById("search-centro")
+        .value.trim()
+        .toLowerCase();
+      const searchDelegado = document
+        .getElementById("search-delegado")
+        .value.trim()
+        .toLowerCase();
 
-                  {/* Detalle KPIs visitas */}
-                  <div>
-                    <h4 className="text-sm font-semibold mb-2">
-                      Detalle de visitas (responsable, checklist, HIT y AAR)
-                    </h4>
-                    <p className="text-xs text-gray-500 mb-3">
-                      Indica quién visita, el % de checklist, si hubo HIT y el
-                      % AAR.
-                    </p>
-                    <div className="border rounded-2xl overflow-hidden">
-                      <div className="grid grid-cols-[40px,1.2fr,0.9fr,0.9fr,0.9fr] bg-gray-50 text-[11px] font-semibold px-3 py-2">
-                        <span>#</span>
-                        <span>Responsable audio</span>
-                        <span>Checklist %</span>
-                        <span>HIT (Sí/No)</span>
-                        <span>AAR %</span>
-                      </div>
-                      <div className="divide-y">
-                        {selectedStore.visitas.map((visit) => (
-                          <div
-                            key={visit.id}
-                            className="grid grid-cols-[40px,1.2fr,0.9fr,0.9fr,0.9fr] items-center px-3 py-2 text-[11px] gap-2"
-                          >
-                            <span className="font-semibold">V{visit.id}</span>
-                            <select
-                              className="border rounded px-2 py-1 text-[11px]"
-                              value={visit.responsable}
-                              onChange={(e) =>
-                                updateVisitField(
-                                  selectedStore.id,
-                                  visit.id,
-                                  "responsable",
-                                  e.target.value as Visit["responsable"]
-                                )
-                              }
-                            >
-                              <option value="">Selecciona...</option>
-                              <option value="Sonia">Sonia</option>
-                              <option value="Ary Rojas">Ary Rojas</option>
-                            </select>
-                            <input
-                              type="number"
-                              min={0}
-                              max={100}
-                              className="border rounded px-2 py-1 text-[11px]"
-                              placeholder="%"
-                              value={visit.checklist ?? ""}
-                              onChange={(e) => {
-                                const val = e.target.value;
-                                const num = val === "" ? null : Number(val);
-                                updateVisitField(
-                                  selectedStore.id,
-                                  visit.id,
-                                  "checklist",
-                                  isNaN(num as number) ? null : (num as number)
-                                );
-                              }}
-                            />
-                            <select
-                              className="border rounded px-2 py-1 text-[11px]"
-                              value={visit.hit ?? ""}
-                              onChange={(e) =>
-                                updateVisitField(
-                                  selectedStore.id,
-                                  visit.id,
-                                  "hit",
-                                  e.target.value as Visit["hit"]
-                                )
-                              }
-                            >
-                              <option value="">Selecciona...</option>
-                              <option value="Sí">Sí</option>
-                              <option value="No">No</option>
-                            </select>
-                            <input
-                              type="number"
-                              min={0}
-                              max={100}
-                              className="border rounded px-2 py-1 text-[11px]"
-                              placeholder="%"
-                              value={visit.aar ?? ""}
-                              onChange={(e) => {
-                                const val = e.target.value;
-                                const num = val === "" ? null : Number(val);
-                                updateVisitField(
-                                  selectedStore.id,
-                                  visit.id,
-                                  "aar",
-                                  isNaN(num as number) ? null : (num as number)
-                                );
-                              }}
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </main>
-          </div>
+      marcadorLayers.forEach((m) => {
+        const provinciaMatch =
+          !searchCentro ||
+          (m.provincia && m.provincia.toLowerCase().includes(searchCentro));
 
-          {/* LISTADO DE CENTROS (tabla final) */}
-          <section className="mt-10 bg-white p-6 rounded-2xl shadow">
-            <h3 className="font-bold text-lg mb-4 bg-red-600 text-white inline-block px-4 py-2 rounded-2xl">
-              LISTADO DE CENTROS
-            </h3>
-            {stores.length === 0 ? (
-              <p className="text-xs text-gray-500">
-                Aún no hay tiendas cargadas.
-              </p>
-            ) : (
-              <div className="overflow-auto">
-                <table className="min-w-full text-[11px] border-collapse">
-                  <thead>
-                    <tr className="bg-gray-50 border-b">
-                      <th className="text-left px-2 py-2">Código</th>
-                      <th className="text-left px-2 py-2">Propietario</th>
-                      <th className="text-left px-2 py-2">Centro</th>
-                      <th className="text-left px-2 py-2">Provincia</th>
-                      <th className="text-left px-2 py-2">Correo</th>
-                      <th className="text-left px-2 py-2">Delegado regional</th>
-                      <th className="text-left px-2 py-2">Región</th>
-                      <th className="text-left px-2 py-2">Resp. audio</th>
-                      <th className="text-left px-2 py-2">Centro AAR</th>
-                      <th className="text-right px-2 py-2"># Visitas</th>
-                      <th className="text-right px-2 py-2">
-                        Checklist medio %
-                      </th>
-                      <th className="text-right px-2 py-2">
-                        HIT (visitas Sí %)
-                      </th>
-                      <th className="text-right px-2 py-2">AAR medio %</th>
-                    </tr>
-                    {/* Fila de filtros tipo Excel por columna */}
-                    <tr className="bg-gray-50 border-b">
-                      <th className="px-2 py-1">
-                        <select
-                          className="border rounded px-1 py-0.5 w-full"
-                          value={filterCodigo}
-                          onChange={(e) => setFilterCodigo(e.target.value)}
-                        >
-                          <option value="">Todos</option>
-                          {opcionesCodigo.map((op) => (
-                            <option key={op} value={op}>
-                              {op}
-                            </option>
-                          ))}
-                        </select>
-                      </th>
-                      <th className="px-2 py-1">
-                        <select
-                          className="border rounded px-1 py-0.5 w-full"
-                          value={filterPropietario}
-                          onChange={(e) => setFilterPropietario(e.target.value)}
-                        >
-                          <option value="">Todos</option>
-                          {opcionesPropietario.map((op) => (
-                            <option key={op} value={op}>
-                              {op}
-                            </option>
-                          ))}
-                        </select>
-                      </th>
-                      <th className="px-2 py-1">
-                        <select
-                          className="border rounded px-1 py-0.5 w-full"
-                          value={filterCentro}
-                          onChange={(e) => setFilterCentro(e.target.value)}
-                        >
-                          <option value="">Todos</option>
-                          {opcionesCentro.map((op) => (
-                            <option key={op} value={op}>
-                              {op}
-                            </option>
-                          ))}
-                        </select>
-                      </th>
-                      <th className="px-2 py-1">
-                        <select
-                          className="border rounded px-1 py-0.5 w-full"
-                          value={filterProvincia}
-                          onChange={(e) => setFilterProvincia(e.target.value)}
-                        >
-                          <option value="">Todas</option>
-                          {opcionesProvincia.map((op) => (
-                            <option key={op} value={op}>
-                              {op}
-                            </option>
-                          ))}
-                        </select>
-                      </th>
-                      <th className="px-2 py-1">
-                        <select
-                          className="border rounded px-1 py-0.5 w-full"
-                          value={filterCorreo}
-                          onChange={(e) => setFilterCorreo(e.target.value)}
-                        >
-                          <option value="">Todos</option>
-                          {opcionesCorreo.map((op) => (
-                            <option key={op} value={op}>
-                              {op}
-                            </option>
-                          ))}
-                        </select>
-                      </th>
-                      <th className="px-2 py-1">
-                        <select
-                          className="border rounded px-1 py-0.5 w-full"
-                          value={filterDelegado}
-                          onChange={(e) => setFilterDelegado(e.target.value)}
-                        >
-                          <option value="">Todos</option>
-                          {opcionesDelegado.map((op) => (
-                            <option key={op} value={op}>
-                              {op || "Sin delegado"}
-                            </option>
-                          ))}
-                        </select>
-                      </th>
-                      <th className="px-2 py-1">
-                        <select
-                          className="border rounded px-1 py-0.5 w-full"
-                          value={filterRegion}
-                          onChange={(e) => setFilterRegion(e.target.value)}
-                        >
-                          <option value="">Todas</option>
-                          {opcionesRegion.map((op) => (
-                            <option key={op} value={op}>
-                              {op}
-                            </option>
-                          ))}
-                        </select>
-                      </th>
-                      <th className="px-2 py-1">
-                        <select
-                          className="border rounded px-1 py-0.5 w-full"
-                          value={filterResponsableAudio}
-                          onChange={(e) =>
-                            setFilterResponsableAudio(e.target.value)
-                          }
-                        >
-                          <option value="">Todos</option>
-                          {opcionesRespAudio.map((op) => (
-                            <option key={op} value={op}>
-                              {op}
-                            </option>
-                          ))}
-                        </select>
-                      </th>
-                      <th className="px-2 py-1">
-                        <select
-                          className="border rounded px-1 py-0.5 w-full"
-                          value={filterCentroAAR}
-                          onChange={(e) => setFilterCentroAAR(e.target.value)}
-                        >
-                          <option value="">Todos</option>
-                          <option value="Sí">Sí</option>
-                          <option value="No">No</option>
-                        </select>
-                      </th>
-                      {/* Columnas de métricas sin filtro */}
-                      <th />
-                      <th />
-                      <th />
-                      <th />
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredStores.map((store) => {
-                      const visitasValidas = store.visitas.filter(
-                        (v) => v.fecha && v.excelName && isValidFecha(v.fecha)
-                      );
-                      const checklistMedioTienda = media(
-                        visitasValidas.map((v) => v.checklist)
-                      );
-                      const hitMedioTienda = porcentajeSi(
-                        visitasValidas.map((v) => v.hit)
-                      );
-                      const aarMedioTienda = media(
-                        visitasValidas.map((v) => v.aar)
-                      );
+        // Aquí podrías enlazar "centros" cuando vengan de Excel
+        const centroMatch = provinciaMatch;
 
-                      return (
-                        <tr
-                          key={store.id}
-                          className="border-b hover:bg-gray-50"
-                        >
-                          <td className="px-2 py-1 whitespace-nowrap">
-                            {store.codigo || "-"}
-                          </td>
-                          <td className="px-2 py-1 whitespace-nowrap">
-                            {store.propietario || "-"}
-                          </td>
-                          <td className="px-2 py-1 whitespace-nowrap">
-                            {store.centro || "-"}
-                          </td>
-                          <td className="px-2 py-1 whitespace-nowrap">
-                            <span
-                              className="inline-block px-2 py-0.5 rounded-full"
-                              style={delegadoColor(store.centroRegional)}
-                            >
-                              {store.provincia || "-"}
-                            </span>
-                          </td>
-                          <td className="px-2 py-1 whitespace-nowrap">
-                            {store.correo || "-"}
-                          </td>
-                          <td className="px-2 py-1 whitespace-nowrap">
-                            <span
-                              className="inline-block px-2 py-0.5 rounded-full"
-                              style={delegadoColor(store.centroRegional)}
-                            >
-                              {store.centroRegional || "Sin delegado"}
-                            </span>
-                          </td>
-                          <td className="px-2 py-1 whitespace-nowrap">
-                            {store.region || "-"}
-                          </td>
-                          <td className="px-2 py-1 whitespace-nowrap">
-                            {store.responsableAudio || "-"}
-                          </td>
-                          <td className="px-2 py-1 whitespace-nowrap">
-                            {store.centroAAR || "-"}
-                          </td>
-                          <td className="px-2 py-1 text-right">
-                            {visitasValidas.length}
-                          </td>
-                          <td className="px-2 py-1 text-right">
-                            {checklistMedioTienda !== null
-                              ? `${checklistMedioTienda.toFixed(0)}%`
-                              : "-"}
-                          </td>
-                          <td className="px-2 py-1 text-right">
-                            {hitMedioTienda !== null
-                              ? `${hitMedioTienda.toFixed(0)}%`
-                              : "-"}
-                          </td>
-                          <td className="px-2 py-1 text-right">
-                            {aarMedioTienda !== null
-                              ? `${aarMedioTienda.toFixed(0)}%`
-                              : "-"}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+        const delegadosStr = (m.delegados || []).join(" ").toLowerCase();
+        const delegadoMatch =
+          !searchDelegado || delegadosStr.includes(searchDelegado);
 
-                {/* KPIs globales */}
-                <div className="mt-4 text-[11px] text-gray-600 flex flex-wrap gap-3">
-                  <span>
-                    Total tiendas: <strong>{totalTiendas}</strong>
-                  </span>
-                  <span>
-                    Tiendas con al menos 1 visita:{" "}
-                    <strong>
-                      {tiendasConVisita} (
-                      {porcentajeTiendasVisitadas.toFixed(0)}%)
-                    </strong>
-                  </span>
-                  <span>
-                    Total visitas válidas: <strong>{totalVisitas}</strong>
-                  </span>
+        const visible = centroMatch && delegadoMatch;
 
-                  <span
-                    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full ${kpiBadgeClass(
-                      checklistMedia
-                    )}`}
-                  >
-                    <span className="w-2 h-2 rounded-full bg-current/70" />
-                    <span>
-                      Checklist medio global:{" "}
-                      {checklistMedia !== null
-                        ? `${checklistMedia.toFixed(0)}%`
-                        : "-"}
-                    </span>
-                  </span>
+        if (visible) {
+          if (!mapInstance.hasLayer(m.layer)) {
+            m.layer.addTo(mapInstance);
+          }
+        } else {
+          if (mapInstance.hasLayer(m.layer)) {
+            mapInstance.removeLayer(m.layer);
+          }
+        }
+      });
+    }
 
-                  <span
-                    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full ${kpiBadgeClass(
-                      hitMedia
-                    )}`}
-                  >
-                    <span className="w-2 h-2 rounded-full bg-current/70" />
-                    <span>
-                      % aplicación HIT global:{" "}
-                      {hitMedia !== null ? `${hitMedia.toFixed(0)}%` : "-"}
-                    </span>
-                  </span>
+    document
+      .getElementById("search-centro")
+      .addEventListener("input", filtrarMapa);
+    document
+      .getElementById("search-delegado")
+      .addEventListener("input", filtrarMapa);
 
-                  <span>
-                    Visitas con AAR informado: <strong>{conteoAAR}</strong>
-                  </span>
+    document.getElementById("btn-add-centro").addEventListener("click", () => {
+      const provincia = window.prompt("Provincia del nuevo centro:");
+      if (!provincia) return;
+      const delegado = window.prompt("Delegado responsable:");
+      if (!delegado) return;
+      showToast(
+        "Nuevo centro en " +
+          provincia +
+          " con delegado " +
+          delegado +
+          " (pendiente de geolocalización fina y guardado real)."
+      );
+      // Aquí podríamos abrir un formulario completo y añadirlo a markersData + Excel
+    });
 
-                  <span
-                    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full ${kpiBadgeClass(
-                      aarMedia
-                    )}`}
-                  >
-                    <span className="w-2 h-2 rounded-full bg-current/70" />
-                    <span>
-                      % AAR global:{" "}
-                      {aarMedia !== null ? `${aarMedia.toFixed(0)}%` : "-"}
-                    </span>
-                  </span>
-                </div>
-              </div>
-            )}
-          </section>
-        </div>
-      )}
-    </div>
-  );
-}
+    /* ===========================
+       GRÁFICOS (Chart.js)
+    ============================ */
+    let chartProcesos = null;
+    let chartHIT = null;
+    let chartAAR = null;
+    let chartRadar = null;
+
+    function inicializarGraficos() {
+      const ctxProcesos = document
+        .getElementById("chartProcesos")
+        .getContext("2d");
+      const ctxHIT = document.getElementById("chartHIT").getContext("2d");
+      const ctxAAR = document.getElementById("chartAAR").getContext("2d");
+      const ctxRadar = document.getElementById("chartRadar").getContext("2d");
+
+      chartProcesos = new Chart(ctxProcesos, {
+        type: "bar",
+        data: {
+          labels: [
+            "Recepción paciente",
+            "Anamnesis",
+            "Pruebas",
+            "Informe",
+            "Seguimiento"
+          ],
+          datasets: [
+            {
+              label: "% aplicación",
+              data: [80, 72, 65, 78, 70],
+              borderWidth: 1
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: { enabled: true }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 100,
+              ticks: { stepSize: 20 }
+            }
+          }
+        }
+      });
+
+      chartHIT = new Chart(ctxHIT, {
+        type: "doughnut",
+        data: {
+          labels: ["Centros con HIT aplicado", "Pendiente / parcial"],
+          datasets: [
+            {
+              data: [68, 32],
+              borderWidth: 1
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: "bottom",
+              labels: { boxWidth: 10 }
+            }
+          },
+          cutout: "60%"
+        }
+      });
+
+      chartAAR = new Chart(ctxAAR, {
+        type: "doughnut",
+        data: {
+          labels: ["Equipos formados AAR", "Sin formación / parcial"],
+          datasets: [
+            {
+              data: [55, 45],
+              borderWidth: 1
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: "bottom",
+              labels: { boxWidth: 10 }
+            }
+          },
+          cutout: "60%"
+        }
+      });
+
+      chartRadar = new Chart(ctxRadar, {
+        type: "radar",
+        data: {
+          labels: ["Ventas", "Formaciones", "Dinamizaciones"],
+          datasets: [
+            {
+              label: "Objetivo",
+              data: [100, 100, 100],
+              borderWidth: 1,
+              borderDash: [4, 4],
+              pointRadius: 2
+            },
+            {
+              label: "Real",
+              data: [72, 60, 54],
+              borderWidth: 1,
+              pointRadius: 3
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: "bottom",
+              labels: { boxWidth: 10 }
+            }
+          },
+          scales: {
+            r: {
+              beginAtZero: true,
+              max: 100,
+              ticks: { stepSize: 20 }
+            }
+          }
+        }
+      });
+    }
+
+    /* ===========================
+       VINCULAR EXCEL (CHECKLIST)
+    ============================ */
+    const excelInput = document.getElementById("excelChecklist");
+
+    excelInput.addEventListener("change", (event) => {
+      const files = Array.from(event.target.files || []);
+      if (!files.length) return;
+
+      files.forEach((file) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: "array" });
+          const sheetName = workbook.SheetNames[0];
+          const sheet = workbook.Sheets[sheetName];
+          const json = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+          actualizarGraficosDesdeChecklist(json);
+        };
+        reader.readAsArrayBuffer(file);
+      });
+
+      showToast(
+        "Excel cargado. Actualizando gráfico de procesos (ajusta nombres de columnas si es necesario)."
+      );
+    });
+
+    // Ejemplo genérico: asume columnas tipo "CRITERIO" y "PUNTUACIÓN"
+    function actualizarGraficosDesdeChecklist(rows) {
+      if (!rows || !rows.length || !chartProcesos) return;
+
+      const agregados = {};
+      rows.forEach((row) => {
+        const criterio =
+          row["CRITERIO"] ||
+          row["Criterio"] ||
+          row["criterio"] ||
+          row["Proceso"] ||
+          row["PROCESO"];
+        const rawValor =
+          row["PUNTUACIÓN"] ||
+          row["Puntuación"] ||
+          row["puntuacion"] ||
+          row["SCORE"] ||
+          row["Score"];
+        const valor = Number(rawValor);
+        if (!criterio || Number.isNaN(valor)) return;
+        if (!agregados[criterio]) {
+          agregados[criterio] = { suma: 0, count: 0 };
+        }
+        agregados[criterio].suma += valor;
+        agregados[criterio].count += 1;
+      });
+
+      const etiquetas = Object.keys(agregados);
+      const valores = etiquetas.map((c) =>
+        Math.round(agregados[c].suma / agregados[c].count)
+      );
+
+      if (etiquetas.length) {
+        chartProcesos.data.labels = etiquetas;
+        chartProcesos.data.datasets[0].data = valores;
+        chartProcesos.update();
+      }
+    }
+
+    /* ===========================
+       INICIALIZACIÓN GLOBAL
+    ============================ */
+    window.addEventListener("load", () => {
+      inicializarMapa();
+      inicializarGraficos();
+    });
+  </script>
+</body>
+</html>
