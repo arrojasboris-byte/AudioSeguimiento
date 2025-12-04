@@ -1,1418 +1,2718 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <title>SEGUIMIENTO-VISITAS AUDIO</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-  <!-- Leaflet (mapa) -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <meta charset="UTF-8">
+  <title>Plataforma Dashboard AAR</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Fuente -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Chart.js para gráficos -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <!-- jsPDF para exportar algunos informes simples a PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- Leaflet para mapa OpenStreetMap -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-
-  <!-- Chart.js (gráficos) -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-  <!-- SheetJS (leer Excel) -->
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-
-  <!-- Iconos (Font Awesome) -->
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
-    integrity="sha512-S+8Vs2RVr4YFvR9p1tWmZQYx8uX8yGBXvJ8TlatN4vVNyYoP2lV/nuYEM+J1EfrQaKd8t0lUz2Ce/Jb9x6WQ2g=="
-    crossorigin="anonymous"
-    referrerpolicy="no-referrer"
-  />
 
   <style>
     :root {
-      --color-bg: #0b0b0d;
-      --color-bg-alt: #141418;
-      --color-primary: #ff2b45;
-      --color-primary-soft: #ff4b5c;
-      --color-accent: #ffb347;
-      --color-text: #f7f7f7;
-      --color-text-soft: #c2c2c2;
-      --color-border: #262632;
-      --radius-xl: 18px;
-      --shadow-soft: 0 18px 40px rgba(0, 0, 0, 0.45);
-      --transition-fast: 0.2s ease;
-      --header-height: 70px;
+      --bg-main: #050608;
+      --bg-card: #111318;
+      --bg-alt: #181b22;
+      --accent: #ff4757;
+      --accent-soft: #ff6b81;
+      --accent-alt: #ffa502;
+      --text-main: #ffffff;
+      --text-muted: #a0a4b8;
+      --border-subtle: #2b2f3a;
+      --success: #2ecc71;
+      --danger: #ff4b5c;
+      --warning: #ffa502;
+      --sidebar-width: 260px;
+      --radius-lg: 18px;
     }
 
     * {
       box-sizing: border-box;
-    }
-
-    html, body {
       margin: 0;
       padding: 0;
-      height: 100%;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: radial-gradient(circle at top, #1a1a20 0, #050509 55%, #000 100%);
-      color: var(--color-text);
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
     body {
+      background: radial-gradient(circle at top left, #2f3542, #000000 45%);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+    }
+
+    .app-shell {
+      width: 100%;
+      max-width: 1400px;
+      margin: 24px;
+      border-radius: 24px;
+      background: #050608;
+      box-shadow:
+        0 40px 80px rgba(0, 0, 0, 0.7),
+        0 0 0 1px rgba(255, 255, 255, 0.02);
+      display: flex;
       overflow: hidden;
-    }
-
-    .hidden {
-      display: none !important;
-    }
-
-    /* --- PANTALLA DE PIN --- */
-    #pin-screen {
-      position: fixed;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: radial-gradient(circle at top, #ff2b45 0, #050509 60%, #000 100%);
-      z-index: 9999;
-    }
-
-    .pin-card {
-      background: linear-gradient(135deg, rgba(15,15,25,0.9), rgba(0,0,0,0.95));
-      border-radius: 26px;
-      padding: 32px 40px;
-      box-shadow: var(--shadow-soft);
-      border: 1px solid rgba(255,255,255,0.06);
-      max-width: 420px;
-      width: 90%;
-      text-align: center;
-      backdrop-filter: blur(20px);
-    }
-
-    .pin-icon {
-      font-size: 52px;
-      color: var(--color-primary);
-      margin-bottom: 10px;
-    }
-
-    .pin-title {
-      font-size: 1.4rem;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      margin-bottom: 4px;
-    }
-
-    .pin-subtitle {
-      font-size: 0.9rem;
-      color: var(--color-text-soft);
-      margin-bottom: 24px;
-    }
-
-    .pin-input-wrapper {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      justify-content: center;
-      margin-bottom: 16px;
-    }
-
-    .pin-input-wrapper input {
-      padding: 10px 12px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,0.15);
-      background: rgba(0,0,0,0.6);
-      color: var(--color-text);
-      outline: none;
-      min-width: 150px;
-      text-align: center;
-      font-size: 1rem;
-      letter-spacing: 0.1em;
-    }
-
-    .pin-input-wrapper input::placeholder {
-      color: #555;
-    }
-
-    .pin-button {
-      padding: 10px 20px;
-      border-radius: 999px;
-      border: none;
-      background: linear-gradient(135deg, var(--color-primary), var(--color-primary-soft));
-      color: white;
-      font-weight: 600;
-      cursor: pointer;
-      text-transform: uppercase;
-      font-size: 0.85rem;
-      letter-spacing: 0.08em;
-      transition: transform var(--transition-fast), box-shadow var(--transition-fast), filter var(--transition-fast);
-      box-shadow: 0 14px 30px rgba(255, 43, 69, 0.6);
-    }
-
-    .pin-button:hover {
-      transform: translateY(-1px);
-      filter: brightness(1.05);
-      box-shadow: 0 18px 40px rgba(255, 43, 69, 0.85);
-    }
-
-    .pin-error {
-      min-height: 18px;
-      font-size: 0.8rem;
-      color: #ff8b9c;
-      margin-top: 4px;
-    }
-
-    /* --- APP PRINCIPAL --- */
-    #app {
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      background: radial-gradient(circle at top left, #20101a 0, #050509 50%, #010106 100%);
-    }
-
-    header.app-header {
-      height: var(--header-height);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 22px;
-      background: linear-gradient(90deg, #f0002b, #8b001b, #050509);
-      border-bottom: 1px solid rgba(255,255,255,0.12);
-      box-shadow: 0 12px 30px rgba(0,0,0,0.8);
-      z-index: 10;
-    }
-
-    .header-left {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-
-    .header-logo {
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      background: radial-gradient(circle at 30% 20%, #ff9f9f 0, #ff2b45 40%, #050509 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 0 20px rgba(255,255,255,0.12);
-    }
-
-    .header-logo i {
-      font-size: 24px;
-      color: #fff;
-    }
-
-    .header-title {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .header-title-main {
-      font-size: 1.1rem;
-      font-weight: 700;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-    }
-
-    .header-title-sub {
-      font-size: 0.75rem;
-      color: rgba(255,255,255,0.7);
-      text-transform: uppercase;
-      letter-spacing: 0.18em;
-    }
-
-    .header-actions {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .icon-button {
-      width: 34px;
-      height: 34px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,0.2);
-      background: rgba(0,0,0,0.35);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: background var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
-      color: #fff;
       position: relative;
     }
 
-    .icon-button:hover {
-      background: rgba(0,0,0,0.7);
-      border-color: var(--color-accent);
-      transform: translateY(-1px);
-      box-shadow: 0 8px 18px rgba(0,0,0,0.7);
+    /* PIN overlay */
+    .pin-overlay {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at top, #2f3542, #000000 60%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
     }
 
-    .icon-button i {
-      font-size: 15px;
+    .pin-modal {
+      background: #0b0d12;
+      border-radius: 20px;
+      padding: 32px 28px;
+      width: 100%;
+      max-width: 380px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8);
+      border: 1px solid var(--border-subtle);
     }
 
-    .icon-button span.tooltip {
-      position: absolute;
-      bottom: -26px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #000;
-      color: #fff;
-      padding: 3px 8px;
+    .pin-modal h1 {
+      font-size: 22px;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .pin-modal p {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+
+    .pin-modal input {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border-subtle);
+      background: #07080c;
+      color: var(--text-main);
+      font-size: 16px;
+      letter-spacing: 0.2em;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .pin-modal button {
+      width: 100%;
+      border: none;
       border-radius: 999px;
-      font-size: 0.7rem;
-      white-space: nowrap;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity var(--transition-fast), transform var(--transition-fast);
+      padding: 10px 14px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-soft));
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform .08s ease, box-shadow .08s ease, opacity .1s ease;
+      box-shadow: 0 10px 20px rgba(255, 71, 87, 0.4);
     }
 
-    .icon-button:hover span.tooltip {
-      opacity: 1;
-      transform: translate(-50%, -2px);
+    .pin-modal button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 14px 28px rgba(255, 71, 87, 0.6);
     }
 
-    /* --- CONTENIDO PRINCIPAL --- */
-    .app-main {
+    .pin-error {
+      color: var(--danger);
+      font-size: 13px;
+      min-height: 18px;
+      margin-bottom: 4px;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: var(--sidebar-width);
+      background: linear-gradient(180deg, #080910, #050508);
+      border-right: 1px solid rgba(255, 255, 255, 0.04);
+      padding: 20px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .logo-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .logo-mark {
+      width: 32px;
+      height: 32px;
+      border-radius: 14px;
+      background: radial-gradient(circle at 30% 20%, #ffd6d9, #ff4757 60%, #6b010f 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 16px;
+      color: #ffffff;
+    }
+
+    .logo-text {
+      font-weight: 700;
+      font-size: 16px;
+    }
+
+    .sidebar-subtitle {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .sidebar-nav {
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .nav-item {
+      border-radius: 999px;
+      padding: 9px 12px;
+      font-size: 13px;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border: 1px solid transparent;
+      transition: background .12s ease, color .12s ease, border-color .12s ease, transform .06s ease;
+    }
+
+    .nav-item span {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nav-item.active {
+      background: linear-gradient(135deg, var(--accent), var(--accent-soft));
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.12);
+      transform: translateY(-1px);
+    }
+
+    .nav-item:hover:not(.active) {
+      background: rgba(255, 255, 255, 0.04);
+      border-color: rgba(255, 255, 255, 0.06);
+    }
+
+    .nav-pill-indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.26);
+    }
+
+    .nav-item.active .nav-pill-indicator {
+      background: #fff;
+    }
+
+    .sidebar-bottom {
+      margin-top: auto;
+      font-size: 11px;
+      color: var(--text-muted);
+      opacity: 0.75;
+    }
+
+    /* Main area */
+    .main {
       flex: 1;
-      padding: 14px 18px 18px;
-      overflow: auto;
+      display: flex;
+      flex-direction: column;
+      background: radial-gradient(circle at top left, #1f222f, #050608 45%);
+      padding: 18px 20px 20px;
     }
 
-    .app-grid {
-      display: grid;
-      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
-      gap: 14px;
-      min-height: 0;
+    .main-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      gap: 12px;
     }
 
-    @media (max-width: 1100px) {
-      .app-grid {
-        grid-template-columns: minmax(0, 1fr);
-      }
+    .main-title-block {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .main-title {
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .main-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .main-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn {
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 7px 13px;
+      font-size: 12px;
+      background: rgba(10, 11, 17, 0.8);
+      color: #f8f8f8;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: background .12s ease, transform .06s ease, box-shadow .12s ease;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent-soft));
+      border-color: transparent;
+      box-shadow: 0 10px 26px rgba(255, 71, 87, 0.5);
+      font-weight: 500;
+    }
+
+    .btn-small {
+      padding: 5px 10px;
+      font-size: 11px;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 26px rgba(0, 0, 0, 0.45);
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .btn-primary:hover {
+      box-shadow: 0 14px 32px rgba(255, 71, 87, 0.8);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      border-color: rgba(255, 255, 255, 0.12);
+    }
+
+    .btn-ghost:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .pill {
+      border-radius: 999px;
+      padding: 3px 8px;
+      font-size: 10px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .content {
+      flex: 1;
+      border-radius: 18px;
+      background: radial-gradient(circle at top right, #1b1f2b, #050608 55%);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 14px 16px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+    }
+
+    .content::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .content::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.18);
+      border-radius: 999px;
     }
 
     .section {
-      background: radial-gradient(circle at top left, #1c141c 0, #090912 45%, #050509 100%);
-      border-radius: var(--radius-xl);
-      border: 1px solid var(--color-border);
-      box-shadow: var(--shadow-soft);
-      padding: 12px 12px 14px;
-      display: flex;
-      flex-direction: column;
-      min-height: 0;
+      display: none;
+      animation: fadeIn .14s ease-out;
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .section-header {
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      padding: 4px 6px 8px;
-      border-bottom: 1px solid rgba(255,255,255,0.04);
-      margin-bottom: 8px;
+      align-items: flex-end;
+      margin-bottom: 10px;
+      gap: 10px;
     }
 
     .section-title {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .section-description {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .section-actions {
       display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.9rem;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--color-text-soft);
+      gap: 6px;
     }
 
-    .section-title i {
-      color: var(--color-primary-soft);
-      font-size: 15px;
-    }
-
-    .section-header-right {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.75rem;
-      color: var(--color-text-soft);
-    }
-
-    .badge {
-      padding: 3px 8px;
-      border-radius: 999px;
-      font-size: 0.7rem;
-      border: 1px solid rgba(255,255,255,0.18);
-      background: rgba(255,255,255,0.02);
-    }
-
-    /* --- REGIONES & MAPA --- */
-    .regiones-layout {
+    .grid-2 {
       display: grid;
       grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
       gap: 10px;
-      flex: 1;
-      min-height: 0;
+      margin-bottom: 10px;
     }
 
-    @media (max-width: 900px) {
-      .regiones-layout {
-        grid-template-columns: minmax(0,1fr);
-      }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 10px;
     }
 
     .card {
-      background: radial-gradient(circle at top, #181821 0, #070711 55%, #050509 100%);
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,0.05);
-      padding: 10px;
-      display: flex;
-      flex-direction: column;
-      min-height: 0;
+      border-radius: var(--radius-lg);
+      background: linear-gradient(145deg, #11131a, #050608);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      padding: 10px 12px;
       position: relative;
+      overflow: hidden;
     }
 
     .card-header {
       display: flex;
-      align-items: center;
       justify-content: space-between;
+      align-items: center;
       margin-bottom: 6px;
     }
 
     .card-title {
-      font-size: 0.85rem;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--color-text-soft);
-    }
-
-    .card-subtitle {
-      font-size: 0.7rem;
-      color: #777;
-    }
-
-    .map-wrapper {
-      flex: 1;
-      min-height: 260px;
-      border-radius: 12px;
-      overflow: hidden;
-      border: 1px solid rgba(255,255,255,0.06);
-    }
-
-    #map {
-      width: 100%;
-      height: 100%;
-    }
-
-    .regiones-sidebar {
-      gap: 8px;
-    }
-
-    .sidebar-group {
-      margin-bottom: 8px;
-    }
-
-    .label {
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--color-text-soft);
-      margin-bottom: 4px;
-    }
-
-    .input {
-      width: 100%;
-      padding: 7px 8px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,0.16);
-      background: rgba(5,5,10,0.9);
-      color: var(--color-text);
-      font-size: 0.8rem;
-      outline: none;
-      transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
-    }
-
-    .input::placeholder {
-      color: #555;
-    }
-
-    .input:focus {
-      border-color: var(--color-primary-soft);
-      box-shadow: 0 0 0 1px rgba(255,43,69,0.5);
-      background: rgba(5,5,10,1);
-    }
-
-    .sidebar-actions {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 4px;
-    }
-
-    .small-text {
-      font-size: 0.7rem;
-      color: var(--color-text-soft);
-    }
-
-    .add-button {
-      padding: 6px 12px;
-      border-radius: 999px;
-      border: none;
-      background: linear-gradient(135deg, #2ecc71, #00b894);
-      color: #fff;
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      cursor: pointer;
-      box-shadow: 0 10px 22px rgba(0,184,148,0.6);
-      transition: transform var(--transition-fast), box-shadow var(--transition-fast), filter var(--transition-fast);
-    }
-
-    .add-button:hover {
-      transform: translateY(-1px);
-      filter: brightness(1.05);
-      box-shadow: 0 14px 30px rgba(0,184,148,0.8);
-    }
-
-    .lista-regiones {
-      flex: 1;
-      overflow: auto;
-      margin-top: 6px;
-      border-top: 1px solid rgba(255,255,255,0.05);
-      padding-top: 6px;
-    }
-
-    .lista-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font-size: 0.76rem;
-      padding: 5px 6px;
-      border-radius: 10px;
-      margin-bottom: 3px;
-      background: rgba(255,255,255,0.01);
-    }
-
-    .lista-item-left {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .delegado-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      border: 1px solid rgba(0,0,0,0.6);
-      box-shadow: 0 0 0 1px rgba(255,255,255,0.12);
-    }
-
-    .lista-item-provincia {
+      font-size: 13px;
       font-weight: 500;
     }
 
-    .lista-item-delegados {
-      font-size: 0.7rem;
-      color: var(--color-text-soft);
+    .card-subtitle {
+      font-size: 11px;
+      color: var(--text-muted);
     }
 
-    /* --- CUADRO DE MANDOS --- */
-    .dashboard-grid {
+    .pill-soft {
+      font-size: 10px;
+      border-radius: 999px;
+      padding: 3px 8px;
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-muted);
+    }
+
+    .stat-value {
+      font-size: 20px;
+      font-weight: 600;
+      margin-top: 2px;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .badge-trend {
+      font-size: 11px;
+      border-radius: 999px;
+      padding: 3px 7px;
+      background: rgba(46, 204, 113, 0.1);
+      color: var(--success);
+    }
+
+    .badge-trend.down {
+      background: rgba(255, 75, 92, 0.1);
+      color: var(--danger);
+    }
+
+    /* Tables and forms */
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      margin-top: 6px;
+    }
+
+    th, td {
+      padding: 6px 6px;
+      text-align: left;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    th {
+      color: var(--text-muted);
+      font-weight: 500;
+      font-size: 11px;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    input[type="text"],
+    input[type="number"],
+    input[type="date"],
+    select,
+    textarea {
+      width: 100%;
+      background: #05070d;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--text-main);
+      font-size: 11px;
+      padding: 6px 7px;
+      outline: none;
+    }
+
+    textarea {
+      min-height: 70px;
+      resize: vertical;
+    }
+
+    label {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .field-row {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0,1fr));
-      grid-auto-rows: minmax(180px, 1fr);
-      gap: 10px;
-      flex: 1;
-      min-height: 0;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 6px;
     }
 
-    @media (max-width: 900px) {
-      .dashboard-grid {
-        grid-template-columns: minmax(0,1fr);
-      }
-    }
-
-    .chart-container {
-      flex: 1;
-      position: relative;
-      min-height: 0;
-    }
-
-    .chart-container canvas {
-      width: 100% !important;
-      height: 100% !important;
-    }
-
-    .excel-panel {
+    .field {
       display: flex;
       flex-direction: column;
+      gap: 2px;
+    }
+
+    .field-2 {
+      grid-column: span 2;
+    }
+
+    .field-3 {
+      grid-column: span 3;
+    }
+
+    .field-full {
+      grid-column: 1 / -1;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
       gap: 4px;
-      font-size: 0.75rem;
-      margin-bottom: 8px;
-      background: rgba(0,0,0,0.35);
+      padding: 3px 7px;
       border-radius: 999px;
-      padding: 6px 10px;
-      border: 1px solid rgba(255,255,255,0.08);
+      font-size: 10px;
+      background: rgba(255, 255, 255, 0.04);
     }
 
-    .excel-panel-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      justify-content: space-between;
-      flex-wrap: wrap;
-    }
-
-    .excel-panel input[type="file"] {
-      font-size: 0.7rem;
-    }
-
-    /* --- TOAST --- */
-    .toast {
-      position: fixed;
-      bottom: 16px;
-      right: 16px;
-      padding: 8px 14px;
-      background: rgba(0,0,0,0.9);
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,0.18);
-      font-size: 0.8rem;
-      color: var(--color-text-soft);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      opacity: 0;
-      pointer-events: none;
-      transform: translateY(8px);
-      transition: opacity 0.25s ease, transform 0.25s ease;
-      z-index: 999;
-    }
-
-    .toast.visible {
-      opacity: 1;
-      pointer-events: auto;
-      transform: translateY(0);
-    }
-
-    .toast i {
-      color: var(--color-primary-soft);
-    }
-
-    /* Scrollbar */
-    ::-webkit-scrollbar {
+    .status-dot {
       width: 8px;
-    }
-
-    ::-webkit-scrollbar-track {
-      background: transparent;
-    }
-
-    ::-webkit-scrollbar-thumb {
-      background: #202028;
+      height: 8px;
       border-radius: 999px;
+      display: inline-block;
+    }
+
+    .dot-green { background: var(--success); }
+    .dot-red { background: var(--danger); }
+    .dot-orange { background: var(--warning); }
+    .dot-muted { background: #555b6b; }
+
+    /* Calendar */
+
+    .calendar {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 4px;
+      margin-top: 8px;
+    }
+
+    .calendar-day {
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      min-height: 52px;
+      padding: 4px 5px;
+      font-size: 10px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .calendar-day-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2px;
+    }
+
+    .calendar-day-number {
+      font-weight: 500;
+      font-size: 11px;
+    }
+
+    .calendar-day-visit {
+      font-size: 10px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .calendar-weekday {
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+      letter-spacing: 0.08em;
+    }
+
+    /* Small modal for calendar editing */
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.65);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 6000;
+    }
+
+    .modal-backdrop.active {
+      display: flex;
+    }
+
+    .modal {
+      background: #0b0d12;
+      border-radius: 16px;
+      padding: 16px 14px;
+      width: 100%;
+      max-width: 360px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .modal-title {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .modal-close {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 18px;
+    }
+
+    .modal-footer {
+      margin-top: 10px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 6px;
+    }
+
+    .text-muted {
+      color: var(--text-muted);
+      font-size: 11px;
+    }
+
+    .tag {
+      display: inline-flex;
+      padding: 2px 6px;
+      font-size: 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.06);
+      margin-right: 4px;
+      margin-bottom: 4px;
+    }
+
+    .checklist {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 4px 12px;
+      margin-top: 4px;
+    }
+
+    .checklist label {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      cursor: pointer;
+    }
+
+    .checklist input[type="checkbox"] {
+      width: 12px;
+      height: 12px;
+    }
+
+    .divider {
+      height: 1px;
+      background: rgba(255, 255, 255, 0.06);
+      margin: 6px 0;
+    }
+
+    .actions-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .helper {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+
+    .radio-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    @media (max-width: 1040px) {
+      .grid-3, .grid-2 {
+        grid-template-columns: minmax(0, 1fr);
+      }
+      .field-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .sidebar {
+        display: none;
+      }
+      .app-shell {
+        margin: 0;
+        border-radius: 0;
+      }
     }
   </style>
 </head>
-<body>
-  <!-- PANTALLA DE PIN -->
-  <div id="pin-screen">
-    <div class="pin-card">
-      <div class="pin-icon">
-        <i class="fa-solid fa-headphones"></i>
-      </div>
-      <div class="pin-title">SEGUIMIENTO-VISITAS AUDIO</div>
-      <div class="pin-subtitle">Introduce el PIN de acceso</div>
 
-      <div class="pin-input-wrapper">
-        <input
-          type="password"
-          id="pin-input"
-          placeholder="AR4321"
-          maxlength="6"
-          autocomplete="off"
-        />
-        <button class="pin-button" id="pin-button">Entrar</button>
-      </div>
+<body>
+  <!-- PIN overlay -->
+  <div class="pin-overlay" id="pin-overlay" style="display: none;">
+    <div class="pin-modal">
+      <h1>Acceso plataforma</h1>
+      <p>Introduce el PIN de acceso para continuar.</p>
       <div class="pin-error" id="pin-error"></div>
+      <input id="pin-input" type="password" maxlength="6" placeholder="••••••">
+      <button id="pin-button">Entrar</button>
+      <p class="helper" style="margin-top:8px;">PIN de prueba: <strong>AR4321</strong></p>
     </div>
   </div>
 
-  <!-- APLICACIÓN PRINCIPAL -->
-  <div id="app" class="hidden">
-    <header class="app-header">
-      <div class="header-left">
-        <div class="header-logo">
-          <i class="fa-solid fa-headphones"></i>
-        </div>
-        <div class="header-title">
-          <div class="header-title-main">SEGUIMIENTO-VISITAS AUDIO</div>
-          <div class="header-title-sub">Panel de visitas · centros · ventas</div>
+  <div class="app-shell" id="app-shell" style="opacity: 1; pointer-events: auto;">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div>
+        <div class="logo-row">
+          <div class="logo-mark">AA</div>
+          <div>
+            <div class="logo-text">Infinity Audio</div>
+            <div class="sidebar-subtitle">Plataforma AAR</div>
+          </div>
         </div>
       </div>
 
-      <div class="header-actions">
-        <button class="icon-button" id="btn-save">
-          <i class="fa-solid fa-cloud-arrow-up"></i>
-          <span class="tooltip">Guardar en nube (local)</span>
-        </button>
-        <button class="icon-button" id="btn-load">
-          <i class="fa-solid fa-cloud-arrow-down"></i>
-          <span class="tooltip">Actualizar desde nube (local)</span>
-        </button>
-        <button class="icon-button" id="btn-print">
-          <i class="fa-solid fa-print"></i>
-          <span class="tooltip">Imprimir</span>
-        </button>
-        <button class="icon-button" id="btn-download">
-          <i class="fa-solid fa-file-arrow-down"></i>
-          <span class="tooltip">Descargar HTML</span>
-        </button>
-      </div>
-    </header>
+      <nav class="sidebar-nav" id="sidebar-nav">
+        <div class="nav-item active" data-section="dashboard">
+          <span>Dashboard General</span>
+          <span class="nav-pill-indicator"></span>
+        </div>
+        <div class="nav-item" data-section="centros">
+          <span>Centros</span>
+          <span class="nav-pill-indicator"></span>
+        </div>
+        <div class="nav-item" data-section="delegados">
+          <span>Delegados</span>
+          <span class="nav-pill-indicator"></span>
+        </div>
+        <div class="nav-item" data-section="visitas">
+          <span>Visitas</span>
+          <span class="nav-pill-indicator"></span>
+        </div>
+        <div class="nav-item" data-section="informes">
+          <span>Informes</span>
+          <span class="nav-pill-indicator"></span>
+        </div>
+        <div class="nav-item" data-section="exclusivos">
+          <span>Centros exclusivos</span>
+          <span class="nav-pill-indicator"></span>
+        </div>
+      </nav>
 
-    <main class="app-main">
-      <div class="app-grid">
-        <!-- SECCIÓN REGIONES / MAPA / CENTROS -->
-        <section class="section" id="section-regiones">
+      <div class="sidebar-bottom">
+        Versión inicial · Datos en localStorage (navegador)
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="main">
+      <header class="main-header">
+        <div class="main-title-block">
+          <div class="main-title">Panel de control AAR</div>
+          <div class="main-subtitle">Seguimiento de procesos, visitas, informes y centros exclusivos.</div>
+        </div>
+        <div class="main-actions">
+          <button class="btn btn-ghost btn-small" id="btn-descargar-html">Descargar HTML</button>
+        </div>
+      </header>
+
+      <section class="content">
+        <!-- DASHBOARD -->
+        <section class="section active" id="section-dashboard">
           <div class="section-header">
-            <div class="section-title">
-              <i class="fa-solid fa-location-dot"></i>
-              REGIONES &amp; CENTROS
+            <div>
+              <div class="section-title">Dashboard General</div>
+              <div class="section-description">Resumen global: procesos, implantaciones, visitas y áreas de mejora.</div>
             </div>
-            <div class="section-header-right">
-              <span class="badge">Mapa delegados</span>
+            <div class="section-actions">
+              <button class="btn btn-primary btn-small" onclick="guardarSeccion('dashboard')">Guardar</button>
             </div>
           </div>
 
-          <div class="regiones-layout">
-            <!-- MAPA -->
+          <div class="grid-3">
             <div class="card">
               <div class="card-header">
                 <div>
-                  <div class="card-title">Mapa de delegados por provincia</div>
-                  <div class="card-subtitle">Colores por delegado regional</div>
+                  <div class="card-title">% Procesos aplicados</div>
+                  <div class="card-subtitle">Aplicación media en centros</div>
                 </div>
+                <span class="pill-soft">Último mes</span>
               </div>
-              <div class="map-wrapper">
-                <div id="map"></div>
+              <div class="stat-value" id="stat-procesos">82%</div>
+              <div class="stat-label">Objetivo ≥ 90%</div>
+              <canvas id="chart-procesos" style="margin-top: 8px; height: 131px; display: block; box-sizing: border-box; width: 262px;"></canvas>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">Implantación HIT</div>
+                  <div class="card-subtitle">% centros con HIT implantado</div>
+                </div>
+                <span class="pill-soft">HIT</span>
+              </div>
+              <div class="stat-value" id="stat-hit">65%</div>
+              <div class="stat-label">Centros con procesos HIT activos</div>
+              <canvas id="chart-hit" style="margin-top: 8px; height: 262px; display: block; box-sizing: border-box; width: 262px;"></canvas>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">Implantación AAR</div>
+                  <div class="card-subtitle">Centros con perfil AAR</div>
+                </div>
+                <span class="pill-soft">AAR</span>
+              </div>
+              <div class="stat-value" id="stat-aar">34</div>
+              <div class="stat-label">Centros certificados AAR</div>
+              <canvas id="chart-aar" style="margin-top: 8px; height: 131px; display: block; box-sizing: border-box; width: 262px;"></canvas>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">Evolución de visitas</div>
+                  <div class="card-subtitle">Visitas realizadas vs total centros</div>
+                </div>
+                <span class="pill-soft" id="dash-visitas-label">2024</span>
+              </div>
+              <canvas id="chart-visitas" style="height: 234px; display: block; box-sizing: border-box; width: 468px;"></canvas>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">Áreas de mejora detectadas</div>
+                  <div class="card-subtitle">Top categorías por nº de incidencias</div>
+                </div>
+                <span class="pill-soft">Últimas visitas</span>
+              </div>
+              <canvas id="chart-mejoras" style="height: 177px; display: block; box-sizing: border-box; width: 354px;"></canvas>
+            </div>
+          </div>
+        </section>
+
+        <!-- CENTROS -->
+        <section class="section" id="section-centros">
+          <div class="section-header">
+            <div>
+              <div class="section-title">Centros</div>
+              <div class="section-description">
+                Listado de centros, informe individual, delegados y registro AAR.
+              </div>
+            </div>
+            <div class="section-actions">
+              <button class="btn btn-primary btn-small" onclick="guardarSeccion('centros')">
+                Guardar
+              </button>
+            </div>
+          </div>
+
+          <!-- Barra superior acciones rápidas -->
+          <div class="card" style="margin-bottom:10px;">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Acciones rápidas</div>
+                <div class="card-subtitle">
+                  Alta de centros, importación desde Excel y buscador global.
+                </div>
               </div>
             </div>
 
-            <!-- BUSCADORES / LISTADO -->
-            <div class="card regiones-sidebar">
-              <div class="card-header">
-                <div>
-                  <div class="card-title">Centros &amp; responsables</div>
-                  <div class="card-subtitle">Búsqueda rápida y altas</div>
-                </div>
-              </div>
-
-              <div class="sidebar-group">
-                <div class="label">Buscar centro</div>
-                <input
-                  type="text"
-                  id="search-centro"
-                  class="input"
-                  placeholder="Nombre de centro / provincia..."
-                />
-              </div>
-
-              <div class="sidebar-group">
-                <div class="label">Buscar delegado</div>
-                <input
-                  type="text"
-                  id="search-delegado"
-                  class="input"
-                  placeholder="Nombre de delegado..."
-                />
-              </div>
-
-              <div class="sidebar-actions">
-                <div class="small-text">
-                  Filtra el mapa en tiempo real por provincia / delegado.
-                </div>
-                <button class="add-button" id="btn-add-centro">
-                  <i class="fa-solid fa-plus"></i>
-                  Nuevo centro
+            <div class="field-row">
+              <div class="field field-2">
+                <label>&nbsp;</label>
+                <button class="btn btn-primary btn-small" id="btn-centro-add">
+                  + Añadir centro
                 </button>
               </div>
+              <div class="field field-2">
+                <label>Importar desde Excel</label>
+                <button class="btn btn-ghost btn-small" id="btn-centro-import">
+                  Adjuntar Excel
+                </button>
+                <input type="file" id="input-centro-excel" accept=".xlsx,.xls" style="display:none;">
+              </div>
+              <div class="field field-2">
+                <label>Buscar centro (código / nombre)</label>
+                <input type="text" id="buscar-centro-global" placeholder="Buscar en todos los centros…">
+              </div>
+            </div>
+          </div>
 
-              <div class="lista-regiones" id="lista-regiones">
-                <!-- Rellenado por JS con provincias + delegados + color -->
+          <!-- Layout 2 columnas: izquierda tabla + registro AAR / derecha informe individual -->
+          <div class="grid-2">
+            <!-- Columna izquierda -->
+            <div>
+              <!-- Listado de centros -->
+              <div class="card">
+                <div class="card-header">
+                  <div>
+                    <div class="card-title">Listado de centros</div>
+                    <div class="card-subtitle">
+                      Código, propietario, delegados, provincia, tipo y responsable audio.
+                    </div>
+                  </div>
+                  <span class="pill-soft">Datos demo editables</span>
+                </div>
+
+                <div class="field-row">
+                  <div class="field field-2">
+                    <label>Filtro por provincia</label>
+                    <input
+                      type="text"
+                      id="filtro-provincia"
+                      placeholder="Ej. Madrid"
+                      oninput="filtrarCentros()"
+                    >
+                  </div>
+                  <div class="field field-2">
+                    <label>Buscar por código / nombre</label>
+                    <input
+                      type="text"
+                      id="filtro-centro"
+                      placeholder="Ej. TET01"
+                      oninput="filtrarCentros()"
+                    >
+                  </div>
+                </div>
+
+                <div class="tabla-centros-full" style="margin-top:4px;">
+                  <table id="tabla-centros">
+                    <thead>
+                      <tr>
+                        <th>Código</th>
+                        <th>Centro</th>
+                        <th>Propietario</th>
+                        <th>Delegado</th>
+                        <th>Provincia</th>
+                        <th>Tipo</th>
+                        <th>Responsable audio</th>
+                        <th>Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <!-- Datos de ejemplo iniciales -->
+                      <tr data-codigo="TET01">
+                        <td>TET01</td>
+                        <td>Alain Afflelou Tetuán</td>
+                        <td>Propietario 1</td>
+                        <td>Ariannys</td>
+                        <td>Madrid</td>
+                        <td>
+                          <select>
+                            <option value="Sucursal">Sucursal</option>
+                            <option value="Franquicia">Franquicia</option>
+                          </select>
+                        </td>
+                        <td>
+                          <select>
+                            <option value="Ariannys Rojas">Ariannys Rojas</option>
+                            <option value="Sonia Guasque">Sonia Guasque</option>
+                          </select>
+                        </td>
+                        <td>
+                          <button
+                            class="btn btn-small btn-ghost"
+                            onclick="seleccionarCentro('TET01')"
+                          >
+                            Ver informe
+                          </button>
+                        </td>
+                      </tr>
+                      <tr data-codigo="RM01">
+                        <td>RM01</td>
+                        <td>Reina Mercedes</td>
+                        <td>Propietario 2</td>
+                        <td>Sonia</td>
+                        <td>Sevilla</td>
+                        <td>
+                          <select>
+                            <option value="Sucursal">Sucursal</option>
+                            <option value="Franquicia" selected>Franquicia</option>
+                          </select>
+                        </td>
+                        <td>
+                          <select>
+                            <option value="Ariannys Rojas">Ariannys Rojas</option>
+                            <option value="Sonia Guasque" selected>Sonia Guasque</option>
+                          </select>
+                        </td>
+                        <td>
+                          <button
+                            class="btn btn-small btn-ghost"
+                            onclick="seleccionarCentro('RM01')"
+                          >
+                            Ver informe
+                          </button>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Registro AAR -->
+              <div class="card" style="margin-top:10px;">
+                <div class="card-header">
+                  <div>
+                    <div class="card-title">Registro centros AAR</div>
+                    <div class="card-subtitle">
+                      Datos del centro y perfil certificado (audiólogo / técnico).
+                    </div>
+                  </div>
+                </div>
+
+                <div class="field-row">
+                  <div class="field field-2">
+                    <label>Código centro AAR</label>
+                    <input type="text" id="aar-codigo" placeholder="Ej. TET01">
+                  </div>
+                  <div class="field field-2">
+                    <label>Nombre centro</label>
+                    <input type="text" id="aar-nombre" placeholder="Nombre comercial">
+                  </div>
+                  <div class="field field-2">
+                    <label>Provincia</label>
+                    <input type="text" id="aar-provincia">
+                  </div>
+                  <div class="field field-2">
+                    <label>Perfil certificado</label>
+                    <select id="aar-perfil">
+                      <option value="">Seleccionar</option>
+                      <option value="Audiologo">Audiólogo</option>
+                      <option value="Tecnico">Técnico</option>
+                    </select>
+                  </div>
+                  <div class="field field-full">
+                    <label>Observaciones</label>
+                    <textarea
+                      id="aar-observaciones"
+                      placeholder="Notas relevantes del centro AAR"
+                    ></textarea>
+                  </div>
+                </div>
+
+                <div class="actions-row">
+                  <button class="btn btn-primary btn-small" onclick="guardarRegistroAAR()">
+                    Añadir / actualizar centro AAR
+                  </button>
+                </div>
+
+                <div class="divider"></div>
+                <div>
+                  <div class="card-subtitle">Centros AAR registrados</div>
+                  <div
+                    style="font-size:11px; margin-top:4px;"
+                    id="lista-aar-vacia"
+                  >
+                    Todavía no hay registros guardados.
+                  </div>
+                  <ul
+                    id="lista-aar"
+                    style="margin-top:4px; font-size:11px; list-style:none; padding-left:0;"
+                  ></ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- Columna derecha: INFORME INDIVIDUAL -->
+            <div id="panel-informe-centro">
+              <div class="card">
+                <div class="card-header">
+                  <div>
+                    <div class="card-title">Informe individual del centro</div>
+                    <div class="card-subtitle">
+                      Datos, KPIs, checklist, mapa e información cualitativa.
+                    </div>
+                  </div>
+                  <span class="pill-soft" id="inf-centro-label">Sin centro seleccionado</span>
+                </div>
+
+                <!-- Datos principales -->
+                <div class="field-row">
+                  <div class="field field-2">
+                    <label>Código</label>
+                    <input type="text" id="inf2-codigo" readonly>
+                  </div>
+                  <div class="field field-2">
+                    <label>Nombre centro</label>
+                    <input type="text" id="inf2-nombre" readonly>
+                  </div>
+                  <div class="field field-2">
+                    <label>Provincia</label>
+                    <input type="text" id="inf2-provincia" readonly>
+                  </div>
+                  <div class="field field-2">
+                    <label>Delegado</label>
+                    <input type="text" id="inf2-delegado" readonly>
+                  </div>
+                </div>
+
+                <!-- Mapa -->
+                <div class="divider"></div>
+                <div class="card-subtitle">Ubicación (demo · coordenadas aproximadas)</div>
+                <div
+                  id="mapa-centro"
+                  style="height:220px; border-radius:12px; margin-top:6px;"
+                ></div>
+
+                <!-- Checklist complementario -->
+                <div class="divider"></div>
+                <div class="card-subtitle">Checklist complementario</div>
+                <div class="checklist" id="inf2-checklist1">
+                  <label>
+                    <input type="checkbox" data-item="Recepción correcta">
+                    Recepción del paciente
+                  </label>
+                  <label>
+                    <input type="checkbox" data-item="Agenda organizada">
+                    Agenda organizada
+                  </label>
+                  <label>
+                    <input type="checkbox" data-item="CRM actualizado">
+                    CRM actualizado
+                  </label>
+                  <label>
+                    <input type="checkbox" data-item="Seguimiento postventa">
+                    Seguimiento postventa
+                  </label>
+                </div>
+
+                <div class="checklist" id="inf2-checklist2" style="margin-top:6px;">
+                  <label>
+                    <input type="checkbox" data-item="HIT implantado">
+                    HIT implantado
+                  </label>
+                  <label>
+                    <input type="checkbox" data-item="AAR activo">
+                    AAR activo
+                  </label>
+                  <label>
+                    <input type="checkbox" data-item="Formación reciente">
+                    Formación reciente
+                  </label>
+                  <label>
+                    <input type="checkbox" data-item="Campañas locales">
+                    Campañas locales
+                  </label>
+                </div>
+
+                <!-- Imágenes -->
+                <div class="divider"></div>
+                <div class="card-subtitle">Imágenes del centro</div>
+                <div class="field-row">
+                  <div class="field field-2">
+                    <label>Foto exterior</label>
+                    <input type="file" id="inf2-img-exterior" accept="image/*">
+                  </div>
+                  <div class="field field-2">
+                    <label>Foto interior</label>
+                    <input type="file" id="inf2-img-interior" accept="image/*">
+                  </div>
+                  <div class="field field-2">
+                    <label>Foto gabinete</label>
+                    <input type="file" id="inf2-img-gabinete" accept="image/*">
+                  </div>
+                </div>
+
+                <!-- KPIs -->
+                <div class="divider"></div>
+                <div class="card-subtitle">KPIs del centro</div>
+                <div class="field-row">
+                  <div class="field field-2">
+                    <label>AAR (%)</label>
+                    <input type="number" id="inf2-aar" min="0" max="100" value="0">
+                  </div>
+                  <div class="field field-2">
+                    <label>HIT (%)</label>
+                    <input type="number" id="inf2-hit" min="0" max="100" value="0">
+                  </div>
+                  <div class="field field-2">
+                    <label>% Procesos</label>
+                    <input type="number" id="inf2-procesos" min="0" max="100" value="0">
+                  </div>
+                  <div class="field field-2">
+                    <label>Conv. prueba (%)</label>
+                    <input type="number" id="inf2-conv-prueba" min="0" max="100" value="0">
+                  </div>
+                  <div class="field field-2">
+                    <label>Conv. venta (%)</label>
+                    <input type="number" id="inf2-conv-venta" min="0" max="100" value="0">
+                  </div>
+                </div>
+
+                <div style="margin-top:6px;">
+                  <canvas id="chart-kpis-centro" style="height:160px;"></canvas>
+                </div>
+
+                <!-- Áreas de mejora -->
+                <div class="divider"></div>
+                <div class="card-subtitle">Áreas de mejora automáticas</div>
+                <ul
+                  id="inf2-mejoras"
+                  style="font-size:11px; margin-top:4px; padding-left:16px;"
+                ></ul>
+
+                <!-- Textos -->
+                <div class="divider"></div>
+                <div class="field-row">
+                  <div class="field field-full">
+                    <label>Observaciones</label>
+                    <textarea id="inf2-obs"></textarea>
+                  </div>
+                  <div class="field field-full">
+                    <label>Recomendaciones</label>
+                    <textarea id="inf2-rec"></textarea>
+                  </div>
+                  <div class="field field-full">
+                    <label>Compromisos</label>
+                    <textarea id="inf2-comp"></textarea>
+                  </div>
+                </div>
+
+                <!-- Botones -->
+                <div class="actions-row" style="margin-top:8px;">
+                  <button class="btn btn-ghost btn-small" onclick="imprimirInformeCentro()">
+                    Imprimir
+                  </button>
+                  <button
+                    class="btn btn-ghost btn-small"
+                    onclick="descargarInformeCentroPDF()"
+                  >
+                    PDF
+                  </button>
+                  <button class="btn btn-primary btn-small" onclick="guardarInformeCentro()">
+                    Guardar informe
+                  </button>
+                </div>
               </div>
             </div>
           </div>
         </section>
 
-        <!-- SECCIÓN CUADRO DE MANDOS -->
-        <section class="section" id="section-dashboard">
+        <!-- DELEGADOS -->
+        <section class="section" id="section-delegados">
           <div class="section-header">
-            <div class="section-title">
-              <i class="fa-solid fa-chart-line"></i>
-              CUADRO DE MANDOS
+            <div>
+              <div class="section-title">Delegados</div>
+              <div class="section-description">Ranking por delegado: procesos, HIT, formaciones y centros AAR.</div>
             </div>
-            <div class="section-header-right">
-              <span class="badge">Visitas · procesos · HIT · AAR</span>
+            <div class="section-actions">
+              <button class="btn btn-ghost btn-small" id="btn-add-delegado">+ Añadir delegado</button>
+              <button class="btn btn-primary btn-small" onclick="guardarSeccion('delegados')">Guardar</button>
             </div>
           </div>
 
-          <div class="excel-panel">
-            <div class="excel-panel-row">
-              <span>Vincular datos de checklist (Excel):</span>
-              <input
-                type="file"
-                id="excelChecklist"
-                accept=".xlsx"
-                multiple
-              />
-            </div>
-            <span class="small-text">
-              Sube tus archivos <b>CHECKLIST AUDIO Córners</b> y
-              <b>CHECKLIST AUDIO Exclusv</b>. El ejemplo de abajo agrupa por
-              criterio y actualiza el gráfico de barras de procesos.
-            </span>
-          </div>
-
-          <div class="dashboard-grid">
-            <!-- BARRAS: APLICACIÓN PROCESOS GENERAL -->
+          <div class="grid-2">
             <div class="card">
               <div class="card-header">
                 <div>
-                  <div class="card-title">
-                    Aplicación de procesos (Checklist)
-                  </div>
-                  <div class="card-subtitle">
-                    Media por criterio de checklist
-                  </div>
+                  <div class="card-title">Ariannys Rojas</div>
+                  <div class="card-subtitle">Delegada · Portfolio de centros</div>
+                </div>
+                <span class="pill-soft">Delegado 1</span>
+              </div>
+
+              <div class="field-row">
+                <div class="field field-2">
+                  <label>Aplicación de procesos (%)</label>
+                  <input type="number" id="del-ar-procesos" value="85" min="0" max="100">
+                </div>
+                <div class="field field-2">
+                  <label>Aplicación HIT (%)</label>
+                  <input type="number" id="del-ar-hit" value="70" min="0" max="100">
+                </div>
+                <div class="field field-2">
+                  <label>Formaciones relevantes (nº)</label>
+                  <input type="number" id="del-ar-form" value="6" min="0">
+                </div>
+                <div class="field field-2">
+                  <label>Centros AAR</label>
+                  <input type="number" id="del-ar-aar" value="10" min="0">
                 </div>
               </div>
-              <div class="chart-container">
-                <canvas id="chartProcesos"></canvas>
-              </div>
+
+              <div class="divider"></div>
+              <div class="card-subtitle">Centros asignados</div>
+              <ul style="margin-top:4px; font-size:11px; list-style: none; padding-left:0;">
+                <li><span class="tag">TET01</span> <span class="text-muted">Tetuán · Madrid</span></li>
+                <li><span class="tag">CT02</span> <span class="text-muted">Centro demo 2</span></li>
+              </ul>
             </div>
 
-            <!-- DONUT: APLICACIÓN GENERAL HIT -->
             <div class="card">
               <div class="card-header">
                 <div>
-                  <div class="card-title">Aplicación general HIT</div>
-                  <div class="card-subtitle">
-                    % centros aplicando protocolo HIT
-                  </div>
+                  <div class="card-title">Sonia Guasque</div>
+                  <div class="card-subtitle">Delegada · Portfolio de centros</div>
                 </div>
+                <span class="pill-soft">Delegado 2</span>
               </div>
-              <div class="chart-container">
-                <canvas id="chartHIT"></canvas>
-              </div>
-            </div>
 
-            <!-- DONUT: CAPACITACIÓN SERVICIO AAR -->
-            <div class="card">
-              <div class="card-header">
-                <div>
-                  <div class="card-title">Capacitación servicio AAR</div>
-                  <div class="card-subtitle">
-                    % equipos formados en servicio AAR
-                  </div>
+              <div class="field-row">
+                <div class="field field-2">
+                  <label>Aplicación de procesos (%)</label>
+                  <input type="number" id="del-sg-procesos" value="78" min="0" max="100">
+                </div>
+                <div class="field field-2">
+                  <label>Aplicación HIT (%)</label>
+                  <input type="number" id="del-sg-hit" value="62" min="0" max="100">
+                </div>
+                <div class="field field-2">
+                  <label>Formaciones relevantes (nº)</label>
+                  <input type="number" id="del-sg-form" value="4" min="0">
+                </div>
+                <div class="field field-2">
+                  <label>Centros AAR</label>
+                  <input type="number" id="del-sg-aar" value="7" min="0">
                 </div>
               </div>
-              <div class="chart-container">
-                <canvas id="chartAAR"></canvas>
-              </div>
-            </div>
 
-            <!-- RADAR: VENTAS / FORMACIONES / DINAMIZACIONES -->
-            <div class="card">
-              <div class="card-header">
-                <div>
-                  <div class="card-title">Indicadores clave</div>
-                  <div class="card-subtitle">
-                    Ventas · formaciones · dinamizaciones (% objetivo)
-                  </div>
-                </div>
-              </div>
-              <div class="chart-container">
-                <canvas id="chartRadar"></canvas>
-              </div>
+              <div class="divider"></div>
+              <div class="card-subtitle">Centros asignados</div>
+              <ul style="margin-top:4px; font-size:11px; list-style: none; padding-left:0;">
+                <li><span class="tag">RM01</span> <span class="text-muted">Reina Mercedes · Sevilla</span></li>
+                <li><span class="tag">SV02</span> <span class="text-muted">Centro demo Sevilla</span></li>
+              </ul>
             </div>
           </div>
         </section>
-      </div>
+
+        <!-- VISITAS -->
+        <section class="section" id="section-visitas">
+          <div class="section-header">
+            <div>
+              <div class="section-title">Visitas</div>
+              <div class="section-description">Planificación de visitas, checklist y evolución sobre el total de centros.</div>
+            </div>
+            <div class="section-actions">
+              <button class="btn btn-ghost btn-small" onclick="descargarChecklist()">Checklist en blanco</button>
+              <button class="btn btn-primary btn-small" onclick="guardarSeccion('visitas')">Guardar</button>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">Calendario de visitas</div>
+                  <div class="card-subtitle">Click en el día para asignar centro y estado.</div>
+                </div>
+                <span class="pill-soft">A / S + código</span>
+              </div>
+
+              <div class="field-row">
+                <div class="field field-2">
+                  <label>Mes (solo visual)</label>
+                  <input type="text" value="Julio 2024 (demo)" disabled="">
+                </div>
+                <div class="field field-2">
+                  <label>Buscar centro</label>
+                  <input type="text" id="buscador-visitas" placeholder="Código o nombre">
+                </div>
+              </div>
+
+              <div class="calendar" id="calendar-grid"></div>
+              <div class="helper" style="margin-top:6px;">
+                Leyenda: <span class="status-dot dot-orange"></span> Pendiente ·
+                <span class="status-dot dot-red"></span> Anulada ·
+                <span class="status-dot dot-green"></span> Realizada
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">Dashboard evolución de visitas</div>
+                  <div class="card-subtitle">Visitas planificadas / realizadas vs total centros.</div>
+                </div>
+              </div>
+              <canvas id="chart-visitas-dashboard" style="height: 0px; display: block; box-sizing: border-box; width: 0px;"></canvas>
+            </div>
+          </div>
+        </section>
+
+        <!-- INFORMES -->
+        <section class="section" id="section-informes">
+          <div class="section-header">
+            <div>
+              <div class="section-title">Informes de centro</div>
+              <div class="section-description">Creación de informes por centro, checklist de procesos y adjuntos.</div>
+            </div>
+            <div class="section-actions">
+              <button class="btn btn-small btn-ghost" onclick="imprimirSeccion('informes')">Imprimir</button>
+              <button class="btn btn-small btn-ghost" onclick="descargarInformePDF()">Descargar</button>
+              <button class="btn btn-small btn-ghost" onclick="recargarSeccion('informes')">Actualizar</button>
+              <button class="btn btn-primary btn-small" onclick="guardarSeccion('informes')">Guardar</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Datos del centro</div>
+                <div class="card-subtitle">Selecciona desde buscador, tabla de centros o calendario.</div>
+              </div>
+              <span class="pill-soft">Autorrelleno disponible</span>
+            </div>
+
+            <div class="field-row">
+              <div class="field field-2">
+                <label>Buscar centro (código / nombre)</label>
+                <input type="text" id="inf-buscar-centro" placeholder="Ej. TET01">
+              </div>
+              <div class="field field-2">
+                <label>Código centro</label>
+                <input type="text" id="inf-codigo">
+              </div>
+              <div class="field field-2">
+                <label>Nombre centro</label>
+                <input type="text" id="inf-nombre">
+              </div>
+              <div class="field field-2">
+                <label>Provincia</label>
+                <input type="text" id="inf-provincia">
+              </div>
+              <div class="field field-2">
+                <label>Responsable audio</label>
+                <select id="inf-responsable">
+                  <option value="">Seleccionar</option>
+                  <option value="Ariannys Rojas">Ariannys Rojas</option>
+                  <option value="Sonia Guasque">Sonia Guasque</option>
+                </select>
+              </div>
+              <div class="field field-2">
+                <label>Fecha visita</label>
+                <input type="date" id="inf-fecha">
+              </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="field-row">
+              <div class="field field-2">
+                <label>Audiólogo / Técnico</label>
+                <input type="text" id="inf-audiologo" placeholder="Nombre y perfil">
+              </div>
+              <div class="field field-2">
+                <label>Tiempo de servicio (años)</label>
+                <input type="number" id="inf-tiempo-servicio" min="0" step="0.5">
+              </div>
+              <div class="field field-full">
+                <label>Tipo de centro</label>
+                <div class="radio-row">
+                  <label><input type="radio" name="inf-tipo-centro" value="Corner"> Corner</label>
+                  <label><input type="radio" name="inf-tipo-centro" value="Centro exclusivo"> Centro exclusivo</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="card-subtitle">Checklist de procesos (los resultados rellenan las tablas)</div>
+            <div class="checklist" id="inf-checklist">
+              <label><input type="checkbox" data-item="Proceso de captación"> Proceso de captación</label>
+              <label><input type="checkbox" data-item="Historia clínica"> Historia clínica</label>
+              <label><input type="checkbox" data-item="Teleaudiometría / screening"> Teleaudiometría / screening</label>
+              <label><input type="checkbox" data-item="Pruebas diagnósticas completas"> Pruebas diagnósticas</label>
+              <label><input type="checkbox" data-item="Explicación de resultados"> Explicación de resultados</label>
+              <label><input type="checkbox" data-item="Rehabilitación auditiva"> Rehabilitación auditiva</label>
+              <label><input type="checkbox" data-item="Seguimiento sistemático"> Seguimiento sistemático</label>
+              <label><input type="checkbox" data-item="Registro en HIT"> Registro en HIT</label>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="field-row">
+              <div class="field field-full">
+                <label>Formaciones relevantes / dinamización</label>
+                <textarea id="inf-formaciones" placeholder="Formaciones realizadas, acciones de dinamización, campañas, etc."></textarea>
+              </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="card-subtitle">Imágenes adjuntas</div>
+            <div class="field-row">
+              <div class="field field-2">
+                <label>Foto exterior</label>
+                <input type="file" id="inf-img-exterior" accept="image/*">
+              </div>
+              <div class="field field-2">
+                <label>Foto interior</label>
+                <input type="file" id="inf-img-interior" accept="image/*">
+              </div>
+              <div class="field field-2">
+                <label>Foto gabinete</label>
+                <input type="file" id="inf-img-gabinete" accept="image/*">
+              </div>
+            </div>
+            <div class="helper">
+              Demo front-end: las imágenes se utilizan como referencia visual; para un PDF completo con imágenes se recomienda integrar un backend o tratamiento específico.
+            </div>
+          </div>
+        </section>
+
+        <!-- CENTROS EXCLUSIVOS -->
+        <section class="section" id="section-exclusivos">
+          <div class="section-header">
+            <div>
+              <div class="section-title">Centros exclusivos</div>
+              <div class="section-description">Cifras mensuales, previsto, acumulado y acciones por centro exclusivo.</div>
+            </div>
+            <div class="section-actions">
+              <button class="btn btn-small btn-ghost" onclick="imprimirSeccion('exclusivos')">Imprimir</button>
+              <button class="btn btn-small btn-ghost" onclick="descargarExclusivosPDF()">Descargar</button>
+              <button class="btn btn-small btn-ghost" onclick="recargarSeccion('exclusivos')">Actualizar</button>
+              <button class="btn btn-primary btn-small" onclick="guardarSeccion('exclusivos')">Guardar</button>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">Dashboard general exclusivos</div>
+                  <div class="card-subtitle">Cifras mensuales, previsto y acumulado.</div>
+                </div>
+              </div>
+              <canvas id="chart-exclusivos" style="height: 0px; display: block; box-sizing: border-box; width: 0px;"></canvas>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">Acciones</div>
+                  <div class="card-subtitle">Fechas, tipo de acción (anuncio, derivación, cita) y observaciones.</div>
+                </div>
+              </div>
+
+              <div class="field-row">
+                <div class="field field-2">
+                  <label>Centro exclusivo</label>
+                  <input type="text" id="ex-accion-centro" placeholder="Ej. TET01 Exclusivo">
+                </div>
+                <div class="field field-2">
+                  <label>Fecha</label>
+                  <input type="date" id="ex-accion-fecha">
+                </div>
+                <div class="field field-2">
+                  <label>Tipo de acción</label>
+                  <select id="ex-accion-tipo">
+                    <option value="">Seleccionar</option>
+                    <option value="Anuncio">Anuncio</option>
+                    <option value="Derivación">Derivación</option>
+                    <option value="Cita">Cita</option>
+                    <option value="Otra">Otra</option>
+                  </select>
+                </div>
+                <div class="field field-full">
+                  <label>Observaciones</label>
+                  <textarea id="ex-accion-obs"></textarea>
+                </div>
+              </div>
+              <div class="actions-row">
+                <button class="btn btn-primary btn-small" onclick="agregarAccion()">Añadir acción</button>
+              </div>
+              <div class="divider"></div>
+              <div class="card-subtitle">Acciones registradas</div>
+              <ul id="ex-lista-acciones" style="margin-top:4px; font-size:11px; list-style:none; padding-left:0;"></ul>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top:10px;">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Detalle por centro exclusivo</div>
+                <div class="card-subtitle">Cifras mensuales, previsto y acumulado.</div>
+              </div>
+              <span class="pill-soft">Editable · demo</span>
+            </div>
+
+            <div style="overflow-x:auto;">
+              <table id="tabla-exclusivos">
+                <thead>
+                  <tr>
+                    <th>Código</th>
+                    <th>Centro</th>
+                    <th>Mes</th>
+                    <th>Cifras mensuales</th>
+                    <th>Previsto</th>
+                    <th>Acumulado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>EX01</td>
+                    <td>Tetuán Exclusivo</td>
+                    <td>Jul-24</td>
+                    <td><input type="number" value="12000"></td>
+                    <td><input type="number" value="15000"></td>
+                    <td><input type="number" value="60000"></td>
+                  </tr>
+                  <tr>
+                    <td>EX02</td>
+                    <td>Reina Mercedes Exclusivo</td>
+                    <td>Jul-24</td>
+                    <td><input type="number" value="9000"></td>
+                    <td><input type="number" value="11000"></td>
+                    <td><input type="number" value="45000"></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      </section>
     </main>
   </div>
 
-  <!-- TOAST -->
-  <div class="toast" id="toast">
-    <i class="fa-solid fa-circle-info"></i>
-    <span id="toast-text"></span>
+  <!-- Modal Visita -->
+  <div class="modal-backdrop" id="modal-visita">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title" id="modal-visita-title">Visita</div>
+        <button class="modal-close" onclick="cerrarModalVisita()">×</button>
+      </div>
+      <div>
+        <div class="field">
+          <label>Código centro</label>
+          <input type="text" id="modal-visita-centro" placeholder="Ej. TET01">
+        </div>
+        <div class="field" style="margin-top:6px;">
+          <label>Quién visita</label>
+          <select id="modal-visita-quien">
+            <option value="">Seleccionar</option>
+            <option value="A">A (Ariannys)</option>
+            <option value="S">S (Sonia)</option>
+          </select>
+        </div>
+        <div class="field" style="margin-top:6px;">
+          <label>Estado</label>
+          <select id="modal-visita-estado">
+            <option value="pendiente">Pendiente (● naranja)</option>
+            <option value="anulada">Anulada (● rojo)</option>
+            <option value="realizada">Realizada (● verde)</option>
+            <option value="sin">Sin visita</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-small btn-ghost" onclick="cerrarModalVisita()">Cancelar</button>
+        <button class="btn btn-primary btn-small" onclick="guardarVisitaDia()">Guardar día</button>
+      </div>
+    </div>
   </div>
 
   <script>
-    /* ===========================
-       LÓGICA PANTALLA PIN
-    ============================ */
-    const PIN_CODE = "AR4321";
-    const pinScreen = document.getElementById("pin-screen");
-    const app = document.getElementById("app");
-    const pinInput = document.getElementById("pin-input");
-    const pinButton = document.getElementById("pin-button");
-    const pinError = document.getElementById("pin-error");
+    const STORAGE_KEY = "plataformaAAR";
 
-    function checkPin() {
-      const value = pinInput.value.trim();
-      if (value === PIN_CODE) {
-        pinScreen.classList.add("hidden");
-        app.classList.remove("hidden");
-      } else {
-        pinError.textContent = "PIN incorrecto. Vuelve a intentarlo.";
-        pinInput.focus();
+    function getStore() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+      } catch (e) {
+        return {};
       }
     }
 
-    pinButton.addEventListener("click", checkPin);
-    pinInput.addEventListener("keyup", (e) => {
-      if (e.key === "Enter") checkPin();
-    });
-
-    /* ===========================
-       TOAST
-    ============================ */
-    const toastEl = document.getElementById("toast");
-    const toastTextEl = document.getElementById("toast-text");
-    let toastTimeout = null;
-
-    function showToast(message) {
-      toastTextEl.textContent = message;
-      toastEl.classList.add("visible");
-      if (toastTimeout) clearTimeout(toastTimeout);
-      toastTimeout = setTimeout(() => {
-        toastEl.classList.remove("visible");
-      }, 2600);
+    function setStore(data) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     }
 
-    /* ===========================
-       BOTONES CABECERA
-    ============================ */
-    document.getElementById("btn-print").addEventListener("click", () => {
-      window.print();
-    });
+    /* PIN */
 
-    document.getElementById("btn-download").addEventListener("click", () => {
-      try {
-        const html = document.documentElement.outerHTML;
-        const blob = new Blob([html], { type: "text/html" });
+    function initPin() {
+      const overlay = document.getElementById("pin-overlay");
+      const input = document.getElementById("pin-input");
+      const btn = document.getElementById("pin-button");
+      const err = document.getElementById("pin-error");
+      const shell = document.getElementById("app-shell");
+
+      function unlock() {
+        overlay.style.display = "none";
+        shell.style.opacity = "1";
+        shell.style.pointerEvents = "auto";
+        sessionStorage.setItem("pin-ok", "1");
+      }
+
+      if (sessionStorage.getItem("pin-ok") === "1") {
+        unlock();
+        return;
+      }
+
+      btn.addEventListener("click", () => {
+        const val = input.value.trim();
+        if (val.toUpperCase() === "AR4321") {
+          err.textContent = "";
+          unlock();
+        } else {
+          err.textContent = "PIN incorrecto.";
+        }
+      });
+
+      input.addEventListener("keydown", e => {
+        if (e.key === "Enter") btn.click();
+      });
+    }
+
+    /* Navegación */
+
+    function initNav() {
+      const navItems = document.querySelectorAll(".nav-item");
+      navItems.forEach(item => {
+        item.addEventListener("click", () => {
+          const sectionId = item.getAttribute("data-section");
+          navItems.forEach(n => n.classList.remove("active"));
+          item.classList.add("active");
+          document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+          document.getElementById("section-" + sectionId).classList.add("active");
+        });
+      });
+    }
+
+    /* Guardar secciones básicas */
+
+    function guardarSeccion(nombre) {
+      const store = getStore();
+      if (!store[nombre]) store[nombre] = {};
+
+      switch (nombre) {
+        case "delegados":
+          store.delegados = {
+            ariannys: {
+              procesos: document.getElementById("del-ar-procesos").value,
+              hit: document.getElementById("del-ar-hit").value,
+              form: document.getElementById("del-ar-form").value,
+              aar: document.getElementById("del-ar-aar").value
+            },
+            sonia: {
+              procesos: document.getElementById("del-sg-procesos").value,
+              hit: document.getElementById("del-sg-hit").value,
+              form: document.getElementById("del-sg-form").value,
+              aar: document.getElementById("del-sg-aar").value
+            }
+          };
+          break;
+        case "centros":
+          store.centros = store.centros || {};
+          store.centros.filtroProvincia = document.getElementById("filtro-provincia").value;
+          store.centros.filtroCentro = document.getElementById("filtro-centro").value;
+          store.centros.aar = store.centros.aar || [];
+          break;
+        case "visitas":
+          // las visitas se guardan día a día
+          break;
+        case "informes":
+          store.informes = capturarInforme();
+          break;
+        case "exclusivos":
+          store.exclusivos = capturarExclusivos();
+          break;
+        default:
+          break;
+      }
+
+      setStore(store);
+      alert("Sección '" + nombre + "' guardada en este navegador.");
+    }
+
+    function recargarSeccion(nombre) {
+      const store = getStore();
+      if (nombre === "informes" && store.informes) {
+        pintarInforme(store.informes);
+        alert("Informe cargado desde el navegador.");
+      } else if (nombre === "exclusivos" && store.exclusivos) {
+        pintarExclusivos(store.exclusivos);
+        alert("Datos de exclusivos cargados desde el navegador.");
+      } else {
+        alert("No hay datos guardados para '" + nombre + "'.");
+      }
+    }
+
+    /* DESCARGAR HTML ACTUAL */
+
+    function initDescargaHTML() {
+      const btn = document.getElementById("btn-descargar-html");
+      if (!btn) return;
+      btn.addEventListener("click", () => {
+        const blob = new Blob([document.documentElement.outerHTML], {
+          type: "text/html;charset=utf-8"
+        });
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = "seguimiento-visitas-audio.html";
+        a.download = "plataforma_dashboard.html";
         document.body.appendChild(a);
         a.click();
-        a.remove();
+        document.body.removeChild(a);
         URL.revokeObjectURL(url);
-        showToast("Descarga de HTML iniciada.");
-      } catch (e) {
-        console.error(e);
-        showToast("No se pudo generar el HTML.");
-      }
-    });
-
-    const STORAGE_KEY = "seguimiento-visitas-audio";
-
-    document.getElementById("btn-save").addEventListener("click", () => {
-      try {
-        const filtros = {
-          centro: document.getElementById("search-centro").value || "",
-          delegado: document.getElementById("search-delegado").value || "",
-        };
-
-        const payload = {
-          timestamp: new Date().toISOString(),
-          filtros,
-          charts: {
-            procesos: chartProcesos ? chartProcesos.data : null,
-            hit: chartHIT ? chartHIT.data : null,
-            aar: chartAAR ? chartAAR.data : null,
-            radar: chartRadar ? chartRadar.data : null,
-          },
-        };
-
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-        showToast("Datos guardados en nube local (navegador).");
-      } catch (e) {
-        console.error(e);
-        showToast("Error al guardar datos.");
-      }
-    });
-
-    document.getElementById("btn-load").addEventListener("click", () => {
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (!raw) {
-          showToast("No hay datos guardados aún.");
-          return;
-        }
-        const payload = JSON.parse(raw);
-        if (payload.filtros) {
-          document.getElementById("search-centro").value =
-            payload.filtros.centro || "";
-          document.getElementById("search-delegado").value =
-            payload.filtros.delegado || "";
-          filtrarMapa();
-        }
-
-        if (payload.charts && payload.charts.procesos && chartProcesos) {
-          chartProcesos.data = payload.charts.procesos;
-          chartProcesos.update();
-        }
-        if (payload.charts && payload.charts.hit && chartHIT) {
-          chartHIT.data = payload.charts.hit;
-          chartHIT.update();
-        }
-        if (payload.charts && payload.charts.aar && chartAAR) {
-          chartAAR.data = payload.charts.aar;
-          chartAAR.update();
-        }
-        if (payload.charts && payload.charts.radar && chartRadar) {
-          chartRadar.data = payload.charts.radar;
-          chartRadar.update();
-        }
-
-        showToast("Datos cargados desde nube local.");
-      } catch (e) {
-        console.error(e);
-        showToast("Error al cargar datos.");
-      }
-    });
-
-    /* ===========================
-       MAPA DELEGADOS (LEAFLET)
-       Datos integrados desde el HTML de mapa original
-    ============================ */
-
-    // Datos de provincias / delegados (extraídos del mapa que enviaste)
-    const markersData = [
-      {"provincia": "A CORUÑA", "delegados": ["Manuel Cánovas", "Marisa Carmona"], "lat": 43.3623, "lon": -8.4115},
-      {"provincia": "ALBACETE", "delegados": ["Manuel Cánovas"], "lat": 38.9941, "lon": -1.8589},
-      {"provincia": "ALICANTE", "delegados": ["Manuel Cánovas", "Martin SEBASTIÁN", "Verónica Alfonsín"], "lat": 38.3452, "lon": -0.481},
-      {"provincia": "ALMERIA", "delegados": ["LAURA RAMOS", "Maribel Amezcua"], "lat": 36.834, "lon": -2.4637},
-      {"provincia": "ASTURIAS", "delegados": ["Cecilia Pérez", "Maribel Amezcua"], "lat": 43.3614, "lon": -5.8593},
-      {"provincia": "BADAJOZ", "delegados": ["Cecilia Pérez", "LAURA PLAZAS"], "lat": 38.8794, "lon": -6.9707},
-      {"provincia": "BALEARES", "delegados": ["LAURA PLAZAS"], "lat": 39.5696, "lon": 2.6502},
-      {"provincia": "BARCELONA", "delegados": ["ENERITZ ARANGUREN", "LAURA PLAZAS", "LAURA RAMOS", "Laura Plazas", "Laura Ramos", "Maribel Amezcua", "Martin SEBASTIÁN", "Sonia Godino"], "lat": 41.3851, "lon": 2.1734},
-      {"provincia": "BURGOS", "delegados": ["Martin SEBASTIÁN"], "lat": 42.3439, "lon": -3.6969},
-      {"provincia": "CACERES", "delegados": ["Maribel Amezcua", "Sonia Godino"], "lat": 39.4763, "lon": -6.3727},
-      {"provincia": "CADIZ", "delegados": ["Sergio Perán"], "lat": 36.5271, "lon": -6.2886},
-      {"provincia": "CANTABRIA", "delegados": ["Cecilia Pérez", "ENERITZ ARANGUREN", "Marisa Carmona"], "lat": 43.4623, "lon": -3.8099},
-      {"provincia": "CASTELLON", "delegados": ["ENERITZ ARANGUREN", "Laura Plazas", "Marisa Carmona", "Martin SEBASTIÁN"], "lat": 39.9864, "lon": -0.0513},
-      {"provincia": "CORDOBA", "delegados": ["ENERITZ ARANGUREN", "Martin SEBASTIÁN"], "lat": 37.8882, "lon": -4.7794},
-      {"provincia": "CUENCA", "delegados": ["Maribel Amezcua"], "lat": 40.0704, "lon": -2.1374},
-      {"provincia": "GIRONA", "delegados": ["Maribel Amezcua", "SONIA GODINO", "Sonia Godino"], "lat": 41.9794, "lon": 2.8214},
-      {"provincia": "GRANADA", "delegados": ["ENERITZ ARANGUREN", "SONIA GODINO", "Sonia Godino"], "lat": 37.1773, "lon": -3.5986},
-      {"provincia": "GUIPUZCOA", "delegados": ["Daniel Chazo", "Martin SEBASTIÁN"], "lat": 43.3128, "lon": -1.974},
-      {"provincia": "HUESCA", "delegados": ["Daniel Chazo"], "lat": 42.1362, "lon": -0.4089},
-      {"provincia": "JAEN", "delegados": ["Daniel Chazo", "Verónica Alfonsín"], "lat": 37.7796, "lon": -3.7849},
-      {"provincia": "LA RIOJA", "delegados": ["SONIA GODINO"], "lat": 42.2871, "lon": -2.5396},
-      {"provincia": "LAS PALMAS", "delegados": ["Blanca Fdez. de la Pradilla"], "lat": 28.1235, "lon": -15.4363},
-      {"provincia": "LLEIDA", "delegados": ["ENERITZ ARANGUREN", "LAURA PLAZAS"], "lat": 41.6176, "lon": 0.62},
-      {"provincia": "LUGO", "delegados": ["Daniel Chazo"], "lat": 43.0125, "lon": -7.555},
-      {"provincia": "MADRID", "delegados": ["Blanca Fdez. de la Pradilla", "LAURA RAMOS", "Laura RAMOS", "Marisa Carmona", "Sergio Perán"], "lat": 40.4168, "lon": -3.7038},
-      {"provincia": "MALAGA", "delegados": ["Maribel Amezcua", "Martin SEBASTIÁN"], "lat": 36.7213, "lon": -4.4214},
-      {"provincia": "MURCIA", "delegados": ["Manuel Cánovas"], "lat": 37.9922, "lon": -1.1307},
-      {"provincia": "NAVARRA", "delegados": ["Sonia Godino"], "lat": 42.6954, "lon": -1.6761},
-      {"provincia": "OURENSE", "delegados": ["Daniel Chazo"], "lat": 42.3358, "lon": -7.8639},
-      {"provincia": "PONTEVEDRA", "delegados": ["Cecilia Pérez", "ENERITZ ARANGUREN", "Manuel Cánovas", "Verónica Alfonsín"], "lat": 42.4337, "lon": -8.6481},
-      {"provincia": "SALAMANCA", "delegados": ["Sergio Perán"], "lat": 40.9701, "lon": -5.6635},
-      {"provincia": "SEVILLA", "delegados": ["Maribel Amezcua", "Sergio Perán"], "lat": 37.3891, "lon": -5.9845},
-      {"provincia": "SORIA", "delegados": ["ENERITZ ARANGUREN"], "lat": 41.7662, "lon": -2.479},
-      {"provincia": "TARRAGONA", "delegados": ["Cecilia Pérez", "ENERITZ ARANGUREN", "LAURA PLAZAS"], "lat": 41.1189, "lon": 1.2445},
-      {"provincia": "TENERIFE", "delegados": ["Blanca Fdez. de la Pradilla"], "lat": 28.4636, "lon": -16.2518},
-      {"provincia": "TERUEL", "delegados": ["ENERITZ ARANGUREN"], "lat": 40.3456, "lon": -1.1065},
-      {"provincia": "TOLEDO", "delegados": ["Marisa Carmona"], "lat": 39.8628, "lon": -4.0273},
-      {"provincia": "VALENCIA", "delegados": ["Cecilia Pérez", "Marisa Carmona"], "lat": 39.4699, "lon": -0.3763},
-      {"provincia": "VALLADOLID", "delegados": ["Daniel Chazo"], "lat": 41.6523, "lon": -4.7245},
-      {"provincia": "VIZCAYA", "delegados": ["SONIA GODINO", "Sonia Godino"], "lat": 43.263, "lon": -2.935},
-      {"provincia": "ZAMORA", "delegados": ["Blanca Fdez. de la Pradilla"], "lat": 41.5035, "lon": -5.7445},
-      {"provincia": "ZARAGOZA", "delegados": ["ENERITZ ARANGUREN"], "lat": 41.6488, "lon": -0.8891}
-    ];
-
-    let mapInstance = null;
-    const marcadorLayers = [];
-    const delegadoColors = {};
-    const colorPalette = [
-      "#ff4b5c",
-      "#ffb347",
-      "#4ecca3",
-      "#1e90ff",
-      "#9b59b6",
-      "#2ecc71",
-      "#e67e22",
-      "#e84393",
-      "#00cec9",
-      "#fdcb6e",
-      "#e74c3c",
-      "#16a085"
-    ];
-    let colorIndex = 0;
-
-    function normalizarDelegado(nombre) {
-      if (!nombre) return "";
-      return nombre.trim().toLowerCase().replace(/\s+/g, " ");
-    }
-
-    function getColorDelegado(nombre) {
-      const key = normalizarDelegado(nombre);
-      if (!delegadoColors[key]) {
-        delegadoColors[key] = colorPalette[colorIndex % colorPalette.length];
-        colorIndex++;
-      }
-      return delegadoColors[key];
-    }
-
-    function inicializarMapa() {
-      mapInstance = L.map("map").setView([40.3, -3.7], 6);
-
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        maxZoom: 18,
-        attribution: "&copy; OpenStreetMap contributors"
-      }).addTo(mapInstance);
-
-      const listaRegiones = document.getElementById("lista-regiones");
-      listaRegiones.innerHTML = "";
-
-      markersData.forEach((m) => {
-        const principal = m.delegados && m.delegados.length ? m.delegados[0] : "Sin delegado";
-        const color = getColorDelegado(principal);
-
-        const delegadosList = (m.delegados || [])
-          .map((d) => "- " + d)
-          .join("<br/>");
-
-        const popup =
-          "<b>" +
-          m.provincia +
-          "</b><br/><br/><b>Delegado(s):</b><br/>" +
-          delegadosList;
-
-        const circle = L.circleMarker([m.lat, m.lon], {
-          radius: 8,
-          fillColor: color,
-          color: "#ffffff",
-          weight: 1,
-          opacity: 1,
-          fillOpacity: 0.9
-        }).addTo(mapInstance);
-
-        circle.bindPopup(popup);
-
-        marcadorLayers.push({
-          layer: circle,
-          provincia: m.provincia,
-          delegados: m.delegados || [],
-          color
-        });
-
-        // Lista lateral
-        const item = document.createElement("div");
-        item.className = "lista-item";
-
-        const left = document.createElement("div");
-        left.className = "lista-item-left";
-
-        const dot = document.createElement("div");
-        dot.className = "delegado-dot";
-        dot.style.background = color;
-
-        const provSpan = document.createElement("span");
-        provSpan.className = "lista-item-provincia";
-        provSpan.textContent = m.provincia;
-
-        const delSpan = document.createElement("span");
-        delSpan.className = "lista-item-delegados";
-        delSpan.textContent = (m.delegados || []).join(" · ");
-
-        left.appendChild(dot);
-        left.appendChild(provSpan);
-
-        item.appendChild(left);
-        item.appendChild(delSpan);
-
-        item.addEventListener("click", () => {
-          mapInstance.setView([m.lat, m.lon], 7);
-          circle.openPopup();
-        });
-
-        listaRegiones.appendChild(item);
       });
     }
 
-    function filtrarMapa() {
-      const searchCentro = document
-        .getElementById("search-centro")
-        .value.trim()
-        .toLowerCase();
-      const searchDelegado = document
-        .getElementById("search-delegado")
-        .value.trim()
-        .toLowerCase();
+    /* CENTROS – filtros y buscador global */
 
-      marcadorLayers.forEach((m) => {
-        const provinciaMatch =
-          !searchCentro ||
-          (m.provincia && m.provincia.toLowerCase().includes(searchCentro));
+    function filtrarCentros() {
+      const provFilter = (document.getElementById("filtro-provincia")?.value || "").toLowerCase();
+      const cenFilter = (document.getElementById("filtro-centro")?.value || "").toLowerCase();
+      const rows = document.querySelectorAll("#tabla-centros tbody tr");
+      rows.forEach(row => {
+        const txt = row.textContent.toLowerCase();
+        const prov = row.children[4].textContent.toLowerCase();
+        const show =
+          (prov.includes(provFilter) || !provFilter) &&
+          (txt.includes(cenFilter) || !cenFilter);
+        row.style.display = show ? "" : "none";
+      });
+    }
 
-        // Aquí podrías enlazar "centros" cuando vengan de Excel
-        const centroMatch = provinciaMatch;
+    function initBuscadorGlobalCentros() {
+      const input = document.getElementById("buscar-centro-global");
+      if (!input) return;
+      input.addEventListener("input", () => {
+        const val = input.value.toLowerCase();
+        const rows = document.querySelectorAll("#tabla-centros tbody tr");
+        rows.forEach(row => {
+          const txt = row.textContent.toLowerCase();
+          row.style.display = !val || txt.includes(val) ? "" : "none";
+        });
+      });
+    }
 
-        const delegadosStr = (m.delegados || []).join(" ").toLowerCase();
-        const delegadoMatch =
-          !searchDelegado || delegadosStr.includes(searchDelegado);
+    /* INFORME INDIVIDUAL DE CENTRO + MAPA + KPIs */
 
-        const visible = centroMatch && delegadoMatch;
+    let mapaCentro = null;
+    let markerCentro = null;
+    let chartKpisCentro = null;
 
-        if (visible) {
-          if (!mapInstance.hasLayer(m.layer)) {
-            m.layer.addTo(mapInstance);
-          }
+    function seleccionarCentro(codigo) {
+      const filas = document.querySelectorAll("#tabla-centros tbody tr");
+      let fila = null;
+      filas.forEach(row => {
+        if (row.getAttribute("data-codigo") === codigo) fila = row;
+      });
+      if (!fila) return;
+
+      const nombre = fila.children[1].textContent.trim();
+      const provincia = fila.children[4].textContent.trim();
+      const delegado = fila.children[3].textContent.trim();
+
+      document.getElementById("inf2-codigo").value = codigo;
+      document.getElementById("inf2-nombre").value = nombre;
+      document.getElementById("inf2-provincia").value = provincia;
+      document.getElementById("inf2-delegado").value = delegado;
+      document.getElementById("inf-centro-label").textContent = codigo + " · " + nombre;
+
+      const store = getStore();
+      store.informesCentro = store.informesCentro || {};
+      const data = store.informesCentro[codigo] || null;
+
+      if (data) {
+        document.getElementById("inf2-aar").value = data.aar ?? 0;
+        document.getElementById("inf2-hit").value = data.hit ?? 0;
+        document.getElementById("inf2-procesos").value = data.procesos ?? 0;
+        document.getElementById("inf2-conv-prueba").value = data.convPrueba ?? 0;
+        document.getElementById("inf2-conv-venta").value = data.convVenta ?? 0;
+        document.getElementById("inf2-obs").value = data.obs || "";
+        document.getElementById("inf2-rec").value = data.rec || "";
+        document.getElementById("inf2-comp").value = data.comp || "";
+
+        document.querySelectorAll("#inf2-checklist1 input, #inf2-checklist2 input")
+          .forEach(ch => {
+            ch.checked = data.checklist && data.checklist.includes(ch.dataset.item);
+          });
+
+        const lat = data.lat ?? 40.4168;
+        const lng = data.lng ?? -3.7038;
+        initMapaCentro(lat, lng);
+      } else {
+        document.getElementById("inf2-aar").value = 0;
+        document.getElementById("inf2-hit").value = 0;
+        document.getElementById("inf2-procesos").value = 0;
+        document.getElementById("inf2-conv-prueba").value = 0;
+        document.getElementById("inf2-conv-venta").value = 0;
+        document.getElementById("inf2-obs").value = "";
+        document.getElementById("inf2-rec").value = "";
+        document.getElementById("inf2-comp").value = "";
+        document.querySelectorAll("#inf2-checklist1 input, #inf2-checklist2 input")
+          .forEach(ch => ch.checked = false);
+        initMapaCentro(40.4168, -3.7038);
+      }
+
+      actualizarChartKpisCentro();
+      generarAreasMejora();
+    }
+
+    function initMapaCentro(lat, lng) {
+      if (!window.L) return;
+      if (!mapaCentro) {
+        mapaCentro = L.map("mapa-centro").setView([lat, lng], 15);
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          maxZoom: 19
+        }).addTo(mapaCentro);
+        markerCentro = L.marker([lat, lng]).addTo(mapaCentro);
+      } else {
+        mapaCentro.setView([lat, lng], 15);
+        if (markerCentro) {
+          markerCentro.setLatLng([lat, lng]);
         } else {
-          if (mapInstance.hasLayer(m.layer)) {
-            mapInstance.removeLayer(m.layer);
-          }
+          markerCentro = L.marker([lat, lng]).addTo(mapaCentro);
         }
-      });
+      }
     }
 
-    document
-      .getElementById("search-centro")
-      .addEventListener("input", filtrarMapa);
-    document
-      .getElementById("search-delegado")
-      .addEventListener("input", filtrarMapa);
+    function obtenerKpisCentro() {
+      return {
+        aar: Number(document.getElementById("inf2-aar").value || 0),
+        hit: Number(document.getElementById("inf2-hit").value || 0),
+        procesos: Number(document.getElementById("inf2-procesos").value || 0),
+        convPrueba: Number(document.getElementById("inf2-conv-prueba").value || 0),
+        convVenta: Number(document.getElementById("inf2-conv-venta").value || 0)
+      };
+    }
 
-    document.getElementById("btn-add-centro").addEventListener("click", () => {
-      const provincia = window.prompt("Provincia del nuevo centro:");
-      if (!provincia) return;
-      const delegado = window.prompt("Delegado responsable:");
-      if (!delegado) return;
-      showToast(
-        "Nuevo centro en " +
-          provincia +
-          " con delegado " +
-          delegado +
-          " (pendiente de geolocalización fina y guardado real)."
-      );
-      // Aquí podríamos abrir un formulario completo y añadirlo a markersData + Excel
-    });
-
-    /* ===========================
-       GRÁFICOS (Chart.js)
-    ============================ */
-    let chartProcesos = null;
-    let chartHIT = null;
-    let chartAAR = null;
-    let chartRadar = null;
-
-    function inicializarGraficos() {
-      const ctxProcesos = document
-        .getElementById("chartProcesos")
-        .getContext("2d");
-      const ctxHIT = document.getElementById("chartHIT").getContext("2d");
-      const ctxAAR = document.getElementById("chartAAR").getContext("2d");
-      const ctxRadar = document.getElementById("chartRadar").getContext("2d");
-
-      chartProcesos = new Chart(ctxProcesos, {
+    function actualizarChartKpisCentro() {
+      const kpis = obtenerKpisCentro();
+      const canvas = document.getElementById("chart-kpis-centro");
+      if (!canvas) return;
+      const ctx = canvas.getContext("2d");
+      if (chartKpisCentro) chartKpisCentro.destroy();
+      chartKpisCentro = new Chart(ctx, {
         type: "bar",
         data: {
-          labels: [
-            "Recepción paciente",
-            "Anamnesis",
-            "Pruebas",
-            "Informe",
-            "Seguimiento"
-          ],
-          datasets: [
-            {
-              label: "% aplicación",
-              data: [80, 72, 65, 78, 70],
-              borderWidth: 1
-            }
-          ]
+          labels: ["AAR", "HIT", "%Procesos", "Conv. prueba", "Conv. venta"],
+          datasets: [{
+            data: [
+              kpis.aar,
+              kpis.hit,
+              kpis.procesos,
+              kpis.convPrueba,
+              kpis.convVenta
+            ]
+          }]
         },
         options: {
           responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false },
-            tooltip: { enabled: true }
-          },
+          plugins: { legend: { display: false } },
           scales: {
+            x: { ticks: { color: "#a0a4b8" } },
             y: {
-              beginAtZero: true,
-              max: 100,
-              ticks: { stepSize: 20 }
-            }
-          }
-        }
-      });
-
-      chartHIT = new Chart(ctxHIT, {
-        type: "doughnut",
-        data: {
-          labels: ["Centros con HIT aplicado", "Pendiente / parcial"],
-          datasets: [
-            {
-              data: [68, 32],
-              borderWidth: 1
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              position: "bottom",
-              labels: { boxWidth: 10 }
-            }
-          },
-          cutout: "60%"
-        }
-      });
-
-      chartAAR = new Chart(ctxAAR, {
-        type: "doughnut",
-        data: {
-          labels: ["Equipos formados AAR", "Sin formación / parcial"],
-          datasets: [
-            {
-              data: [55, 45],
-              borderWidth: 1
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              position: "bottom",
-              labels: { boxWidth: 10 }
-            }
-          },
-          cutout: "60%"
-        }
-      });
-
-      chartRadar = new Chart(ctxRadar, {
-        type: "radar",
-        data: {
-          labels: ["Ventas", "Formaciones", "Dinamizaciones"],
-          datasets: [
-            {
-              label: "Objetivo",
-              data: [100, 100, 100],
-              borderWidth: 1,
-              borderDash: [4, 4],
-              pointRadius: 2
-            },
-            {
-              label: "Real",
-              data: [72, 60, 54],
-              borderWidth: 1,
-              pointRadius: 3
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              position: "bottom",
-              labels: { boxWidth: 10 }
-            }
-          },
-          scales: {
-            r: {
-              beginAtZero: true,
-              max: 100,
-              ticks: { stepSize: 20 }
+              ticks: {
+                color: "#a0a4b8",
+                callback: v => v + "%"
+              }
             }
           }
         }
       });
     }
 
-    /* ===========================
-       VINCULAR EXCEL (CHECKLIST)
-    ============================ */
-    const excelInput = document.getElementById("excelChecklist");
+    function generarAreasMejora() {
+      const ul = document.getElementById("inf2-mejoras");
+      if (!ul) return;
+      ul.innerHTML = "";
+      const { aar, hit, procesos, convPrueba, convVenta } = obtenerKpisCentro();
 
-    excelInput.addEventListener("change", (event) => {
-      const files = Array.from(event.target.files || []);
-      if (!files.length) return;
+      if (procesos < 85) {
+        const li = document.createElement("li");
+        li.textContent = "Refuerzo en aplicación de procesos (objetivo ≥ 85%).";
+        ul.appendChild(li);
+      }
+      if (hit < 80) {
+        const li = document.createElement("li");
+        li.textContent = "Incrementar implantación HIT (objetivo ≥ 80%).";
+        ul.appendChild(li);
+      }
+      if (aar < 80) {
+        const li = document.createElement("li");
+        li.textContent = "Trabajar certificación AAR (formación + seguimiento).";
+        ul.appendChild(li);
+      }
+      if (convPrueba < 60) {
+        const li = document.createElement("li");
+        li.textContent = "Mejorar conversión de prueba a propuesta.";
+        ul.appendChild(li);
+      }
+      if (convVenta < 50) {
+        const li = document.createElement("li");
+        li.textContent = "Reforzar argumentario comercial para conversión a venta.";
+        ul.appendChild(li);
+      }
 
-      files.forEach((file) => {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const data = new Uint8Array(e.target.result);
-          const workbook = XLSX.read(data, { type: "array" });
-          const sheetName = workbook.SheetNames[0];
-          const sheet = workbook.Sheets[sheetName];
-          const json = XLSX.utils.sheet_to_json(sheet, { defval: "" });
-          actualizarGraficosDesdeChecklist(json);
-        };
-        reader.readAsArrayBuffer(file);
-      });
-
-      showToast(
-        "Excel cargado. Actualizando gráfico de procesos (ajusta nombres de columnas si es necesario)."
-      );
-    });
-
-    // Ejemplo genérico: asume columnas tipo "CRITERIO" y "PUNTUACIÓN"
-    function actualizarGraficosDesdeChecklist(rows) {
-      if (!rows || !rows.length || !chartProcesos) return;
-
-      const agregados = {};
-      rows.forEach((row) => {
-        const criterio =
-          row["CRITERIO"] ||
-          row["Criterio"] ||
-          row["criterio"] ||
-          row["Proceso"] ||
-          row["PROCESO"];
-        const rawValor =
-          row["PUNTUACIÓN"] ||
-          row["Puntuación"] ||
-          row["puntuacion"] ||
-          row["SCORE"] ||
-          row["Score"];
-        const valor = Number(rawValor);
-        if (!criterio || Number.isNaN(valor)) return;
-        if (!agregados[criterio]) {
-          agregados[criterio] = { suma: 0, count: 0 };
-        }
-        agregados[criterio].suma += valor;
-        agregados[criterio].count += 1;
-      });
-
-      const etiquetas = Object.keys(agregados);
-      const valores = etiquetas.map((c) =>
-        Math.round(agregados[c].suma / agregados[c].count)
-      );
-
-      if (etiquetas.length) {
-        chartProcesos.data.labels = etiquetas;
-        chartProcesos.data.datasets[0].data = valores;
-        chartProcesos.update();
+      if (!ul.children.length) {
+        const li = document.createElement("li");
+        li.textContent = "Sin áreas de mejora relevantes según los KPIs actuales.";
+        ul.appendChild(li);
       }
     }
 
-    /* ===========================
-       INICIALIZACIÓN GLOBAL
-    ============================ */
-    window.addEventListener("load", () => {
-      inicializarMapa();
-      inicializarGraficos();
+    function guardarInformeCentro() {
+      const codigo = document.getElementById("inf2-codigo").value.trim();
+      if (!codigo) {
+        alert("Selecciona primero un centro en la tabla.");
+        return;
+      }
+
+      const checklist = [];
+      document
+        .querySelectorAll("#inf2-checklist1 input, #inf2-checklist2 input")
+        .forEach(ch => {
+          if (ch.checked) checklist.push(ch.dataset.item);
+        });
+
+      const data = {
+        fecha: new Date().toISOString(),
+        aar: Number(document.getElementById("inf2-aar").value || 0),
+        hit: Number(document.getElementById("inf2-hit").value || 0),
+        procesos: Number(document.getElementById("inf2-procesos").value || 0),
+        convPrueba: Number(document.getElementById("inf2-conv-prueba").value || 0),
+        convVenta: Number(document.getElementById("inf2-conv-venta").value || 0),
+        checklist,
+        obs: document.getElementById("inf2-obs").value,
+        rec: document.getElementById("inf2-rec").value,
+        comp: document.getElementById("inf2-comp").value
+      };
+
+      const store = getStore();
+      store.informesCentro = store.informesCentro || {};
+      store.informesCentro[codigo] = data;
+
+      // Añadir también al histórico de visitas por centro
+      store.visitas = store.visitas || {};
+      store.visitas.historial = store.visitas.historial || [];
+      store.visitas.historial.push({
+        fecha: data.fecha,
+        centro: codigo,
+        nombreCentro: document.getElementById("inf2-nombre").value || "",
+        kpis: {
+          aar: data.aar,
+          hit: data.hit,
+          procesos: data.procesos,
+          convPrueba: data.convPrueba,
+          convVenta: data.convVenta
+        }
+      });
+      store.visitas.historial.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
+      setStore(store);
+      alert("Informe individual del centro guardado en este navegador.");
+    }
+
+    function imprimirInformeCentro() {
+      const panel = document.getElementById("panel-informe-centro");
+      if (!panel) return;
+      const win = window.open("", "_blank");
+      win.document.write(
+        "<html><head><title>Informe de centro</title></head><body>" +
+          panel.innerHTML +
+          "</body></html>"
+      );
+      win.document.close();
+      win.focus();
+      win.print();
+    }
+
+    function descargarInformeCentroPDF() {
+      const codigo = document.getElementById("inf2-codigo").value || "";
+      const nombre = document.getElementById("inf2-nombre").value || "";
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      let y = 10;
+      doc.setFontSize(14);
+      doc.text("Informe individual de centro", 10, y); y += 8;
+      doc.setFontSize(11);
+      doc.text("Centro: " + codigo + " - " + nombre, 10, y); y += 6;
+      doc.text("Provincia: " + (document.getElementById("inf2-provincia").value || ""), 10, y); y += 6;
+      doc.text("Delegado: " + (document.getElementById("inf2-delegado").value || ""), 10, y); y += 8;
+      doc.text("KPIs:", 10, y); y += 6;
+      doc.text("AAR: " + document.getElementById("inf2-aar").value + "%", 12, y); y += 5;
+      doc.text("HIT: " + document.getElementById("inf2-hit").value + "%", 12, y); y += 5;
+      doc.text("% Procesos: " + document.getElementById("inf2-procesos").value + "%", 12, y); y += 5;
+      doc.text("Conv. prueba: " + document.getElementById("inf2-conv-prueba").value + "%", 12, y); y += 5;
+      doc.text("Conv. venta: " + document.getElementById("inf2-conv-venta").value + "%", 12, y); y += 8;
+      doc.text("Observaciones:", 10, y); y += 5;
+      doc.text(doc.splitTextToSize(document.getElementById("inf2-obs").value || "", 180), 12, y); y += 20;
+      doc.text("Recomendaciones:", 10, y); y += 5;
+      doc.text(doc.splitTextToSize(document.getElementById("inf2-rec").value || "", 180), 12, y); y += 20;
+      doc.text("Compromisos:", 10, y); y += 5;
+      doc.text(doc.splitTextToSize(document.getElementById("inf2-comp").value || "", 180), 12, y);
+      doc.save("informe_centro_" + codigo + ".pdf");
+    }
+
+    /* Registro AAR */
+
+    function guardarRegistroAAR() {
+      const codigo = document.getElementById("aar-codigo").value.trim();
+      if (!codigo) {
+        alert("Introduce al menos el código del centro AAR.");
+        return;
+      }
+      const nombre = document.getElementById("aar-nombre").value.trim();
+      const provincia = document.getElementById("aar-provincia").value.trim();
+      const perfil = document.getElementById("aar-perfil").value;
+      const obs = document.getElementById("aar-observaciones").value.trim();
+
+      const store = getStore();
+      store.centros = store.centros || {};
+      store.centros.aar = store.centros.aar || [];
+
+      const existenteIdx = store.centros.aar.findIndex(c => c.codigo === codigo);
+      const item = { codigo, nombre, provincia, perfil, observaciones: obs };
+      if (existenteIdx >= 0) {
+        store.centros.aar[existenteIdx] = item;
+      } else {
+        store.centros.aar.push(item);
+      }
+      setStore(store);
+      pintarListaAAR(store.centros.aar);
+      alert("Centro AAR guardado/actualizado.");
+    }
+
+    function pintarListaAAR(lista) {
+      const ul = document.getElementById("lista-aar");
+      const vacio = document.getElementById("lista-aar-vacia");
+      ul.innerHTML = "";
+      if (!lista || lista.length === 0) {
+        vacio.style.display = "block";
+        return;
+      }
+      vacio.style.display = "none";
+      lista.forEach(c => {
+        const li = document.createElement("li");
+        li.textContent =
+          `${c.codigo} · ${c.nombre || ""} · ${c.provincia || ""} · ${c.perfil || ""}`;
+        ul.appendChild(li);
+      });
+    }
+
+    /* VISITAS – calendario */
+
+    const diasMesDemo = 31;
+
+    function initCalendario() {
+      const grid = document.getElementById("calendar-grid");
+      if (!grid) return;
+
+      grid.innerHTML = "";
+
+      const store = getStore();
+      const visitas = (store.visitas && store.visitas.dias) || {};
+
+      for (let d = 1; d <= diasMesDemo; d++) {
+        const cell = document.createElement("div");
+        cell.className = "calendar-day";
+        cell.dataset.dia = d;
+        const header = document.createElement("div");
+        header.className = "calendar-day-header";
+        const num = document.createElement("div");
+        num.className = "calendar-day-number";
+        num.textContent = d;
+        const dot = document.createElement("span");
+        dot.className = "status-dot dot-muted";
+        header.appendChild(num);
+        header.appendChild(dot);
+
+        const visitDiv = document.createElement("div");
+        visitDiv.className = "calendar-day-visit";
+
+        const data = visitas[d];
+        if (data && data.estado && data.estado !== "sin") {
+          let cls = "dot-orange";
+          if (data.estado === "anulada") cls = "dot-red";
+          else if (data.estado === "realizada") cls = "dot-green";
+          dot.className = "status-dot " + cls;
+          visitDiv.innerHTML =
+            `<span>${data.quien || ""}${data.centro ? " · " + data.centro : ""}</span>`;
+        } else {
+          visitDiv.innerHTML = `<span class="text-muted">Sin visita</span>`;
+        }
+
+        cell.appendChild(header);
+        cell.appendChild(visitDiv);
+        cell.addEventListener("click", () => abrirModalVisita(d));
+        grid.appendChild(cell);
+      }
+
+      actualizarDashboardVisitas();
+    }
+
+    function abrirModalVisita(dia) {
+      const modal = document.getElementById("modal-visita");
+      if (!modal) return;
+      modal.classList.add("active");
+      document.getElementById("modal-visita-title").textContent = "Visita día " + dia;
+      modal.dataset.dia = dia;
+
+      const store = getStore();
+      const visitas = (store.visitas && store.visitas.dias) || {};
+      const data = visitas[dia] || {};
+      document.getElementById("modal-visita-centro").value = data.centro || "";
+      document.getElementById("modal-visita-quien").value = data.quien || "";
+      document.getElementById("modal-visita-estado").value = data.estado || "sin";
+    }
+
+    function cerrarModalVisita() {
+      const modal = document.getElementById("modal-visita");
+      if (!modal) return;
+      modal.classList.remove("active");
+    }
+
+    function guardarVisitaDia() {
+      const modal = document.getElementById("modal-visita");
+      if (!modal) return;
+      const dia = modal.dataset.dia;
+      const centro = document.getElementById("modal-visita-centro").value.trim();
+      const quien = document.getElementById("modal-visita-quien").value;
+      const estado = document.getElementById("modal-visita-estado").value;
+
+      const store = getStore();
+      store.visitas = store.visitas || {};
+      store.visitas.dias = store.visitas.dias || {};
+      store.visitas.dias[dia] = { centro, quien, estado };
+      setStore(store);
+
+      cerrarModalVisita();
+      initCalendario();
+    }
+
+    /* Checklist en blanco */
+
+    function descargarChecklist() {
+      const contenido = [
+        "CHECKLIST VISITA CENTRO",
+        "",
+        "- Proceso de captación",
+        "- Historia clínica",
+        "- Teleaudiometría / screening",
+        "- Pruebas diagnósticas completas",
+        "- Explicación de resultados",
+        "- Rehabilitación auditiva",
+        "- Seguimiento sistemático",
+        "- Registro en HIT",
+        "",
+        "Observaciones:",
+        "______________________________",
+        "______________________________"
+      ].join("\n");
+      const blob = new Blob([contenido], { type: "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "checklist_visita.txt";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    /* Dashboard visitas */
+
+    function actualizarDashboardVisitas() {
+      const ctxEl = document.getElementById("chart-visitas-dashboard");
+      if (!ctxEl) return;
+      const store = getStore();
+      const visitas = (store.visitas && store.visitas.dias) || {};
+      let planificadas = 0;
+      let realizadas = 0;
+      Object.values(visitas).forEach(v => {
+        if (v && v.estado && v.estado !== "sin") planificadas++;
+        if (v.estado === "realizada") realizadas++;
+      });
+
+      const totalCentros = document.querySelectorAll("#tabla-centros tbody tr").length || 1;
+      const ctx = ctxEl.getContext("2d");
+      if (window._chartVisitasDash) window._chartVisitasDash.destroy();
+      window._chartVisitasDash = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: ["Total centros", "Visitas planificadas", "Visitas realizadas"],
+          datasets: [{
+            label: "Visitas",
+            data: [totalCentros, planificadas, realizadas]
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { ticks: { color: "#a0a4b8" } },
+            y: { ticks: { color: "#a0a4b8" } }
+          }
+        }
+      });
+    }
+
+    /* INFORMES – captura y pintado (sección Informes) */
+
+    function capturarInforme() {
+      const checklist = [];
+      document
+        .querySelectorAll("#inf-checklist input[type='checkbox']")
+        .forEach(ch => {
+          if (ch.checked) checklist.push(ch.dataset.item);
+        });
+
+      let tipo = "";
+      document
+        .querySelectorAll("input[name='inf-tipo-centro']")
+        .forEach(r => {
+          if (r.checked) tipo = r.value;
+        });
+
+      return {
+        codigo: document.getElementById("inf-codigo").value,
+        nombre: document.getElementById("inf-nombre").value,
+        provincia: document.getElementById("inf-provincia").value,
+        responsable: document.getElementById("inf-responsable").value,
+        fecha: document.getElementById("inf-fecha").value,
+        audiologo: document.getElementById("inf-audiologo").value,
+        tiempoServicio: document.getElementById("inf-tiempo-servicio").value,
+        tipoCentro: tipo,
+        checklist,
+        formaciones: document.getElementById("inf-formaciones").value
+      };
+    }
+
+    function pintarInforme(data) {
+      document.getElementById("inf-codigo").value = data.codigo || "";
+      document.getElementById("inf-nombre").value = data.nombre || "";
+      document.getElementById("inf-provincia").value = data.provincia || "";
+      document.getElementById("inf-responsable").value = data.responsable || "";
+      document.getElementById("inf-fecha").value = data.fecha || "";
+      document.getElementById("inf-audiologo").value = data.audiologo || "";
+      document.getElementById("inf-tiempo-servicio").value = data.tiempoServicio || "";
+      document
+        .querySelectorAll("input[name='inf-tipo-centro']")
+        .forEach(r => {
+          r.checked = r.value === data.tipoCentro;
+        });
+      document
+        .querySelectorAll("#inf-checklist input[type='checkbox']")
+        .forEach(ch => {
+          ch.checked = data.checklist && data.checklist.includes(ch.dataset.item);
+        });
+      document.getElementById("inf-formaciones").value = data.formaciones || "";
+    }
+
+    function imprimirSeccion(nombre) {
+      const seccion = document.getElementById("section-" + nombre);
+      if (!seccion) return;
+      const win = window.open("", "_blank");
+      win.document.write(
+        "<html><head><title>Impresión - " + nombre + "</title></head><body>" +
+          seccion.innerHTML +
+          "</body></html>"
+      );
+      win.document.close();
+      win.focus();
+      win.print();
+    }
+
+    function descargarInformePDF() {
+      const { jsPDF } = window.jspdf;
+      const data = capturarInforme();
+      const doc = new jsPDF();
+      let y = 10;
+      doc.setFontSize(14);
+      doc.text("Informe de centro", 10, y); y += 8;
+      doc.setFontSize(11);
+      doc.text("Centro: " + (data.codigo || "") + " - " + (data.nombre || ""), 10, y); y += 6;
+      doc.text("Provincia: " + (data.provincia || ""), 10, y); y += 6;
+      doc.text("Responsable audio: " + (data.responsable || ""), 10, y); y += 6;
+      doc.text("Fecha visita: " + (data.fecha || ""), 10, y); y += 6;
+      doc.text("Audiólogo/Técnico: " + (data.audiologo || ""), 10, y); y += 6;
+      doc.text("Tiempo servicio (años): " + (data.tiempoServicio || ""), 10, y); y += 6;
+      doc.text("Tipo centro: " + (data.tipoCentro || ""), 10, y); y += 8;
+      doc.text("Checklist procesos:", 10, y); y += 6;
+      (data.checklist || []).forEach(c => {
+        doc.text("- " + c, 12, y);
+        y += 5;
+      });
+      y += 4;
+      doc.text("Formaciones / dinamización:", 10, y); y += 6;
+      const split = doc.splitTextToSize(data.formaciones || "", 180);
+      doc.text(split, 10, y);
+      doc.save("informe_centro.pdf");
+    }
+
+    /* EXCLUSIVOS – captura y PDF */
+
+    function capturarExclusivos() {
+      const filas = document.querySelectorAll("#tabla-exclusivos tbody tr");
+      const items = [];
+      filas.forEach(row => {
+        const inputs = row.querySelectorAll("input[type='number']");
+        items.push({
+          codigo: row.children[0].textContent.trim(),
+          centro: row.children[1].textContent.trim(),
+          mes: row.children[2].textContent.trim(),
+          mensual: inputs[0].value,
+          previsto: inputs[1].value,
+          acumulado: inputs[2].value
+        });
+      });
+
+      const acciones = [];
+      document.querySelectorAll("#ex-lista-acciones li").forEach(li => {
+        acciones.push(li.dataset.json ? JSON.parse(li.dataset.json) : {});
+      });
+
+      return { items, acciones };
+    }
+
+    function pintarExclusivos(data) {
+      const filas = document.querySelectorAll("#tabla-exclusivos tbody tr");
+      data.items && data.items.forEach((item, idx) => {
+        const row = filas[idx];
+        if (!row) return;
+        const inputs = row.querySelectorAll("input[type='number']");
+        inputs[0].value = item.mensual || 0;
+        inputs[1].value = item.previsto || 0;
+        inputs[2].value = item.acumulado || 0;
+      });
+
+      const ul = document.getElementById("ex-lista-acciones");
+      ul.innerHTML = "";
+      (data.acciones || []).forEach(acc => {
+        const li = document.createElement("li");
+        li.dataset.json = JSON.stringify(acc);
+        li.textContent =
+          `${acc.fecha || ""} · ${acc.centro || ""} · ${acc.tipo || ""} · ${acc.obs || ""}`;
+        ul.appendChild(li);
+      });
+
+      actualizarChartExclusivos();
+    }
+
+    function agregarAccion() {
+      const centro = document.getElementById("ex-accion-centro").value.trim();
+      const fecha = document.getElementById("ex-accion-fecha").value;
+      const tipo = document.getElementById("ex-accion-tipo").value;
+      const obs = document.getElementById("ex-accion-obs").value.trim();
+
+      if (!centro || !fecha || !tipo) {
+        alert("Centro, fecha y tipo de acción son obligatorios.");
+        return;
+      }
+
+      const ul = document.getElementById("ex-lista-acciones");
+      const li = document.createElement("li");
+      const obj = { centro, fecha, tipo, obs };
+      li.dataset.json = JSON.stringify(obj);
+      li.textContent = `${fecha} · ${centro} · ${tipo} · ${obs}`;
+      ul.appendChild(li);
+
+      document.getElementById("ex-accion-centro").value = "";
+      document.getElementById("ex-accion-fecha").value = "";
+      document.getElementById("ex-accion-tipo").value = "";
+      document.getElementById("ex-accion-obs").value = "";
+    }
+
+    function descargarExclusivosPDF() {
+      const { jsPDF } = window.jspdf;
+      const data = capturarExclusivos();
+      const doc = new jsPDF();
+      let y = 10;
+      doc.setFontSize(14);
+      doc.text("Centros exclusivos - Resumen", 10, y); y += 8;
+      doc.setFontSize(11);
+      (data.items || []).forEach(item => {
+        doc.text(`${item.codigo} - ${item.centro} (${item.mes})`, 10, y); y += 5;
+        doc.text(
+          `Mensual: ${item.mensual} · Previsto: ${item.previsto} · Acumulado: ${item.acumulado}`,
+          12,
+          y
+        );
+        y += 6;
+      });
+      y += 4;
+      doc.text("Acciones:", 10, y); y += 6;
+      (data.acciones || []).forEach(a => {
+        doc.text(`${a.fecha} · ${a.centro} · ${a.tipo} · ${a.obs}`, 12, y); y += 5;
+      });
+      doc.save("centros_exclusivos.pdf");
+    }
+
+    /* Gráficos del dashboard y exclusivos */
+
+    function initCharts() {
+      const ctxProcesos = document.getElementById("chart-procesos")?.getContext("2d");
+      if (ctxProcesos) {
+        window._chartProcesos = new Chart(ctxProcesos, {
+          type: "line",
+          data: {
+            labels: ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul"],
+            datasets: [{
+              label: "% Procesos",
+              data: [70, 72, 75, 78, 80, 82, 84]
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { ticks: { color: "#a0a4b8" } },
+              y: { ticks: { color: "#a0a4b8" } }
+            }
+          }
+        });
+      }
+
+      const ctxHit = document.getElementById("chart-hit")?.getContext("2d");
+      if (ctxHit) {
+        window._chartHit = new Chart(ctxHit, {
+          type: "doughnut",
+          data: {
+            labels: ["Implantado", "Pendiente"],
+            datasets: [{
+              data: [65, 35]
+            }]
+          },
+          options: {
+            plugins: {
+              legend: {
+                position: "bottom",
+                labels: { color: "#a0a4b8", font: { size: 9 } }
+              }
+            }
+          }
+        });
+      }
+
+      const ctxAar = document.getElementById("chart-aar")?.getContext("2d");
+      if (ctxAar) {
+        window._chartAar = new Chart(ctxAar, {
+          type: "bar",
+          data: {
+            labels: ["Ene", "Feb", "Mar", "Abr", "May", "Jun"],
+            datasets: [{
+              label: "Centros AAR",
+              data: [20, 22, 24, 27, 30, 34]
+            }]
+          },
+          options: {
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { ticks: { color: "#a0a4b8" } },
+              y: { ticks: { color: "#a0a4b8" } }
+            }
+          }
+        });
+      }
+
+      const ctxVisitas = document.getElementById("chart-visitas")?.getContext("2d");
+      if (ctxVisitas) {
+        window._chartVisitas = new Chart(ctxVisitas, {
+          type: "line",
+          data: {
+            labels: ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul"],
+            datasets: [{
+              label: "Visitas realizadas",
+              data: [10, 15, 18, 22, 25, 28, 32]
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { ticks: { color: "#a0a4b8" } },
+              y: { ticks: { color: "#a0a4b8" } }
+            }
+          }
+        });
+      }
+
+      const ctxMejoras = document.getElementById("chart-mejoras")?.getContext("2d");
+      if (ctxMejoras) {
+        window._chartMejoras = new Chart(ctxMejoras, {
+          type: "bar",
+          data: {
+            labels: ["Proceso", "HIT", "Formación", "Atención", "Documentación"],
+            datasets: [{
+              label: "Incidencias",
+              data: [14, 9, 6, 11, 5]
+            }]
+          },
+          options: {
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { ticks: { color: "#a0a4b8" } },
+              y: { ticks: { color: "#a0a4b8" } }
+            }
+          }
+        });
+      }
+
+      actualizarChartExclusivos();
+    }
+
+    function actualizarChartExclusivos() {
+      const canvas = document.getElementById("chart-exclusivos");
+      if (!canvas) return;
+      const filas = document.querySelectorAll("#tabla-exclusivos tbody tr");
+      const labels = [];
+      const mensual = [];
+      const previsto = [];
+      filas.forEach(row => {
+        labels.push(row.children[1].textContent.trim());
+        const inputs = row.querySelectorAll("input[type='number']");
+        mensual.push(parseFloat(inputs[0].value || "0"));
+        previsto.push(parseFloat(inputs[1].value || "0"));
+      });
+
+      const ctx = canvas.getContext("2d");
+      if (window._chartExclusivos) window._chartExclusivos.destroy();
+      window._chartExclusivos = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels,
+          datasets: [
+            { label: "Mensual", data: mensual },
+            { label: "Previsto", data: previsto }
+          ]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            x: { ticks: { color: "#a0a4b8" } },
+            y: { ticks: { color: "#a0a4b8" } }
+          }
+        }
+      });
+    }
+
+    /* INIT */
+
+    window.addEventListener("DOMContentLoaded", () => {
+      initPin();
+      initNav();
+      initDescargaHTML();
+      initCalendario();
+      initCharts();
+      initBuscadorGlobalCentros();
+
+      // KPIs centro: listeners
+      ["inf2-aar","inf2-hit","inf2-procesos","inf2-conv-prueba","inf2-conv-venta"]
+        .forEach(id => {
+          const el = document.getElementById(id);
+          if (el) {
+            el.addEventListener("input", () => {
+              actualizarChartKpisCentro();
+              generarAreasMejora();
+            });
+          }
+        });
+
+      // Restaurar datos guardados
+      const store = getStore();
+      if (store.centros && store.centros.aar) pintarListaAAR(store.centros.aar);
+      if (store.informes) pintarInforme(store.informes);
+      if (store.exclusivos) pintarExclusivos(store.exclusivos);
+
+      // Rellenar filtros centros si estaban guardados
+      if (store.centros) {
+        if (store.centros.filtroProvincia) {
+          const el = document.getElementById("filtro-provincia");
+          if (el) el.value = store.centros.filtroProvincia;
+        }
+        if (store.centros.filtroCentro) {
+          const el = document.getElementById("filtro-centro");
+          if (el) el.value = store.centros.filtroCentro;
+        }
+        filtrarCentros();
+      }
     });
   </script>
 </body>
