@@ -164,7 +164,6 @@
       display: flex;
       flex-direction: column;
       gap: 8px;
-      /* IMPORTANTE: sin límite de altura para que el informe no se corte ni se solapen bloques */
     }
 
     .topbar {
@@ -399,7 +398,7 @@
       min-height: 0;
     }
 
-    /* CONTENEDOR DE GRÁFICOS – ajustado para que no desborden ni tapen campos */
+    /* CONTENEDOR DE GRÁFICOS */
     .chart-container {
       position: relative;
       width: 100%;
@@ -1699,13 +1698,13 @@
 
     function formatDateISO(d) {
       const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, "0");
-      const day = String(d.getDate()).padStart(2, "0");
+      const m = String(d.getMonth()+1).padStart(2,"0");
+      const day = String(d.getDate()).padStart(2,"0");
       return `${y}-${m}-${day}`;
     }
 
     function formatDateHuman(iso) {
-      const [y, m, d] = iso.split("-");
+      const [y,m,d] = iso.split("-");
       return `${d}-${m}-${y}`;
     }
 
@@ -1720,10 +1719,6 @@
     });
 
     /* ========= TEMA ========= */
-    const globalCharts = {};
-    const centroCharts = {};
-    let centroChartsCreated = false;
-
     $("#themeToggle").addEventListener("click", () => {
       document.body.classList.toggle("light");
       Object.values(globalCharts).forEach(ch => ch && ch.resize());
@@ -1747,7 +1742,7 @@
 
     $("#btnExportarHTML").addEventListener("click", () => {
       const content = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
-      const blob = new Blob([content], { type: "text/html" });
+      const blob = new Blob([content], {type:"text/html"});
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -1776,12 +1771,11 @@
     const informesPorCentro = {};
     const aarPorCentro = {};
     const delegadosColores = {};
-    const checklistPorCentro = {}; // CHECKLIST POR CENTRO (para % procesos y criterios)
-    let criteriosGlobalCache = []; // cache para detalle y top10 áreas de mejora
+    const checklistPorCentro = {}; // NUEVO: checklist por centro
 
     const colorPalette = [
-      "#22c55e", "#2563eb", "#14b8a6", "#a855f7", "#f97316", "#0ea5e9", "#ef4444",
-      "#eab308", "#ec4899", "#facc15", "#22d3ee", "#4ade80", "#fb7185", "#2dd4bf"
+      "#22c55e","#2563eb","#14b8a6","#a855f7","#f97316","#0ea5e9","#ef4444",
+      "#eab308","#ec4899","#facc15","#22d3ee","#4ade80","#fb7185","#2dd4bf"
     ];
 
     function getColorForDelegado(nombre) {
@@ -1871,7 +1865,7 @@
       });
 
       delegadosList.innerHTML = "";
-      const delegados = Array.from(map.entries()).sort((a, b) => a[0].localeCompare(b[0]));
+      const delegados = Array.from(map.entries()).sort((a,b)=>a[0].localeCompare(b[0]));
 
       delegados.forEach(([nombre, lista]) => {
         const card = document.createElement("div");
@@ -1894,7 +1888,7 @@
             card.classList.remove("active");
           } else {
             filtroDelegadoActual = nombre;
-            $$(".delegado-card").forEach(c => c.classList.remove("active"));
+            $$(".delegado-card").forEach(c=>c.classList.remove("active"));
             card.classList.add("active");
           }
           renderTablaCentros();
@@ -1914,11 +1908,11 @@
     function renderRankingDelegados(map) {
       rankingDelegadosDiv.innerHTML = "";
       const arr = Array.from(map.entries()).map(([nombre, lista]) => {
-        const procesos = 80 + Math.floor(Math.random() * 15);
-        const hit = 75 + Math.floor(Math.random() * 15);
-        const score = Math.round((procesos + hit) / 2);
-        return { nombre, n: lista.length, score, procesos, hit };
-      }).sort((a, b) => b.score - a.score);
+        const procesos = 80 + Math.floor(Math.random()*15);
+        const hit = 75 + Math.floor(Math.random()*15);
+        const score = Math.round((procesos+hit)/2);
+        return {nombre, n:lista.length, score, procesos, hit};
+      }).sort((a,b)=>b.score-a.score);
 
       arr.forEach((d, idx) => {
         const row = document.createElement("div");
@@ -1927,7 +1921,7 @@
         const color = getColorForDelegado(d.nombre);
         row.innerHTML = `
           <div class="ranking-main">
-            <span style="font-size:.75rem; color:var(--text-muted);">${idx + 1}.</span>
+            <span style="font-size:.75rem; color:var(--text-muted);">${idx+1}.</span>
             <span class="delegado-color" style="background:${color}"></span>
             <span>${d.nombre}</span>
           </div>
@@ -2051,14 +2045,14 @@
     function drawCalendar() {
       calendarGrid.innerHTML = "";
       const first = new Date(calYear, calMonth, 1);
-      const dow = (first.getDay() + 6) % 7;
-      const last = new Date(calYear, calMonth + 1, 0).getDate();
+      const dow = (first.getDay()+6)%7;
+      const last = new Date(calYear, calMonth+1, 0).getDate();
 
-      const formatter = new Intl.DateTimeFormat("es-ES", { month: "long", year: "numeric" });
-      calTitulo.textContent = formatter.format(new Date(calYear, calMonth, 1)).replace(/^\w/, c => c.toUpperCase());
+      const formatter = new Intl.DateTimeFormat("es-ES", {month:"long", year:"numeric"});
+      calTitulo.textContent = formatter.format(new Date(calYear, calMonth, 1)).replace(/^\w/, c=>c.toUpperCase());
 
       const totalCells = 42;
-      for (let i = 0; i < totalCells; i++) {
+      for (let i=0;i<totalCells;i++) {
         const cell = document.createElement("div");
         const dayNum = i - dow + 1;
         if (dayNum < 1 || dayNum > last) {
@@ -2068,7 +2062,7 @@
           const dateIso = formatDateISO(new Date(calYear, calMonth, dayNum));
           cell.dataset.date = dateIso;
           cell.innerHTML = `<div class="cal-day">${dayNum}</div>`;
-          const v = visitas.find(v => v.fecha === dateIso);
+          const v = visitas.find(v=>v.fecha===dateIso);
           if (v) {
             const letter = v.respAudio.startsWith("A") ? "A" : "S";
             const ev = document.createElement("div");
@@ -2076,7 +2070,7 @@
             ev.innerHTML = `<span class="cal-dot"></span><span class="cal-letter">${letter}</span>`;
             cell.appendChild(ev);
           }
-          cell.addEventListener("click", () => abrirModalVisita(dateIso));
+          cell.addEventListener("click", ()=> abrirModalVisita(dateIso));
         }
         calendarGrid.appendChild(cell);
       }
@@ -2084,12 +2078,12 @@
 
     $("#calPrev").addEventListener("click", () => {
       calMonth--;
-      if (calMonth < 0) { calMonth = 11; calYear--; }
+      if (calMonth<0){calMonth=11;calYear--;}
       drawCalendar();
     });
     $("#calNext").addEventListener("click", () => {
       calMonth++;
-      if (calMonth > 11) { calMonth = 0; calYear++; }
+      if (calMonth>11){calMonth=0;calYear++;}
       drawCalendar();
     });
 
@@ -2109,7 +2103,7 @@
         alert("Indica el centro.");
         return;
       }
-      const centroObj = centros.find(c => c.centro === centroNombre);
+      const centroObj = centros.find(c=>c.centro===centroNombre);
       const delegado = centroObj ? centroObj.delegado : "N/D";
       visitas.push({
         fecha: iso,
@@ -2127,7 +2121,7 @@
 
     function renderVisitas() {
       visitasList.innerHTML = "";
-      visitas.sort((a, b) => a.fecha.localeCompare(b.fecha));
+      visitas.sort((a,b)=>a.fecha.localeCompare(b.fecha));
       visitas.forEach((v, idx) => {
         const row = document.createElement("div");
         row.className = "visita-row";
@@ -2136,7 +2130,7 @@
             <span class="visita-row-main">${formatDateHuman(v.fecha)} · ${v.centro}</span>
             <span class="chip-estado ${v.estado}">
               ${v.estado === "pendiente" ? "Pendiente" :
-                v.estado === "enproceso" ? "En proceso" : "Finalizada"}
+                 v.estado === "enproceso" ? "En proceso" : "Finalizada"}
             </span>
           </div>
           <div class="visita-row-secondary">
@@ -2148,7 +2142,6 @@
         `;
         visitasList.appendChild(row);
       });
-      actualizarCoberturaVisitas(); // actualizar gráfico de visitas %
     }
 
     /* ========= MODALES ========= */
@@ -2158,16 +2151,18 @@
     function cerrarModal(id) {
       document.getElementById(id).style.display = "none";
     }
-    $$(".modal-close").forEach(el => {
-      el.addEventListener("click", () => cerrarModal(el.dataset.close));
+    $$(".modal-close").forEach(el=>{
+      el.addEventListener("click", ()=> cerrarModal(el.dataset.close));
     });
-    $$(".modal-backdrop").forEach(bg => {
-      bg.addEventListener("click", e => {
-        if (e.target === bg) bg.style.display = "none";
+    $$(".modal-backdrop").forEach(bg=>{
+      bg.addEventListener("click", e=>{
+        if (e.target===bg) bg.style.display="none";
       });
     });
 
     /* ========= INFORME VISITA ========= */
+    let centroChartsCreated = false;
+    const centroCharts = {};
     let centroMetricsActual = null;
     let centroActual = null;
 
@@ -2190,19 +2185,19 @@
       const avgProc = Math.round(dashboardAcum.procesos / n);
       const avgPrue = Math.round(dashboardAcum.convPrueba / n);
       const avgVent = Math.round(dashboardAcum.convVenta / n);
-      const avgHit = Math.round(dashboardAcum.hit / n);
+      const avgHit  = Math.round(dashboardAcum.hit / n);
       const avgForm = Math.round(dashboardAcum.formaciones / n);
       const ayudaPct = Math.round(100 * dashboardAcum.ayuda / n);
-      const aarPct = Math.round(100 * dashboardAcum.aar / n);
+      const aarPct   = Math.round(100 * dashboardAcum.aar / n);
       const primerosPct = Math.round(100 * dashboardAcum.primeros / n);
 
-      $("#kpiProcesos").textContent = avgProc + "%";
+      $("#kpiProcesos").textContent   = avgProc + "%";
       $("#kpiConvPrueba").textContent = avgPrue + "%";
-      $("#kpiConvVenta").textContent = avgVent + "%";
-      $("#kpiHIT").textContent = avgHit + "%";
+      $("#kpiConvVenta").textContent  = avgVent + "%";
+      $("#kpiHIT").textContent        = avgHit + "%";
       $("#kpiFormaciones").textContent = avgForm + "%";
       $("#kpiAyuda").textContent = ayudaPct === 0 ? "No" : `Sí ${ayudaPct}%`;
-      $("#kpiAar").textContent = aarPct === 0 ? "No" : `Sí ${aarPct}%`;
+      $("#kpiAar").textContent   = aarPct === 0 ? "No" : `Sí ${aarPct}%`;
       $("#kpiPrimeros").textContent = primerosPct === 0 ? "No" : `Sí ${primerosPct}%`;
 
       globalCharts.radarGeneral.data.datasets[0].data = [
@@ -2216,10 +2211,10 @@
       const isChecked = sel => !!(q(sel) && q(sel).checked);
 
       const audioKeys = [
-        "audio_test", "audio_screening", "audio_manteleta",
-        "audio_escaparate", "audio_salud", "audio_renove"
+        "audio_test","audio_screening","audio_manteleta",
+        "audio_escaparate","audio_salud","audio_renove"
       ];
-      const audioCount = audioKeys.reduce((acc, k) => acc + (isChecked(k) ? 1 : 0), 0);
+      const audioCount = audioKeys.reduce((acc,k)=> acc + (isChecked(k)?1:0), 0);
       const elemAudio = audioCount >= 3;
 
       const aar = centroActual ? (centroActual.aar === "Sí") : false;
@@ -2240,29 +2235,120 @@
     }
 
     function calcularFormacionesYScreening() {
-      const formKeys = ["wsa", "starkey", "neuroventas", "telecare", "pia", "telehear", "rt"];
+      const formKeys = ["wsa","starkey","neuroventas","telecare","pia","telehear","rt"];
       const totalForm = formKeys.length;
-      const checkedForm = formKeys.reduce((acc, k) => {
+      const checkedForm = formKeys.reduce((acc,k)=>{
         const el = document.querySelector(`input[data-kpi="${k}"]`);
         return acc + (el && el.checked ? 1 : 0);
-      }, 0);
+      },0);
       const formaciones = totalForm ? Math.round(100 * checkedForm / totalForm) : 0;
       const screening = document.querySelector('input[data-kpi="audio_screening"]')?.checked ? 100 : 0;
       return { formaciones, screening };
     }
 
+    /* ==== HELPERS PARA CHECKLIST EXCEL ==== */
+
+    function normalizarBinario(val) {
+      if (val === null || val === undefined) return 0;
+      if (typeof val === "number") return val >= 0.5 ? 1 : 0;
+      const s = String(val).trim().toUpperCase();
+      if (["1","SI","SÍ","X","TRUE","VERDADERO"].includes(s)) return 1;
+      return 0;
+    }
+
+    function normalizarPorcentaje(val) {
+      if (val === null || val === undefined || val === "") return 0;
+      if (typeof val === "number") {
+        if (val <= 1) return Math.round(val * 100);
+        return Math.round(val);
+      }
+      const s = String(val).replace("%","").replace(",",".").trim();
+      if (!s) return 0;
+      const num = parseFloat(s);
+      if (isNaN(num)) return 0;
+      if (num <= 1) return Math.round(num * 100);
+      return Math.round(num);
+    }
+
+    function parseChecklistCorner(rows) {
+      const criterios = [];
+      // B7–B88 (col B = índice 1), F7–F88 (col F = índice 5)
+      for (let excelRow = 7; excelRow <= 88; excelRow++) {
+        const r = rows[excelRow - 1] || [];
+        const nombre = r[1];
+        const val = r[5];
+        if (nombre) {
+          criterios.push({
+            nombre: String(nombre).trim(),
+            valor: normalizarBinario(val)
+          });
+        }
+      }
+      const procesosPct   = normalizarPorcentaje((rows[90 - 1] || [])[5]); // F90
+      const convPruebaPct = normalizarPorcentaje((rows[92 - 1] || [])[1]); // B92
+      const convVentaPct  = normalizarPorcentaje((rows[93 - 1] || [])[1]); // B93
+      const hitPct        = normalizarBinario((rows[63 - 1] || [])[5]) * 100; // F63
+      const criteriosNo   = criterios.filter(c => c.valor === 0).length;
+
+      return {
+        tipo: "CORNER",
+        criterios,
+        procesosPct,
+        convPruebaPct,
+        convVentaPct,
+        hitPct,
+        criteriosNo
+      };
+    }
+
+    function parseChecklistExclusivo(rows) {
+      const criterios = [];
+      // B8–B102 (col B = 1), F8–F102 (col F = 5)
+      for (let excelRow = 8; excelRow <= 102; excelRow++) {
+        const r = rows[excelRow - 1] || [];
+        const nombre = r[1];
+        const val = r[5];
+        if (nombre) {
+          criterios.push({
+            nombre: String(nombre).trim(),
+            valor: normalizarBinario(val)
+          });
+        }
+      }
+      const procesosPct   = normalizarPorcentaje((rows[104 - 1] || [])[5]); // F104
+      const convPruebaPct = normalizarPorcentaje((rows[126 - 1] || [])[8]); // I126
+      const convVentaPct  = normalizarPorcentaje((rows[127 - 1] || [])[8]); // I127
+      const hitPct        = normalizarBinario((rows[65 - 1] || [])[5]) * 100; // F65
+      const criteriosNo   = criterios.filter(c => c.valor === 0).length;
+
+      return {
+        tipo: "EXCLUSIVO",
+        criterios,
+        procesosPct,
+        convPruebaPct,
+        convVentaPct,
+        hitPct,
+        criteriosNo
+      };
+    }
+
+    function aplicarChecklistEnCentro(parsed) {
+      if (!centroActual) return;
+      checklistPorCentro[centroActual.centro] = parsed;
+      crearChartsCentro();
+      actualizarChartsCentro(); // usará ahora los datos del checklist
+    }
+
+    /* ========= CREACIÓN CHARTS CENTRO ========= */
     function crearChartsCentro() {
       if (centroChartsCreated) return;
       centroChartsCreated = true;
-
-      const textColor = getComputedStyle(document.body).getPropertyValue("--text-main");
-      const mutedColor = getComputedStyle(document.body).getPropertyValue("--text-muted");
 
       const radarCtx = document.getElementById("chartCentroRadar").getContext("2d");
       centroCharts.radar = new Chart(radarCtx, {
         type: "radar",
         data: {
-          labels: ["Formaciones", "Screening", "Procesos", "Conv. prueba", "Conv. cierre"],
+          labels: ["Formaciones","Screening","Procesos","Conv. prueba","Conv. cierre"],
           datasets: [{
             label: "Nivel (%)",
             data: [80, 100, 90, 82, 78],
@@ -2278,8 +2364,8 @@
             r: {
               angleLines: { color: "rgba(148,163,184,0.3)" },
               grid: { color: "rgba(148,163,184,0.3)" },
-              pointLabels: { color: textColor, font: { size: 10 } },
-              ticks: { display: false, max: 100, min: 0 }
+              pointLabels: { color: getComputedStyle(document.body).getPropertyValue("--text-main"), font:{size:10} },
+              ticks: { display:false, max:100, min:0 }
             }
           }
         }
@@ -2289,29 +2375,46 @@
       centroCharts.barras = new Chart(barrasCtx, {
         type: "bar",
         data: {
-          labels: ["AAR", "HIT", "1os aux.", "Financiación", "Seguros", "Tchin", "RT", "Elem. audio", "MGM"],
+          labels: ["1","2","3"],
           datasets: [{
             label: "1 = Sí, 0 = No",
-            data: [1, 1, 0, 1, 0, 0, 1, 1, 0],
-            backgroundColor: [
-              "#22c55e", "#3b82f6", "#f97316", "#ef4444",
-              "#22c55e", "#3b82f6", "#f97316", "#ef4444", "#22c55e"
-            ],
+            data: [1,0,1],
+            backgroundColor: "#22c55e",
             borderWidth: 1
           }]
         },
         options: {
-          plugins: { legend: { display: false } },
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            x: {
-              ticks: { color: mutedColor, font: { size: 10 } },
-              grid: { display: false }
+          plugins: {
+            legend: { display:false },
+            tooltip: {
+              callbacks: {
+                label: function(ctx) {
+                  const idx = ctx.dataIndex;
+                  const chart = ctx.chart;
+                  const nombres = chart._criteriosNombres || [];
+                  const nombre = nombres[idx] || `Criterio ${idx+1}`;
+                  const valor = ctx.raw === 1 ? "Aplicado" : "No aplicado";
+                  return `${nombre}: ${valor}`;
+                }
+              }
+            }
+          },
+          responsive:true,
+          maintainAspectRatio:false,
+          scales:{
+            x:{
+              ticks:{
+                color:getComputedStyle(document.body).getPropertyValue("--text-muted"),
+                font:{size:8}
+              },
+              grid:{ display:false }
             },
-            y: {
-              ticks: { color: mutedColor, stepSize: 1, max: 1, min: 0, font: { size: 10 } },
-              grid: { color: "rgba(30,64,175,0.3)" }
+            y:{
+              ticks:{
+                color:getComputedStyle(document.body).getPropertyValue("--text-muted"),
+                stepSize:1, max:1, min:0
+              },
+              grid:{ color:"rgba(30,64,175,0.3)" }
             }
           }
         }
@@ -2321,248 +2424,223 @@
       centroCharts.donut = new Chart(donutCtx, {
         type: "doughnut",
         data: {
-          labels: ["Sí", "No"],
+          labels: ["Aplicados","No aplicados"],
           datasets: [{
-            data: [6, 3],
-            backgroundColor: ["#22c55e", "#ef4444"],
+            data: [6,3],
+            backgroundColor: ["#22c55e","#ef4444"],
             borderWidth: 1
           }]
         },
         options: {
-          plugins: {
-            legend: {
-              position: "bottom",
-              labels: { color: textColor, font: { size: 10 } }
-            }
-          },
-          responsive: true,
-          maintainAspectRatio: false,
-          cutout: "55%"
+          plugins:{ legend:{ position:"bottom", labels:{ color:getComputedStyle(document.body).getPropertyValue("--text-main"), font:{size:10} } } },
+          responsive:true,
+          maintainAspectRatio:false,
+          cutout:"55%"
         }
       });
 
       const procMCtx = document.getElementById("chartCentroProcesosMes").getContext("2d");
       centroCharts.procMes = new Chart(procMCtx, {
-        type: "bar",
-        data: {
-          labels: ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"],
-          datasets: [
+        type:"bar",
+        data:{
+          labels:["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"],
+          datasets:[
             {
-              type: "line",
-              label: "Procesos %",
-              data: [78, 80, 82, 85, 87, 88, 89, 90, 91, 92, 92, 93],
-              borderWidth: 2,
-              tension: .35,
-              borderColor: "#3b82f6",
-              pointRadius: 2,
-              yAxisID: "y"
+              type:"line",
+              label:"Procesos %",
+              data:[78,80,82,85,87,88,89,90,91,92,92,93],
+              borderWidth:2,
+              tension:.35,
+              borderColor:"#3b82f6",
+              pointRadius:2,
+              yAxisID:"y"
             },
             {
-              type: "bar",
-              label: "Áreas de mejora",
-              data: [6, 6, 5, 5, 4, 4, 3, 3, 3, 2, 2, 2],
-              backgroundColor: "rgba(239,68,68,0.5)",
-              yAxisID: "y"
+              type:"bar",
+              label:"Áreas de mejora",
+              data:[6,6,5,5,4,4,3,3,3,2,2,2],
+              backgroundColor:"rgba(239,68,68,0.5)",
+              yAxisID:"y"
             }
           ]
         },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              labels: { color: textColor, font: { size: 10 } }
-            }
-          },
-          scales: {
-            x: {
-              ticks: { color: mutedColor, font: { size: 10 } },
-              grid: { color: "rgba(31,41,55,0.3)" }
-            },
-            y: {
-              ticks: { color: mutedColor, font: { size: 10 } },
-              grid: { color: "rgba(31,41,55,0.3)" }
-            }
+        options:{
+          responsive:true,
+          maintainAspectRatio:false,
+          plugins:{ legend:{ labels:{ color:getComputedStyle(document.body).getPropertyValue("--text-main"), font:{size:10} } } },
+          scales:{
+            x:{ ticks:{ color:getComputedStyle(document.body).getPropertyValue("--text-muted"), font:{size:10} },
+                grid:{ color:"rgba(31,41,55,0.3)" } },
+            y:{ ticks:{ color:getComputedStyle(document.body).getPropertyValue("--text-muted"), font:{size:10} },
+                grid:{ color:"rgba(31,41,55,0.3)" } }
           }
         }
       });
 
       const hitMCtx = document.getElementById("chartCentroHitMes").getContext("2d");
       centroCharts.hitMes = new Chart(hitMCtx, {
-        type: "bar",
-        data: {
-          labels: ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"],
-          datasets: [{
-            label: "HIT %",
-            data: [70, 72, 74, 76, 78, 80, 82, 84, 85, 86, 86, 87],
-            backgroundColor: "#f97316"
+        type:"bar",
+        data:{
+          labels:["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"],
+          datasets:[{
+            label:"HIT",
+            data:[70,72,74,76,78,80,82,84,85,86,86,87],
+            backgroundColor:"#f97316"
           }]
         },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: {
-            x: {
-              ticks: { color: mutedColor, font: { size: 10 } },
-              grid: { display: false }
-            },
-            y: {
-              ticks: { color: mutedColor, font: { size: 10 } },
-              grid: { color: "rgba(31,41,55,0.3)" }
-            }
+        options:{
+          responsive:true,
+          maintainAspectRatio:false,
+          plugins:{ legend:{ display:false } },
+          scales:{
+            x:{ ticks:{ color:getComputedStyle(document.body).getPropertyValue("--text-muted"), font:{size:10} },
+                grid:{ display:false } },
+            y:{ ticks:{ color:getComputedStyle(document.body).getPropertyValue("--text-muted"), font:{size:10} },
+                grid:{ color:"rgba(31,41,55,0.3)" } }
           }
         }
       });
 
       const areasMCtx = document.getElementById("chartCentroAreasMes").getContext("2d");
       centroCharts.areasMes = new Chart(areasMCtx, {
-        type: "bar",
-        data: {
-          labels: ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"],
-          datasets: [{
-            label: "Áreas de mejora",
-            data: [6, 6, 5, 5, 4, 4, 3, 3, 3, 2, 2, 2],
-            backgroundColor: "#ef4444"
+        type:"bar",
+        data:{
+          labels:["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"],
+          datasets:[{
+            label:"Áreas de mejora",
+            data:[6,6,5,5,4,4,3,3,3,2,2,2],
+            backgroundColor:"#ef4444"
           }]
         },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: {
-            x: {
-              ticks: { color: mutedColor, font: { size: 10 } },
-              grid: { display: false }
-            },
-            y: {
-              ticks: { color: mutedColor, font: { size: 10 } },
-              grid: { color: "rgba(31,41,55,0.3)" }
-            }
+        options:{
+          responsive:true,
+          maintainAspectRatio:false,
+          plugins:{ legend:{ display:false } },
+          scales:{
+            x:{ ticks:{ color:getComputedStyle(document.body).getPropertyValue("--text-muted"), font:{size:10} },
+                grid:{ display:false } },
+            y:{ ticks:{ color:getComputedStyle(document.body).getPropertyValue("--text-muted"), font:{size:10} },
+                grid:{ color:"rgba(31,41,55,0.3)" } }
           }
         }
       });
 
       const topAreasCtx = document.getElementById("chartCentroTopAreas").getContext("2d");
       centroCharts.topAreas = new Chart(topAreasCtx, {
-        type: "bar",
-        data: {
-          labels: ["Seguimiento", "Telecare", "Escaparate", "Stock", "Formación", "AAR", "Postventa", "Documentación", "Citas", "Otros"],
-          datasets: [{
-            label: "Nº incidencias",
-            data: [5, 4, 4, 3, 3, 3, 2, 2, 2, 1],
-            backgroundColor: "#3b82f6"
+        type:"bar",
+        data:{
+          labels:["Seguimiento","Telecare","Escaparate","Stock","Formación","AAR","Postventa","Documentación","Citas","Otros"],
+          datasets:[{
+            label:"Nº incidencias",
+            data:[5,4,4,3,3,3,2,2,2,1],
+            backgroundColor:"#3b82f6"
           }]
         },
-        options: {
-          indexAxis: "y",
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: {
-            x: {
-              ticks: { color: mutedColor, font: { size: 10 } },
-              grid: { color: "rgba(31,41,55,0.3)" }
-            },
-            y: {
-              ticks: { color: mutedColor, font: { size: 10 } },
-              grid: { display: false }
-            }
+        options:{
+          indexAxis:"y",
+          responsive:true,
+          maintainAspectRatio:false,
+          plugins:{ legend:{ display:false } },
+          scales:{
+            x:{ ticks:{ color:getComputedStyle(document.body).getPropertyValue("--text-muted"), font:{size:10} },
+                grid:{ color:"rgba(31,41,55,0.3)" } },
+            y:{ ticks:{ color:getComputedStyle(document.body).getPropertyValue("--text-muted"), font:{size:10} },
+                grid:{ display:false } }
           }
         }
       });
 
       const procResCtx = document.getElementById("chartCentroProcesosResumen").getContext("2d");
       centroCharts.procResumen = new Chart(procResCtx, {
-        type: "doughnut",
-        data: {
-          labels: ["Aplicados", "Pendiente"],
-          datasets: [{
-            data: [90, 10],
-            backgroundColor: ["#22c55e", "#6b7280"],
-            borderWidth: 1
+        type:"doughnut",
+        data:{
+          labels:["Aplicados","Pendiente"],
+          datasets:[{
+            data:[90,10],
+            backgroundColor:["#22c55e","#6b7280"],
+            borderWidth:1
           }]
         },
-        options: {
-          plugins: {
-            legend: {
-              position: "bottom",
-              labels: { color: textColor, font: { size: 10 } }
-            }
-          },
-          responsive: true,
-          maintainAspectRatio: false,
-          cutout: "55%"
+        options:{
+          plugins:{ legend:{ position:"bottom", labels:{ color:getComputedStyle(document.body).getPropertyValue("--text-main"), font:{size:10} } } },
+          responsive:true,
+          maintainAspectRatio:false,
+          cutout:"55%"
         }
       });
 
       const areasResCtx = document.getElementById("chartCentroAreasResumen").getContext("2d");
       centroCharts.areasResumen = new Chart(areasResCtx, {
-        type: "bar",
-        data: {
-          labels: ["Áreas mejora", "Correcto"],
-          datasets: [{
-            data: [4, 10],
-            backgroundColor: ["#ef4444", "#22c55e"]
+        type:"bar",
+        data:{
+          labels:["Áreas mejora","Correcto"],
+          datasets:[{
+            data:[4,10],
+            backgroundColor:["#ef4444","#22c55e"]
           }]
         },
-        options: {
-          plugins: { legend: { display: false } },
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            x: {
-              ticks: { color: mutedColor, font: { size: 10 } },
-              grid: { display: false }
-            },
-            y: {
-              ticks: { color: mutedColor, font: { size: 10 } },
-              grid: { color: "rgba(31,41,55,0.3)" }
-            }
+        options:{
+          plugins:{ legend:{ display:false } },
+          responsive:true,
+          maintainAspectRatio:false,
+          scales:{
+            x:{ ticks:{ color:getComputedStyle(document.body).getPropertyValue("--text-muted"), font:{size:10} },
+                grid:{ display:false } },
+            y:{ ticks:{ color:getComputedStyle(document.body).getPropertyValue("--text-muted"), font:{size:10} },
+                grid:{ color:"rgba(31,41,55,0.3)" } }
           }
         }
       });
 
       const convResCtx = document.getElementById("chartCentroConversionResumen").getContext("2d");
       centroCharts.convResumen = new Chart(convResCtx, {
-        type: "bar",
-        data: {
-          labels: ["Prueba", "Venta"],
-          datasets: [{
-            data: [82, 78],
-            backgroundColor: ["#38bdf8", "#22c55e"]
+        type:"bar",
+        data:{
+          labels:["Prueba","Venta"],
+          datasets:[{
+            data:[82,78],
+            backgroundColor:["#38bdf8","#22c55e"]
           }]
         },
-        options: {
-          plugins: { legend: { display: false } },
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            x: {
-              ticks: { color: mutedColor, font: { size: 10 } },
-              grid: { display: false }
-            },
-            y: {
-              ticks: { color: mutedColor, font: { size: 10 } },
-              grid: { color: "rgba(31,41,55,0.3)" }, max: 100, min: 0
-            }
+        options:{
+          plugins:{ legend:{ display:false } },
+          responsive:true,
+          maintainAspectRatio:false,
+          scales:{
+            x:{ ticks:{ color:getComputedStyle(document.body).getPropertyValue("--text-muted"), font:{size:10} },
+                grid:{ display:false } },
+            y:{ ticks:{ color:getComputedStyle(document.body).getPropertyValue("--text-muted"), font:{size:10} },
+                grid:{ color:"rgba(31,41,55,0.3)" }, max:100, min:0 }
           }
         }
       });
     }
 
     function actualizarChartsCentro() {
-      if (!centroChartsCreated) return;
+      if (!centroChartsCreated || !centroActual) return;
 
       const { formaciones, screening } = calcularFormacionesYScreening();
       const flags = getChecklistFlags();
-      const check = centroActual ? checklistPorCentro[centroActual.centro] : null;
+      const dataChecklist = checklistPorCentro[centroActual.centro];
 
-      let procesos = check ? check.procesosPct : 90;
-      let convPrueba = check ? check.convPruebaPct : 82;
-      let convVenta = check ? check.convVentaPct : 78;
-      let hitVal = check ? check.hitPct : (flags.hit ? 90 : 70);
-      const areasMejora = check ? Math.max(0, Math.round((100 - procesos) / 5)) : 4;
+      let procesos, convPrueba, convVenta, hitVal, areasMejora, criteriosTotales;
+
+      if (dataChecklist) {
+        procesos       = dataChecklist.procesosPct || 0;
+        convPrueba     = dataChecklist.convPruebaPct || 0;
+        convVenta      = dataChecklist.convVentaPct || 0;
+        hitVal         = dataChecklist.hitPct || 0;
+        areasMejora    = dataChecklist.criteriosNo || 0;
+        criteriosTotales = dataChecklist.criterios ? dataChecklist.criterios.length : 0;
+      } else {
+        // fallback demo si no hay checklist cargado
+        procesos       = 90;
+        convPrueba     = 82;
+        convVenta      = 78;
+        hitVal         = flags.hit ? 90 : 70;
+        areasMejora    = 4;
+        criteriosTotales = 10;
+      }
 
       centroMetricsActual = {
         procesos,
@@ -2574,11 +2652,13 @@
         areasMejora
       };
 
+      // KPIs de cabecera del centro
       $("#kpiCentroProcesos").textContent = procesos + "%";
-      $("#kpiCentroPrueba").textContent = convPrueba + "%";
-      $("#kpiCentroVenta").textContent = convVenta + "%";
-      $("#kpiCentroHit").textContent = hitVal + "%";
+      $("#kpiCentroPrueba").textContent   = convPrueba + "%";
+      $("#kpiCentroVenta").textContent    = convVenta + "%";
+      $("#kpiCentroHit").textContent      = hitVal + "%";
 
+      // Radar
       centroCharts.radar.data.datasets[0].data = [
         formaciones,
         screening,
@@ -2588,29 +2668,45 @@
       ];
       centroCharts.radar.update();
 
-      const valsBarras = [
-        flags.aar,
-        (check ? check.hitPct >= 50 : flags.hit),
-        flags.primeros,
-        flags.infinity,
-        flags.seguros,
-        flags.tchin,
-        flags.rt,
-        flags.elemAudio,
-        flags.mgm
-      ].map(v => v ? 1 : 0);
-      centroCharts.barras.data.datasets[0].data = valsBarras;
-      centroCharts.barras.update();
+      // Barras y donut de criterios (82 criterios)
+      if (dataChecklist && dataChecklist.criterios && dataChecklist.criterios.length) {
+        const labels = dataChecklist.criterios.map((c, i) => String(i+1));
+        const valores = dataChecklist.criterios.map(c => c.valor);
 
-      const siCount = valsBarras.filter(v => v === 1).length;
-      const noCount = valsBarras.length - siCount;
-      centroCharts.donut.data.datasets[0].data = [siCount, noCount];
-      centroCharts.donut.update();
+        centroCharts.barras.data.labels = labels;
+        centroCharts.barras.data.datasets[0].data = valores;
+        centroCharts.barras._criteriosNombres = dataChecklist.criterios.map(c => c.nombre);
+        centroCharts.barras.update();
 
-      centroCharts.procResumen.data.datasets[0].data = [procesos, 100 - procesos];
+        const si = valores.filter(v => v === 1).length;
+        const no = valores.length - si;
+        centroCharts.donut.data.datasets[0].data = [si, no];
+        centroCharts.donut.update();
+      } else {
+        // fallback simple si no hay checklist
+        const valores = [
+          flags.aar, flags.hit, flags.primeros, flags.infinity, flags.seguros,
+          flags.tchin, flags.rt, flags.elemAudio, flags.mgm
+        ].map(b => b ? 1 : 0);
+        centroCharts.barras.data.labels = ["AAR","HIT","1os aux.","Infinity","Seguros","Tchin","RT","Elem. audio","MGM"];
+        centroCharts.barras.data.datasets[0].data = valores;
+        centroCharts.barras._criteriosNombres = centroCharts.barras.data.labels.slice();
+        centroCharts.barras.update();
+
+        const si = valores.filter(v => v === 1).length;
+        const no = valores.length - si;
+        centroCharts.donut.data.datasets[0].data = [si, no];
+        centroCharts.donut.update();
+      }
+
+      // Resúmenes
+      centroCharts.procResumen.data.datasets[0].data = [procesos, Math.max(0, 100 - procesos)];
       centroCharts.procResumen.update();
 
-      centroCharts.areasResumen.data.datasets[0].data = [areasMejora, 10 - areasMejora];
+      centroCharts.areasResumen.data.datasets[0].data = [
+        areasMejora,
+        Math.max(0, (criteriosTotales || 10) - areasMejora)
+      ];
       centroCharts.areasResumen.update();
 
       centroCharts.convResumen.data.datasets[0].data = [convPrueba, convVenta];
@@ -2642,7 +2738,7 @@
       $("#infDelegado").value = c.delegado;
       $("#infTipo").value = tipoCentro(c.centro);
       $("#infRespAudio").value = "Ariannys Rojas / Sonia Guasque";
-      $("#infFecha").value = fechaIso ? formatDateHuman(fechaIso) : formatDateHuman(new Date().toISOString().slice(0, 10));
+      $("#infFecha").value = fechaIso ? formatDateHuman(fechaIso) : formatDateHuman(new Date().toISOString().slice(0,10));
 
       crearChartsCentro();
       actualizarChartsCentro();
@@ -2665,17 +2761,53 @@
       }
     });
 
-    $("#btnAdjuntarChecklist").addEventListener("click", () => $("#inputChecklist").click());
+    /* ====== ADJUNTAR CHECKLIST EXCEL (CORNER / EXCLUSIVO) ====== */
+    $("#btnAdjuntarChecklist").addEventListener("click", ()=> $("#inputChecklist").click());
+
     $("#inputChecklist").addEventListener("change", e => {
       const file = e.target.files[0];
-      if (file) {
-        $("#nombreChecklist").textContent = file.name;
-        procesarChecklistFile(file);
-      } else {
-        $("#nombreChecklist").textContent = "";
+      const labelEl = $("#nombreChecklist");
+      if (!file) {
+        labelEl.textContent = "";
+        return;
       }
+      labelEl.textContent = file.name;
+
+      if (!centroActual) {
+        alert("Primero selecciona un centro o visita para asociar el checklist.");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = evt => {
+        try {
+          const data = new Uint8Array(evt.target.result);
+          const workbook = XLSX.read(data, { type: "array" });
+          const sheet = workbook.Sheets[workbook.SheetNames[0]];
+          const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+          const upperName = file.name.toUpperCase();
+          let parsed;
+          if (upperName.includes("EXCLUSIVO")) {
+            parsed = parseChecklistExclusivo(rows);
+          } else if (upperName.includes("CORNER")) {
+            parsed = parseChecklistCorner(rows);
+          } else {
+            // Si el nombre no indica, intentamos por defecto CORNER
+            parsed = parseChecklistCorner(rows);
+          }
+
+          aplicarChecklistEnCentro(parsed);
+          alert(`Checklist (${parsed.tipo}) cargado para el centro ${centroActual.centro}.`);
+        } catch (err) {
+          console.error(err);
+          alert("No se ha podido leer el checklist. Revisa que el archivo tenga el formato esperado.");
+        }
+      };
+      reader.readAsArrayBuffer(file);
     });
 
+    /* ====== IMÁGENES INFORME ====== */
     $$(".imagen-preview").forEach(div => {
       div.addEventListener("click", () => {
         const target = div.dataset.target;
@@ -2700,20 +2832,21 @@
     });
 
     $("#btnGuardarInforme").addEventListener("click", () => {
+      crearChartsCentro();
       actualizarChartsCentro();
 
       if (centroMetricsActual && centroActual) {
         const flags = getChecklistFlags();
-        dashboardAcum.procesos += centroMetricsActual.procesos;
+        dashboardAcum.procesos   += centroMetricsActual.procesos;
         dashboardAcum.convPrueba += centroMetricsActual.convPrueba;
-        dashboardAcum.convVenta += centroMetricsActual.convVenta;
-        dashboardAcum.hit += centroMetricsActual.hit;
-        dashboardAcum.formaciones += centroMetricsActual.formaciones;
-        dashboardAcum.ayuda += flags.ayuda ? 1 : 0;
-        dashboardAcum.aar += flags.aar ? 1 : 0;
-        dashboardAcum.primeros += flags.primeros ? 1 : 0;
-        dashboardAcum.areas += centroMetricsActual.areasMejora || 0;
-        dashboardAcum.n += 1;
+        dashboardAcum.convVenta  += centroMetricsActual.convVenta;
+        dashboardAcum.hit        += centroMetricsActual.hit;
+        dashboardAcum.formaciones+= centroMetricsActual.formaciones;
+        dashboardAcum.ayuda      += flags.ayuda ? 1 : 0;
+        dashboardAcum.aar        += flags.aar ? 1 : 0;
+        dashboardAcum.primeros   += flags.primeros ? 1 : 0;
+        dashboardAcum.areas      += centroMetricsActual.areasMejora || 0;
+        dashboardAcum.n         += 1;
         actualizarDashboardDesdeAcum();
 
         informesPorCentro[centroActual.centro] = (informesPorCentro[centroActual.centro] || 0) + 1;
@@ -2726,272 +2859,35 @@
         visitaActual = null;
       }
 
-      alert("Informe guardado (demo). Se han actualizado los KPIs del dashboard.");
+      alert("Informe guardado. KPIs del dashboard actualizados con datos reales del checklist (si existe).");
     });
 
-    /* ========= CHECKLIST: LECTURA Y AGREGADOS ========= */
-
-    function procesarChecklistFile(file) {
-      if (!centroActual) {
-        alert("Selecciona un centro antes de adjuntar el checklist.");
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.onload = evt => {
-        try {
-          const data = new Uint8Array(evt.target.result);
-          const wb = XLSX.read(data, { type: "array" });
-          const sheetName = wb.SheetNames[0];
-          const sheet = wb.Sheets[sheetName];
-
-          const get = (row, col) => {
-            const cell = sheet[XLSX.utils.encode_cell({ r: row - 1, c: col - 1 })];
-            return cell ? cell.v : null;
-          };
-
-          const nombreCentro = centroActual.centro;
-          const tipoNominal = tipoCentro(nombreCentro);
-          const upperName = file.name.toUpperCase();
-          let tipoChecklist = tipoNominal;
-          if (upperName.includes("CORNER")) tipoChecklist = "Corner";
-          if (upperName.includes("EXCLUSIVO")) tipoChecklist = "Exclusivo";
-
-          let rStart, rEnd, rowProcPct, rowHit, rowConvPrueba, rowConvVenta,
-            colProcPct = 6, colHit = 6, colConvPrueba, colConvVenta;
-
-          if (tipoChecklist === "Exclusivo") {
-            // B8–B102 criterios, F8–F102 resultados, % procesos F104, HIT F65,
-            // conv prueba I126, conv venta I127
-            rStart = 8; rEnd = 102;
-            rowProcPct = 104;
-            rowHit = 65;
-            rowConvPrueba = 126;
-            rowConvVenta = 127;
-            colConvPrueba = 9;
-            colConvVenta = 9;
-          } else {
-            // Corner: B7–B88 criterios, F7–F88 resultados, % procesos F90, HIT F63,
-            // conv prueba B92, conv venta B93
-            rStart = 7; rEnd = 88;
-            rowProcPct = 90;
-            rowHit = 63;
-            rowConvPrueba = 92;
-            rowConvVenta = 93;
-            colConvPrueba = 2;
-            colConvVenta = 2;
-          }
-
-          const criterios = {};
-          for (let r = rStart; r <= rEnd; r++) {
-            const crit = get(r, 2);
-            if (!crit) continue;
-            const val = get(r, 6);
-            if (val === null || val === undefined || val === "") continue;
-            let aplica = null;
-            if (typeof val === "number") aplica = val >= 0.5 ? 1 : 0;
-            else if (typeof val === "string") {
-              const s = val.trim().toUpperCase();
-              if (["SI", "SÍ", "X", "1"].includes(s)) aplica = 1;
-              if (["NO", "0"].includes(s)) aplica = 0;
-            }
-            if (aplica !== null) criterios[crit] = aplica;
-          }
-
-          const normalizarPct = v => {
-            if (v === null || v === undefined || v === "") return 0;
-            if (typeof v === "string") {
-              v = v.replace("%", "").replace(",", ".");
-              v = parseFloat(v);
-            }
-            if (!isFinite(v)) return 0;
-            if (v <= 1) v = v * 100;
-            if (v < 0) v = 0;
-            if (v > 100) v = 100;
-            return Math.round(v);
-          };
-
-          let procesosPct = normalizarPct(get(rowProcPct, colProcPct));
-          if (!procesosPct) {
-            let sum = 0, n = 0;
-            Object.values(criterios).forEach(val => { sum += val ? 1 : 0; n++; });
-            procesosPct = n ? Math.round(100 * sum / n) : 0;
-          }
-
-          const convPruebaPct = normalizarPct(get(rowConvPrueba, colConvPrueba));
-          const convVentaPct = normalizarPct(get(rowConvVenta, colConvVenta));
-
-          const hitRaw = get(rowHit, colHit);
-          let hitFlag = false;
-          if (typeof hitRaw === "number") hitFlag = hitRaw >= 0.5;
-          else if (typeof hitRaw === "string") {
-            const s = hitRaw.trim().toUpperCase();
-            if (["SI", "SÍ", "X", "1"].includes(s)) hitFlag = true;
-          }
-          const hitPct = hitFlag ? 100 : 0;
-
-          const check = {
-            centro: nombreCentro,
-            tipo: tipoChecklist,
-            procesosPct,
-            convPruebaPct,
-            convVentaPct,
-            hitPct,
-            criterios
-          };
-          checklistPorCentro[nombreCentro] = check;
-
-          crearChartsCentro();
-          actualizarChartsCentro();
-          recalcularCriteriosGlobales();
-        } catch (err) {
-          console.error(err);
-          alert("No se ha podido leer el checklist. Revisa que el archivo corresponda al modelo establecido.");
-        }
-      };
-      reader.readAsArrayBuffer(file);
-    }
-
-    function acortarNombreCriterio(nombre) {
-      if (!nombre) return "";
-      let s = nombre.toString().trim();
-      s = s
-        .replace(/^Realiza\s+/i, "")
-        .replace(/^Explicar\s+/i, "")
-        .replace(/^Explica\s+/i, "")
-        .replace(/^Utiliza\s+/i, "")
-        .replace(/^Registrar\s+/i, "")
-        .replace(/^Hacer\s+/i, "");
-      if (s.length > 60) s = s.slice(0, 57) + "…";
-      return s;
-    }
-
-    function recalcularCriteriosGlobales() {
-      const criterios = {};
-      const checks = Object.values(checklistPorCentro);
-      checks.forEach(ch => {
-        if (!ch || !ch.criterios) return;
-        Object.entries(ch.criterios).forEach(([nombre, val]) => {
-          if (!criterios[nombre]) criterios[nombre] = { aplica: 0, total: 0 };
-          criterios[nombre].total += 1;
-          criterios[nombre].aplica += val ? 1 : 0;
-        });
-      });
-      criteriosGlobalCache = Object.entries(criterios).map(([nombre, obj]) => {
-        const pct = obj.total ? Math.round(100 * obj.aplica / obj.total) : 0;
-        return { nombre, pct };
-      });
-
-      actualizarTopAreasChart();
-      renderCriteriosGlobalList();
-    }
-
-    function actualizarTopAreasChart() {
-      if (!globalCharts.topAreas) return;
-      if (!criteriosGlobalCache.length) {
-        globalCharts.topAreas.data.labels = ["(sin datos)"];
-        globalCharts.topAreas.data.datasets[0].data = [0];
-        globalCharts.topAreas.update();
-        return;
-      }
-      const sorted = criteriosGlobalCache.slice().sort((a, b) => a.pct - b.pct);
-      const top10 = sorted.slice(0, 10);
-      globalCharts.topAreas.data.labels = top10.map(c => acortarNombreCriterio(c.nombre));
-      globalCharts.topAreas.data.datasets[0].data = top10.map(c => c.pct);
-      globalCharts.topAreas.update();
-    }
-
-    function crearCardCriteriosDashboard() {
-      const dash = document.querySelector(".dashboard-charts");
-      if (!dash) return;
-      // evitar duplicados
-      if (document.getElementById("criteriosGlobalList")) return;
-
-      const card = document.createElement("article");
-      card.className = "card";
-      card.innerHTML = `
-        <div class="card-header-row">
-          <span class="card-title">Detalle criterios checklist</span>
-        </div>
-        <div class="ranking-list" id="criteriosGlobalList">
-          <div class="card-sub">Adjunta checklist a algún centro para ver el detalle global de aplicación.</div>
-        </div>
-      `;
-      dash.appendChild(card);
-    }
-
-    function renderCriteriosGlobalList() {
-      const cont = document.getElementById("criteriosGlobalList");
-      if (!cont) return;
-      cont.innerHTML = "";
-      if (!criteriosGlobalCache.length) {
-        const p = document.createElement("div");
-        p.className = "card-sub";
-        p.textContent = "Adjunta checklist a algún centro para ver el detalle global de aplicación.";
-        cont.appendChild(p);
-        return;
-      }
-      const sorted = criteriosGlobalCache.slice().sort((a, b) => a.nombre.localeCompare(b.nombre));
-      sorted.forEach(c => {
-        const row = document.createElement("div");
-        row.className = "ranking-row";
-        row.innerHTML = `
-          <div class="ranking-main">
-            <span>${acortarNombreCriterio(c.nombre)}</span>
-          </div>
-          <div style="flex:1;display:flex;align-items:center;gap:4px;margin-left:6px;">
-            <div class="ranking-bar"><span style="width:${c.pct}%;"></span></div>
-            <span style="font-size:.72rem;">${c.pct}%</span>
-          </div>
-        `;
-        cont.appendChild(row);
-      });
-    }
-
-    function actualizarCoberturaVisitas() {
-      if (!globalCharts.cobVisitas) return;
-      const totalCentros = centros.length || 1;
-      const counts = new Array(12).fill(0);
-      visitas.forEach(v => {
-        if (v.estado !== "finalizada") return;
-        const dt = new Date(v.fecha);
-        if (isNaN(dt)) return;
-        const m = dt.getMonth();
-        counts[m] += 1;
-      });
-      const pct = counts.map(c => Math.round(100 * c / totalCentros));
-      globalCharts.cobVisitas.data.datasets[0].data = pct;
-      globalCharts.cobVisitas.update();
-    }
-
     /* ========= DASHBOARD CHARTS ========= */
+    const globalCharts = {};
 
     function initDashboardCharts() {
-      const textColor = getComputedStyle(document.body).getPropertyValue("--text-main");
-      const mutedColor = getComputedStyle(document.body).getPropertyValue("--text-muted");
-
       const radarCtx = document.getElementById("chartRadarGeneral").getContext("2d");
       globalCharts.radarGeneral = new Chart(radarCtx, {
-        type: "radar",
-        data: {
-          labels: ["Procesos", "Conv. prueba", "Conv. venta", "HIT"],
-          datasets: [{
-            label: "Promedio %",
-            data: [85, 80, 78, 82],
-            backgroundColor: "rgba(96,165,250,0.2)",
-            borderColor: "#60a5fa",
-            borderWidth: 2,
-            pointBackgroundColor: "#60a5fa"
+        type:"radar",
+        data:{
+          labels:["Procesos","Conv. prueba","Conv. venta","HIT"],
+          datasets:[{
+            label:"Promedio %",
+            data:[85,80,78,82],
+            backgroundColor:"rgba(96,165,250,0.2)",
+            borderColor:"#60a5fa",
+            borderWidth:2,
+            pointBackgroundColor:"#60a5fa"
           }]
         },
-        options: {
-          plugins: { legend: { display: false } },
-          scales: {
-            r: {
-              angleLines: { color: "rgba(148,163,184,0.3)" },
-              grid: { color: "rgba(148,163,184,0.3)" },
-              pointLabels: { color: textColor, font: { size: 10 } },
-              ticks: { display: false, min: 0, max: 100 }
+        options:{
+          plugins:{ legend:{ display:false } },
+          scales:{
+            r:{
+              angleLines:{ color:"rgba(148,163,184,0.3)" },
+              grid:{ color:"rgba(148,163,184,0.3)" },
+              pointLabels:{ color:getComputedStyle(document.body).getPropertyValue("--text-main"), font:{size:10} },
+              ticks:{ display:false, min:0, max:100 }
             }
           }
         }
@@ -2999,199 +2895,149 @@
 
       const procCtx = document.getElementById("chartProcesosMes").getContext("2d");
       globalCharts.procMes = new Chart(procCtx, {
-        type: "bar",
-        data: {
-          labels: ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"],
-          datasets: [
+        type:"bar",
+        data:{
+          labels:["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"],
+          datasets:[
             {
-              type: "line",
-              label: "Procesos %",
-              data: [80, 82, 83, 84, 85, 86, 87, 88, 88, 89, 89, 90],
-              borderColor: "#38bdf8",
-              backgroundColor: "rgba(56,189,248,0.2)",
-              tension: .35,
-              borderWidth: 2,
-              pointRadius: 2,
-              yAxisID: "y"
+              type:"line",
+              label:"Procesos %",
+              data:[80,82,83,84,85,86,87,88,88,89,89,90],
+              borderColor:"#38bdf8",
+              backgroundColor:"rgba(56,189,248,0.2)",
+              tension:.35,
+              borderWidth:2,
+              pointRadius:2,
+              yAxisID:"y"
             },
             {
-              type: "bar",
-              label: "Áreas de mejora (nº)",
-              data: [7, 7, 6, 6, 5, 5, 4, 4, 3, 3, 3, 2],
-              backgroundColor: "rgba(239,68,68,0.5)",
-              yAxisID: "y"
+              type:"bar",
+              label:"Áreas de mejora",
+              data:[7,7,6,6,5,5,4,4,3,3,3,2],
+              backgroundColor:"rgba(239,68,68,0.5)",
+              yAxisID:"y"
             }
           ]
         },
-        options: {
-          plugins: {
-            legend: {
-              labels: { color: textColor, font: { size: 10 } }
-            }
-          },
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            x: {
-              ticks: { color: mutedColor, font: { size: 10 } },
-              grid: { color: "rgba(31,41,55,0.3)" }
-            },
-            y: {
-              ticks: { color: mutedColor, font: { size: 10 } },
-              grid: { color: "rgba(31,41,55,0.3)" }
-            }
+        options:{
+          plugins:{ legend:{ labels:{ color:getComputedStyle(document.body).getPropertyValue("--text-main"), font:{size:10} } } },
+          responsive:true,
+          maintainAspectRatio:false,
+          scales:{
+            x:{ ticks:{ color:getComputedStyle(document.body).getPropertyValue("--text-muted"), font:{size:10} },
+                grid:{ color:"rgba(31,41,55,0.3)" } },
+            y:{ ticks:{ color:getComputedStyle(document.body).getPropertyValue("--text-muted"), font:{size:10} },
+                grid:{ color:"rgba(31,41,55,0.3)" } }
           }
         }
       });
 
-      // REUTILIZAMOS chartAreasMes COMO "Cobertura visitas (%)"
       const areasCtx = document.getElementById("chartAreasMes").getContext("2d");
-      globalCharts.cobVisitas = new Chart(areasCtx, {
-        type: "bar",
-        data: {
-          labels: ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"],
-          datasets: [{
-            label: "Cobertura visitas %",
-            data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            backgroundColor: "#22c55e"
+      globalCharts.areasMes = new Chart(areasCtx, {
+        type:"bar",
+        data:{
+          labels:["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"],
+          datasets:[{
+            label:"Áreas de mejora",
+            data:[7,7,6,6,5,5,4,4,3,3,3,2],
+            backgroundColor:"#ef4444"
           }]
         },
-        options: {
-          plugins: { legend: { display: false } },
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            x: {
-              ticks: { color: mutedColor, font: { size: 10 } },
-              grid: { display: false }
-            },
-            y: {
-              ticks: {
-                color: mutedColor,
-                font: { size: 10 },
-                callback: v => v + "%"
-              },
-              grid: { color: "rgba(31,41,55,0.3)" },
-              max: 100,
-              min: 0
-            }
+        options:{
+          plugins:{ legend:{ display:false } },
+          responsive:true,
+          maintainAspectRatio:false,
+          scales:{
+            x:{ ticks:{ color:getComputedStyle(document.body).getPropertyValue("--text-muted"), font:{size:10} },
+                grid:{ display:false } },
+            y:{ ticks:{ color:getComputedStyle(document.body).getPropertyValue("--text-muted"), font:{size:10} },
+                grid:{ color:"rgba(31,41,55,0.3)" } }
           }
         }
       });
-      // Cambiar título de la tarjeta en DOM
-      const cardAreasTitle = document.getElementById("chartAreasMes")?.closest(".card")?.querySelector(".card-title");
-      if (cardAreasTitle) cardAreasTitle.textContent = "Cobertura visitas (%)";
 
       const primerosCtx = document.getElementById("chartPrimerosMes").getContext("2d");
       globalCharts.primerosMes = new Chart(primerosCtx, {
-        type: "bar",
-        data: {
-          labels: ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"],
-          datasets: [{
-            label: "1os auxilios %",
-            data: [40, 45, 50, 55, 60, 65, 70, 72, 74, 76, 78, 80],
-            backgroundColor: "#22c55e"
+        type:"bar",
+        data:{
+          labels:["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"],
+          datasets:[{
+            label:"1os auxilios %",
+            data:[40,45,50,55,60,65,70,72,74,76,78,80],
+            backgroundColor:"#22c55e"
           }]
         },
-        options: {
-          plugins: { legend: { display: false } },
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            x: {
-              ticks: { color: mutedColor, font: { size: 10 } },
-              grid: { display: false }
-            },
-            y: {
-              ticks: {
-                color: mutedColor,
-                font: { size: 10 },
-                callback: v => v + "%"
-              },
-              grid: { color: "rgba(31,41,55,0.3)" },
-              max: 100,
-              min: 0
-            }
+        options:{
+          plugins:{ legend:{ display:false } },
+          responsive:true,
+          maintainAspectRatio:false,
+          scales:{
+            x:{ ticks:{ color:getComputedStyle(document.body).getPropertyValue("--text-muted"), font:{size:10} },
+                grid:{ display:false } },
+            y:{ ticks:{ color:getComputedStyle(document.body).getPropertyValue("--text-muted"), font:{size:10} },
+                grid:{ color:"rgba(31,41,55,0.3)" }, max:100, min:0 }
           }
         }
       });
 
       const topCtx = document.getElementById("chartTopAreas").getContext("2d");
       globalCharts.topAreas = new Chart(topCtx, {
-        type: "bar",
-        data: {
-          labels: ["(sin datos)"],
-          datasets: [{
-            label: "Aplicación media %",
-            data: [0],
-            backgroundColor: "#3b82f6"
+        type:"bar",
+        data:{
+          labels:["Seguimiento","Telecare","Escaparate","Stock","Formación","AAR","Postventa","Documentación","Citas","Otros"],
+          datasets:[{
+            label:"Nº incidencias",
+            data:[12,10,9,8,7,6,5,4,4,3],
+            backgroundColor:"#3b82f6"
           }]
         },
-        options: {
-          indexAxis: "y",
-          plugins: { legend: { display: false } },
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            x: {
-              ticks: {
-                color: mutedColor,
-                font: { size: 10 },
-                callback: v => v + "%"
-              },
-              grid: { color: "rgba(31,41,55,0.3)" },
-              max: 100,
-              min: 0
-            },
-            y: {
-              ticks: { color: mutedColor, font: { size: 10 } },
-              grid: { display: false }
-            }
+        options:{
+          indexAxis:"y",
+          plugins:{ legend:{ display:false } },
+          responsive:true,
+          maintainAspectRatio:false,
+          scales:{
+            x:{ ticks:{ color:getComputedStyle(document.body).getPropertyValue("--text-muted"), font:{size:10} },
+                grid:{ color:"rgba(31,41,55,0.3)" } },
+            y:{ ticks:{ color:getComputedStyle(document.body).getPropertyValue("--text-muted"), font:{size:10} },
+                grid:{ display:false } }
           }
         }
       });
 
       const aarHitCtx = document.getElementById("chartAarHitDonut").getContext("2d");
       globalCharts.aarHit = new Chart(aarHitCtx, {
-        type: "doughnut",
-        data: {
-          labels: ["Centros con AAR", "Centros sin AAR"],
-          datasets: [{
-            data: [30, 20],
-            backgroundColor: ["#22c55e", "#ef4444"],
-            borderWidth: 1
+        type:"doughnut",
+        data:{
+          labels:["Centros con AAR","Centros sin AAR"],
+          datasets:[{
+            data:[30,20],
+            backgroundColor:["#22c55e","#ef4444"],
+            borderWidth:1
           }]
         },
-        options: {
-          plugins: {
-            legend: {
-              position: "bottom",
-              labels: { color: textColor, font: { size: 10 } }
-            }
-          },
-          responsive: true,
-          maintainAspectRatio: false,
-          cutout: "55%"
+        options:{
+          plugins:{ legend:{ position:"bottom", labels:{ color:getComputedStyle(document.body).getPropertyValue("--text-main"), font:{size:10} } } },
+          responsive:true,
+          maintainAspectRatio:false,
+          cutout:"55%"
         }
       });
-
-      // Tarjeta de detalle criterios checklist
-      crearCardCriteriosDashboard();
     }
 
     /* ========= DEMO CENTROS ========= */
     function cargarCentrosDemo() {
       const demo = [
-        { codigo: "4ABB", propietario: "MAZA Oriol", centro: "PAMPLONA C. Exclusivo", provincia: "NAVARRA", delegado: "Sonia Godino" },
-        { codigo: "4AFH", propietario: "MAZA Oriol", centro: "PAMPLONA Calle Sancho el Mayor", provincia: "NAVARRA", delegado: "Sonia Godino" },
-        { codigo: "4AWQ", propietario: "MAZA Oriol", centro: "PAMPLONA Carlos III", provincia: "NAVARRA", delegado: "Sonia Godino" },
-        { codigo: "4MRM", propietario: "AAO", centro: "REINA DE MERCEDES", provincia: "Madrid", delegado: "Sergio Perán" },
-        { codigo: "4PEC", propietario: "AAO", centro: "SANTANDER CC PEÑACASTILLO", provincia: "Santander", delegado: "Sergio Perán" },
-        { codigo: "4AXF", propietario: "URRUTIA Esteban", centro: "SANTIAGO DE COMPOSTELA RUA DA ROSA", provincia: "A Coruña", delegado: "Daniel Chazo" },
-        { codigo: "4TOL", propietario: "AAO", centro: "TORRELAVEGA CARREFOUR CC", provincia: "Santander", delegado: "Sergio Perán" },
-        { codigo: "4ZDE", propietario: "AAO", centro: "ZARAGOZA CALLE DELICIAS", provincia: "ZARAGOZA", delegado: "ENERITZ ARANGUREN" },
-        { codigo: "4AKI", propietario: "PIEDRAFITA Rocio", centro: "CC LOS VALLES", provincia: "MADRID", delegado: "Blanca Fdez. de la Pradilla" },
-        { codigo: "4MLG", propietario: "AAO", centro: "FUENLABRADA Calle Leganes", provincia: "MADRID", delegado: "Marisa Carmona" }
+        { codigo:"4ABB", propietario:"MAZA Oriol", centro:"PAMPLONA C. Exclusivo", provincia:"NAVARRA", delegado:"Sonia Godino" },
+        { codigo:"4AFH", propietario:"MAZA Oriol", centro:"PAMPLONA Calle Sancho el Mayor", provincia:"NAVARRA", delegado:"Sonia Godino" },
+        { codigo:"4AWQ", propietario:"MAZA Oriol", centro:"PAMPLONA Carlos III", provincia:"NAVARRA", delegado:"Sonia Godino" },
+        { codigo:"4MRM", propietario:"AAO", centro:"REINA DE MERCEDES", provincia:"Madrid", delegado:"Sergio Perán" },
+        { codigo:"4PEC", propietario:"AAO", centro:"SANTANDER CC PEÑACASTILLO", provincia:"Santander", delegado:"Sergio Perán" },
+        { codigo:"4AXF", propietario:"URRUTIA Esteban", centro:"SANTIAGO DE COMPOSTELA RUA DA ROSA", provincia:"A Coruña", delegado:"Daniel Chazo" },
+        { codigo:"4TOL", propietario:"AAO", centro:"TORRELAVEGA CARREFOUR CC", provincia:"Santander", delegado:"Sergio Perán" },
+        { codigo:"4ZDE", propietario:"AAO", centro:"ZARAGOZA CALLE DELICIAS", provincia:"ZARAGOZA", delegado:"ENERITZ ARANGUREN" },
+        { codigo:"4AKI", propietario:"PIEDRAFITA Rocio", centro:"CC LOS VALLES", provincia:"MADRID", delegado:"Blanca Fdez. de la Pradilla" },
+        { codigo:"4MLG", propietario:"AAO", centro:"FUENLABRADA Calle Leganes", provincia:"MADRID", delegado:"Marisa Carmona" }
       ];
       demo.forEach(c => centros.push(c));
       actualizarListaCentrosDatalist();
@@ -3204,7 +3050,6 @@
       initCalendar();
       initDashboardCharts();
       actualizarDashboardDesdeAcum();
-      actualizarCoberturaVisitas();
     });
   </script>
 </body>
