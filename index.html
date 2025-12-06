@@ -53,6 +53,7 @@
       background: var(--bg-main);
       color: var(--text-main);
       display: flex;
+      overflow-x: hidden;
     }
 
     /* SIDEBAR */
@@ -164,6 +165,9 @@
       display: flex;
       flex-direction: column;
       gap: 8px;
+      max-width: 1600px;           /* evita ensanchar demasiado */
+      margin: 0 auto;              /* centrado */
+      box-sizing: border-box;
     }
 
     .topbar {
@@ -171,11 +175,13 @@
       align-items: center;
       gap: 10px;
       margin-bottom: 4px;
+      flex-wrap: wrap;             /* permite que los botones bajen a otra línea */
     }
 
     .topbar-search {
-      flex: 1;
+      flex: 1 1 260px;
       position: relative;
+      min-width: 220px;
     }
 
     .topbar-search input {
@@ -201,6 +207,8 @@
     .topbar-buttons {
       display: flex;
       gap: 8px;
+      flex-wrap: wrap;             /* botones pueden partirse en varias filas */
+      justify-content: flex-end;
     }
 
     .btn {
@@ -269,12 +277,15 @@
       display: flex;
       flex-direction: column;
       gap: 8px;
+      max-width: 100%;
     }
 
     .page {
       flex: 1;
       display: none;
-      overflow: auto;
+      overflow-y: auto;
+      overflow-x: hidden;          /* evitamos scroll horizontal */
+      max-width: 100%;
     }
 
     .page.active {
@@ -354,9 +365,12 @@
     /* DASHBOARD PAGE */
     .dashboard-grid {
       display: grid;
-      grid-template-columns: 1.5fr 1fr;
+      grid-template-columns: minmax(0, 1.7fr) minmax(0, 1.3fr); /* resumen+gráficos / ranking */
       gap: 10px;
       min-height: 0;
+      align-items: flex-start;
+      width: 100%;
+      box-sizing: border-box;
     }
 
     .kpi-grid {
@@ -398,6 +412,7 @@
       min-height: 0;
     }
 
+    /* CONTENEDOR DE GRÁFICOS */
     .chart-container {
       position: relative;
       width: 100%;
@@ -469,133 +484,21 @@
       text-align:right;
     }
 
-    /* === NUEVO MÓDULO 80 CRITERIOS === */
-    #cardModuloProcesos {
-      margin-top: 4px;
+    /* resumen bajo el ranking para aprovechar espacio */
+    .ranking-summary {
+      margin-top: 8px;
+      padding-top: 6px;
+      border-top: 1px dashed rgba(148,163,184,0.4);
+      font-size: .76rem;
+      color: var(--text-muted);
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
     }
 
-    .modulo-procesos-header {
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:8px;
-      margin-bottom:6px;
-      flex-wrap:wrap;
-    }
-
-    .modulo-procesos-header-left {
-      display:flex;
-      flex-direction:column;
-      gap:2px;
-    }
-
-    .modulo-procesos-header-right {
-      display:flex;
-      align-items:center;
-      gap:6px;
-      font-size:.78rem;
-    }
-
-    .modulo-procesos-header-right select {
-      padding:4px 8px;
-      border-radius:999px;
-      border:1px solid var(--border-soft);
-      background:var(--bg-card-soft);
-      color:var(--text-main);
-      font-size:.78rem;
-      outline:none;
-    }
-
-    .modulo-procesos-kpis {
-      display:grid;
-      grid-template-columns: repeat(3, minmax(0,1fr));
-      gap:6px;
-      margin-top:4px;
-    }
-
-    .modulo-procesos-kpi {
-      background:var(--bg-card-soft);
-      border-radius:10px;
-      border:1px solid var(--border-soft);
-      padding:6px 8px;
-      display:flex;
-      flex-direction:column;
-      gap:2px;
-      font-size:.78rem;
-    }
-
-    .modulo-procesos-kpi-label {
-      color:var(--text-muted);
-      font-size:.72rem;
-    }
-
-    .modulo-procesos-kpi-value {
-      font-weight:600;
-      font-size:.95rem;
-    }
-
-    .modulo-procesos-kpi-tag {
-      font-size:.7rem;
-      padding:2px 6px;
-      border-radius:999px;
-      border:1px solid var(--border-soft);
-      align-self:flex-start;
-      margin-top:2px;
-    }
-
-    .modulo-procesos-kpi-tag.optimo {
-      background:rgba(34,197,94,0.15);
-      color:var(--accent-green);
-      border-color:rgba(34,197,94,0.7);
-    }
-    .modulo-procesos-kpi-tag.muybueno {
-      background:rgba(56,189,248,0.15);
-      color:var(--accent-blue);
-      border-color:rgba(56,189,248,0.7);
-    }
-    .modulo-procesos-kpi-tag.mejorable {
-      background:rgba(239,68,68,0.15);
-      color:#ef4444;
-      border-color:rgba(239,68,68,0.7);
-    }
-
-    .criterios-wrapper {
-      margin-top:6px;
-      display:flex;
-      flex-direction:column;
-      gap:4px;
-    }
-
-    .criterios-header {
-      font-size:.76rem;
-      color:var(--text-muted);
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-    }
-
-    .criterios-chart-container {
-      margin-top:4px;
-      max-height:260px;
-      overflow-y:auto;
-      scroll-behavior:smooth;
-      padding-right:4px;
-    }
-
-    .criterios-chart-container canvas {
-      min-height:900px; /* espacio para muchas barras */
-    }
-
-    .modulo-procesos-bottom {
-      margin-top:8px;
-      display:grid;
-      grid-template-columns: repeat(3, minmax(0,1fr));
-      gap:6px;
-      font-size:.78rem;
-    }
-
-    .modulo-procesos-bottom .kpi-card {
-      padding:6px 8px;
+    .ranking-summary-item span {
+      font-weight: 600;
+      color: var(--text-main);
     }
 
     /* CENTROS PAGE */
@@ -1157,6 +1060,53 @@
       background:#ffffff;
     }
 
+    /* RESPONSIVE EXTRA PARA DASHBOARD Y TOPBAR */
+    @media (max-width: 1400px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;   /* ranking baja debajo del resumen+gráficos */
+      }
+      .centros-top {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 1100px) {
+      .topbar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .topbar-buttons {
+        justify-content: flex-start;
+      }
+      .centros-top {
+        grid-template-columns: 1fr;
+      }
+      .informe-top {
+        grid-template-columns: 1fr;
+      }
+      .panel-graficos {
+        grid-template-columns: 1fr 1fr;
+      }
+      .panel-inferior {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 800px) {
+      .dashboard-charts {
+        grid-template-columns: 1fr;
+      }
+      .panel-graficos {
+        grid-template-columns: 1fr;
+      }
+      .observaciones-grid {
+        grid-template-columns: 1fr;
+      }
+      .imagenes-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
     /* IMPRESIÓN A4 SIN DESBORDES */
     @page {
       size: A4 portrait;
@@ -1182,13 +1132,17 @@
 
       .main {
         padding:0 !important;
-        max-height:none !important;
+        max-width: 210mm !important;
         overflow:visible !important;
       }
 
       .pages,
       .page {
         overflow:visible !important;
+      }
+
+      .dashboard-grid {
+        grid-template-columns: 1fr !important;   /* todo en una columna en A4 */
       }
 
       .panel-graficos {
@@ -1394,72 +1348,16 @@
             <div class="ranking-toggle" id="rankingToggle" style="display:none;">
               Mostrar todos
             </div>
+            <div class="ranking-summary" id="rankingResumen">
+              <div class="ranking-summary-item">
+                Top delegado: <span id="rankingTopDelegado">–</span>
+              </div>
+              <div class="ranking-summary-item">
+                Media procesos delegados: <span id="rankingMediaProcesos">–</span>
+              </div>
+            </div>
           </article>
         </div>
-
-        <!-- NUEVO MÓDULO: EVALUACIÓN DETALLADA 80 CRITERIOS -->
-        <article class="card" id="cardModuloProcesos">
-          <div class="modulo-procesos-header">
-            <div class="modulo-procesos-header-left">
-              <span class="card-title">Evaluación detallada de procesos (80 criterios)</span>
-              <span class="card-sub">
-                Basado en los checklists CORNER / EXCLUSIVO cargados por centro.
-              </span>
-            </div>
-            <div class="modulo-procesos-header-right">
-              <span>Ámbito:</span>
-              <select id="filtroModulo80">
-                <option value="global">Global</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="modulo-procesos-kpis">
-            <div class="modulo-procesos-kpi">
-              <div class="modulo-procesos-kpi-label">% global aplicación procesos</div>
-              <div class="modulo-procesos-kpi-value" id="modProcGlobal">–</div>
-              <div class="modulo-procesos-kpi-tag" id="modProcClasTag">Sin datos</div>
-            </div>
-            <div class="modulo-procesos-kpi">
-              <div class="modulo-procesos-kpi-label">Nº centros evaluados</div>
-              <div class="modulo-procesos-kpi-value" id="modProcNcentros">0</div>
-              <div class="modulo-procesos-kpi-tag">Checklist CORNER / EXCLUSIVO</div>
-            </div>
-            <div class="modulo-procesos-kpi">
-              <div class="modulo-procesos-kpi-label">Clasificación</div>
-              <div class="modulo-procesos-kpi-value" id="modProcClasificacion">Sin datos</div>
-              <div class="modulo-procesos-kpi-tag">≥100% Óptimo · ≥85% Muy bueno · &lt;85% Mejorable</div>
-            </div>
-          </div>
-
-          <div class="criterios-wrapper">
-            <div class="criterios-header">
-              <span>Detalle por criterio (ordenado de mayor a menor · barras horizontales · sin animación)</span>
-              <span id="modProcNumCriterios">0 criterios</span>
-            </div>
-            <div class="criterios-chart-container">
-              <canvas id="chartCriterios80"></canvas>
-            </div>
-          </div>
-
-          <div class="modulo-procesos-bottom">
-            <div class="kpi-card">
-              <div class="kpi-label">HIT (media)</div>
-              <div class="kpi-value" id="modProcHit">–</div>
-              <div class="kpi-caption">Según checklist (F63 / F65)</div>
-            </div>
-            <div class="kpi-card">
-              <div class="kpi-label">Conv. prueba (media)</div>
-              <div class="kpi-value" id="modProcConvPrueba">–</div>
-              <div class="kpi-caption">B92 / I126</div>
-            </div>
-            <div class="kpi-card">
-              <div class="kpi-label">Conv. venta (media)</div>
-              <div class="kpi-value" id="modProcConvVenta">–</div>
-              <div class="kpi-caption">B93 / I127</div>
-            </div>
-          </div>
-        </article>
       </section>
 
       <!-- CENTROS -->
@@ -1917,7 +1815,6 @@
       if (centroChartsCreated) {
         Object.values(centroCharts).forEach(ch => ch && ch.resize());
       }
-      if (moduloProcesos.chart) moduloProcesos.chart.resize();
     });
 
     /* ========= BOTONES TOPBAR ========= */
@@ -1934,7 +1831,7 @@
     });
 
     $("#btnExportarHTML").addEventListener("click", () => {
-      const content = "<!DOCTYPE html>\\n" + document.documentElement.outerHTML;
+      const content = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
       const blob = new Blob([content], {type:"text/html"});
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -1964,8 +1861,6 @@
     const informesPorCentro = {};
     const aarPorCentro = {};
     const delegadosColores = {};
-    const checklistsPorCentro = {}; // NUEVO: checklist por centro
-
     const colorPalette = [
       "#22c55e","#2563eb","#14b8a6","#a855f7","#f97316","#0ea5e9","#ef4444",
       "#eab308","#ec4899","#facc15","#22d3ee","#4ade80","#fb7185","#2dd4bf"
@@ -2091,7 +1986,6 @@
 
       numDelegadosSpan.textContent = delegados.length;
       renderRankingDelegados(map);
-      actualizarOpcionesFiltroModuloProcesos(); // delegados en el filtro del módulo
     }
 
     /* ========= RANKING ========= */
@@ -2131,6 +2025,20 @@
         rankingToggle.style.display = "block";
       } else {
         rankingToggle.style.display = "none";
+      }
+
+      // Resumen bajo el ranking
+      const topSpan = $("#rankingTopDelegado");
+      const mediaSpan = $("#rankingMediaProcesos");
+      if (topSpan && mediaSpan) {
+        if (arr.length) {
+          topSpan.textContent = arr[0].nombre;
+          const mediaProc = Math.round(arr.reduce((s,d)=> s + d.procesos, 0) / arr.length);
+          mediaSpan.textContent = mediaProc + "%";
+        } else {
+          topSpan.textContent = "–";
+          mediaSpan.textContent = "–";
+        }
       }
     }
 
@@ -2219,7 +2127,6 @@
         opt.value = c.centro;
         dl.appendChild(opt);
       });
-      actualizarOpcionesFiltroModuloProcesos();
     }
 
     /* ========= CALENDARIO + VISITAS ========= */
@@ -2355,7 +2262,7 @@
       });
     });
 
-    /* ========= INFORME VISITA & CHECKLIST ========= */
+    /* ========= INFORME VISITA ========= */
     let centroChartsCreated = false;
     const centroCharts = {};
     let centroMetricsActual = null;
@@ -2399,11 +2306,6 @@
         avgProc, avgPrue, avgVent, avgHit
       ];
       globalCharts.radarGeneral.update();
-
-      if (globalCharts.aarHit) {
-        globalCharts.aarHit.data.datasets[0].data = [aarPct, 100 - aarPct];
-        globalCharts.aarHit.update();
-      }
     }
 
     function getChecklistFlags() {
@@ -2417,7 +2319,7 @@
       const audioCount = audioKeys.reduce((acc,k)=> acc + (isChecked(k)?1:0), 0);
       const elemAudio = audioCount >= 3;
 
-      const aar = centroActual ? (getAarEstado(centroActual.centro) === "Sí") : false;
+      const aar = centroActual ? (centroActual.aar === "Sí") : false;
       const ayuda = isChecked("telecare") || isChecked("pia") || isChecked("telehear");
 
       return {
@@ -2457,7 +2359,7 @@
           labels: ["Formaciones","Screening","Procesos","Conv. prueba","Conv. cierre"],
           datasets: [{
             label: "Nivel (%)",
-            data: [0, 0, 0, 0, 0],
+            data: [80, 100, 90, 82, 78],
             backgroundColor: "rgba(56,189,248,0.2)",
             borderColor: "#38bdf8",
             borderWidth: 2,
@@ -2484,7 +2386,7 @@
           labels: ["AAR","HIT","1os aux.","Infinity","Seguros","Tchin","RT","Elem. audio","MGM"],
           datasets: [{
             label: "1 = Sí, 0 = No",
-            data: [0,0,0,0,0,0,0,0,0],
+            data: [1,1,0,1,0,0,1,1,0],
             backgroundColor: [
               "#22c55e","#3b82f6","#f97316","#ef4444",
               "#22c55e","#3b82f6","#f97316","#ef4444","#22c55e"
@@ -2511,13 +2413,13 @@
         data: {
           labels: ["Sí","No"],
           datasets: [{
-            data: [0, 9],
+            data: [6,3],
             backgroundColor: ["#22c55e","#ef4444"],
             borderWidth: 1
           }]
         },
         options: {
-          plugins:{ legend:{ position:"bottom", labels:{ color:getComputedStyle(document.body).getPropertyValue("--text-main"), font:{size:10} } } },
+          plugins:{ legend:{ position:"bottom", labels:{ color: getComputedStyle(document.body).getPropertyValue("--text-main"), font:{size:10} } } },
           responsive:true,
           maintainAspectRatio:false,
           cutout:"55%"
@@ -2533,7 +2435,7 @@
             {
               type:"line",
               label:"Procesos %",
-              data:[0,0,0,0,0,0,0,0,0,0,0,0],
+              data:[78,80,82,85,87,88,89,90,91,92,92,93],
               borderWidth:2,
               tension:.35,
               borderColor:"#3b82f6",
@@ -2543,7 +2445,7 @@
             {
               type:"bar",
               label:"Áreas de mejora",
-              data:[0,0,0,0,0,0,0,0,0,0,0,0],
+              data:[6,6,5,5,4,4,3,3,3,2,2,2],
               backgroundColor:"rgba(239,68,68,0.5)",
               yAxisID:"y"
             }
@@ -2569,7 +2471,7 @@
           labels:["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"],
           datasets:[{
             label:"HIT",
-            data:[0,0,0,0,0,0,0,0,0,0,0,0],
+            data:[70,72,74,76,78,80,82,84,85,86,86,87],
             backgroundColor:"#f97316"
           }]
         },
@@ -2593,7 +2495,7 @@
           labels:["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"],
           datasets:[{
             label:"Áreas de mejora",
-            data:[0,0,0,0,0,0,0,0,0,0,0,0],
+            data:[6,6,5,5,4,4,3,3,3,2,2,2],
             backgroundColor:"#ef4444"
           }]
         },
@@ -2617,7 +2519,7 @@
           labels:["Seguimiento","Telecare","Escaparate","Stock","Formación","AAR","Postventa","Documentación","Citas","Otros"],
           datasets:[{
             label:"Nº incidencias",
-            data:[0,0,0,0,0,0,0,0,0,0],
+            data:[5,4,4,3,3,3,2,2,2,1],
             backgroundColor:"#3b82f6"
           }]
         },
@@ -2641,7 +2543,7 @@
         data:{
           labels:["Aplicados","Pendiente"],
           datasets:[{
-            data:[0,100],
+            data:[90,10],
             backgroundColor:["#22c55e","#6b7280"],
             borderWidth:1
           }]
@@ -2660,7 +2562,7 @@
         data:{
           labels:["Áreas mejora","Correcto"],
           datasets:[{
-            data:[0,0],
+            data:[4,10],
             backgroundColor:["#ef4444","#22c55e"]
           }]
         },
@@ -2683,7 +2585,7 @@
         data:{
           labels:["Prueba","Venta"],
           datasets:[{
-            data:[0,0],
+            data:[82,78],
             backgroundColor:["#38bdf8","#22c55e"]
           }]
         },
@@ -2701,40 +2603,32 @@
       });
     }
 
-    function obtenerMetricsCentroActual() {
-      const { formaciones, screening } = calcularFormacionesYScreening();
-      let procesos = 0, convPrueba = 0, convVenta = 0, hitVal = 0, areasMejora = 0;
-      if (centroActual && checklistsPorCentro[centroActual.centro]) {
-        const d = checklistsPorCentro[centroActual.centro];
-        procesos = d.procesosPct || 0;
-        convPrueba = d.convPruebaPct || 0;
-        convVenta  = d.convVentaPct || 0;
-        hitVal     = d.hit ? 100 : 0;
-        areasMejora = d.areasMejora || 0;
-      }
-      return { formaciones, screening, procesos, convPrueba, convVenta, hit: hitVal, areasMejora };
-    }
-
     function actualizarChartsCentro() {
       if (!centroChartsCreated) return;
-      const m = obtenerMetricsCentroActual();
-      centroMetricsActual = m;
+      const { formaciones, screening } = calcularFormacionesYScreening();
+      const procesos = 90;
+      const convPrueba = 82;
+      const convVenta = 78;
+      const flags = getChecklistFlags();
+      const hitVal = flags.hit ? 90 : 70;
+      const areasMejora = 4; // demo
 
-      $("#kpiCentroProcesos").textContent = m.procesos ? `${m.procesos.toFixed(1)}%` : "–";
-      $("#kpiCentroPrueba").textContent   = m.convPrueba ? `${m.convPrueba.toFixed(1)}%` : "–";
-      $("#kpiCentroVenta").textContent    = m.convVenta ? `${m.convVenta.toFixed(1)}%` : "–";
-      $("#kpiCentroHit").textContent      = m.hit ? `${m.hit.toFixed(0)}%` : "–";
+      centroMetricsActual = { procesos, convPrueba, convVenta, hit: hitVal, formaciones, screening, areasMejora };
+
+      $("#kpiCentroProcesos").textContent = procesos + "%";
+      $("#kpiCentroPrueba").textContent   = convPrueba + "%";
+      $("#kpiCentroVenta").textContent    = convVenta + "%";
+      $("#kpiCentroHit").textContent      = hitVal + "%";
 
       centroCharts.radar.data.datasets[0].data = [
-        m.formaciones,
-        m.screening,
-        m.procesos,
-        m.convPrueba,
-        m.convVenta
+        formaciones,
+        screening,
+        procesos,
+        convPrueba,
+        convVenta
       ];
       centroCharts.radar.update();
 
-      const flags = getChecklistFlags();
       const valores = [
         flags.aar, flags.hit, flags.primeros, flags.infinity, flags.seguros,
         flags.tchin, flags.rt, flags.elemAudio, flags.mgm
@@ -2747,16 +2641,14 @@
       centroCharts.donut.data.datasets[0].data = [siCount, noCount];
       centroCharts.donut.update();
 
-      const procesos = m.procesos;
-      const areasMejora = m.areasMejora;
-
-      centroCharts.procResumen.data.datasets[0].data = [procesos, 100 - procesos];
+      // Resumen
+      centroCharts.procResumen.data.datasets[0].data = [procesos, 100-procesos];
       centroCharts.procResumen.update();
 
-      centroCharts.areasResumen.data.datasets[0].data = [areasMejora, Math.max(0, 10 - areasMejora)];
+      centroCharts.areasResumen.data.datasets[0].data = [areasMejora, 10-areasMejora];
       centroCharts.areasResumen.update();
 
-      centroCharts.convResumen.data.datasets[0].data = [m.convPrueba, m.convVenta];
+      centroCharts.convResumen.data.datasets[0].data = [convPrueba, convVenta];
       centroCharts.convResumen.update();
     }
 
@@ -2764,9 +2656,6 @@
       if (e.target.matches("input[data-kpi]")) {
         crearChartsCentro();
         actualizarChartsCentro();
-      }
-      if (e.target.id === "filtroModulo80") {
-        recomputeModuloProcesos();
       }
     });
 
@@ -2812,102 +2701,10 @@
     });
 
     $("#btnAdjuntarChecklist").addEventListener("click", ()=> $("#inputChecklist").click());
-
-    function leerPctDesdeCelda(sheet, addr) {
-      const cell = sheet[addr];
-      if (!cell || cell.v == null || cell.v === "") return null;
-      let v = Number(cell.v);
-      if (isNaN(v)) return null;
-      if (v <= 1.5) v = v * 100; // si viene como 0-1
-      return Math.max(0, Math.min(200, v));
-    }
-
-    function leerChecklistExcelParaCentro(file, centroObj) {
-      const reader = new FileReader();
-      reader.onload = evt => {
-        try {
-          const data = new Uint8Array(evt.target.result);
-          const workbook = XLSX.read(data, { type: "array" });
-          const sheetName = workbook.SheetNames[0];
-          const sheet = workbook.Sheets[sheetName];
-
-          const nameUpper = file.name.toUpperCase();
-          let tipo = null;
-          if (nameUpper.includes("CORNER")) tipo = "CORNER";
-          else if (nameUpper.includes("EXCLUSIVO")) tipo = "EXCLUSIVO";
-
-          if (!tipo) {
-            alert("No se ha podido detectar si el checklist es CORNER o EXCLUSIVO. Asegúrate de que el nombre del archivo contiene CORNER o EXCLUSIVO.");
-            return;
-          }
-
-          const cfg = tipo === "CORNER"
-            ? {rowIni:7,rowFin:88,colNombre:"B",colValor:"F",celdaProcesos:"F90",celdaHit:"F63",celdaConvPrueba:"B92",celdaConvVenta:"B93"}
-            : {rowIni:8,rowFin:102,colNombre:"B",colValor:"F",celdaProcesos:"F104",celdaHit:"F65",celdaConvPrueba:"I126",celdaConvVenta:"I127"};
-
-          const criterios = [];
-          for (let r = cfg.rowIni; r <= cfg.rowFin; r++) {
-            const cNombre = sheet[`${cfg.colNombre}${r}`];
-            if (!cNombre || cNombre.v == null || String(cNombre.v).trim() === "") continue;
-            const nombre = String(cNombre.v).trim();
-            const cValor = sheet[`${cfg.colValor}${r}`];
-            let valor = 0;
-            if (cValor && cValor.v != null && cValor.v !== "") {
-              let n = Number(cValor.v);
-              if (!isNaN(n) && n > 0) valor = 1;
-            }
-            criterios.push({ nombre, valor });
-          }
-
-          const procesosPct   = leerPctDesdeCelda(sheet, cfg.celdaProcesos) ?? 0;
-          const convPruebaPct = leerPctDesdeCelda(sheet, cfg.celdaConvPrueba) ?? 0;
-          const convVentaPct  = leerPctDesdeCelda(sheet, cfg.celdaConvVenta) ?? 0;
-          const hitCell = sheet[cfg.celdaHit];
-          const hitFlag = hitCell && Number(hitCell.v) > 0 ? true : false;
-
-          const totalAplicados = criterios.reduce((acc,c)=> acc + (c.valor?1:0), 0);
-          const totalCriterios = criterios.length;
-          const areasMejora = Math.max(0, totalCriterios - totalAplicados);
-
-          checklistsPorCentro[centroObj.centro] = {
-            tipo,
-            criterios,
-            procesosPct,
-            convPruebaPct,
-            convVentaPct,
-            hit: hitFlag,
-            areasMejora,
-            fecha: new Date().toISOString()
-          };
-
-          // Marcar AAR si aplica
-          aarPorCentro[centroObj.centro] = hitFlag ? "Sí" : (aarPorCentro[centroObj.centro] || "No");
-          renderTablaCentros();
-          actualizarOpcionesFiltroModuloProcesos();
-          crearChartsCentro();
-          actualizarChartsCentro();
-          recomputeModuloProcesos();
-          alert("Checklist cargado y vinculado al centro: " + centroObj.centro);
-        } catch (err) {
-          console.error(err);
-          alert("No se ha podido leer el checklist. Revisa el archivo.");
-        }
-      };
-      reader.readAsArrayBuffer(file);
-    }
-
     $("#inputChecklist").addEventListener("change", e => {
       const file = e.target.files[0];
-      if (file) {
-        $("#nombreChecklist").textContent = file.name;
-        if (!centroActual) {
-          alert("Primero selecciona un centro desde la tabla o desde una visita para vincular el checklist.");
-          return;
-        }
-        leerChecklistExcelParaCentro(file, centroActual);
-      } else {
-        $("#nombreChecklist").textContent = "";
-      }
+      if (file) $("#nombreChecklist").textContent = file.name;
+      else $("#nombreChecklist").textContent = "";
     });
 
     $$(".imagen-preview").forEach(div => {
@@ -2934,7 +2731,6 @@
     });
 
     $("#btnGuardarInforme").addEventListener("click", () => {
-      crearChartsCentro();
       actualizarChartsCentro();
 
       if (centroMetricsActual && centroActual) {
@@ -2961,13 +2757,11 @@
         visitaActual = null;
       }
 
-      recomputeModuloProcesos();
-      alert("Informe guardado (demo). Se han actualizado los KPIs del dashboard y el módulo de procesos.");
+      alert("Informe guardado (demo). Se han actualizado los KPIs del dashboard.");
     });
 
     /* ========= DASHBOARD CHARTS ========= */
     const globalCharts = {};
-    const moduloProcesos = { chart: null };
 
     function initDashboardCharts() {
       const radarCtx = document.getElementById("chartRadarGeneral").getContext("2d");
@@ -2977,7 +2771,7 @@
           labels:["Procesos","Conv. prueba","Conv. venta","HIT"],
           datasets:[{
             label:"Promedio %",
-            data:[0,0,0,0],
+            data:[85,80,78,82],
             backgroundColor:"rgba(96,165,250,0.2)",
             borderColor:"#60a5fa",
             borderWidth:2,
@@ -3129,242 +2923,6 @@
       });
     }
 
-    /* ========= MÓDULO 80 CRITERIOS ========= */
-    function initModuloProcesosChart() {
-      const canvas = document.getElementById("chartCriterios80");
-      if (!canvas) return;
-      const ctx = canvas.getContext("2d");
-      moduloProcesos.chart = new Chart(ctx, {
-        type:"bar",
-        data:{
-          labels:[],
-          datasets:[{
-            label:"% aplicación por criterio",
-            data:[],
-            backgroundColor:[]
-          }]
-        },
-        options:{
-          indexAxis:"y",
-          responsive:true,
-          maintainAspectRatio:false,
-          animation:false,
-          plugins:{
-            legend:{ display:false },
-            tooltip:{
-              callbacks:{
-                label: context => `${context.parsed.x.toFixed(1)} %`
-              }
-            }
-          },
-          scales:{
-            x:{
-              min:0,
-              max:110,
-              ticks:{
-                color:getComputedStyle(document.body).getPropertyValue("--text-muted"),
-                font:{size:10},
-                callback: v => v + "%"
-              },
-              grid:{ color:"rgba(31,41,55,0.3)" }
-            },
-            y:{
-              ticks:{
-                color:getComputedStyle(document.body).getPropertyValue("--text-muted"),
-                font:{size:9}
-              },
-              grid:{ display:false }
-            }
-          }
-        }
-      });
-
-      actualizarOpcionesFiltroModuloProcesos();
-      recomputeModuloProcesos();
-    }
-
-    function actualizarOpcionesFiltroModuloProcesos() {
-      const sel = document.getElementById("filtroModulo80");
-      if (!sel) return;
-      const prev = sel.value || "global";
-      sel.innerHTML = "";
-
-      const optGlobal = document.createElement("option");
-      optGlobal.value = "global";
-      optGlobal.textContent = "Global";
-      sel.appendChild(optGlobal);
-
-      const centrosConChecklist = Object.keys(checklistsPorCentro);
-      const delegadosSet = new Set();
-      const centrosSet = new Set();
-
-      centrosConChecklist.forEach(nombreCentro => {
-        centrosSet.add(nombreCentro);
-        const c = centros.find(x => x.centro === nombreCentro);
-        if (c && c.delegado) delegadosSet.add(c.delegado);
-      });
-
-      if (delegadosSet.size) {
-        const og = document.createElement("optgroup");
-        og.label = "Delegados";
-        Array.from(delegadosSet).sort().forEach(del => {
-          const o = document.createElement("option");
-          o.value = "del:" + del;
-          o.textContent = "Delegado · " + del;
-          og.appendChild(o);
-        });
-        sel.appendChild(og);
-      }
-
-      if (centrosSet.size) {
-        const og2 = document.createElement("optgroup");
-        og2.label = "Centros";
-        Array.from(centrosSet).sort().forEach(nombreCentro => {
-          const o = document.createElement("option");
-          o.value = "cen:" + nombreCentro;
-          o.textContent = "Centro · " + nombreCentro;
-          og2.appendChild(o);
-        });
-        sel.appendChild(og2);
-      }
-
-      const values = Array.from(sel.options).map(o => o.value);
-      if (values.includes(prev)) sel.value = prev;
-      else sel.value = "global";
-    }
-
-    function obtenerChecklistsFiltrados() {
-      const entries = Object.entries(checklistsPorCentro);
-      if (!entries.length) return [];
-      const sel = document.getElementById("filtroModulo80");
-      if (!sel) return entries.map(([centroNombre, datos]) => ({ centroNombre, datos }));
-      const val = sel.value || "global";
-
-      if (val === "global") {
-        return entries.map(([centroNombre, datos]) => ({ centroNombre, datos }));
-      }
-
-      if (val.startsWith("del:")) {
-        const del = val.slice(4);
-        return entries
-          .map(([centroNombre, datos]) => {
-            const c = centros.find(x => x.centro === centroNombre);
-            if (c && c.delegado === del) return { centroNombre, datos };
-            return null;
-          })
-          .filter(Boolean);
-      }
-
-      if (val.startsWith("cen:")) {
-        const cen = val.slice(4);
-        return entries
-          .filter(([centroNombre]) => centroNombre === cen)
-          .map(([centroNombre, datos]) => ({ centroNombre, datos }));
-      }
-
-      return entries.map(([centroNombre, datos]) => ({ centroNombre, datos }));
-    }
-
-    function recomputeModuloProcesos() {
-      if (!moduloProcesos.chart) return;
-
-      const filtrados = obtenerChecklistsFiltrados();
-      const lblGlobal = $("#modProcGlobal");
-      const lblNcentros = $("#modProcNcentros");
-      const lblClasificacion = $("#modProcClasificacion");
-      const lblClasTag = $("#modProcClasTag");
-      const lblHit = $("#modProcHit");
-      const lblConvPrueba = $("#modProcConvPrueba");
-      const lblConvVenta = $("#modProcConvVenta");
-      const lblNumCrit = $("#modProcNumCriterios");
-
-      if (!filtrados.length) {
-        moduloProcesos.chart.data.labels = [];
-        moduloProcesos.chart.data.datasets[0].data = [];
-        moduloProcesos.chart.data.datasets[0].backgroundColor = [];
-        moduloProcesos.chart.update();
-        if (lblGlobal) lblGlobal.textContent = "–";
-        if (lblNcentros) lblNcentros.textContent = "0";
-        if (lblClasificacion) lblClasificacion.textContent = "Sin datos";
-        if (lblClasTag) {
-          lblClasTag.textContent = "Sin datos";
-          lblClasTag.className = "modulo-procesos-kpi-tag";
-        }
-        if (lblHit) lblHit.textContent = "–";
-        if (lblConvPrueba) lblConvPrueba.textContent = "–";
-        if (lblConvVenta) lblConvVenta.textContent = "–";
-        if (lblNumCrit) lblNumCrit.textContent = "0 criterios";
-        return;
-      }
-
-      let sumProc = 0, sumPrueba = 0, sumVenta = 0, sumHit = 0;
-      filtrados.forEach(f => {
-        sumProc   += f.datos.procesosPct   || 0;
-        sumPrueba += f.datos.convPruebaPct || 0;
-        sumVenta  += f.datos.convVentaPct  || 0;
-        sumHit    += f.datos.hit ? 1 : 0;
-      });
-      const n = filtrados.length;
-      const procGlobal = sumProc / n;
-      const convPrGlobal = sumPrueba / n;
-      const convVentaGlobal = sumVenta / n;
-      const hitGlobalPct = 100 * (sumHit / n);
-
-      if (lblGlobal) lblGlobal.textContent = procGlobal.toFixed(1) + "%";
-      if (lblNcentros) lblNcentros.textContent = String(n);
-
-      let clasTexto = "Mejorable";
-      let clasClase = "mejorable";
-      if (procGlobal >= 100) {
-        clasTexto = "Óptimo";
-        clasClase = "optimo";
-      } else if (procGlobal >= 85) {
-        clasTexto = "Muy bueno";
-        clasClase = "muybueno";
-      }
-      if (lblClasificacion) lblClasificacion.textContent = clasTexto;
-      if (lblClasTag) {
-        lblClasTag.textContent = clasTexto;
-        lblClasTag.className = "modulo-procesos-kpi-tag " + clasClase;
-      }
-
-      if (lblHit) lblHit.textContent = hitGlobalPct ? hitGlobalPct.toFixed(0) + "%" : "0%";
-      if (lblConvPrueba) lblConvPrueba.textContent = convPrGlobal.toFixed(1) + "%";
-      if (lblConvVenta) lblConvVenta.textContent = convVentaGlobal.toFixed(1) + "%";
-
-      const criterioMap = new Map();
-      filtrados.forEach(f => {
-        f.datos.criterios.forEach(c => {
-          if (!criterioMap.has(c.nombre)) {
-            criterioMap.set(c.nombre, { aplica:0, total:0 });
-          }
-          const agg = criterioMap.get(c.nombre);
-          agg.total += 1;
-          if (c.valor) agg.aplica += 1;
-        });
-      });
-
-      const lista = Array.from(criterioMap.entries()).map(([nombre, agg]) => {
-        const pct = agg.total ? 100 * agg.aplica / agg.total : 0;
-        return { nombre, pct };
-      }).sort((a,b)=> b.pct - a.pct);
-
-      const labels = lista.map(x=>x.nombre);
-      const data = lista.map(x=>Number(x.pct.toFixed(1)));
-      const colors = data.map(v => {
-        if (v >= 100) return "#22c55e";
-        if (v >= 85) return "#4ade80";
-        return "#ef4444";
-      });
-
-      moduloProcesos.chart.data.labels = labels;
-      moduloProcesos.chart.data.datasets[0].data = data;
-      moduloProcesos.chart.data.datasets[0].backgroundColor = colors;
-      moduloProcesos.chart.update();
-
-      if (lblNumCrit) lblNumCrit.textContent = `${labels.length} criterios`;
-    }
-
     /* ========= DEMO CENTROS ========= */
     function cargarCentrosDemo() {
       const demo = [
@@ -3389,7 +2947,6 @@
       cargarCentrosDemo();
       initCalendar();
       initDashboardCharts();
-      initModuloProcesosChart();
       actualizarDashboardDesdeAcum();
     });
   </script>
