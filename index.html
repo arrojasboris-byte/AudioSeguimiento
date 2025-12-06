@@ -444,6 +444,7 @@
     .criterios-container {
       min-height: 260px;
       max-height: 320px;
+      overflow-y: auto; /* scroll vertical para ver todos los criterios */
     }
 
     .ranking-list {
@@ -2264,6 +2265,7 @@
 
     function actualizarDashboardDesdeAcum() {
       if (!dashboardAcum.n) return;
+      if (!globalCharts.radarGeneral) return;
       const n = dashboardAcum.n;
       const avgProc = Math.round(dashboardAcum.procesos / n);
       const avgPrue = Math.round(dashboardAcum.convPrueba / n);
@@ -2284,7 +2286,7 @@
       $("#kpiPrimeros").textContent   = primerosPct === 0 ? "No" : `Sí ${primerosPct}%`;
 
       globalCharts.radarGeneral.data.datasets[0].data = [
-        avgProc, avgPrue, avgVent, avgHit
+        avgProc, avgPrue, avgVent, avgHit, avgForm, primerosPct
       ];
       globalCharts.radarGeneral.update();
     }
@@ -2328,6 +2330,7 @@
 
     /* 80 CRITERIOS: estructura global */
     const criteriosGlobal = new Map(); // nombre -> {nombre, suma, total}
+    let criteriosDemoActivo = false;
     let ultimoChecklistCentro = null;  // {centro, data}
     const globalCharts = {};
 
@@ -2342,17 +2345,33 @@
       return Math.round(num);
     }
 
+    const clampPct = v => Math.max(0, Math.min(100, v));
+
+    function seedCriteriosDemo() {
+      criteriosDemoActivo = true;
+      criteriosGlobal.clear();
+      const total = 80;
+      for (let i = 1; i <= total; i++) {
+        const nombre = `Criterio ${i}`;
+        const pct = 60 + Math.round(Math.random()*40); // 60–100 %
+        criteriosGlobal.set(nombre, { nombre, suma: pct, total: 100 });
+      }
+      actualizarGraficoCriterios();
+    }
+
     function parseChecklistRows(rows, tipo) {
       const criterios = [];
       let rStart, rEnd, colCrit, colRes, filaProc, colProc, filaHit, colHit, filaPrueba, colPrueba, filaVenta, colVenta;
 
       if (tipo === "EXCLUSIVO") {
+        // B8–B102 / F8–F102, %proc F104, HIT F65, prueba I126, venta I127
         rStart = 7;  rEnd = 101; colCrit = 1; colRes = 5;
         filaProc = 103; colProc = 5;
         filaHit  = 64;  colHit  = 5;
         filaPrueba = 125; colPrueba = 8; // I
         filaVenta  = 126; colVenta  = 8;
-      } else { // CORNER por defecto
+      } else { // CORNER
+        // B7–B88 / F7–F88, %proc F90, HIT F63, prueba B92, venta B93
         rStart = 6;  rEnd = 87; colCrit = 1; colRes = 5;
         filaProc = 89; colProc = 5;
         filaHit  = 62; colHit  = 5;
@@ -2374,9 +2393,9 @@
       const pruebaRaw   = (rows[filaPrueba] || [])[colPrueba];
       const ventaRaw    = (rows[filaVenta]  || [])[colVenta];
 
-      const procesosPct   = normalizarPorcentaje(procesosRaw);
-      const convPruebaPct = normalizarPorcentaje(pruebaRaw);
-      const convVentaPct  = normalizarPorcentaje(ventaRaw);
+      const procesosPct   = clampPct(normalizarPorcentaje(procesosRaw));
+      const convPruebaPct = clampPct(normalizarPorcentaje(pruebaRaw));
+      const convVentaPct  = clampPct(normalizarPorcentaje(ventaRaw));
       const hit           = Number(hitRaw) === 1;
 
       const areasMejora = criterios.filter(c => !c.aplica).length;
@@ -2385,6 +2404,12 @@
     }
 
     function integrarChecklistEnMetricas(centroNombre, parsed) {
+      // si había datos demo, los limpiamos al primer checklist real
+      if (criteriosDemoActivo) {
+        criteriosGlobal.clear();
+        criteriosDemoActivo = false;
+      }
+
       parsed.criterios.forEach(c => {
         const key = c.nombre || "Criterio";
         let obj = criteriosGlobal.get(key);
@@ -2411,13 +2436,20 @@
       const labels = top.map(i => i.nombre);
       const data   = top.map(i => i.pct);
       const colors = top.map(i =>
-        i.pct >= 100 ? "#16a34a" :
-        i.pct >= 85  ? "#22c55e" :
-                       "#ef4444"
+        i.pct >= 100 ? "#16a34a" :     // 100% Óptimo
+        i.pct >= 85  ? "#22c55e" :     // 85–99% Muy bien
+                       "#ef4444"       // <85% Mejorable
       );
 
       const msg = $("#criteriosEmptyMsg");
       if (msg) msg.style.display = "none";
+
+      // altura del canvas según nº de criterios -> scroll en el contenedor
+      const canvas = document.getElementById("chartCriteriosDetalle");
+      if (canvas) {
+        const pxPerRow = 18;
+        canvas.style.height = (top.length * pxPerRow) + "px";
+      }
 
       if (!globalCharts.criteriosDetalle) {
         const ctx = document.getElementById("chartCriteriosDetalle").getContext("2d");
@@ -2490,12 +2522,11 @@
           const parsed = parseChecklistRows(rows, tipo);
           ultimoChecklistCentro = { centro: centroNombre, data: parsed };
           integrarChecklistEnMetricas(centroNombre, parsed);
-          // Refrescar KPIs de centro con datos reales del checklist
+          // KPIs de centro desde checklist
           $("#kpiCentroProcesos").textContent = parsed.procesosPct + "%";
           $("#kpiCentroPrueba").textContent   = parsed.convPruebaPct + "%";
           $("#kpiCentroVenta").textContent    = parsed.convVentaPct + "%";
           $("#kpiCentroHit").textContent      = parsed.hit ? "Sí" : "No";
-          // Actualizar charts de centro si ya están creados
           actualizarChartsCentro();
         } catch (err) {
           console.error(err);
@@ -2513,10 +2544,10 @@
       centroCharts.radar = new Chart(radarCtx, {
         type: "radar",
         data: {
-          labels: ["Formaciones","Screening","Procesos","Conv. prueba","Conv. cierre"],
+          labels: ["Formaciones","1os auxilios","Procesos","Conv. prueba","Conv. cierre"],
           datasets: [{
             label: "Nivel (%)",
-            data: [80, 100, 90, 82, 78],
+            data: [80,40,90,82,78],
             backgroundColor: "rgba(56,189,248,0.2)",
             borderColor: "#38bdf8",
             borderWidth: 2,
@@ -2782,6 +2813,7 @@
       }
 
       const flags = getChecklistFlags();
+      const primerosPct = flags.primeros ? 100 : 0;
 
       $("#kpiCentroProcesos").textContent = procesos + "%";
       $("#kpiCentroPrueba").textContent   = convPrueba + "%";
@@ -2790,7 +2822,7 @@
 
       centroCharts.radar.data.datasets[0].data = [
         formaciones,
-        screening,
+        primerosPct,
         procesos,
         convPrueba,
         convVenta
@@ -2818,7 +2850,7 @@
       centroCharts.convResumen.data.datasets[0].data = [convPrueba, convVenta];
       centroCharts.convResumen.update();
 
-      centroMetricsActual = { procesos, convPrueba, convVenta, hit: hitVal, formaciones, screening, areasMejora };
+      centroMetricsActual = { procesos, convPrueba, convVenta, hit: hitVal, formaciones, screening, primeros: primerosPct, areasMejora };
     }
 
     document.addEventListener("change", e => {
@@ -2927,10 +2959,10 @@
       globalCharts.radarGeneral = new Chart(radarCtx, {
         type:"radar",
         data:{
-          labels:["Procesos","Conv. prueba","Conv. venta","HIT"],
+          labels:["% procesos","Conv. prueba","Conv. venta","HIT","Formaciones","1os auxilios"],
           datasets:[{
             label:"Promedio %",
-            data:[85,80,78,82],
+            data:[85,80,78,82,60,40],
             backgroundColor:"rgba(96,165,250,0.2)",
             borderColor:"#60a5fa",
             borderWidth:2,
@@ -3105,10 +3137,10 @@
     window.addEventListener("load", () => {
       cargarCentrosDemo();
       initCalendar();
+      seedCriteriosDemo();          // datos demo para los 80 criterios
       initDashboardCharts();
       actualizarDashboardDesdeAcum();
     });
   </script>
 </body>
 </html>
-
