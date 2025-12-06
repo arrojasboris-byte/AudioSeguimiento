@@ -59,7 +59,7 @@
     /* SIDEBAR */
     .sidebar {
       width: 250px;
-      background: #020617; /* fijo oscuro */
+      background: #020617;
       border-right: 1px solid #020617;
       padding: 18px 18px 24px;
       display: flex;
@@ -165,8 +165,8 @@
       display: flex;
       flex-direction: column;
       gap: 8px;
-      max-width: 1600px;           /* evita ensanchar demasiado */
-      margin: 0 auto;              /* centrado */
+      max-width: 1600px;
+      margin: 0 auto;
       box-sizing: border-box;
     }
 
@@ -175,7 +175,7 @@
       align-items: center;
       gap: 10px;
       margin-bottom: 4px;
-      flex-wrap: wrap;             /* permite que los botones bajen a otra línea */
+      flex-wrap: wrap;
     }
 
     .topbar-search {
@@ -207,7 +207,7 @@
     .topbar-buttons {
       display: flex;
       gap: 8px;
-      flex-wrap: wrap;             /* botones pueden partirse en varias filas */
+      flex-wrap: wrap;
       justify-content: flex-end;
     }
 
@@ -242,7 +242,6 @@
       justify-content: center;
     }
 
-    /* Botones de colores */
     #btnGuardarVista {
       background: linear-gradient(90deg, #3b82f6, #22c55e);
       color: #0b1120;
@@ -284,7 +283,7 @@
       flex: 1;
       display: none;
       overflow-y: auto;
-      overflow-x: hidden;          /* evitamos scroll horizontal */
+      overflow-x: hidden;
       max-width: 100%;
     }
 
@@ -365,12 +364,19 @@
     /* DASHBOARD PAGE */
     .dashboard-grid {
       display: grid;
-      grid-template-columns: minmax(0, 1.7fr) minmax(0, 1.3fr); /* resumen+gráficos / ranking */
+      grid-template-columns: minmax(0, 1.7fr) minmax(0, 1.3fr);
       gap: 10px;
       min-height: 0;
       align-items: flex-start;
       width: 100%;
       box-sizing: border-box;
+    }
+
+    .dashboard-right-column {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-height: 0;
     }
 
     .kpi-grid {
@@ -412,7 +418,6 @@
       min-height: 0;
     }
 
-    /* CONTENEDOR DE GRÁFICOS */
     .chart-container {
       position: relative;
       width: 100%;
@@ -433,6 +438,12 @@
       height: 100% !important;
       display: block;
       box-sizing: border-box;
+    }
+
+    /* contenedor específico para los 80 criterios */
+    .criterios-container {
+      min-height: 260px;
+      max-height: 320px;
     }
 
     .ranking-list {
@@ -484,7 +495,6 @@
       text-align:right;
     }
 
-    /* resumen bajo el ranking para aprovechar espacio */
     .ranking-summary {
       margin-top: 8px;
       padding-top: 6px;
@@ -501,7 +511,7 @@
       color: var(--text-main);
     }
 
-    /* CENTROS PAGE */
+    /* CENTROS PAGE Y DEMÁS (igual que antes) */
     .centros-top {
       display: grid;
       grid-template-columns: 1.2fr 1.2fr 1fr;
@@ -570,7 +580,6 @@
       outline:1px solid var(--accent-blue);
     }
 
-    /* CALENDARIO */
     .calendar-wrapper {
       display:flex;
       flex-direction:column;
@@ -660,7 +669,6 @@
       font-weight:600;
     }
 
-    /* VISITAS LISTA */
     .visitas-list {
       flex:1;
       overflow:auto;
@@ -703,7 +711,6 @@
       gap:4px;
     }
 
-    /* TABLA CENTROS */
     .table-wrapper {
       flex:1;
       background: var(--bg-card);
@@ -824,7 +831,6 @@
       text-decoration: underline;
     }
 
-    /* INFORME DE LA VISITA */
     .informe-layout {
       display:flex;
       flex-direction:column;
@@ -974,7 +980,6 @@
       gap:8px;
     }
 
-    /* MODAL GENÉRICO */
     .modal-backdrop {
       position: fixed;
       inset: 0;
@@ -1047,7 +1052,6 @@
       margin-top: 10px;
     }
 
-    /* UTIL */
     input[type="file"] {
       font-size:.75rem;
     }
@@ -1060,10 +1064,10 @@
       background:#ffffff;
     }
 
-    /* RESPONSIVE EXTRA PARA DASHBOARD Y TOPBAR */
+    /* RESPONSIVE */
     @media (max-width: 1400px) {
       .dashboard-grid {
-        grid-template-columns: 1fr;   /* ranking baja debajo del resumen+gráficos */
+        grid-template-columns: 1fr;
       }
       .centros-top {
         grid-template-columns: 1fr 1fr;
@@ -1107,7 +1111,7 @@
       }
     }
 
-    /* IMPRESIÓN A4 SIN DESBORDES */
+    /* IMPRESIÓN A4: sin faldón izquierdo */
     @page {
       size: A4 portrait;
       margin: 10mm;
@@ -1115,41 +1119,38 @@
 
     @media print {
       html, body {
-        width: 210mm;
+        width: 100%;
         height: auto;
-        overflow: visible !important;
+        margin: 0;
+        padding: 0;
         background:#ffffff !important;
+        overflow: visible !important;
       }
-
       body {
         display:block;
       }
-
       .sidebar,
       .topbar {
         display:none !important;
       }
-
       .main {
         padding:0 !important;
-        max-width: 210mm !important;
+        margin:0 !important;
+        width:100% !important;
+        max-width:none !important;
         overflow:visible !important;
       }
-
       .pages,
       .page {
         overflow:visible !important;
       }
-
       .dashboard-grid {
-        grid-template-columns: 1fr !important;   /* todo en una columna en A4 */
+        grid-template-columns: 1fr !important;
       }
-
       .panel-graficos {
         max-height:none !important;
-        overflow:visible !important;
+        overflow:visible !Important;
       }
-
       .card {
         box-shadow:none !important;
         border-color:#d1d5db !important;
@@ -1232,7 +1233,7 @@
       <!-- DASHBOARD -->
       <section class="page active" data-page="dashboard">
         <div class="dashboard-grid">
-          <!-- Izquierda: KPIs + gráficos -->
+          <!-- IZQUIERDA -->
           <article class="card">
             <div class="card-header-row">
               <span class="card-title">Resumen general</span>
@@ -1241,7 +1242,7 @@
 
             <div class="kpi-grid">
               <div class="kpi-card">
-                <div class="kpi-label">% Procesos</div>
+                <div class="kpi-label">% de aplicación de procesos</div>
                 <div class="kpi-value" id="kpiProcesos">–</div>
                 <div class="kpi-caption">Objetivo 85–100%</div>
               </div>
@@ -1276,7 +1277,7 @@
                 <div class="kpi-caption">Centros con AAR</div>
               </div>
               <div class="kpi-card">
-                <div class="kpi-label">1os auxilios</div>
+                <div class="kpi-label">Primeros auxilios</div>
                 <div class="kpi-value" id="kpiPrimeros">–</div>
                 <div class="kpi-caption">Centros con formación</div>
               </div>
@@ -1339,24 +1340,39 @@
             </div>
           </article>
 
-          <!-- Derecha: ranking delegados -->
-          <article class="card">
-            <div class="card-header-row">
-              <span class="card-title">Ranking de delegados</span>
-            </div>
-            <div class="ranking-list" id="rankingDelegados"></div>
-            <div class="ranking-toggle" id="rankingToggle" style="display:none;">
-              Mostrar todos
-            </div>
-            <div class="ranking-summary" id="rankingResumen">
-              <div class="ranking-summary-item">
-                Top delegado: <span id="rankingTopDelegado">–</span>
+          <!-- DERECHA: 80 CRITERIOS + RANKING -->
+          <div class="dashboard-right-column">
+            <article class="card">
+              <div class="card-header-row">
+                <span class="card-title">Evaluación detallada de procesos (80 criterios)</span>
+                <span class="badge-small">Se actualiza con los checklists CORNER / EXCLUSIVO</span>
               </div>
-              <div class="ranking-summary-item">
-                Media procesos delegados: <span id="rankingMediaProcesos">–</span>
+              <div class="card-sub" id="criteriosEmptyMsg">
+                Adjunta un checklist en el informe de la visita para ver el detalle por criterios.
               </div>
-            </div>
-          </article>
+              <div class="chart-container criterios-container">
+                <canvas id="chartCriteriosDetalle"></canvas>
+              </div>
+            </article>
+
+            <article class="card">
+              <div class="card-header-row">
+                <span class="card-title">Ranking de delegados</span>
+              </div>
+              <div class="ranking-list" id="rankingDelegados"></div>
+              <div class="ranking-toggle" id="rankingToggle" style="display:none;">
+                Mostrar todos
+              </div>
+              <div class="ranking-summary" id="rankingResumen">
+                <div class="ranking-summary-item">
+                  Top delegado: <span id="rankingTopDelegado">–</span>
+                </div>
+                <div class="ranking-summary-item">
+                  Media procesos delegados: <span id="rankingMediaProcesos">–</span>
+                </div>
+              </div>
+            </article>
+          </div>
         </div>
       </section>
 
@@ -1500,7 +1516,7 @@
                 <span class="card-title">KPIs del centro</span>
               </div>
               <div style="font-size:.78rem; margin-top:4px;">
-                <div>Procesos: <strong id="kpiCentroProcesos">–</strong></div>
+                <div>% de aplicación de procesos: <strong id="kpiCentroProcesos">–</strong></div>
                 <div>Conv. a prueba: <strong id="kpiCentroPrueba">–</strong></div>
                 <div>Conv. a cierre: <strong id="kpiCentroVenta">–</strong></div>
                 <div>Aplicación HIT: <strong id="kpiCentroHit">–</strong></div>
@@ -1568,7 +1584,7 @@
             </article>
           </div>
 
-          <!-- Panel inferior: checklist + imágenes -->
+          <!-- Panel inferior -->
           <div class="panel-inferior">
             <article class="card">
               <div class="card-header-row">
@@ -1629,7 +1645,7 @@
             </article>
           </div>
 
-          <!-- Gráficas resumen debajo de las imágenes -->
+          <!-- Resumen gráficos -->
           <article class="card">
             <div class="card-header-row">
               <span class="card-title">Resumen de la visita</span>
@@ -1662,7 +1678,7 @@
             </div>
           </article>
 
-          <!-- Observaciones / compromisos -->
+          <!-- Observaciones -->
           <article class="card">
             <div class="card-header-row">
               <span class="card-title">Observaciones · Recomendaciones · Compromisos</span>
@@ -1690,7 +1706,7 @@
         </div>
       </section>
 
-      <!-- Páginas placeholder -->
+      <!-- PLACEHOLDERS -->
       <section class="page" data-page="servicios">
         <article class="card">
           <div class="card-title">Servicios</div>
@@ -1714,7 +1730,7 @@
     </div>
   </main>
 
-  <!-- MODAL NUEVA VISITA -->
+  <!-- MODALES -->
   <div class="modal-backdrop" id="modalVisita">
     <div class="modal">
       <div class="modal-header">
@@ -1746,7 +1762,6 @@
     </div>
   </div>
 
-  <!-- MODAL NUEVO CENTRO -->
   <div class="modal-backdrop" id="modalCentro">
     <div class="modal">
       <div class="modal-header">
@@ -1783,7 +1798,7 @@
   </div>
 
   <script>
-    const $ = sel => document.querySelector(sel);
+    const $  = sel => document.querySelector(sel);
     const $$ = sel => Array.from(document.querySelectorAll(sel));
 
     function formatDateISO(d) {
@@ -1792,13 +1807,12 @@
       const day = String(d.getDate()).padStart(2,"0");
       return `${y}-${m}-${day}`;
     }
-
     function formatDateHuman(iso) {
       const [y,m,d] = iso.split("-");
       return `${d}-${m}-${y}`;
     }
 
-    /* ========= NAVEGACIÓN ========= */
+    /* NAV */
     const pages = $$(".page");
     $$(".nav-item").forEach(item => {
       item.addEventListener("click", () => {
@@ -1808,33 +1822,22 @@
       });
     });
 
-    /* ========= TEMA ========= */
+    /* TEMA */
     $("#themeToggle").addEventListener("click", () => {
       document.body.classList.toggle("light");
       Object.values(globalCharts).forEach(ch => ch && ch.resize());
-      if (centroChartsCreated) {
-        Object.values(centroCharts).forEach(ch => ch && ch.resize());
-      }
+      if (centroChartsCreated) Object.values(centroCharts).forEach(ch => ch && ch.resize());
     });
 
-    /* ========= BOTONES TOPBAR ========= */
-    $("#btnGuardarVista").addEventListener("click", () => {
-      alert("Guardar vista (demo).");
-    });
-
-    $("#btnActualizarNube").addEventListener("click", () => {
-      alert("Actualización a nube (demo).");
-    });
-
-    $("#btnImprimir").addEventListener("click", () => {
-      window.print();
-    });
-
+    /* BOTONES TOPBAR */
+    $("#btnGuardarVista").addEventListener("click", () => alert("Guardar vista (demo)."));
+    $("#btnActualizarNube").addEventListener("click", () => alert("Actualización a nube (demo)."));
+    $("#btnImprimir").addEventListener("click", () => window.print());
     $("#btnExportarHTML").addEventListener("click", () => {
       const content = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
       const blob = new Blob([content], {type:"text/html"});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement("a");
       a.href = url;
       a.download = "control-center-audio.html";
       document.body.appendChild(a);
@@ -1843,7 +1846,7 @@
       URL.revokeObjectURL(url);
     });
 
-    /* ========= DATOS DEMO ========= */
+    /* DATOS */
     const exclusivosSet = new Set([
       "CC LOS VALLES",
       "FUENLABRADA Calle Leganes",
@@ -1874,12 +1877,11 @@
       return delegadosColores[nombre];
     }
 
-    /* ========= TABLA CENTROS ========= */
+    /* TABLA CENTROS */
     const tablaBody = $("#tablaCentrosBody");
     const totalCentrosLabel = $("#totalCentrosLabel");
     const centrosMostradosSpan = $("#centrosMostrados");
     const centrosTotalSpan = $("#centrosTotal");
-
     let filtroDelegadoActual = null;
     let filtroTextoActual = "";
 
@@ -1890,7 +1892,6 @@
     function getInformes(nombreCentro) {
       return informesPorCentro[nombreCentro] || 0;
     }
-
     function getAarEstado(nombreCentro) {
       return aarPorCentro[nombreCentro] || "No";
     }
@@ -1898,20 +1899,18 @@
     function renderTablaCentros() {
       const texto = filtroTextoActual.toLowerCase();
       tablaBody.innerHTML = "";
-
       const filtrados = centros.filter(c => {
         const cad = (c.centro + " " + c.propietario + " " + c.delegado).toLowerCase();
         const pasaTexto = cad.includes(texto);
-        const pasaDelegado = !filtroDelegadoActual || c.delegado === filtroDelegadoActual;
-        return pasaTexto && pasaDelegado;
+        const pasaDel   = !filtroDelegadoActual || c.delegado === filtroDelegadoActual;
+        return pasaTexto && pasaDel;
       });
 
       filtrados.forEach(c => {
         const tr = document.createElement("tr");
-        const t = tipoCentro(c.centro);
+        const t  = tipoCentro(c.centro);
         const informes = getInformes(c.centro);
         const aarEstado = getAarEstado(c.centro);
-
         tr.innerHTML = `
           <td>${c.codigo}</td>
           <td>${c.propietario}</td>
@@ -1939,16 +1938,17 @@
       centrosTotalSpan.textContent = centros.length;
     }
 
-    /* ========= DELEGADOS ========= */
+    /* DELEGADOS + RANKING */
     const delegadosList = $("#delegadosList");
     const numDelegadosSpan = $("#numDelegados");
+    const rankingDelegadosDiv = $("#rankingDelegados");
+    const rankingToggle = $("#rankingToggle");
+    let rankingExpandido = false;
 
     function renderDelegados() {
       const map = new Map();
       centros.forEach(c => {
-        if (!map.has(c.delegado)) {
-          map.set(c.delegado, []);
-        }
+        if (!map.has(c.delegado)) map.set(c.delegado, []);
         map.get(c.delegado).push(c);
       });
 
@@ -1988,11 +1988,6 @@
       renderRankingDelegados(map);
     }
 
-    /* ========= RANKING ========= */
-    const rankingDelegadosDiv = $("#rankingDelegados");
-    const rankingToggle = $("#rankingToggle");
-    let rankingExpandido = false;
-
     function renderRankingDelegados(map) {
       rankingDelegadosDiv.innerHTML = "";
       const arr = Array.from(map.entries()).map(([nombre, lista]) => {
@@ -2021,24 +2016,18 @@
         rankingDelegadosDiv.appendChild(row);
       });
 
-      if (arr.length > 5) {
-        rankingToggle.style.display = "block";
-      } else {
-        rankingToggle.style.display = "none";
-      }
+      if (arr.length > 5) rankingToggle.style.display = "block";
+      else rankingToggle.style.display = "none";
 
-      // Resumen bajo el ranking
-      const topSpan = $("#rankingTopDelegado");
+      const topSpan   = $("#rankingTopDelegado");
       const mediaSpan = $("#rankingMediaProcesos");
-      if (topSpan && mediaSpan) {
-        if (arr.length) {
-          topSpan.textContent = arr[0].nombre;
-          const mediaProc = Math.round(arr.reduce((s,d)=> s + d.procesos, 0) / arr.length);
-          mediaSpan.textContent = mediaProc + "%";
-        } else {
-          topSpan.textContent = "–";
-          mediaSpan.textContent = "–";
-        }
+      if (arr.length) {
+        topSpan.textContent = arr[0].nombre;
+        const mediaProc = Math.round(arr.reduce((s,d)=> s + d.procesos, 0) / arr.length);
+        mediaSpan.textContent = mediaProc + "%";
+      } else {
+        topSpan.textContent = "–";
+        mediaSpan.textContent = "–";
       }
     }
 
@@ -2050,20 +2039,19 @@
       rankingToggle.textContent = rankingExpandido ? "Ocultar" : "Mostrar todos";
     });
 
-    /* ========= BUSCADOR ========= */
+    /* BUSCADOR */
     $("#searchGlobal").addEventListener("input", e => {
       filtroTextoActual = e.target.value || "";
       renderTablaCentros();
     });
 
-    /* ========= EXCEL CENTROS ========= */
+    /* EXCEL CENTROS */
     const inputExcel = $("#inputExcel");
     $("#btnAdjuntarExcel").addEventListener("click", () => inputExcel.click());
 
     inputExcel.addEventListener("change", e => {
       const file = e.target.files[0];
       if (!file) return;
-
       const reader = new FileReader();
       reader.onload = evt => {
         const data = new Uint8Array(evt.target.result);
@@ -2093,7 +2081,7 @@
       reader.readAsArrayBuffer(file);
     });
 
-    /* ========= NUEVO CENTRO MANUAL ========= */
+    /* NUEVO CENTRO */
     $("#btnAddCentro").addEventListener("click", () => {
       $("#nuevoCodigo").value = "";
       $("#nuevoPropietario").value = "";
@@ -2129,17 +2117,16 @@
       });
     }
 
-    /* ========= CALENDARIO + VISITAS ========= */
+    /* CALENDARIO + VISITAS */
     const calendarGrid = $("#calendarGrid");
-    const calTitulo = $("#calTitulo");
+    const calTitulo    = $("#calTitulo");
     let calYear, calMonth;
-
     const visitas = [];
     let visitaActual = null;
 
     function initCalendar() {
       const now = new Date();
-      calYear = now.getFullYear();
+      calYear  = now.getFullYear();
       calMonth = now.getMonth();
       drawCalendar();
     }
@@ -2147,11 +2134,13 @@
     function drawCalendar() {
       calendarGrid.innerHTML = "";
       const first = new Date(calYear, calMonth, 1);
-      const dow = (first.getDay()+6)%7;
-      const last = new Date(calYear, calMonth+1, 0).getDate();
+      const dow   = (first.getDay()+6)%7;
+      const last  = new Date(calYear, calMonth+1, 0).getDate();
 
       const formatter = new Intl.DateTimeFormat("es-ES", {month:"long", year:"numeric"});
-      calTitulo.textContent = formatter.format(new Date(calYear, calMonth, 1)).replace(/^\w/, c=>c.toUpperCase());
+      calTitulo.textContent = formatter
+        .format(new Date(calYear, calMonth, 1))
+        .replace(/^\w/, c=>c.toUpperCase());
 
       const totalCells = 42;
       for (let i=0;i<totalCells;i++) {
@@ -2198,15 +2187,12 @@
     }
 
     $("#btnGuardarVisita").addEventListener("click", () => {
-      const iso = $("#visitaFecha").dataset.iso;
-      const resp = $("#visitaResp").value;
+      const iso   = $("#visitaFecha").dataset.iso;
+      const resp  = $("#visitaResp").value;
       const centroNombre = $("#visitaCentro").value.trim();
-      if (!centroNombre) {
-        alert("Indica el centro.");
-        return;
-      }
+      if (!centroNombre) { alert("Indica el centro."); return; }
       const centroObj = centros.find(c=>c.centro===centroNombre);
-      const delegado = centroObj ? centroObj.delegado : "N/D";
+      const delegado  = centroObj ? centroObj.delegado : "N/D";
       visitas.push({
         fecha: iso,
         centro: centroNombre,
@@ -2220,7 +2206,6 @@
     });
 
     const visitasList = $("#visitasList");
-
     function renderVisitas() {
       visitasList.innerHTML = "";
       visitas.sort((a,b)=>a.fecha.localeCompare(b.fecha));
@@ -2246,13 +2231,9 @@
       });
     }
 
-    /* ========= MODALES ========= */
-    function abrirModal(id) {
-      document.getElementById(id).style.display = "flex";
-    }
-    function cerrarModal(id) {
-      document.getElementById(id).style.display = "none";
-    }
+    /* MODALES GENÉRICOS */
+    function abrirModal(id){ document.getElementById(id).style.display = "flex"; }
+    function cerrarModal(id){ document.getElementById(id).style.display = "none"; }
     $$(".modal-close").forEach(el=>{
       el.addEventListener("click", ()=> cerrarModal(el.dataset.close));
     });
@@ -2262,7 +2243,7 @@
       });
     });
 
-    /* ========= INFORME VISITA ========= */
+    /* INFORME / KPIs CENTRO */
     let centroChartsCreated = false;
     const centroCharts = {};
     let centroMetricsActual = null;
@@ -2298,9 +2279,9 @@
       $("#kpiConvVenta").textContent  = avgVent + "%";
       $("#kpiHIT").textContent        = avgHit + "%";
       $("#kpiFormaciones").textContent = avgForm + "%";
-      $("#kpiAyuda").textContent = ayudaPct === 0 ? "No" : `Sí ${ayudaPct}%`;
-      $("#kpiAar").textContent   = aarPct === 0 ? "No" : `Sí ${aarPct}%`;
-      $("#kpiPrimeros").textContent = primerosPct === 0 ? "No" : `Sí ${primerosPct}%`;
+      $("#kpiAyuda").textContent      = ayudaPct === 0 ? "No" : `Sí ${ayudaPct}%`;
+      $("#kpiAar").textContent        = aarPct === 0 ? "No" : `Sí ${aarPct}%`;
+      $("#kpiPrimeros").textContent   = primerosPct === 0 ? "No" : `Sí ${primerosPct}%`;
 
       globalCharts.radarGeneral.data.datasets[0].data = [
         avgProc, avgPrue, avgVent, avgHit
@@ -2311,17 +2292,14 @@
     function getChecklistFlags() {
       const q = sel => document.querySelector(`input[data-kpi="${sel}"]`);
       const isChecked = sel => !!(q(sel) && q(sel).checked);
-
       const audioKeys = [
         "audio_test","audio_screening","audio_manteleta",
         "audio_escaparate","audio_salud","audio_renove"
       ];
       const audioCount = audioKeys.reduce((acc,k)=> acc + (isChecked(k)?1:0), 0);
       const elemAudio = audioCount >= 3;
-
-      const aar = centroActual ? (centroActual.aar === "Sí") : false;
+      const aar   = centroActual ? (centroActual.aar === "Sí") : false;
       const ayuda = isChecked("telecare") || isChecked("pia") || isChecked("telehear");
-
       return {
         aar,
         hit: isChecked("hit"),
@@ -2348,10 +2326,189 @@
       return { formaciones, screening };
     }
 
+    /* 80 CRITERIOS: estructura global */
+    const criteriosGlobal = new Map(); // nombre -> {nombre, suma, total}
+    let ultimoChecklistCentro = null;  // {centro, data}
+    const globalCharts = {};
+
+    function normalizarPorcentaje(v) {
+      if (v == null || v === "") return 0;
+      let num = v;
+      if (typeof num !== "number") {
+        num = parseFloat(String(num).replace(",", "."));
+        if (isNaN(num)) return 0;
+      }
+      if (num <= 1) return Math.round(num * 100);
+      return Math.round(num);
+    }
+
+    function parseChecklistRows(rows, tipo) {
+      const criterios = [];
+      let rStart, rEnd, colCrit, colRes, filaProc, colProc, filaHit, colHit, filaPrueba, colPrueba, filaVenta, colVenta;
+
+      if (tipo === "EXCLUSIVO") {
+        rStart = 7;  rEnd = 101; colCrit = 1; colRes = 5;
+        filaProc = 103; colProc = 5;
+        filaHit  = 64;  colHit  = 5;
+        filaPrueba = 125; colPrueba = 8; // I
+        filaVenta  = 126; colVenta  = 8;
+      } else { // CORNER por defecto
+        rStart = 6;  rEnd = 87; colCrit = 1; colRes = 5;
+        filaProc = 89; colProc = 5;
+        filaHit  = 62; colHit  = 5;
+        filaPrueba = 91; colPrueba = 1; // B
+        filaVenta  = 92; colVenta  = 1;
+      }
+
+      for (let r=rStart; r<=rEnd && r<rows.length; r++) {
+        const row = rows[r] || [];
+        const nombre = row[colCrit];
+        if (!nombre) continue;
+        const val = row[colRes];
+        const aplica = Number(val) === 1 ? 1 : 0;
+        criterios.push({ nombre: String(nombre).trim(), aplica });
+      }
+
+      const procesosRaw = (rows[filaProc] || [])[colProc];
+      const hitRaw      = (rows[filaHit]  || [])[colHit];
+      const pruebaRaw   = (rows[filaPrueba] || [])[colPrueba];
+      const ventaRaw    = (rows[filaVenta]  || [])[colVenta];
+
+      const procesosPct   = normalizarPorcentaje(procesosRaw);
+      const convPruebaPct = normalizarPorcentaje(pruebaRaw);
+      const convVentaPct  = normalizarPorcentaje(ventaRaw);
+      const hit           = Number(hitRaw) === 1;
+
+      const areasMejora = criterios.filter(c => !c.aplica).length;
+
+      return { tipo, procesosPct, convPruebaPct, convVentaPct, hit, criterios, areasMejora };
+    }
+
+    function integrarChecklistEnMetricas(centroNombre, parsed) {
+      parsed.criterios.forEach(c => {
+        const key = c.nombre || "Criterio";
+        let obj = criteriosGlobal.get(key);
+        if (!obj) {
+          obj = { nombre:key, suma:0, total:0 };
+          criteriosGlobal.set(key, obj);
+        }
+        obj.suma  += c.aplica ? 1 : 0;
+        obj.total += 1;
+      });
+      actualizarGraficoCriterios();
+    }
+
+    function actualizarGraficoCriterios() {
+      const lista = Array.from(criteriosGlobal.values()).map(o => ({
+        nombre: o.nombre,
+        pct: o.total ? Math.round(100 * o.suma / o.total) : 0
+      }));
+      if (!lista.length) return;
+
+      lista.sort((a,b)=>b.pct - a.pct);
+      const maxCriterios = 82;
+      const top = lista.slice(0, maxCriterios);
+      const labels = top.map(i => i.nombre);
+      const data   = top.map(i => i.pct);
+      const colors = top.map(i =>
+        i.pct >= 100 ? "#16a34a" :
+        i.pct >= 85  ? "#22c55e" :
+                       "#ef4444"
+      );
+
+      const msg = $("#criteriosEmptyMsg");
+      if (msg) msg.style.display = "none";
+
+      if (!globalCharts.criteriosDetalle) {
+        const ctx = document.getElementById("chartCriteriosDetalle").getContext("2d");
+        globalCharts.criteriosDetalle = new Chart(ctx, {
+          type: "bar",
+          data: {
+            labels,
+            datasets: [{
+              label: "% aplicación criterio",
+              data,
+              backgroundColor: colors,
+              borderWidth: 1
+            }]
+          },
+          options: {
+            indexAxis: "y",
+            animation: false,
+            plugins: {
+              legend: { display:false },
+              tooltip: {
+                callbacks: {
+                  label: ctx => `${ctx.parsed.x}%`
+                }
+              }
+            },
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: {
+                min: 0,
+                max: 110,
+                ticks: {
+                  color: getComputedStyle(document.body).getPropertyValue("--text-muted"),
+                  callback: v => v + "%"
+                },
+                grid: { color: "rgba(31,41,55,0.3)" }
+              },
+              y: {
+                ticks: {
+                  color: getComputedStyle(document.body).getPropertyValue("--text-muted"),
+                  font: { size: 9 }
+                },
+                grid: { display:false }
+              }
+            }
+          }
+        });
+      } else {
+        const ch = globalCharts.criteriosDetalle;
+        ch.data.labels = labels;
+        ch.data.datasets[0].data = data;
+        ch.data.datasets[0].backgroundColor = colors;
+        ch.update();
+      }
+    }
+
+    function procesarChecklist(file, centroNombre) {
+      const reader = new FileReader();
+      reader.onload = evt => {
+        try {
+          const data = new Uint8Array(evt.target.result);
+          const workbook = XLSX.read(data, { type: "array" });
+          const sheetName = workbook.SheetNames[0];
+          const sheet = workbook.Sheets[sheetName];
+          const rows = XLSX.utils.sheet_to_json(sheet, { header:1 });
+          const nameUpper = file.name.toUpperCase();
+          let tipo = "CORNER";
+          if (nameUpper.includes("EXCLUSIVO")) tipo = "EXCLUSIVO";
+          else if (nameUpper.includes("CORNER")) tipo = "CORNER";
+          const parsed = parseChecklistRows(rows, tipo);
+          ultimoChecklistCentro = { centro: centroNombre, data: parsed };
+          integrarChecklistEnMetricas(centroNombre, parsed);
+          // Refrescar KPIs de centro con datos reales del checklist
+          $("#kpiCentroProcesos").textContent = parsed.procesosPct + "%";
+          $("#kpiCentroPrueba").textContent   = parsed.convPruebaPct + "%";
+          $("#kpiCentroVenta").textContent    = parsed.convVentaPct + "%";
+          $("#kpiCentroHit").textContent      = parsed.hit ? "Sí" : "No";
+          // Actualizar charts de centro si ya están creados
+          actualizarChartsCentro();
+        } catch (err) {
+          console.error(err);
+          alert("No se ha podido leer el checklist. Revisa el formato (CORNER / EXCLUSIVO).");
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    /* CHARTS CENTRO */
     function crearChartsCentro() {
       if (centroChartsCreated) return;
       centroChartsCreated = true;
-
       const radarCtx = document.getElementById("chartCentroRadar").getContext("2d");
       centroCharts.radar = new Chart(radarCtx, {
         type: "radar",
@@ -2606,14 +2763,25 @@
     function actualizarChartsCentro() {
       if (!centroChartsCreated) return;
       const { formaciones, screening } = calcularFormacionesYScreening();
-      const procesos = 90;
-      const convPrueba = 82;
-      const convVenta = 78;
-      const flags = getChecklistFlags();
-      const hitVal = flags.hit ? 90 : 70;
-      const areasMejora = 4; // demo
+      let procesos   = 90;
+      let convPrueba = 82;
+      let convVenta  = 78;
+      let hitVal     = 80;
+      let areasMejora = 4;
 
-      centroMetricsActual = { procesos, convPrueba, convVenta, hit: hitVal, formaciones, screening, areasMejora };
+      const parsed = (ultimoChecklistCentro && centroActual && ultimoChecklistCentro.centro === centroActual.centro)
+        ? ultimoChecklistCentro.data
+        : null;
+
+      if (parsed) {
+        procesos    = parsed.procesosPct;
+        convPrueba  = parsed.convPruebaPct;
+        convVenta   = parsed.convVentaPct;
+        areasMejora = parsed.areasMejora;
+        hitVal      = parsed.hit ? 90 : 60;
+      }
+
+      const flags = getChecklistFlags();
 
       $("#kpiCentroProcesos").textContent = procesos + "%";
       $("#kpiCentroPrueba").textContent   = convPrueba + "%";
@@ -2641,15 +2809,16 @@
       centroCharts.donut.data.datasets[0].data = [siCount, noCount];
       centroCharts.donut.update();
 
-      // Resumen
       centroCharts.procResumen.data.datasets[0].data = [procesos, 100-procesos];
       centroCharts.procResumen.update();
 
-      centroCharts.areasResumen.data.datasets[0].data = [areasMejora, 10-areasMejora];
+      centroCharts.areasResumen.data.datasets[0].data = [areasMejora, Math.max(0, 10-areasMejora)];
       centroCharts.areasResumen.update();
 
       centroCharts.convResumen.data.datasets[0].data = [convPrueba, convVenta];
       centroCharts.convResumen.update();
+
+      centroMetricsActual = { procesos, convPrueba, convVenta, hit: hitVal, formaciones, screening, areasMejora };
     }
 
     document.addEventListener("change", e => {
@@ -2661,24 +2830,16 @@
 
     function irAInforme(centroNombre, fechaIso) {
       const c = centros.find(x => x.centro === centroNombre) || centros[0];
-      if (!c) {
-        alert("No hay centros cargados todavía.");
-        return;
-      }
+      if (!c) { alert("No hay centros cargados todavía."); return; }
       centroActual = c;
-
-      $$(".nav-item").forEach(i => {
-        i.classList.toggle("active", i.dataset.page === "informe");
-      });
+      $$(".nav-item").forEach(i => i.classList.toggle("active", i.dataset.page === "informe"));
       pages.forEach(p => p.classList.toggle("active", p.dataset.page === "informe"));
-
-      $("#infCentro").value = c.centro;
+      $("#infCentro").value    = c.centro;
       $("#infProvincia").value = c.provincia;
-      $("#infDelegado").value = c.delegado;
-      $("#infTipo").value = tipoCentro(c.centro);
+      $("#infDelegado").value  = c.delegado;
+      $("#infTipo").value      = tipoCentro(c.centro);
       $("#infRespAudio").value = "Ariannys Rojas / Sonia Guasque";
-      $("#infFecha").value = fechaIso ? formatDateHuman(fechaIso) : formatDateHuman(new Date().toISOString().slice(0,10));
-
+      $("#infFecha").value     = fechaIso ? formatDateHuman(fechaIso) : formatDateHuman(new Date().toISOString().slice(0,10));
       crearChartsCentro();
       actualizarChartsCentro();
     }
@@ -2703,8 +2864,13 @@
     $("#btnAdjuntarChecklist").addEventListener("click", ()=> $("#inputChecklist").click());
     $("#inputChecklist").addEventListener("change", e => {
       const file = e.target.files[0];
-      if (file) $("#nombreChecklist").textContent = file.name;
-      else $("#nombreChecklist").textContent = "";
+      if (file) {
+        $("#nombreChecklist").textContent = file.name;
+        const centroNombre = centroActual ? centroActual.centro : "Centro sin asignar";
+        procesarChecklist(file, centroNombre);
+      } else {
+        $("#nombreChecklist").textContent = "";
+      }
     });
 
     $$(".imagen-preview").forEach(div => {
@@ -2714,7 +2880,6 @@
         if (input) input.click();
       });
     });
-
     $$('input[data-input-img]').forEach(input => {
       input.addEventListener("change", e => {
         const file = e.target.files[0];
@@ -2732,7 +2897,6 @@
 
     $("#btnGuardarInforme").addEventListener("click", () => {
       actualizarChartsCentro();
-
       if (centroMetricsActual && centroActual) {
         const flags = getChecklistFlags();
         dashboardAcum.procesos   += centroMetricsActual.procesos;
@@ -2746,23 +2910,18 @@
         dashboardAcum.areas      += centroMetricsActual.areasMejora || 0;
         dashboardAcum.n += 1;
         actualizarDashboardDesdeAcum();
-
         informesPorCentro[centroActual.centro] = (informesPorCentro[centroActual.centro] || 0) + 1;
         renderTablaCentros();
       }
-
       if (visitaActual) {
         visitaActual.estado = "finalizada";
         renderVisitas();
         visitaActual = null;
       }
-
       alert("Informe guardado (demo). Se han actualizado los KPIs del dashboard.");
     });
 
-    /* ========= DASHBOARD CHARTS ========= */
-    const globalCharts = {};
-
+    /* CHARTS DASHBOARD GLOBAL */
     function initDashboardCharts() {
       const radarCtx = document.getElementById("chartRadarGeneral").getContext("2d");
       globalCharts.radarGeneral = new Chart(radarCtx, {
@@ -2923,7 +3082,7 @@
       });
     }
 
-    /* ========= DEMO CENTROS ========= */
+    /* DEMO CENTROS */
     function cargarCentrosDemo() {
       const demo = [
         { codigo:"4ABB", propietario:"MAZA Oriol", centro:"PAMPLONA C. Exclusivo", provincia:"NAVARRA", delegado:"Sonia Godino" },
