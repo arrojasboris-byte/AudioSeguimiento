@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html lang="es"><head>
+<html lang="es">
+<head>
   <meta charset="UTF-8">
-  <title>Control Center Audio</title>
+  <title>Control Center Audio - Plataforma Integral</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -9,9 +10,9 @@
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
   <style>
-    /* ==============================================
-       TU CSS ORIGINAL (MANTENIDO AL 100%) 
-       ============================================== */
+    /* =========================================
+       ESTILOS GENERALES Y TEMA
+       ========================================= */
     :root {
       --bg-main: radial-gradient(circle at top left, #111827, #020617 55%);
       --bg-card: #020617;
@@ -37,1167 +38,200 @@
       --border-soft: #e5e7eb;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
-    }
-
-    html, body {
-      width: 100%;
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-
-    body {
-      background: var(--bg-main);
-      color: var(--text-main);
-      display: flex;
-      overflow-x: hidden;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+    html, body { width: 100%; min-height: 100vh; overflow-x: hidden; }
+    body { background: var(--bg-main); color: var(--text-main); display: flex; font-size: 14px; }
 
     /* SIDEBAR */
-    .sidebar {
-      width: 250px;
-      background: #020617;
-      border-right: 1px solid #020617;
-      padding: 18px 18px 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 24px;
-      color: #e5e7eb;
-      flex-shrink: 0;
-    }
+    .sidebar { width: 260px; background: #020617; border-right: 1px solid var(--border-soft); padding: 20px; display: flex; flex-direction: column; gap: 20px; flex-shrink: 0; height: 100vh; position: sticky; top: 0; overflow-y: auto; z-index: 50; }
+    .logo { display: flex; align-items: center; gap: 12px; padding-bottom: 15px; border-bottom: 1px solid var(--border-soft); }
+    .logo-badge { width: 38px; height: 38px; border-radius: 50%; background: radial-gradient(circle at 30% 20%, #fee2e2, var(--accent-red)); }
+    .logo-text { display: flex; flex-direction: column; }
+    .logo-title { font-weight: 800; font-size: 1.1rem; }
+    .logo-subtitle { font-size: .75rem; color: var(--text-muted); }
+    .nav-list { display: flex; flex-direction: column; gap: 6px; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 15px; border-radius: 12px; font-size: .9rem; color: var(--text-muted); cursor: pointer; transition: all .2s; }
+    .nav-item:hover { background: rgba(255,255,255,0.05); color: #fff; }
+    .nav-item.active { background: linear-gradient(90deg, #ff2440, #fb7185); color: #fff; font-weight: 600; box-shadow: 0 4px 12px rgba(255,36,64,0.3); }
+    .sidebar-footer { margin-top: auto; font-size: .75rem; color: #6b7280; text-align: center; border-top: 1px solid var(--border-soft); padding-top: 20px; }
 
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
+    /* MAIN CONTENT */
+    .main { flex: 1; padding: 15px 25px; display: flex; flex-direction: column; gap: 20px; max-width: 100%; overflow-x: hidden; }
 
-    .logo-badge {
-      width: 34px;
-      height: 34px;
-      border-radius: 999px;
-      background: radial-gradient(circle at 30% 20%, #fee2e2, var(--accent-red));
-    }
+    /* TOPBAR */
+    .topbar { display: flex; align-items: center; gap: 15px; background: var(--bg-card); padding: 12px 20px; border-radius: 16px; border: 1px solid var(--border-soft); }
+    .topbar-search { flex: 1; max-width: 400px; position: relative; }
+    .topbar-search input { width: 100%; border-radius: 12px; padding: 10px 15px 10px 40px; border: 1px solid var(--border-soft); background: var(--bg-card-soft); color: var(--text-main); outline: none; }
+    .topbar-search span { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
+    .topbar-info { font-size: .9rem; color: var(--text-muted); border-left: 1px solid var(--border-soft); padding-left: 20px; margin-left: 10px; }
+    .topbar-buttons { margin-left: auto; display: flex; gap: 10px; }
+    .btn { border-radius: 99px; padding: 8px 16px; border: 1px solid var(--border-soft); background: var(--bg-card-soft); color: var(--text-main); cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: .85rem; }
+    .btn:hover { background: var(--border-soft); }
+    .btn-cta { background: linear-gradient(90deg, #3b82f6, #22c55e); color: #fff; border: none; font-weight: 600; }
 
-    .logo-text {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .logo-title {
-      font-weight: 700;
-      font-size: 1.05rem;
-    }
-
-    .logo-subtitle {
-      font-size: .7rem;
-      color: #9ca3af;
-    }
-
-    .section-title {
-      font-size: .75rem;
-      text-transform: uppercase;
-      color: #6b7280;
-      letter-spacing: .12em;
-      margin-bottom: 8px;
-    }
-
-    .nav-list {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .nav-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 8px 10px;
-      border-radius: 999px;
-      font-size: .88rem;
-      color: #9ca3af;
-      cursor: pointer;
-      transition: all .18s ease;
-    }
-
-    .nav-item span.icon {
-      width: 22px;
-      height: 22px;
-      border-radius: 999px;
-      background: #020617;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: .75rem;
-    }
-
-    .nav-item.active {
-      background: linear-gradient(90deg, #ff2440, #fb7185);
-      color: #111827;
-      font-weight: 600;
-    }
-
-    .nav-item.active span.icon {
-      background: rgba(15,23,42,.2);
-    }
-
-    .nav-item:hover:not(.active) {
-      background: rgba(31,41,55,0.7);
-      color: #e5e7eb;
-    }
-
-    body.light .nav-item:hover:not(.active) {
-      background: rgba(15,23,42,0.2);
-    }
-
-    .sidebar-footer {
-      margin-top: auto;
-      font-size: .78rem;
-      color: #9ca3af;
-    }
-
-    /* MAIN LAYOUT */
-    .main {
-      flex: 1;
-      padding: 10px 18px 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      max-width: 1600px;
-      margin: 0 auto;
-      box-sizing: border-box;
-    }
-
-    .topbar {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 4px;
-      flex-wrap: wrap;
-    }
-
-    .topbar-search {
-      flex: 1 1 260px;
-      position: relative;
-      min-width: 220px;
-    }
-
-    .topbar-search input {
-      width: 100%;
-      border-radius: 999px;
-      padding: 8px 14px 8px 30px;
-      border: 1px solid var(--border-soft);
-      background: var(--bg-card);
-      color: var(--text-main);
-      font-size: .86rem;
-      outline: none;
-    }
-
-    .topbar-search span {
-      position: absolute;
-      left: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: .8rem;
-      color: var(--text-muted);
-    }
-    
-    /* AÑADIDO: Contador discreto en cabecera */
-    .topbar-info {
-        font-size: .8rem;
-        color: var(--text-muted);
-        border-left: 1px solid var(--border-soft);
-        padding-left: 15px;
-        margin-left: 10px;
-    }
-
-    .topbar-buttons {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-    }
-
-    .btn {
-      border-radius: 999px;
-      padding: 6px 12px;
-      border: 1px solid var(--border-soft);
-      font-size: .8rem;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: var(--bg-card);
-      color: var(--text-main);
-      white-space: nowrap;
-      box-shadow: none;
-    }
-
-    .btn-cta {
-      background: linear-gradient(90deg, #ff2440, #fb7185);
-      color: #111827;
-      font-weight: 600;
-      border-color: transparent;
-    }
-
-    .btn span.icon {
-      font-size: .85rem;
-    }
+    /* CARDS & GRID */
+    .card { background: var(--bg-card); border-radius: 16px; padding: 16px; border: 1px solid var(--border-soft); display: flex; flex-direction: column; min-width: 0; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    .card-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.03); padding-bottom: 8px; }
+    .card-title { font-size: 1rem; font-weight: 700; }
+    .badge-small { font-size: .75rem; padding: 4px 10px; border-radius: 99px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-soft); color: var(--text-muted); }
 
     /* PAGES */
-    .pages {
-      flex: 1;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      max-width: 100%;
-    }
-
-    .page {
-      flex: 1;
-      display: none;
-      overflow-y: auto;
-      overflow-x: hidden;
-      max-width: 100%;
-    }
-
-    .page.active {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .card {
-      background: var(--bg-card);
-      border-radius: 14px;
-      padding: 10px;
-      border: 1px solid var(--border-soft);
-      display: flex;
-      flex-direction: column;
-      min-width: 0;
-    }
-
-    .card-title {
-      font-size: .9rem;
-      font-weight: 600;
-    }
-
-    .card-sub {
-      font-size: .72rem;
-      color: var(--text-muted);
-      margin-top: 2px;
-    }
-
-    .card-header-row {
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      gap: 6px;
-      margin-bottom: 4px;
-    }
-
-    .badge-small {
-      font-size: .7rem;
-      padding: 2px 6px;
-      border-radius: 999px;
-      background: #111827;
-      color: #9ca3af;
-      border: 1px solid var(--border-soft);
-    }
-
-    body.light .badge-small {
-      background: #e5e7eb;
-    }
-
-    .chip-estado {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 2px 8px;
-      border-radius: 999px;
-      font-size: .7rem;
-      font-weight: 500;
-      color: #111827;
-      background: #9ca3af;
-    }
-
-    .chip-estado.pendiente    { background: var(--chip-pendiente); }
-    .chip-estado.enproceso    { background: var(--chip-enproceso); }
-    .chip-estado.finalizada   { background: var(--chip-finalizada); }
-
-    .btn-chip {
-      border-radius: 999px;
-      border: 1px solid var(--border-soft);
-      background: transparent;
-      font-size: .72rem;
-      padding: 2px 6px;
-      cursor: pointer;
-      color: var(--accent-blue);
-    }
-
-    /* DASHBOARD GRID */
-    .dashboard-grid {
-      display: grid;
-      grid-template-columns: minmax(0, 1.7fr) minmax(0, 1.3fr);
-      gap: 10px;
-      min-height: 0;
-      align-items: flex-start;
-      width: 100%;
-      box-sizing: border-box;
-    }
-
-    .dashboard-right-column {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      min-height: 0;
-    }
-
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0,1fr));
-      gap: 6px;
-      margin-bottom: 6px;
-    }
-
-    .kpi-card {
-      background: var(--bg-card-soft);
-      border-radius: 10px;
-      padding: 6px 8px;
-      border: 1px solid var(--border-soft);
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    .kpi-label {
-      font-size: .72rem;
-      color: var(--text-muted);
-    }
-
-    .kpi-value {
-      font-size: .98rem;
-      font-weight: 600;
-    }
-
-    .kpi-caption {
-      font-size: .7rem;
-      color: var(--text-muted);
-    }
-
-    .dashboard-charts {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0,1fr));
-      gap: 8px;
-      min-height: 0;
-    }
-
-    .chart-container {
-      position: relative;
-      width: 100%;
-      min-height: 160px;
-      max-height: 240px;
-    }
-
-    .chart-container.centered {
-      display:flex;
-      align-items:center;
-      justify-content:center;
-    }
-
-    .chart-container canvas {
-      position: relative;
-      inset: auto !important;
-      width: 100% !important;
-      height: 100% !important;
-      display: block;
-      box-sizing: border-box;
-    }
-
-    /* contenedor específico para los 80 criterios */
-    .criterios-container {
-      min-height: 260px;
-      max-height: 320px;
-      overflow-y: auto; /* scroll vertical para ver todos los criterios */
-    }
-
-    .ranking-list {
-      font-size: .78rem;
-      margin-top: 4px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .ranking-row {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      justify-content: space-between;
-      padding:3px 0;
-      border-bottom: 1px dashed rgba(148,163,184,0.3);
-    }
-
-    .ranking-main {
-      display:flex;
-      align-items:center;
-      gap:6px;
-    }
-
-    .ranking-bar {
-      height: 5px;
-      border-radius:999px;
-      background: var(--bg-card-soft);
-      flex: 1;
-      overflow:hidden;
-    }
-
-    .ranking-bar span {
-      display:block;
-      height:100%;
-      background: linear-gradient(90deg,#22c55e,#38bdf8);
-    }
-
-    .ranking-row.extra-hidden {
-      display:none;
-    }
-
-    .ranking-toggle {
-      margin-top:6px;
-      font-size:.76rem;
-      color:var(--accent-blue);
-      cursor:pointer;
-      text-align:right;
-    }
-
-    .ranking-summary {
-      margin-top: 8px;
-      padding-top: 6px;
-      border-top: 1px dashed rgba(148,163,184,0.4);
-      font-size: .76rem;
-      color: var(--text-muted);
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    .ranking-summary-item span {
-      font-weight: 600;
-      color: var(--text-main);
-    }
-
-    /* CENTROS PAGE Y DEMÁS (igual que antes) */
-    .centros-top {
-      display: grid;
-      grid-template-columns: 1.2fr 1.2fr 1fr;
-      gap: 10px;
-      min-height: 210px;
-    }
-
-    .delegados-list {
-      margin-top: 6px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      max-height: 160px;
-      overflow: auto;
-    }
-
-    .delegado-card {
-      background: var(--bg-card-soft);
-      border-radius: 10px;
-      padding: 4px 6px;
-      border: 1px solid var(--border-soft);
-      cursor: pointer;
-    }
-
-    .delegado-header {
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:6px;
-    }
-
-    .delegado-main {
-      display:flex;
-      align-items:center;
-      gap:6px;
-      font-size:.8rem;
-    }
-
-    .delegado-color {
-      width:8px;
-      height:8px;
-      border-radius:999px;
-    }
-
-    .delegado-count {
-      font-size:.72rem;
-      color:var(--text-muted);
-    }
-
-    .delegado-bar {
-      margin-top:3px;
-      height:4px;
-      border-radius:999px;
-      background:var(--border-soft);
-      overflow:hidden;
-    }
-
-    .delegado-bar span {
-      display:block;
-      height:100%;
-      width:100%;
-      background:linear-gradient(90deg,#38bdf8,#fb7185);
-    }
-
-    .delegado-card.active {
-      outline:1px solid var(--accent-blue);
-    }
-
-    .calendar-wrapper {
-      display:flex;
-      flex-direction:column;
-      gap:4px;
-      height:100%;
-    }
-
-    .calendar-header {
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      font-size:.85rem;
-      font-weight:700;
-    }
-
-    .calendar-header button {
-      border-radius:999px;
-      width:24px;
-      height:24px;
-      border:1px solid var(--border-soft);
-      background:transparent;
-      color:var(--text-main);
-      cursor:pointer;
-      font-size:.8rem;
-    }
-
-    .calendar-weekdays {
-      display:grid;
-      grid-template-columns: repeat(7, minmax(0,1fr));
-      font-size:.7rem;
-      margin-top:4px;
-      color:var(--text-muted);
-      text-align:center;
-    }
-
-    .calendar-grid {
-      margin-top:4px;
-      display:grid;
-      grid-template-columns: repeat(7, minmax(0,1fr));
-      grid-template-rows: repeat(6, 42px);
-      gap:4px;
-      flex:1;
-    }
-
-    .cal-cell {
-      border-radius:10px;
-      border:1px solid var(--border-soft);
-      background:var(--bg-card-soft);
-      font-size:.8rem;
-      display:flex;
-      flex-direction:column;
-      align-items:flex-start;
-      justify-content:flex-start;
-      padding:3px 4px;
-      cursor:pointer;
-      position:relative;
-    }
-
-    .cal-cell.empty {
-      background:transparent;
-      border-style:dashed;
-      cursor:default;
-    }
-
-    .cal-day {
-      font-size:.78rem;
-    }
-
-    .cal-event {
-      position:absolute;
-      bottom:4px;
-      left:4px;
-      display:flex;
-      align-items:center;
-      gap:3px;
-      font-size:.7rem;
-    }
-
-    .cal-dot {
-      width:6px;
-      height:6px;
-      border-radius:999px;
-      background:#facc15;
-    }
-
-    .cal-letter {
-      font-weight:600;
-    }
-
-    .visitas-list {
-      flex:1;
-      overflow:auto;
-      font-size:.78rem;
-      display:flex;
-      flex-direction:column;
-      gap:4px;
-    }
-
-    .visita-row {
-      border-radius:10px;
-      border:1px solid var(--border-soft);
-      padding:4px 6px;
-      background:var(--bg-card-soft);
-      display:flex;
-      flex-direction:column;
-      gap:2px;
-    }
-
-    .visita-row-line {
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:4px;
-    }
-
-    .visita-row-main {
-      font-weight:500;
-    }
-
-    .visita-row-secondary {
-      color:var(--text-muted);
-      font-size:.72rem;
-    }
-
-    .visita-actions {
-      margin-top:2px;
-      display:flex;
-      justify-content:flex-end;
-      gap:4px;
-    }
-
-    .table-wrapper {
-      flex:1;
-      background: var(--bg-card);
-      border-radius: 14px;
-      border: 1px solid var(--border-soft);
-      display: flex;
-      flex-direction: column;
-      min-height: 0;
-    }
-
-    .table-header {
-      padding: 8px 10px 6px;
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-    }
-
-    .table-header h3 {
-      font-size: .9rem;
-    }
-
-    .table-header span {
-      font-size: .72rem;
-      color: var(--text-muted);
-    }
-
-    .table-scroll {
-      flex: 1;
-      overflow: auto;
-      border-top: 1px solid var(--border-soft);
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: .78rem;
-    }
-
-    thead {
-      position: sticky;
-      top: 0;
-      background: var(--bg-card);
-      z-index: 2;
-    }
-
-    th, td {
-      padding: 6px 8px;
-      border-bottom: 1px solid #0b1120;
-      text-align: left;
-      white-space: nowrap;
-    }
-
-    th {
-      font-weight: 600;
-      font-size: .75rem;
-      color: var(--text-muted);
-    }
-
-    tbody tr:nth-child(even) {
-      background: var(--bg-card-soft);
-    }
-
-    tbody tr:hover {
-      background: rgba(15,23,42,0.8);
-    }
-
-    body.light tbody tr:nth-child(even) {
-      background:#f3f4f6;
-    }
-    body.light tbody tr:hover {
-      background:#e5e7eb;
-    }
-
-    .tag {
-      border-radius: 999px;
-      padding: 2px 6px;
-      font-size: .7rem;
-      border: 1px solid var(--border-soft);
-      background: #0b1120;
-    }
-
-    .tag.exclusivo {
-      background: rgba(22,163,74,0.15);
-      color: var(--accent-green);
-      border-color: rgba(22,163,74,0.7);
-    }
-
-    .tag.corner {
-      background: rgba(37,99,235,0.15);
-      color: var(--accent-blue);
-      border-color: rgba(37,99,235,0.7);
-    }
-
-    .tag-aar {
-      background: rgba(148,163,184,0.15);
-      border-color: rgba(148,163,184,0.7);
-      color: var(--text-muted);
-    }
-
-    .tag-aar.si {
-      background: rgba(34,197,94,0.15);
-      border-color: rgba(34,197,94,0.7);
-      color: var(--accent-green);
-    }
-
-    .tag-aar.formacion {
-      background: rgba(234,179,8,0.15);
-      border-color: rgba(234,179,8,0.7);
-      color: #eab308;
-    }
-
-    .btn-link {
-      border: none;
-      background: transparent;
-      color: var(--accent-blue);
-      cursor: pointer;
-      font-size: .74rem;
-      text-decoration: underline;
-    }
-
-    .informe-layout {
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-      min-height:0;
-    }
-
-    .informe-top {
-      display:grid;
-      grid-template-columns: 1.3fr 1fr;
-      gap:10px;
-      min-height:190px;
-    }
-
-    .datos-grid {
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:6px 12px;
-      font-size:.8rem;
-      margin-top:6px;
-    }
-
-    .dato-label {
-      font-size:.72rem;
-      color:var(--text-muted);
-    }
-
-    .dato-value {
-      font-size:.82rem;
-      font-weight:500;
-    }
-
-    .dato-full {
-      grid-column:1 / -1;
-    }
-
-    .field-input {
-      width:100%;
-      padding:4px 6px;
-      border-radius:8px;
-      border:1px solid var(--border-soft);
-      background:var(--bg-card-soft);
-      color:var(--text-main);
-      font-size:.8rem;
-      outline:none;
-    }
-
-    /* === AQUI EMPIEZAN LOS CAMBIOS DE ESTILO DEL INFORME === */
-    /* Radio Buttons */
-    .radio-group { display: flex; gap: 15px; align-items: center; margin-top:2px; }
-    .radio-group label { display: flex; align-items: center; gap: 4px; font-size: .8rem; cursor: pointer; }
-    .radio-group input { accent-color: var(--accent-blue); transform: scale(1.1); cursor: pointer; }
-
-    /* Panel Unificado */
-    .panel-combined { display: grid; grid-template-columns: 1fr 2fr; gap: 10px; min-height: 250px; }
-    .panel-listado { border-right: 1px dashed var(--border-soft); padding-right: 10px; overflow-y: auto; max-height: 240px; font-size: .75rem; }
-    .panel-listado ul { margin: 0; padding-left: 15px; }
-    .panel-listado li { margin-bottom: 4px; color: var(--accent-red); }
-
-    .panel-graficos {
-      display:grid;
-      grid-template-columns: repeat(3, minmax(0,1fr));
-      gap:8px;
-      min-height:0;
-      /* Eliminamos el max-height antiguo */
-      overflow:visible; 
-    }
-
-    .panel-inferior {
-      display: grid;
-      grid-template-columns: 1.1fr 1.9fr;
-      gap: 10px;
-    }
-
-    /* Checklist Scroll y Contenido Completo */
-    .checklist-visita {
-      font-size: .78rem;
-      max-height: 250px; /* Scroll vertical activado */
-      overflow-y: auto;
-      display:flex;
-      flex-direction:column;
-      gap:2px;
-      border: 1px solid var(--border-soft);
-      padding: 6px;
-      border-radius: 8px;
-    }
-    .checklist-visita::-webkit-scrollbar { width: 6px; }
+    .pages { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+    .page { display: none; flex-direction: column; gap: 15px; height: 100%; overflow-y: auto; padding-bottom: 40px; }
+    .page.active { display: flex; }
+
+    /* --- DASHBOARD GLOBAL STYLES --- */
+    .dashboard-grid { display: grid; grid-template-columns: 1.6fr 1.4fr; gap: 20px; align-items: flex-start; }
+    .dashboard-right-column { display: flex; flex-direction: column; gap: 20px; }
+    
+    .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+    .kpi-card { background: var(--bg-card-soft); border: 1px solid var(--border-soft); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 4px; }
+    .kpi-label { font-size: .7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; }
+    .kpi-value { font-size: 1.3rem; font-weight: 800; color: var(--text-main); }
+    .kpi-caption { font-size: .7rem; color: var(--text-muted); opacity: 0.8; }
+
+    .dashboard-charts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+    .chart-container { position: relative; width: 100%; min-height: 200px; }
+    .criterios-container { min-height: 350px; max-height: 500px; overflow-y: auto; }
+
+    /* Ranking Delegados */
+    .ranking-list { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+    .ranking-row { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed var(--border-soft); font-size: .85rem; }
+    .ranking-main { display: flex; align-items: center; gap: 8px; }
+    .ranking-bar { flex: 1; height: 6px; background: var(--bg-card-soft); border-radius: 99px; margin: 0 12px; overflow: hidden; }
+    .ranking-bar span { display: block; height: 100%; background: linear-gradient(90deg, #22c55e, #38bdf8); }
+    .delegado-color { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+
+    /* --- CENTROS Y CALENDARIO STYLES --- */
+    .centros-top { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
+    .delegados-list { max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
+    .delegado-card { background: var(--bg-card-soft); padding: 10px; border-radius: 10px; border: 1px solid var(--border-soft); cursor: pointer; display: flex; justify-content: space-between; font-size: .85rem; }
+    .delegado-card:hover { border-color: var(--accent-blue); }
+
+    .calendar-wrapper { display: flex; flex-direction: column; height: 100%; gap: 8px; }
+    .calendar-header { display: flex; justify-content: space-between; align-items: center; font-weight: 700; }
+    .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; flex: 1; }
+    .cal-cell { background: var(--bg-card-soft); border: 1px solid var(--border-soft); border-radius: 6px; min-height: 35px; padding: 4px; cursor: pointer; position: relative; font-size: .8rem; }
+    .cal-cell.empty { background: transparent; border: 1px dashed var(--border-soft); cursor: default; }
+    .cal-event { width: 6px; height: 6px; background: #facc15; border-radius: 50%; position: absolute; bottom: 4px; right: 4px; }
+    
+    .visitas-list { max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+    .visita-row { background: var(--bg-card-soft); padding: 10px; border-radius: 10px; border: 1px solid var(--border-soft); font-size: .8rem; }
+    .visita-row-line { display: flex; justify-content: space-between; margin-bottom: 4px; font-weight: 500; }
+    .chip-estado { padding: 2px 6px; border-radius: 4px; font-size: .7rem; font-weight: 600; color: #111; }
+    .chip-estado.pendiente { background: var(--chip-pendiente); }
+    .chip-estado.enproceso { background: var(--chip-enproceso); }
+    .chip-estado.finalizada { background: var(--chip-finalizada); }
+
+    .table-wrapper { background: var(--bg-card); border-radius: 12px; border: 1px solid var(--border-soft); overflow: hidden; display: flex; flex-direction: column; min-height: 250px; }
+    .table-scroll { overflow: auto; flex: 1; max-height: 500px; }
+    table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+    th { text-align: left; padding: 12px 15px; background: var(--bg-card-soft); color: var(--text-muted); font-weight: 600; position: sticky; top: 0; z-index: 5; }
+    td { padding: 12px 15px; border-bottom: 1px solid var(--border-soft); color: var(--text-main); }
+    tr:hover td { background: rgba(255,255,255,0.03); }
+    .tag { padding: 3px 8px; border-radius: 99px; font-size: .7rem; font-weight: 600; }
+    .tag.exclusivo { background: rgba(34,197,94,0.15); color: var(--accent-green); }
+    .tag.corner { background: rgba(56,189,248,0.15); color: var(--accent-blue); }
+    .btn-link { background: none; border: none; color: var(--accent-blue); cursor: pointer; text-decoration: underline; font-size: .75rem; }
+
+    /* --- INFORME VISITA (NUEVO DISEÑO) --- */
+    .informe-layout { display: flex; flex-direction: column; gap: 15px; }
+    .informe-top { display: grid; grid-template-columns: 1.4fr 1fr; gap: 15px; }
+    .datos-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 15px; margin-top: 5px; font-size: .85rem; }
+    .field-group { display: flex; flex-direction: column; gap: 4px; }
+    .field-label { font-size: .7rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; }
+    .field-input { width: 100%; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-soft); background: var(--bg-card-soft); color: var(--text-main); font-size: .9rem; outline: none; }
+    .field-input:focus { border-color: var(--accent-blue); }
+    .dato-full { grid-column: 1 / -1; }
+    
+    /* RADIO BUTTONS */
+    .radio-group { display: flex; align-items: center; gap: 20px; height: 35px; }
+    .radio-group label { display: flex; align-items: center; gap: 6px; font-size: .9rem; cursor: pointer; }
+    .radio-group input { accent-color: var(--accent-blue); transform: scale(1.2); cursor: pointer; }
+
+    /* PANEL COMBINADO */
+    .panel-combined { display: grid; grid-template-columns: 1fr 2fr; gap: 20px; min-height: 280px; }
+    .panel-listado { border-right: 1px dashed var(--border-soft); padding-right: 15px; overflow-y: auto; max-height: 260px; font-size: .8rem; }
+    .panel-listado ul { margin: 0; padding-left: 18px; }
+    .panel-listado li { margin-bottom: 6px; color: var(--accent-red); }
+    .panel-listado li.ok { color: var(--accent-green); list-style: none; }
+
+    .panel-graficos { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    .panel-inferior { display: grid; grid-template-columns: 1.2fr 1.8fr; gap: 15px; }
+    .chart-container.centered { display:flex; align-items:center; justify-content:center; }
+
+    /* CHECKLIST COMPLETO CON SCROLL */
+    .checklist-visita { 
+        font-size: .8rem; 
+        max-height: 280px; 
+        overflow-y: auto; 
+        display: flex; 
+        flex-direction: column; 
+        gap: 8px; 
+        padding: 12px; 
+        border: 1px solid var(--border-soft); 
+        border-radius: 8px; 
+        background: rgba(0,0,0,0.15); 
+    }
+    .checklist-visita::-webkit-scrollbar { width: 8px; }
     .checklist-visita::-webkit-scrollbar-thumb { background: var(--border-soft); border-radius: 4px; }
-
-    .checklist-visita label {
-      display:flex;
-      align-items:center;
-      gap:4px;
-      cursor:pointer;
+    
+    .checklist-heading { 
+        margin-top: 12px; 
+        font-weight: 700; 
+        color: var(--accent-blue); 
+        text-transform: uppercase; 
+        font-size: .75rem; 
+        border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+        padding-bottom: 4px;
+        margin-bottom: 6px;
     }
+    .checklist-visita label { display: flex; align-items: center; gap: 10px; cursor: pointer; transition: color 0.2s; }
+    .checklist-visita label:hover { color: #fff; }
+    .checklist-visita input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--accent-green); }
 
-    .checklist-heading {
-      margin-top:6px;
-      font-size:.8rem;
-      font-weight:600;
-      color:var(--text-main);
-      border-bottom: 1px solid var(--border-soft);
-      padding-bottom: 2px;
-      margin-bottom: 4px;
-    }
+    /* IMAGENES Y OBS */
+    .imagenes-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .imagen-preview { width: 100%; aspect-ratio: 16/9; background: var(--bg-card-soft); border: 2px dashed var(--border-soft); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: .75rem; cursor: pointer; color: var(--text-muted); overflow: hidden; flex-direction: column; gap: 5px; }
+    .imagen-preview img { width: 100%; height: 100%; object-fit: cover; }
+    
+    .observaciones-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+    textarea { width: 100%; height: 100px; background: var(--bg-card-soft); border: 1px solid var(--border-soft); border-radius: 10px; color: var(--text-main); padding: 12px; font-size: .85rem; resize: none; outline: none; }
+    .acciones-informe { margin-top: 15px; display: flex; justify-content: flex-end; }
 
-    .imagenes-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0,1fr));
-      gap: 10px;
-      font-size: .78rem;
-    }
+    /* MODAL */
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(4px); }
+    .modal { background: var(--bg-card); padding: 25px; border-radius: 16px; width: 450px; border: 1px solid var(--border-soft); }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; font-weight: 700; font-size: 1.1rem; }
+    .modal-close { cursor: pointer; font-size: 1.2rem; color: var(--text-muted); }
+    .modal-body { display: flex; flex-direction: column; gap: 15px; }
 
-    .imagen-item-title {
-      font-size:.78rem;
-      margin-bottom:3px;
-    }
-
-    .imagen-preview {
-      width: 100%;
-      aspect-ratio: 16 / 9;
-      border-radius: 10px;
-      border: 1px dashed var(--border-soft);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: .7rem;
-      color: var(--text-muted);
-      overflow: hidden;
-      background:var(--bg-card-soft);
-      cursor:pointer;
-    }
-
-    .imagen-preview img {
-      width:100%;
-      height:100%;
-      object-fit:cover;
-    }
-
-    .observaciones-grid {
-      display:grid;
-      grid-template-columns: repeat(3, minmax(0,1fr));
-      gap:10px;
-      margin-top:4px;
-    }
-
-    .obs-item textarea {
-      width:100%;
-      height:80px;
-      resize:vertical;
-      border-radius:10px;
-      border:1px solid var(--border-soft);
-      background:var(--bg-card-soft);
-      color:var(--text-main);
-      padding:6px;
-      font-size:.78rem;
-      outline:none;
-    }
-
-    .obs-label {
-      font-size:.78rem;
-      margin-bottom:2px;
-    }
-
-    .acciones-informe {
-      margin-top:6px;
-      display:flex;
-      justify-content:flex-end;
-      gap:8px;
-    }
-
-    .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(15,23,42,0.75);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 50;
-    }
-
-    .modal {
-      background: var(--bg-card);
-      border-radius: 14px;
-      padding: 14px;
-      width: 420px;
-      max-width: 95%;
-      border: 1px solid var(--border-soft);
-    }
-
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 8px;
-    }
-
-    .modal-header h3 {
-      font-size: .95rem;
-    }
-
-    .modal-close {
-      cursor: pointer;
-      font-size: 1rem;
-      color: var(--text-muted);
-    }
-
-    .modal-body {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      font-size: .78rem;
-    }
-
-    .modal-field {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    .modal-field label {
-      font-size: .74rem;
-      color: var(--text-muted);
-    }
-
-    .modal-field input,
-    .modal-field select {
-      padding: 5px 7px;
-      border-radius: 8px;
-      border: 1px solid var(--border-soft);
-      background: var(--bg-card-soft);
-      color: var(--text-main);
-      font-size: .78rem;
-      outline: none;
-    }
-
-    .modal-footer {
-      display: flex;
-      justify-content: flex-end;
-      gap: 8px;
-      margin-top: 10px;
-    }
-
-    input[type="file"] {
-      font-size:.75rem;
-    }
-
-    body.light .btn {
-      background:#ffffff;
-    }
-
-    body.light .card {
-      background:#ffffff;
-    }
-
-    /* RESPONSIVE */
-    @media (max-width: 1400px) {
-      .dashboard-grid {
-        grid-template-columns: 1fr;
-      }
-      .centros-top {
-        grid-template-columns: 1fr 1fr;
-      }
-    }
-
-    @media (max-width: 1100px) {
-      .topbar {
-        flex-direction: column;
-        align-items: stretch;
-      }
-      .topbar-buttons {
-        justify-content: flex-start;
-      }
-      .centros-top {
-        grid-template-columns: 1fr;
-      }
-      .informe-top {
-        grid-template-columns: 1fr;
-      }
-      .panel-graficos {
-        grid-template-columns: 1fr 1fr;
-      }
-      .panel-inferior {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    @media (max-width: 800px) {
-      .dashboard-charts {
-        grid-template-columns: 1fr;
-      }
-      .panel-graficos {
-        grid-template-columns: 1fr;
-      }
-      .observaciones-grid {
-        grid-template-columns: 1fr;
-      }
-      .imagenes-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    /* ESTILOS DE IMPRESIÓN (PÁGINA 2 CHECKLIST) */
+    /* ESTILOS DE IMPRESIÓN */
     #printChecklistContainer { display: none; }
-
-    @page {
-      size: A4 portrait;
-      margin: 10mm;
-    }
-
+    @page { size: A4 portrait; margin: 10mm; }
     @media print {
-      html, body {
-        width: 100%;
-        height: auto;
-        margin: 0;
-        padding: 0;
-        background:#ffffff !important;
-        color: black !important;
-        overflow: visible !important;
-      }
-      body {
-        display:block;
-      }
-      .sidebar,
-      .topbar,
-      .btn,
-      .btn-cta,
-      .acciones-informe,
-      #themeToggle,
-      .modal-backdrop {
-        display:none !important;
-      }
-
-      .main {
-        padding:0 !important;
-        margin:0 !important;
-        width:100% !important;
-        max-width:none !important;
-        overflow:visible !important;
-      }
-      .pages,
-      .page {
-        overflow:visible !important;
-        height: auto !important;
-        display: block !important;
-      }
-      /* Solo mostramos la página activa */
-      .page:not(.active) { display: none !important; }
-      
-      .card {
-        box-shadow:none !important;
-        border: 1px solid #ccc !important;
-        background: white !important;
-        color: black !important;
-        break-inside: avoid;
-        margin-bottom: 10px;
-      }
-      
-      input, textarea, select {
-        border: 1px solid #ccc !important;
-        background: white !important;
-        color: black !important;
-      }
-
-      /* Ajustes Grid para Impresión */
-      .dashboard-grid { grid-template-columns: 1fr !important; }
-      .panel-graficos { grid-template-columns: 1fr 1fr !important; height:auto !important; }
-      .panel-inferior { grid-template-columns: 1fr 2fr !important; }
-      .informe-top { grid-template-columns: 1.3fr 1fr !important; }
-      .panel-combined { grid-template-columns: 1fr 1.5fr !important; min-height:auto; }
-
-      .checklist-visita { 
-        max-height:none !important; 
-        overflow:visible !important; 
-        border: 1px solid #ccc !important; 
-      }
-      
-      /* PÁGINA 2 */
-      #printChecklistContainer {
-        display: block !important;
-        break-before: page;
-        margin-top: 30px;
-      }
-      .print-header { font-size: 16px; font-weight: bold; margin-bottom: 10px; border-bottom: 2px solid black; }
-      .print-table { width: 100%; border-collapse: collapse; font-size: 11px; }
-      .print-table th, .print-table td { border: 1px solid #ccc; padding: 4px; text-align: left; }
-      .print-table th { background: #eee; font-weight: bold; }
+        body { background: white !important; color: black !important; display: block; }
+        .sidebar, .topbar, .btn, .btn-cta, .acciones-informe, #themeToggle, .modal-backdrop { display: none !important; }
+        .main { margin: 0; padding: 0; max-width: none; overflow: visible; }
+        .pages { overflow: visible !important; height: auto !important; display: block !important; }
+        .page:not(.active) { display: none !important; }
+        .page.active { display: flex !important; overflow: visible !important; height: auto !important; }
+        .card { box-shadow: none !important; border: 1px solid #ccc !important; background: white !important; color: black !important; margin-bottom: 15px; break-inside: avoid; }
+        input, textarea, select { border: 1px solid #ccc !important; background: white !important; color: black !important; font-weight: bold; }
+        .checklist-visita { max-height: none !important; overflow: visible !important; border: 1px solid #ccc !important; }
+        
+        .dashboard-grid { grid-template-columns: 1fr !important; }
+        .informe-top { grid-template-columns: 1.5fr 1fr !important; }
+        .panel-combined { grid-template-columns: 1fr 1.5fr !important; min-height: auto; }
+        .panel-graficos { grid-template-columns: 1fr 1fr !important; height: auto; }
+        .panel-inferior { grid-template-columns: 1fr 2fr !important; }
+        
+        #printChecklistContainer { display: block !important; break-before: page; margin-top: 30px; }
+        .print-header { font-size: 18px; font-weight: bold; margin-bottom: 15px; border-bottom: 2px solid black; padding-bottom: 5px; }
+        .print-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+        .print-table th, .print-table td { border: 1px solid #999; padding: 6px; text-align: left; color: black; }
+        .print-table th { background: #eee; font-weight: bold; }
+        .print-table tr:nth-child(even) { background: #f9f9f9; }
     }
   </style>
 </head>
@@ -1207,38 +241,19 @@
     <div class="logo">
       <div class="logo-badge"></div>
       <div class="logo-text">
-        <span class="logo-title">Control Center Audio</span>
-        <span class="logo-subtitle">Gestión de centros y delegados</span>
+        <span class="logo-title">Control Center</span>
+        <span class="logo-subtitle">Audio Management</span>
       </div>
     </div>
-
-    <div>
-      <div class="section-title">Secciones</div>
-      <nav class="nav-list">
-        <div class="nav-item active" data-page="dashboard">
-          <span class="icon">🏠</span> Dashboard
-        </div>
-        <div class="nav-item" data-page="centros">
-          <span class="icon">🏢</span> Centros
-        </div>
-        <div class="nav-item" data-page="informe">
-          <span class="icon">📋</span> Informe de la visita
-        </div>
-        <div class="nav-item" data-page="servicios">
-          <span class="icon">🛠</span> Servicios
-        </div>
-        <div class="nav-item" data-page="ventas">
-          <span class="icon">💳</span> Ventas
-        </div>
-        <div class="nav-item" data-page="proyectos">
-          <span class="icon">📊</span> Proyectos
-        </div>
-      </nav>
-    </div>
-
-    <div class="sidebar-footer">
-      Versión demo · Datos ficticios
-    </div>
+    <nav class="nav-list">
+      <div class="nav-item active" data-page="dashboard"><span class="icon">🏠</span> Dashboard</div>
+      <div class="nav-item" data-page="centros"><span class="icon">🏢</span> Centros</div>
+      <div class="nav-item" data-page="informe"><span class="icon">📋</span> Informe Visita</div>
+      <div class="nav-item" data-page="servicios"><span class="icon">🛠</span> Servicios</div>
+      <div class="nav-item" data-page="ventas"><span class="icon">💳</span> Ventas</div>
+      <div class="nav-item" data-page="proyectos"><span class="icon">📊</span> Proyectos</div>
+    </nav>
+    <div class="sidebar-footer">Versión 5.0 Final</div>
   </aside>
 
   <main class="main">
@@ -1247,124 +262,47 @@
         <span>🔍</span>
         <input id="searchGlobal" placeholder="Buscar por centro, propietario o delegado...">
       </div>
-      
-      <div style="font-size: .8rem; color: var(--text-muted); margin-left: 15px; border-left: 1px solid var(--border-soft); padding-left: 15px;">
+      <div class="topbar-info">
          Visitas procesadas: <strong id="headerVisitsCount" style="color:var(--accent-green)">0</strong>
       </div>
-
       <div class="topbar-buttons">
-        <button class="btn" id="themeToggle">
-          <span class="icon">🌓</span> Oscuro / Claro
-        </button>
-        <button class="btn" id="btnGuardarVista">
-          <span class="icon">💾</span> Guardar vista
-        </button>
-        <button class="btn" id="btnExportarHTML">
-          <span class="icon">⬇️</span> Exportar HTML
-        </button>
-        <button class="btn" onclick="window.print()">
-          <span class="icon">🖨</span> Imprimir
-        </button>
-        <button class="btn btn-cta" id="btnActualizarNube">
-          <span class="icon">☁️</span> Actualizar datos nube
-        </button>
+        <button class="btn" id="themeToggle"><span class="icon">🌓</span> Tema</button>
+        <button class="btn" onclick="window.print()"><span class="icon">🖨</span> Imprimir</button>
+        <button class="btn btn-cta" id="btnActualizarNube"><span class="icon">☁️</span> Sync Nube</button>
       </div>
     </div>
 
     <div class="pages">
-      
       <section class="page active" data-page="dashboard">
         <div class="dashboard-grid">
           <article class="card">
-            <div class="card-header-row">
-              <span class="card-title">Resumen general</span>
-              <span class="badge-small">Demo · Promedios sobre visitas guardadas</span>
-            </div>
-
+            <div class="card-header-row"><span class="card-title">Resumen Ejecutivo (Global Acumulado)</span><span class="badge-small">Año en curso</span></div>
             <div class="kpi-grid">
-              <div class="kpi-card">
-                <div class="kpi-label">% de aplicación de procesos</div>
-                <div class="kpi-value" id="kpiProcesos">-</div>
-                <div class="kpi-caption">Objetivo 85–100%</div>
-              </div>
-              <div class="kpi-card">
-                <div class="kpi-label">Conv. a prueba</div>
-                <div class="kpi-value" id="kpiConvPrueba">-</div>
-                <div class="kpi-caption">Objetivo 80%</div>
-              </div>
-              <div class="kpi-card">
-                <div class="kpi-label">Conv. a venta</div>
-                <div class="kpi-value" id="kpiConvVenta">-</div>
-                <div class="kpi-caption">Objetivo 80%</div>
-              </div>
-              <div class="kpi-card">
-                <div class="kpi-label">Aplicación HIT</div>
-                <div class="kpi-value" id="kpiHIT">-</div>
-                <div class="kpi-caption">% Centros (Global)</div>
-              </div>
-              <div class="kpi-card">
-                <div class="kpi-label">Formaciones %</div>
-                <div class="kpi-value" id="kpiFormaciones">-</div>
-                <div class="kpi-caption">Media de módulos formativos</div>
-              </div>
-              <div class="kpi-card">
-                <div class="kpi-label">Ayuda</div>
-                <div class="kpi-value" id="kpiAyuda">-</div>
-                <div class="kpi-caption">Telecare / PIA / Telehear</div>
-              </div>
-              <div class="kpi-card">
-                <div class="kpi-label">AAR</div>
-                <div class="kpi-value" id="kpiAar">-</div>
-                <div class="kpi-caption">% Centros (Global)</div>
-              </div>
-              <div class="kpi-card">
-                <div class="kpi-label">Primeros auxilios</div>
-                <div class="kpi-value" id="kpiPrimeros">-</div>
-                <div class="kpi-caption">Centros con formación</div>
-              </div>
+              <div class="kpi-card"><div class="kpi-label">Procesos Global</div><div class="kpi-value" id="kpiProcesos">-</div></div>
+              <div class="kpi-card"><div class="kpi-label">Conv. Prueba</div><div class="kpi-value" id="kpiConvPrueba">-</div></div>
+              <div class="kpi-card"><div class="kpi-label">Conv. Venta</div><div class="kpi-value" id="kpiConvVenta">-</div></div>
+              <div class="kpi-card"><div class="kpi-label">HIT (Global)</div><div class="kpi-value" id="kpiHIT">-</div><div class="kpi-caption">% Centros</div></div>
+              <div class="kpi-card"><div class="kpi-label">AAR (Global)</div><div class="kpi-value" id="kpiAar">-</div><div class="kpi-caption">% Centros</div></div>
+              <div class="kpi-card"><div class="kpi-label">Formaciones</div><div class="kpi-value" id="kpiForm">-</div></div>
+              <div class="kpi-card"><div class="kpi-label">Ayuda</div><div class="kpi-value" id="kpiAyuda">-</div></div>
+              <div class="kpi-card"><div class="kpi-label">1os Auxilios</div><div class="kpi-value" id="kpi1os">-</div></div>
             </div>
-
             <div class="dashboard-charts">
-              <div class="card">
-                <div class="card-header-row"><span class="card-title">Radar general</span></div>
-                <div class="chart-container"><canvas id="chartRadarGeneral"></canvas></div>
-              </div>
-              <div class="card">
-                <div class="card-header-row"><span class="card-title">Procesos por mes</span></div>
-                <div class="chart-container"><canvas id="chartProcesosMes"></canvas></div>
-              </div>
-              <div class="card">
-                <div class="card-header-row"><span class="card-title">Áreas de mejora por mes</span></div>
-                <div class="chart-container"><canvas id="chartAreasMes"></canvas></div>
-              </div>
-              <div class="card">
-                <div class="card-header-row"><span class="card-title">Primeros auxilios por mes</span></div>
-                <div class="chart-container"><canvas id="chartPrimerosMes"></canvas></div>
-              </div>
-              <div class="card">
-                <div class="card-header-row"><span class="card-title">Top 10 áreas de mejora</span></div>
-                <div class="chart-container"><canvas id="chartTopAreas"></canvas></div>
-              </div>
-              <div class="card">
-                <div class="card-header-row"><span class="card-title">Aplicación AAR / HIT</span></div>
-                <div class="chart-container"><canvas id="chartAarHitDonut"></canvas></div>
-              </div>
+              <div class="card"><div class="card-header-row"><span class="card-title">Radar Global</span></div><div class="chart-container"><canvas id="chartRadarGeneral"></canvas></div></div>
+              <div class="card"><div class="card-header-row"><span class="card-title">Procesos Mensual</span></div><div class="chart-container"><canvas id="chartProcesosMes"></canvas></div></div>
+              <div class="card"><div class="card-header-row"><span class="card-title">Áreas Mejora Mes</span></div><div class="chart-container"><canvas id="chartAreasMes"></canvas></div></div>
+              <div class="card"><div class="card-header-row"><span class="card-title">1os Auxilios</span></div><div class="chart-container"><canvas id="chartPrimerosMes"></canvas></div></div>
+              <div class="card"><div class="card-header-row"><span class="card-title">Top Fallos</span></div><div class="chart-container"><canvas id="chartTopAreas"></canvas></div></div>
+              <div class="card"><div class="card-header-row"><span class="card-title">AAR vs HIT</span></div><div class="chart-container"><canvas id="chartAarHitDonut"></canvas></div></div>
             </div>
           </article>
-
           <div class="dashboard-right-column">
             <article class="card">
-              <div class="card-header-row">
-                <span class="card-title">Evaluación detallada de procesos (Promedio Global %)</span>
-                <span class="badge-small">Acumulado</span>
-              </div>
-              <div class="chart-container criterios-container">
-                <canvas id="chartCriteriosDetalle"></canvas>
-              </div>
+              <div class="card-header-row"><span class="card-title">Evaluación 80 Criterios (Promedio Global %)</span><span class="badge-small">Acumulado</span></div>
+              <div class="chart-container criterios-container"><canvas id="chartCriteriosDetalle"></canvas></div>
             </article>
-
             <article class="card">
-              <div class="card-header-row"><span class="card-title">Ranking de delegados</span></div>
+              <div class="card-header-row"><span class="card-title">Ranking Delegados</span></div>
               <div class="ranking-list" id="rankingDelegados"></div>
             </article>
           </div>
@@ -1374,96 +312,71 @@
       <section class="page" data-page="centros">
         <div class="centros-top">
           <article class="card">
-            <div class="card-header-row">
-              <span class="card-title">Centros y delegados</span>
-              <span class="badge-small"><span id="numDelegados">0</span> delegados</span>
-            </div>
+            <div class="card-header-row"><span class="card-title">Gestión Centros</span><span class="badge-small" id="totalCentrosLabel">0 Centros</span></div>
             <div class="delegados-list" id="delegadosList"></div>
-            <div style="display:flex; gap:8px; margin-top:6px;">
-              <button class="btn btn-cta" id="btnAddCentro">
-                <span class="icon">➕</span> Añadir centro
-              </button>
-              <button class="btn" id="btnAdjuntarExcel">
-                <span class="icon">📤</span> Adjuntar centros (Excel)
-              </button>
-              <input type="file" id="inputExcel" accept=".xlsx,.xls" style="display:none">
+            <div style="margin-top:10px; display:flex; gap:8px;">
+               <button class="btn btn-cta" id="btnAddCentro">➕ Nuevo</button>
+               <button class="btn" id="btnAdjuntarExcel">📤 Carga Masiva</button>
+               <input type="file" id="inputExcel" hidden>
             </div>
           </article>
-
           <article class="card">
-            <div class="calendar-wrapper">
-              <div class="calendar-header">
-                <button id="calPrev">&lt;</button>
-                <div class="calendar-month" id="calTitulo"></div>
-                <button id="calNext">&gt;</button>
-              </div>
-              <div class="calendar-weekdays"><div>L</div><div>M</div><div>X</div><div>J</div><div>V</div><div>S</div><div>D</div></div>
-              <div class="calendar-grid" id="calendarGrid"></div>
-            </div>
+             <div class="calendar-wrapper">
+                <div class="calendar-header">
+                  <button id="calPrev">&lt;</button> <div id="calTitulo"></div> <button id="calNext">&gt;</button>
+                </div>
+                <div class="calendar-grid" id="calendarGrid"></div>
+             </div>
           </article>
-
           <article class="card">
-            <div class="card-header-row"><span class="card-title">Visitas agendadas</span></div>
-            <div class="visitas-list" id="visitasList"></div>
+             <div class="card-header-row"><span class="card-title">Visitas Agendadas</span></div>
+             <div class="visitas-list" id="visitasList"></div>
           </article>
         </div>
-
-        <section class="table-wrapper">
-          <div class="table-header">
-            <div><h3>Listado de centros</h3></div>
-            <span class="badge-small" id="totalCentrosLabel">0 Centros</span>
-          </div>
-          <div class="table-scroll">
-            <table>
-              <thead><tr><th>Código</th><th>Propietario</th><th>Centro</th><th>Provincia</th><th>Delegado</th><th>Tipo</th><th>Informes</th><th>Centro AAR</th></tr></thead>
-              <tbody id="tablaCentrosBody"></tbody>
-            </table>
-          </div>
-        </section>
+        <div class="table-wrapper">
+           <div class="table-scroll">
+              <table><thead><tr><th>Código</th><th>Propietario</th><th>Centro</th><th>Provincia</th><th>Delegado</th><th>Tipo</th><th>Acción</th><th>AAR</th></tr></thead><tbody id="tablaCentrosBody"></tbody></table>
+           </div>
+        </div>
       </section>
 
       <section class="page" data-page="informe">
         <div class="informe-layout">
-          
           <div class="informe-top">
             <article class="card">
-              <div class="card-header-row"><span class="card-title">Datos del centro</span></div>
+              <div class="card-header-row"><span class="card-title">Datos Centro</span></div>
               <div class="datos-grid">
-                <div><div class="dato-label">Centro</div><input id="infCentro" class="field-input" readonly></div>
-                <div><div class="dato-label">Delegado</div><input id="infDelegado" class="field-input" readonly></div>
+                <div class="field-group"><span class="field-label">Centro</span><input id="infCentro" class="field-input" readonly></div>
+                <div class="field-group"><span class="field-label">Delegado</span><input id="infDelegado" class="field-input" readonly></div>
                 
                 <div class="dato-full">
-                   <div class="dato-label" style="margin-bottom:2px;">Tipo de Centro</div>
+                   <div class="field-label" style="margin-bottom:4px;">Tipo de Centro (Selección)</div>
                    <div class="radio-group">
                       <label><input type="radio" name="tipoCentro" value="Exclusivo" id="radExclusivo"> Exclusivo</label>
                       <label><input type="radio" name="tipoCentro" value="Corner" id="radCorner"> Corner</label>
                    </div>
                 </div>
 
-                <div><div class="dato-label">Responsable audio</div><input id="infRespAudio" class="field-input"></div>
-                <div><div class="dato-label">Fecha visita</div><input id="infFecha" class="field-input"></div>
+                <div class="field-group"><span class="field-label">Responsable</span><input id="infRespAudio" class="field-input"></div>
+                <div class="field-group"><span class="field-label">Fecha</span><input id="infFecha" class="field-input"></div>
                 
-                <div class="dato-full" style="margin-top:4px;">
-                  <button class="btn btn-cta" id="btnAdjuntarChecklist">
-                    <span class="icon">📎</span> Adjuntar checklist (Excel)
-                  </button>
-                  <input type="file" id="inputChecklist" accept=".xlsx,.xls" style="display:none">
-                  <span id="nombreChecklist" style="margin-left:8px; font-size:.74rem; color:var(--text-muted);"></span>
+                <div class="dato-full" style="margin-top:5px;">
+                  <button class="btn btn-cta" id="btnAdjuntarChecklist" style="width:100%; justify-content:center;">📎 Adjuntar Checklist (Excel)</button>
+                  <input type="file" id="inputChecklist" hidden>
+                  <span id="nombreChecklist" style="margin-left:8px; font-size:.75rem; color:var(--text-muted); text-align:center;"></span>
                 </div>
               </div>
             </article>
 
             <article class="card">
-              <div class="card-header-row"><span class="card-title">KPIs del centro</span></div>
-              <div style="font-size:.78rem; margin-top:4px; display:grid; grid-template-columns: 1fr 1fr;">
+              <div class="card-header-row"><span class="card-title">KPIs Calidad (Detalle)</span></div>
+              <div style="font-size:.85rem; margin-top:5px; display:grid; grid-template-columns: 1fr 1fr; gap:5px;">
                 <div>% Procesos: <strong id="kpiCentroProcesos">0%</strong></div>
                 <div>C. Prueba: <strong id="kpiCentroPrueba">0%</strong></div>
                 <div>C. Venta: <strong id="kpiCentroVenta">0%</strong></div>
                 <div>HIT: <strong id="kpiCentroHit" style="color:var(--accent-blue);">No</strong></div>
               </div>
-              <div class="chart-container centered" style="margin-top:6px; max-height:180px;">
-                <canvas id="chartCentroKPIsBar"></canvas>
-              </div>
+              <div class="chart-container centered" style="height:190px;"><canvas id="chartCentroKPIsBar"></canvas></div>
             </article>
           </div>
 
@@ -1478,14 +391,8 @@
           </article>
 
           <div class="panel-graficos">
-            <article class="card">
-              <div class="card-header-row"><span class="card-title">Palancas (Sí/No)</span></div>
-              <div class="chart-container"><canvas id="chartCentroPalancas"></canvas></div>
-            </article>
-            <article class="card">
-              <div class="card-header-row"><span class="card-title">Resumen Procesos (Cumple vs No)</span></div>
-              <div class="chart-container centered"><canvas id="chartCentroProcesosStack"></canvas></div>
-            </article>
+            <article class="card"><span class="card-title">Palancas (Sí/No)</span><div class="chart-container"><canvas id="chartCentroPalancas"></canvas></div></article>
+            <article class="card"><span class="card-title">Resumen Procesos</span><div class="chart-container centered"><canvas id="chartCentroProcesosStack"></canvas></div></article>
           </div>
 
           <div class="panel-inferior">
@@ -1515,15 +422,15 @@
                 <label><input type="checkbox" id="chkStock"> Stock</label>
                 <label><input type="checkbox"> Tchin Tchin</label>
               </div>
-              <div style="margin-top:8px;">
-                 <div class="dato-label">Nota Formaciones (0-10)</div>
+              <div style="margin-top:10px;">
+                 <span class="field-label">Nota Formaciones (0-10)</span>
                  <input type="number" id="inpFormaciones" class="field-input" value="0" min="0" max="10">
               </div>
             </article>
 
             <article class="card">
               <div class="card-header-row"><span class="card-title">Imágenes del centro</span></div>
-              <div class="imagenes-grid" style="margin-top:4px;">
+              <div class="imagenes-grid">
                 <div class="imagen-preview" onclick="$('#f1').click()">📷 Exterior<input id="f1" type="file" hidden onchange="preview(this)"></div>
                 <div class="imagen-preview" onclick="$('#f2').click()">📷 Interior<input id="f2" type="file" hidden onchange="preview(this)"></div>
                 <div class="imagen-preview" onclick="$('#f3').click()">📷 Gabinete<input id="f3" type="file" hidden onchange="preview(this)"></div>
@@ -1532,15 +439,13 @@
           </div>
 
           <article class="card">
-            <div class="card-header-row"><span class="card-title">Observaciones · Recomendaciones · Compromisos</span></div>
-            <div class="observaciones-grid" style="margin-top:6px;">
-              <div class="obs-item"><div class="obs-label">Observaciones</div><textarea></textarea></div>
-              <div class="obs-item"><div class="obs-label">Recomendaciones</div><textarea></textarea></div>
-              <div class="obs-item"><div class="obs-label">Compromisos</div><textarea></textarea></div>
+            <span class="card-title">Conclusiones y Compromisos</span>
+            <div class="observaciones-grid">
+              <div class="obs-item"><span class="field-label">Observaciones</span><textarea placeholder="..."></textarea></div>
+              <div class="obs-item"><span class="field-label">Recomendaciones</span><textarea placeholder="..."></textarea></div>
+              <div class="obs-item"><span class="field-label">Compromisos</span><textarea placeholder="..."></textarea></div>
             </div>
-            <div class="acciones-informe">
-              <button class="btn btn-cta" id="btnGuardarInforme"><span class="icon">💾</span> Guardar informe</button>
-            </div>
+            <div class="acciones-informe"><button class="btn btn-cta" id="btnGuardarInforme">💾 Guardar Informe</button></div>
           </article>
         </div>
       </section>
@@ -1552,7 +457,7 @@
   </main>
 
   <div id="printChecklistContainer">
-    <div class="print-header">ANEXO: DETALLE EVALUACIÓN (80 CRITERIOS)</div>
+    <div class="print-header">ANEXO: DETALLE EVALUACIÓN DE PROCESOS (80 CRITERIOS)</div>
     <table class="print-table" id="tablaPrint">
       <thead><tr><th>Criterio Evaluado</th><th>Resultado</th></tr></thead>
       <tbody id="tbodyPrint"></tbody>
@@ -1561,24 +466,24 @@
 
   <div class="modal-backdrop" id="modalVisita" style="display: none;">
     <div class="modal">
-      <div class="modal-header"><h3>Agendar visita</h3><span class="modal-close" data-close="modalVisita">✕</span></div>
+      <div class="modal-header"><h3>Agendar Visita</h3><span class="modal-close" data-close="modalVisita">✕</span></div>
       <div class="modal-body">
         <div class="modal-field"><label>Fecha</label><input id="visitaFecha" readonly></div>
         <div class="modal-field"><label>Responsable</label><select id="visitaResp"><option>Ariannys Rojas</option><option>Sonia Guasque</option></select></div>
         <div class="modal-field"><label>Centro</label><input id="visitaCentro"></div>
       </div>
-      <div class="modal-footer"><button class="btn btn-cta" id="btnGuardarVisita">Guardar visita</button></div>
+      <div class="modal-footer"><button class="btn btn-cta" id="btnGuardarVisita">Guardar</button></div>
     </div>
   </div>
 
   <div class="modal-backdrop" id="modalCentro">
     <div class="modal">
-      <div class="modal-header"><h3>Nuevo centro</h3><span class="modal-close" data-close="modalCentro">✕</span></div>
+      <div class="modal-header"><h3>Nuevo Centro</h3><span class="modal-close" data-close="modalCentro">✕</span></div>
       <div class="modal-body">
          <div class="modal-field"><label>Centro</label><input id="nuevoCentro"></div>
          <div class="modal-field"><label>Delegado</label><input id="nuevoDelegado"></div>
       </div>
-      <div class="modal-footer"><button class="btn btn-cta" id="guardarCentro">Guardar centro</button></div>
+      <div class="modal-footer"><button class="btn btn-cta" id="guardarCentro">Guardar</button></div>
     </div>
   </div>
 
@@ -1617,9 +522,8 @@
     }));
     
     $("#themeToggle").addEventListener("click", ()=> { document.body.classList.toggle("light"); updateChartsTheme(); });
-    $("#btnImprimir").addEventListener("click", ()=> window.print());
 
-    // --- CALCULO DASHBOARD GLOBAL (REAL) ---
+    // --- LOGICA DASHBOARD GLOBAL (REAL) ---
     function recalcularKPIsGlobales() {
        $("#headerVisitsCount").textContent = `${totalInformesCargados}`;
        
@@ -1834,9 +738,7 @@
 
        if(centroActual.centro.includes("Exclusivo")) $("#radExclusivo").checked=true; else $("#radCorner").checked=true;
        itemsFallidos=[]; conteoOk=0; conteoNo=0; $("#tbodyPrint").innerHTML = "";
-       
-       // Inicializar con datos demo si no hay excel
-       actualizarVisualesCentro(centroActual.hit, centroActual.aar, 85, 80, 75);
+       actualizarVisualesCentro(centroActual.hit, centroActual.aar, 0, 0, 0);
     }
 
     document.addEventListener("click", e => {
@@ -1895,12 +797,6 @@
       ];
       demo.forEach(c => centros.push(c));
       renderTablaCentros(); renderDelegados();
-
-      // Visitas Demo
-      visitas.push({ fecha: "2025-12-01", centro:"REINA DE MERCEDES", respAudio:"Ariannys Rojas", estado:"finalizada" });
-      visitas.push({ fecha: "2025-12-05", centro:"SANTANDER CC PEÑACASTILLO", respAudio:"Sergio Perán", estado:"enproceso" });
-      visitas.push({ fecha: "2025-12-10", centro:"PAMPLONA C. Exclusivo", respAudio:"Sonia Godino", estado:"pendiente" });
-      renderVisitas();
     }
     
     function renderDelegados() {
@@ -1933,7 +829,7 @@
           const dIso = formatDateISO(new Date(calYear, calMonth, dayNum));
           cell.innerHTML = `<div class="cal-day">${dayNum}</div>`;
           const v = visitas.find(x=>x.fecha===dIso);
-          if (v) cell.innerHTML += `<div class="cal-event"><span class="cal-dot"></span></div>`;
+          if (v) cell.innerHTML += `<div class="cal-event"><span class="cal-dot"></span><span class="cal-letter">V</span></div>`;
           cell.addEventListener("click", ()=> { $("#visitaFecha").value=formatDateHuman(dIso); $("#visitaFecha").dataset.iso=dIso; abrirModal("modalVisita"); });
         }
         calendarGrid.appendChild(cell);
