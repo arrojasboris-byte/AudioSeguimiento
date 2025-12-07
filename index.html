@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
   <style>
@@ -64,6 +65,7 @@
       flex-direction: column;
       gap: 24px;
       color: #e5e7eb;
+      flex-shrink: 0;
     }
 
     .logo {
@@ -442,7 +444,7 @@
     .criterios-container {
       min-height: 260px;
       max-height: 320px;
-      overflow-y: auto; /* scroll vertical para ver todos los criterios */
+      overflow-y: auto; 
     }
 
     .ranking-list {
@@ -877,13 +879,33 @@
       outline:none;
     }
 
+    /* NUEVOS ESTILOS PARA RADIO BUTTONS */
+    .radio-group {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      height: 28px;
+    }
+    .radio-group label {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      font-size: .8rem;
+    }
+    .radio-group input[type="radio"] {
+      accent-color: var(--accent-blue);
+      transform: scale(1.2);
+      cursor: pointer;
+    }
+
     .panel-graficos {
       display:grid;
       grid-template-columns: repeat(3, minmax(0,1fr));
       gap:8px;
       min-height:0;
-      max-height:340px;
-      overflow:auto;
+      /* Eliminamos max-height para evitar corte en impresión */
+      overflow:visible; 
     }
 
     .panel-inferior {
@@ -892,19 +914,26 @@
       gap: 10px;
     }
 
+    /* CHECKLIST CON SCROLL */
     .checklist-visita {
       font-size: .78rem;
-      max-height: 260px;
-      overflow: auto;
+      max-height: 220px; /* Scroll vertical */
+      overflow-y: auto;
       display:flex;
       flex-direction:column;
       gap:2px;
+      border: 1px solid var(--border-soft);
+      padding: 6px;
+      border-radius: 8px;
     }
+    .checklist-visita::-webkit-scrollbar { width:6px; }
+    .checklist-visita::-webkit-scrollbar-thumb { background:var(--border-soft); border-radius:4px; }
 
     .checklist-visita label {
       display:flex;
       align-items:center;
       gap:4px;
+      cursor: pointer;
     }
 
     .checklist-heading {
@@ -1110,7 +1139,10 @@
       }
     }
 
-    /* IMPRESIÓN A4: sin faldón izquierdo */
+    /* --- ESTILOS DE IMPRESIÓN --- */
+    /* OCULTO POR DEFECTO */
+    #printChecklistContainer { display: none; }
+
     @page {
       size: A4 portrait;
       margin: 10mm;
@@ -1123,15 +1155,28 @@
         margin: 0;
         padding: 0;
         background:#ffffff !important;
+        color: black !important;
         overflow: visible !important;
       }
       body {
         display:block;
       }
+      /* Ocultar elementos de navegación e interfaz */
       .sidebar,
-      .topbar {
+      .topbar,
+      .topbar-buttons,
+      .acciones-informe,
+      #themeToggle,
+      #btnGuardarVista,
+      #btnExportarHTML,
+      #btnImprimir,
+      #btnActualizarNube,
+      .btn, 
+      .btn-cta,
+      .modal-backdrop {
         display:none !important;
       }
+
       .main {
         padding:0 !important;
         margin:0 !important;
@@ -1139,23 +1184,60 @@
         max-width:none !important;
         overflow:visible !important;
       }
-      .pages,
-      .page {
+      .pages {
         overflow:visible !important;
+        height: auto !important;
+        display: block !important;
       }
-      .dashboard-grid {
-        grid-template-columns: 1fr !important;
+      .page {
+        display: none !important;
       }
-      .panel-graficos {
-        max-height:none !important;
-        overflow:visible !Important;
+      /* Solo mostrar la página activa */
+      .page.active {
+        display: flex !important;
+        overflow: visible !important;
+        height: auto !important;
       }
+
       .card {
         box-shadow:none !important;
-        border-color:#d1d5db !important;
+        border: 1px solid #ccc !important;
+        background: white !important;
+        color: black !important;
         break-inside: avoid;
-        page-break-inside: avoid;
+        margin-bottom: 10px;
       }
+      
+      input, textarea, select {
+        background: white !important;
+        color: black !important;
+        border: 1px solid #ccc !important;
+      }
+
+      /* Ajustes Grid Impresión */
+      .dashboard-grid { grid-template-columns: 1fr !important; }
+      .panel-graficos { grid-template-columns: 1fr 1fr 1fr !important; height:auto; }
+      .panel-inferior { grid-template-columns: 1fr 2fr !important; height:auto; }
+      .informe-top { grid-template-columns: 1.4fr 1fr !important; }
+      
+      /* Checklist en página 1 (resumen) */
+      .checklist-visita { 
+        max-height: none !important; 
+        overflow: visible !important; 
+        border: 1px solid #eee;
+      }
+
+      /* PÁGINA 2: Tabla de Checklist Completo */
+      #printChecklistContainer {
+        display: block !important;
+        break-before: page;
+        margin-top: 20px;
+      }
+      .print-header { font-size: 16px; font-weight: bold; margin-bottom: 15px; border-bottom: 2px solid black; padding-bottom: 5px; }
+      .print-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+      .print-table th, .print-table td { border: 1px solid #ccc; padding: 5px; text-align: left; }
+      .print-table th { background: #f0f0f0; font-weight: bold; }
+      .print-table tr:nth-child(even) { background: #f9f9f9; }
     }
   </style>
 </head>
@@ -1252,7 +1334,7 @@
               <div class="kpi-card">
                 <div class="kpi-label">Aplicación HIT</div>
                 <div class="kpi-value" id="kpiHIT">–</div>
-                <div class="kpi-caption">% Centros que aplican</div>
+                <div class="kpi-caption">% Centros (Global)</div>
               </div>
               <div class="kpi-card">
                 <div class="kpi-label">Formaciones %</div>
@@ -1267,7 +1349,7 @@
               <div class="kpi-card">
                 <div class="kpi-label">AAR</div>
                 <div class="kpi-value" id="kpiAar">–</div>
-                <div class="kpi-caption">% Centros con AAR</div>
+                <div class="kpi-caption">% Centros (Global)</div>
               </div>
               <div class="kpi-card">
                 <div class="kpi-label">Primeros auxilios</div>
@@ -1282,7 +1364,7 @@
                   <span class="card-title">Radar general</span>
                 </div>
                 <div class="chart-container">
-                  <canvas id="chartRadarGeneral" width="360" height="360" style="display: block; box-sizing: border-box; height: 240px; width: 240px;"></canvas>
+                  <canvas id="chartRadarGeneral" width="360" height="360"></canvas>
                 </div>
               </div>
 
@@ -1291,7 +1373,7 @@
                   <span class="card-title">Procesos y áreas de mejora por mes</span>
                 </div>
                 <div class="chart-container">
-                  <canvas id="chartProcesosMes" width="438" height="240" style="display: block; box-sizing: border-box; height: 160px; width: 292px;"></canvas>
+                  <canvas id="chartProcesosMes" width="438" height="240"></canvas>
                 </div>
               </div>
 
@@ -1300,7 +1382,7 @@
                   <span class="card-title">Áreas de mejora por mes</span>
                 </div>
                 <div class="chart-container">
-                  <canvas id="chartAreasMes" width="438" height="240" style="display: block; box-sizing: border-box; height: 160px; width: 292px;"></canvas>
+                  <canvas id="chartAreasMes" width="438" height="240"></canvas>
                 </div>
               </div>
 
@@ -1309,7 +1391,7 @@
                   <span class="card-title">Primeros auxilios por mes</span>
                 </div>
                 <div class="chart-container">
-                  <canvas id="chartPrimerosMes" width="438" height="240" style="display: block; box-sizing: border-box; height: 160px; width: 292px;"></canvas>
+                  <canvas id="chartPrimerosMes" width="438" height="240"></canvas>
                 </div>
               </div>
 
@@ -1318,7 +1400,7 @@
                   <span class="card-title">Top 10 áreas de mejora</span>
                 </div>
                 <div class="chart-container">
-                  <canvas id="chartTopAreas" width="438" height="240" style="display: block; box-sizing: border-box; height: 160px; width: 292px;"></canvas>
+                  <canvas id="chartTopAreas" width="438" height="240"></canvas>
                 </div>
               </div>
 
@@ -1327,7 +1409,7 @@
                   <span class="card-title">Aplicación AAR / HIT</span>
                 </div>
                 <div class="chart-container">
-                  <canvas id="chartAarHitDonut" width="438" height="360" style="display: block; box-sizing: border-box; height: 240px; width: 292px;"></canvas>
+                  <canvas id="chartAarHitDonut" width="438" height="360"></canvas>
                 </div>
               </div>
             </div>
@@ -1337,13 +1419,13 @@
             <article class="card">
               <div class="card-header-row">
                 <span class="card-title">Evaluación detallada de procesos (80 criterios)</span>
-                <span class="badge-small">Se actualiza con los checklists CORNER / EXCLUSIVO</span>
+                <span class="badge-small">Se actualiza con los checklists</span>
               </div>
               <div class="card-sub" id="criteriosEmptyMsg" style="display: none;">
-                Adjunta un checklist en el informe de la visita para ver el detalle por criterios.
+                Adjunta un checklist en el informe de la visita para ver el detalle.
               </div>
               <div class="chart-container criterios-container">
-                <canvas id="chartCriteriosDetalle" width="1435" style="height: 260px; display: block; box-sizing: border-box; width: 957px;" height="390"></canvas>
+                <canvas id="chartCriteriosDetalle" width="1435"></canvas>
               </div>
             </article>
 
@@ -1351,16 +1433,17 @@
               <div class="card-header-row">
                 <span class="card-title">Ranking de delegados</span>
               </div>
-              <div class="ranking-list" id="rankingDelegados"></div>
+              <div class="ranking-list" id="rankingDelegados">
+                </div>
               <div class="ranking-toggle" id="rankingToggle" style="display: block;">
                 Mostrar todos
               </div>
               <div class="ranking-summary" id="rankingResumen">
                 <div class="ranking-summary-item">
-                  Top delegado: <span id="rankingTopDelegado">ENERITZ ARANGUREN</span>
+                  Top delegado: <span id="rankingTopDelegado">-</span>
                 </div>
                 <div class="ranking-summary-item">
-                  Media procesos delegados: <span id="rankingMediaProcesos">87%</span>
+                  Media procesos delegados: <span id="rankingMediaProcesos">-</span>
                 </div>
               </div>
             </article>
@@ -1373,7 +1456,7 @@
           <article class="card">
             <div class="card-header-row">
               <span class="card-title">Centros y delegados</span>
-              <span class="badge-small"><span id="numDelegados">6</span> delegados</span>
+              <span class="badge-small"><span id="numDelegados">0</span> delegados</span>
             </div>
             <div class="delegados-list" id="delegadosList"></div>
             <div style="display:flex; gap:8px; margin-top:6px;">
@@ -1386,7 +1469,7 @@
               <input type="file" id="inputExcel" accept=".xlsx,.xls" style="display:none">
             </div>
             <div style="margin-top:4px; font-size:.74rem; color:var(--text-muted);">
-              Centros mostrados: <span id="centrosMostrados">10</span> / <span id="centrosTotal">10</span>
+              Centros mostrados: <span id="centrosMostrados">0</span> / <span id="centrosTotal">0</span>
             </div>
           </article>
 
@@ -1420,7 +1503,7 @@
             <div>
               <h3>Listado de centros</h3>
             </div>
-            <span class="badge-small" id="totalCentrosLabel">Centros mostrados: 10 / 10</span>
+            <span class="badge-small" id="totalCentrosLabel">Centros mostrados: 0 / 0</span>
           </div>
           <div class="table-scroll">
             <table>
@@ -1462,29 +1545,26 @@
                   <div class="dato-label">Delegado</div>
                   <input id="infDelegado" class="field-input" readonly="">
                 </div>
-                <div>
-                  <div class="dato-label">Tipo</div>
-                  <input id="infTipo" class="field-input" readonly="">
+                
+                <div class="dato-full">
+                   <div class="dato-label" style="margin-bottom:2px;">Tipo de Centro</div>
+                   <div class="radio-group">
+                      <label><input type="radio" name="tipoCentro" value="Exclusivo" id="radExclusivo"> Exclusivo</label>
+                      <label><input type="radio" name="tipoCentro" value="Corner" id="radCorner"> Corner</label>
+                   </div>
                 </div>
+
                 <div>
                   <div class="dato-label">Responsable audio</div>
-                  <input id="infRespAudio" class="field-input" readonly="">
+                  <input id="infRespAudio" class="field-input">
                 </div>
                 <div>
                   <div class="dato-label">Fecha visita</div>
-                  <input id="infFecha" class="field-input" readonly="">
-                </div>
-                <div>
-                  <div class="dato-label">Audiólogo</div>
-                  <input id="infAudiologo" class="field-input">
-                </div>
-                <div>
-                  <div class="dato-label">Horas de servicio</div>
-                  <input id="infHoras" class="field-input">
+                  <input id="infFecha" class="field-input">
                 </div>
                 <div class="dato-full" style="margin-top:4px;">
                   <button class="btn btn-cta" id="btnAdjuntarChecklist">
-                    <span class="icon">📎</span> Adjuntar checklist
+                    <span class="icon">📎</span> Adjuntar checklist (Excel)
                   </button>
                   <input type="file" id="inputChecklist" accept=".xlsx,.xls" style="display:none">
                   <span id="nombreChecklist" style="margin-left:8px; font-size:.74rem; color:var(--text-muted);"></span>
@@ -1503,7 +1583,7 @@
                 <div>Aplicación HIT: <strong id="kpiCentroHit" style="color:var(--accent-blue);">No</strong></div>
               </div>
               <div class="chart-container centered" style="margin-top:6px; max-height:180px;">
-                <canvas id="chartCentroRadar" width="270" height="270" style="display: block; box-sizing: border-box; height: 180px; width: 180px;"></canvas>
+                <canvas id="chartCentroRadar" width="270" height="270"></canvas>
               </div>
             </article>
           </div>
@@ -1514,7 +1594,7 @@
                 <span class="card-title">Palancas (Aplica/No Aplica)</span>
               </div>
               <div class="chart-container">
-                <canvas id="chartCentroPalancas" width="441" height="240" style="display: block; box-sizing: border-box; height: 160px; width: 294px;"></canvas>
+                <canvas id="chartCentroPalancas"></canvas>
               </div>
             </article>
 
@@ -1523,7 +1603,7 @@
                 <span class="card-title">Áreas de Mejora (F=0)</span>
               </div>
               <div class="chart-container">
-                <canvas id="chartCentroAreasMejora" width="441" height="360" style="display: block; box-sizing: border-box; height: 240px; width: 294px;"></canvas>
+                <canvas id="chartCentroAreasMejora"></canvas>
               </div>
             </article>
 
@@ -1532,7 +1612,7 @@
                 <span class="card-title">Resumen Procesos (Cumple vs No)</span>
               </div>
               <div class="chart-container">
-                <canvas id="chartCentroProcesosStack" width="441" height="240" style="display: block; box-sizing: border-box; height: 160px; width: 294px;"></canvas>
+                <canvas id="chartCentroProcesosStack"></canvas>
               </div>
             </article>
           </div>
@@ -1542,16 +1622,26 @@
               <div class="card-header-row">
                 <span class="card-title">Checklist Rápido (Manual)</span>
               </div>
-              <div class="checklist-visita" style="margin-top:6px;">
-                 <label><input type="checkbox" id="chkHit"> <strong>HIT</strong></label>
-                 <label><input type="checkbox" id="chkAar"> <strong>AAR</strong></label>
-                 <label><input type="checkbox" id="chk1os"> Primeros Auxilios</label>
-                 <label><input type="checkbox" id="chkInfinity"> Infinity</label>
-                 <label><input type="checkbox" id="chkSeguro"> Seguro</label>
-                 <label><input type="checkbox" id="chkStock"> Stock</label>
-                 <div style="margin:5px 0; border-top:1px dashed #333;"></div>
+              <div class="checklist-visita">
+                <label><input type="checkbox" id="chkHit"> <strong>HIT</strong></label>
+                <label><input type="checkbox" id="chkAar"> <strong>AAR</strong></label>
+                <label><input type="checkbox" id="chk1os"> Primeros Auxilios</label>
+                <label><input type="checkbox" id="chkInfinity"> Infinity</label>
+                <label><input type="checkbox" id="chkSeguro"> Seguro</label>
+                <label><input type="checkbox" id="chkStock"> Stock</label>
+                <div style="margin:5px 0; border-top:1px dashed #333;"></div>
+                <label><input type="checkbox"> Formación WSA</label>
+                <label><input type="checkbox"> Formación Starkey</label>
+                <label><input type="checkbox"> Neuroventas</label>
+                <label><input type="checkbox"> Telecare</label>
+                <label><input type="checkbox"> PIA</label>
+                <label><input type="checkbox"> Telehear</label>
+                <label><input type="checkbox"> Audiometría RT</label>
+                <label><input type="checkbox"> Test Lectura Audio</label>
+              </div>
+              <div style="margin-top:5px;">
                  <div class="dato-label">Nota Formaciones (0-10)</div>
-                 <input type="number" id="inpFormaciones" class="field-input" value="0" max="10" min="0">
+                 <input type="number" id="inpFormaciones" class="field-input" value="0" min="0" max="10">
               </div>
             </article>
 
@@ -1562,24 +1652,24 @@
               <div class="imagenes-grid" style="margin-top:4px;">
                 <div>
                   <div class="imagen-item-title">Centro exterior</div>
-                  <div class="imagen-preview" data-target="ext">
+                  <div class="imagen-preview" onclick="$('#fExt').click()">
                     Adjuntar imagen
+                    <input type="file" id="fExt" accept="image/*" hidden onchange="preview(this)">
                   </div>
-                  <input type="file" accept="image/*" data-input-img="ext" style="display:none">
                 </div>
                 <div>
                   <div class="imagen-item-title">Centro interior</div>
-                  <div class="imagen-preview" data-target="int">
+                  <div class="imagen-preview" onclick="$('#fInt').click()">
                     Adjuntar imagen
+                    <input type="file" id="fInt" accept="image/*" hidden onchange="preview(this)">
                   </div>
-                  <input type="file" accept="image/*" data-input-img="int" style="display:none">
                 </div>
                 <div>
                   <div class="imagen-item-title">Gabinete</div>
-                  <div class="imagen-preview" data-target="gab">
+                  <div class="imagen-preview" onclick="$('#fGab').click()">
                     Adjuntar imagen
+                    <input type="file" id="fGab" accept="image/*" hidden onchange="preview(this)">
                   </div>
-                  <input type="file" accept="image/*" data-input-img="gab" style="display:none">
                 </div>
               </div>
             </article>
@@ -1613,27 +1703,24 @@
       </section>
 
       <section class="page" data-page="servicios">
-        <article class="card">
-          <div class="card-title">Servicios</div>
-          <div class="card-sub">Módulo placeholder para futuras funcionalidades.</div>
-        </article>
+        <article class="card"><div class="card-title">Servicios</div></article>
       </section>
-
       <section class="page" data-page="ventas">
-        <article class="card">
-          <div class="card-title">Ventas</div>
-          <div class="card-sub">Módulo placeholder para futuras funcionalidades.</div>
-        </article>
+        <article class="card"><div class="card-title">Ventas</div></article>
       </section>
-
       <section class="page" data-page="proyectos">
-        <article class="card">
-          <div class="card-title">Proyectos</div>
-          <div class="card-sub">Módulo placeholder para futuras funcionalidades.</div>
-        </article>
+        <article class="card"><div class="card-title">Proyectos</div></article>
       </section>
     </div>
   </main>
+
+  <div id="printChecklistContainer">
+    <div class="print-header">ANEXO: DETALLE DE CHECKLIST (80 Puntos)</div>
+    <table class="print-table" id="tablaPrint">
+      <thead><tr><th>Criterio</th><th>Resultado</th></tr></thead>
+      <tbody id="tbodyPrint"></tbody>
+    </table>
+  </div>
 
   <div class="modal-backdrop" id="modalVisita" style="display: none;">
     <div class="modal">
@@ -1673,26 +1760,11 @@
         <span class="modal-close" data-close="modalCentro">✕</span>
       </div>
       <div class="modal-body">
-        <div class="modal-field">
-          <label>Código</label>
-          <input id="nuevoCodigo">
-        </div>
-        <div class="modal-field">
-          <label>Propietario</label>
-          <input id="nuevoPropietario">
-        </div>
-        <div class="modal-field">
-          <label>Centro</label>
-          <input id="nuevoCentro">
-        </div>
-        <div class="modal-field">
-          <label>Provincia</label>
-          <input id="nuevoProvincia">
-        </div>
-        <div class="modal-field">
-          <label>Delegado</label>
-          <input id="nuevoDelegado">
-        </div>
+        <div class="modal-field"><label>Código</label><input id="nuevoCodigo"></div>
+        <div class="modal-field"><label>Propietario</label><input id="nuevoPropietario"></div>
+        <div class="modal-field"><label>Centro</label><input id="nuevoCentro"></div>
+        <div class="modal-field"><label>Provincia</label><input id="nuevoProvincia"></div>
+        <div class="modal-field"><label>Delegado</label><input id="nuevoDelegado"></div>
       </div>
       <div class="modal-footer">
         <button class="btn" data-close="modalCentro">Cancelar</button>
@@ -1702,6 +1774,7 @@
   </div>
 
   <script>
+    Chart.register(ChartDataLabels);
     const $  = sel => document.querySelector(sel);
     const $$ = sel => Array.from(document.querySelectorAll(sel));
 
@@ -1715,6 +1788,13 @@
     function formatDateHuman(iso) {
       const [y,m,d] = iso.split("-");
       return `${d}-${m}-${y}`;
+    }
+    function preview(input) {
+       if(input.files && input.files[0]) {
+          const r = new FileReader();
+          r.onload = e => input.parentElement.innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;">`;
+          r.readAsDataURL(input.files[0]);
+       }
     }
 
     /* NAV */
@@ -1768,26 +1848,24 @@
       return delegadosColores[nombre];
     }
     function tipoCentro(nombreCentro) {
-      return exclusivosSet.has(nombreCentro) ? "Exclusivo" : "Corner";
+      return nombreCentro.toUpperCase().includes("EXCLUSIVO") ? "Exclusivo" : "Corner";
     }
     function getInformes(nombreCentro) {
       return informesPorCentro[nombreCentro] || 0;
     }
 
-    /* RENDER TABLA */
-    const tablaBody = $("#tablaCentrosBody");
-    const totalCentrosLabel = $("#totalCentrosLabel");
-    const centrosMostradosSpan = $("#centrosMostrados");
-    const centrosTotalSpan = $("#centrosTotal");
+    /* RENDER TABLA CENTROS */
     let filtroDelegadoActual = null;
     let filtroTextoActual = "";
 
     function renderTablaCentros() {
-      const texto = filtroTextoActual.toLowerCase();
-      tablaBody.innerHTML = "";
+      const tbody = $("#tablaCentrosBody");
+      tbody.innerHTML = "";
       const filtrados = centros.filter(c => {
         const cad = (c.centro + " " + c.propietario + " " + c.delegado).toLowerCase();
-        return cad.includes(texto) && (!filtroDelegadoActual || c.delegado === filtroDelegadoActual);
+        const pasaTexto = cad.includes(filtroTextoActual.toLowerCase());
+        const pasaDel   = !filtroDelegadoActual || c.delegado === filtroDelegadoActual;
+        return pasaTexto && pasaDel;
       });
 
       filtrados.forEach(c => {
@@ -1797,107 +1875,80 @@
         const aarEstado = c.aar ? "Sí" : "No";
 
         tr.innerHTML = `
-          <td>${c.codigo}</td>
-          <td>${c.propietario}</td>
-          <td>${c.centro}</td>
-          <td>${c.provincia}</td>
-          <td>${c.delegado}</td>
+          <td>${c.codigo}</td><td>${c.propietario}</td><td>${c.centro}</td><td>${c.provincia}</td><td>${c.delegado}</td>
           <td><span class="tag ${t === 'Exclusivo' ? 'exclusivo' : 'corner'}">${t}</span></td>
           <td><button class="btn-link btn-informe-centro" data-centro="${c.centro}">${informes ? `Ver (${informes})` : "Añadir informe"}</button></td>
           <td><span class="tag tag-aar ${aarEstado === 'Sí' ? 'si' : ''}">${aarEstado}</span></td>
         `;
-        tablaBody.appendChild(tr);
+        tbody.appendChild(tr);
       });
-      totalCentrosLabel.textContent = `Centros mostrados: ${filtrados.length} / ${centros.length}`;
-      centrosMostradosSpan.textContent = filtrados.length;
-      centrosTotalSpan.textContent = centros.length;
+      $("#totalCentrosLabel").textContent = `Centros mostrados: ${filtrados.length} / ${centros.length}`;
+      $("#centrosMostrados").textContent = filtrados.length;
+      $("#centrosTotal").textContent = centros.length;
     }
 
-    /* DELEGADOS + RANKING */
-    const delegadosList = $("#delegadosList");
-    const rankingDelegadosDiv = $("#rankingDelegados");
-    const rankingToggle = $("#rankingToggle");
-    let rankingExpandido = false;
-
+    /* RENDER DELEGADOS */
     function renderDelegados() {
       const map = new Map();
       centros.forEach(c => {
         if (!map.has(c.delegado)) map.set(c.delegado, []);
         map.get(c.delegado).push(c);
       });
+      const list = $("#delegadosList");
+      list.innerHTML = "";
+      const arr = Array.from(map.entries()).sort((a,b)=>a[0].localeCompare(b[0]));
 
-      delegadosList.innerHTML = "";
-      const delegados = Array.from(map.entries()).sort((a,b)=>a[0].localeCompare(b[0]));
-
-      delegados.forEach(([nombre, lista]) => {
+      arr.forEach(([nombre, lista]) => {
         const card = document.createElement("div");
         card.className = "delegado-card";
-        card.dataset.delegado = nombre;
         const color = getColorForDelegado(nombre);
-        card.innerHTML = `
-          <div class="delegado-header">
-            <div class="delegado-main"><span class="delegado-color" style="background:${color}"></span><span>${nombre}</span></div>
-            <span class="delegado-count">${lista.length} centros</span>
-          </div>
-          <div class="delegado-bar"><span style="background:${color}"></span></div>
-        `;
+        card.innerHTML = `<div class="delegado-header"><div class="delegado-main"><span class="delegado-color" style="background:${color}"></span><span>${nombre}</span></div><span class="delegado-count">${lista.length} centros</span></div><div class="delegado-bar"><span style="background:${color}"></span></div>`;
         card.addEventListener("click", () => {
           if (filtroDelegadoActual === nombre) { filtroDelegadoActual = null; card.classList.remove("active"); } 
           else { filtroDelegadoActual = nombre; $$(".delegado-card").forEach(c=>c.classList.remove("active")); card.classList.add("active"); }
           renderTablaCentros();
         });
-        delegadosList.appendChild(card);
+        list.appendChild(card);
       });
-      $("#numDelegados").textContent = delegados.length;
+      $("#numDelegados").textContent = arr.length;
       renderRankingDelegados(map);
     }
 
     function renderRankingDelegados(map) {
-      rankingDelegadosDiv.innerHTML = "";
-      const arr = Array.from(map.entries()).map(([nombre, lista]) => {
-        const procesos = 80 + Math.floor(Math.random()*15);
-        const hit = 75 + Math.floor(Math.random()*15);
-        const score = Math.round((procesos+hit)/2);
-        return {nombre, n:lista.length, score, procesos, hit};
-      }).sort((a,b)=>b.score-a.score);
-
+      const div = $("#rankingDelegados"); div.innerHTML = "";
+      const arr = Array.from(map.entries()).map(([nombre, lista]) => ({nombre, score: Math.floor(80+Math.random()*15)})).sort((a,b)=>b.score-a.score);
       arr.forEach((d, idx) => {
-        const row = document.createElement("div");
-        row.className = "ranking-row";
-        if (idx >= 5) row.classList.add("extra-hidden");
+        const row = document.createElement("div"); row.className = "ranking-row"; if(idx>=5) row.classList.add("extra-hidden");
         const color = getColorForDelegado(d.nombre);
-        row.innerHTML = `
-          <div class="ranking-main"><span style="font-size:.75rem; color:var(--text-muted);">${idx+1}.</span><span class="delegado-color" style="background:${color}"></span><span>${d.nombre}</span></div>
-          <div style="flex:1; display:flex; align-items:center; gap:4px; margin-left:6px;"><div class="ranking-bar"><span style="width:${d.score}%; background:${color}"></span></div><span style="font-size:.72rem;">${d.score}</span></div>
-        `;
-        rankingDelegadosDiv.appendChild(row);
+        row.innerHTML = `<div class="ranking-main"><span style="font-size:.75rem; color:var(--text-muted);">${idx+1}.</span><span class="delegado-color" style="background:${color}"></span><span>${d.nombre}</span></div><div style="flex:1; display:flex; align-items:center; gap:4px; margin-left:6px;"><div class="ranking-bar"><span style="width:${d.score}%; background:${color}"></span></div><span style="font-size:.72rem;">${d.score}</span></div>`;
+        div.appendChild(row);
       });
-      if (arr.length > 5) rankingToggle.style.display = "block"; else rankingToggle.style.display = "none";
-      if (arr.length) { $("#rankingTopDelegado").textContent = arr[0].nombre; $("#rankingMediaProcesos").textContent = Math.round(arr.reduce((s,d)=> s + d.procesos, 0) / arr.length) + "%"; }
+      if(arr.length) { $("#rankingTopDelegado").textContent = arr[0].nombre; $("#rankingMediaProcesos").textContent = "86%"; }
     }
-    rankingToggle.addEventListener("click", () => {
-      rankingExpandido = !rankingExpandido;
-      $$(".ranking-row.extra-hidden").forEach(r => r.style.display = rankingExpandido ? "flex" : "none");
-      rankingToggle.textContent = rankingExpandido ? "Ocultar" : "Mostrar todos";
+    $("#rankingToggle").addEventListener("click", () => {
+       const exp = $("#rankingToggle").textContent === "Ocultar";
+       $$(".ranking-row.extra-hidden").forEach(r => r.style.display = exp ? "none" : "flex");
+       $("#rankingToggle").textContent = exp ? "Mostrar todos" : "Ocultar";
     });
 
     $("#searchGlobal").addEventListener("input", e => { filtroTextoActual = e.target.value || ""; renderTablaCentros(); });
 
-    /* EXCEL CENTROS */
-    const inputExcel = $("#inputExcel");
-    $("#btnAdjuntarExcel").addEventListener("click", () => inputExcel.click());
-    inputExcel.addEventListener("change", e => {
+    /* EXCEL CARGA MASIVA CENTROS */
+    $("#btnAdjuntarExcel").addEventListener("click", () => $("#inputExcel").click());
+    $("#inputExcel").addEventListener("change", e => {
       const file = e.target.files[0];
       if (!file) return;
       const reader = new FileReader();
       reader.onload = evt => {
-        const workbook = XLSX.read(new Uint8Array(evt.target.result), { type: 'array' });
-        const rows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { header: 1 });
+        const wb = XLSX.read(new Uint8Array(evt.target.result), { type: 'array' });
+        const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1 });
         rows.slice(1).forEach(row => {
           if (!row || row.length < 5) return;
-          const [codigo, propietario, centro, provincia, delegado] = row;
-          if (!centro) return;
-          centros.push({ codigo: (codigo||"").toString().trim(), propietario: (propietario||"").toString().trim(), centro: (centro||"").toString().trim(), provincia: (provincia||"").toString().trim(), delegado: (delegado||"").toString().trim(), aar: false, hit: false });
+          centros.push({
+            codigo: (row[0]||"").toString().trim(), propietario: (row[1]||"").toString().trim(),
+            centro: (row[2]||"").toString().trim(), provincia: (row[3]||"").toString().trim(),
+            delegado: (row[4]||"").toString().trim(), aar: false, hit: false
+          });
         });
         actualizarListaCentrosDatalist(); renderTablaCentros(); renderDelegados();
       };
@@ -1905,12 +1956,13 @@
     });
 
     /* NUEVO CENTRO */
-    $("#btnAddCentro").addEventListener("click", () => {
-      $("#nuevoCodigo").value=""; $("#nuevoPropietario").value=""; $("#nuevoCentro").value=""; $("#nuevoProvincia").value=""; $("#nuevoDelegado").value="";
-      abrirModal("modalCentro");
-    });
+    $("#btnAddCentro").addEventListener("click", () => { $("#nuevoCodigo").value=""; abrirModal("modalCentro"); });
     $("#guardarCentro").addEventListener("click", () => {
-      centros.push({ codigo: $("#nuevoCodigo").value||"NEW", propietario: $("#nuevoPropietario").value||"N/D", centro: $("#nuevoCentro").value||"Centro", provincia: $("#nuevoProvincia").value||"N/D", delegado: $("#nuevoDelegado").value||"N/D", aar: false, hit: false });
+      centros.push({
+        codigo: $("#nuevoCodigo").value||"NEW", propietario: $("#nuevoPropietario").value||"N/D",
+        centro: $("#nuevoCentro").value||"Centro", provincia: $("#nuevoProvincia").value||"N/D",
+        delegado: $("#nuevoDelegado").value||"N/D", aar: false, hit: false
+      });
       cerrarModal("modalCentro"); renderTablaCentros(); renderDelegados(); actualizarListaCentrosDatalist();
     });
     function actualizarListaCentrosDatalist() {
@@ -1920,9 +1972,7 @@
 
     /* CALENDARIO */
     const calendarGrid = $("#calendarGrid");
-    let calYear, calMonth;
-    const visitas = [];
-    let visitaActual = null;
+    let calYear, calMonth; const visitas = []; let visitaActual = null;
     function initCalendar() { const now = new Date(); calYear = now.getFullYear(); calMonth = now.getMonth(); drawCalendar(); }
     function drawCalendar() {
       calendarGrid.innerHTML = "";
@@ -1931,42 +1981,32 @@
       const last = new Date(calYear, calMonth+1, 0).getDate();
       $("#calTitulo").textContent = new Intl.DateTimeFormat("es-ES", {month:"long", year:"numeric"}).format(first).replace(/^\w/, c=>c.toUpperCase());
       for (let i=0;i<42;i++) {
-        const cell = document.createElement("div");
-        const dayNum = i - dow + 1;
-        if (dayNum < 1 || dayNum > last) { cell.className = "cal-cell empty"; } 
-        else {
+        const cell = document.createElement("div"); const dayNum = i - dow + 1;
+        if (dayNum < 1 || dayNum > last) { cell.className = "cal-cell empty"; } else {
           cell.className = "cal-cell";
-          const dateIso = formatDateISO(new Date(calYear, calMonth, dayNum));
+          const dIso = formatDateISO(new Date(calYear, calMonth, dayNum));
           cell.innerHTML = `<div class="cal-day">${dayNum}</div>`;
-          const v = visitas.find(v=>v.fecha===dateIso);
+          const v = visitas.find(x=>x.fecha===dIso);
           if (v) cell.innerHTML += `<div class="cal-event"><span class="cal-dot"></span><span class="cal-letter">V</span></div>`;
-          cell.addEventListener("click", ()=> abrirModalVisita(dateIso));
+          cell.addEventListener("click", ()=> { $("#visitaFecha").value=formatDateHuman(dIso); $("#visitaFecha").dataset.iso=dIso; abrirModal("modalVisita"); });
         }
         calendarGrid.appendChild(cell);
       }
     }
-    $("#calPrev").addEventListener("click", () => { calMonth--; if(calMonth<0){calMonth=11;calYear--;} drawCalendar(); });
-    $("#calNext").addEventListener("click", () => { calMonth++; if(calMonth>11){calMonth=0;calYear++;} drawCalendar(); });
-
-    function abrirModalVisita(fechaIso) { $("#visitaFecha").value = formatDateHuman(fechaIso); $("#visitaFecha").dataset.iso = fechaIso; $("#visitaCentro").value = ""; abrirModal("modalVisita"); }
-    $("#btnGuardarVisita").addEventListener("click", () => {
-      const centro = $("#visitaCentro").value.trim();
-      if (!centro) return alert("Indica el centro.");
-      const cObj = centros.find(c=>c.centro===centro);
-      visitas.push({ fecha: $("#visitaFecha").dataset.iso, centro, delegado: cObj?cObj.delegado:"N/D", respAudio: $("#visitaResp").value, estado: "pendiente" });
-      cerrarModal("modalVisita"); drawCalendar(); renderVisitas();
+    $("#calPrev").addEventListener("click", ()=>{ calMonth--; if(calMonth<0){calMonth=11;calYear--;} drawCalendar(); });
+    $("#calNext").addEventListener("click", ()=>{ calMonth++; if(calMonth>11){calMonth=0;calYear++;} drawCalendar(); });
+    $("#btnGuardarVisita").addEventListener("click", ()=>{
+       const c = $("#visitaCentro").value.trim(); if(!c) return;
+       const obj = centros.find(x=>x.centro===c);
+       visitas.push({ fecha: $("#visitaFecha").dataset.iso, centro:c, delegado: obj?obj.delegado:"N/D", respAudio: $("#visitaResp").value, estado:"pendiente" });
+       cerrarModal("modalVisita"); drawCalendar(); renderVisitas();
     });
-
-    const visitasList = $("#visitasList");
     function renderVisitas() {
-      visitasList.innerHTML = "";
-      visitas.sort((a,b)=>a.fecha.localeCompare(b.fecha));
-      visitas.forEach((v, idx) => {
-        const row = document.createElement("div");
-        row.className = "visita-row";
-        row.innerHTML = `<div class="visita-row-line"><span class="visita-row-main">${formatDateHuman(v.fecha)} · ${v.centro}</span><span class="chip-estado ${v.estado}">${v.estado}</span></div><div class="visita-row-secondary">Del. ${v.delegado}</div><div class="visita-actions"><button class="btn-chip btn-ir-informe" data-centro="${v.centro}" data-idx="${idx}">Informe</button></div>`;
-        visitasList.appendChild(row);
-      });
+       const l = $("#visitasList"); l.innerHTML="";
+       visitas.sort((a,b)=>a.fecha.localeCompare(b.fecha));
+       visitas.forEach((v,i) => {
+          l.innerHTML += `<div class="visita-row"><div class="visita-row-line"><span class="visita-row-main">${formatDateHuman(v.fecha)} · ${v.centro}</span><span class="chip-estado ${v.estado}">${v.estado}</span></div><div class="visita-actions"><button class="btn-chip btn-ir-informe" data-centro="${v.centro}" data-idx="${i}">Informe</button></div></div>`;
+       });
     }
 
     function abrirModal(id){ document.getElementById(id).style.display = "flex"; }
@@ -1975,12 +2015,12 @@
     $$(".modal-backdrop").forEach(bg=> bg.addEventListener("click", e=>{ if(e.target===bg) bg.style.display="none"; }));
 
     /* ========================================================================= */
-    /* LÓGICA DE INFORME Y LECTURA DE EXCEL                                      */
+    /* LÓGICA DE INFORME Y LECTURA DE EXCEL (CORNER/EXCLUSIVO + NUEVOS CHARTS)   */
     /* ========================================================================= */
     
     let centroChartsCreated = false;
-    const centroCharts = {};
-    const globalCharts = {};
+    let centroCharts = {};
+    let globalCharts = {};
     let centroActual = null;
     let itemsFallidosGlobal = []; 
     let conteoF1 = 0, conteoF0 = 0;
@@ -1995,9 +2035,8 @@
 
        $("#kpiHIT").textContent = hitPct + "%";
        $("#kpiAar").textContent = aarPct + "%";
-       $("#kpiProcesos").textContent = "85%";
-       $("#kpiConvPrueba").textContent = "80%";
-       $("#kpiConvVenta").textContent = "78%";
+       // Dummy Static
+       $("#kpiProcesos").textContent = "85%"; $("#kpiConvPrueba").textContent = "80%"; $("#kpiConvVenta").textContent = "78%";
        
        if(globalCharts.radarGeneral) {
          globalCharts.radarGeneral.data.datasets[0].data = [85, 80, 78, hitPct, 60, aarPct];
@@ -2023,117 +2062,130 @@
         try {
           const workbook = XLSX.read(new Uint8Array(evt.target.result), { type: "array" });
           const rows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { header:1 });
-          const tipo = file.name.toUpperCase().includes("EXCLUSIVO") ? "EXCLUSIVO" : "CORNER";
+          
+          // Detectar tipo y seleccionar Radio Button
+          const nameUpper = file.name.toUpperCase();
+          const isExclusivo = nameUpper.includes("EXCLUSIVO");
+          if(isExclusivo) $("#radExclusivo").checked = true; else $("#radCorner").checked = true;
 
-          let rStart = (tipo==="EXCLUSIVO") ? 7 : 6;
-          let rEnd   = (tipo==="EXCLUSIVO") ? 101 : 87;
+          // Procesar Filas
+          let rStart = isExclusivo ? 7 : 6;
+          let rEnd   = isExclusivo ? 101 : 87;
           
           itemsFallidosGlobal = [];
           let c1=0, c0=0;
-          const labelsDetalle = [], dataDetalle = [];
+          let listaPrint = ""; // HTML para tabla pagina 2
 
           for(let r=rStart; r<=rEnd; r++) {
              const row = rows[r] || [];
-             const nombre = row[1];
-             const res = row[5];
+             const nombre = row[1]; // Col B
+             const res = row[5];    // Col F
              if(nombre) {
-                if(res == 1) c1++;
-                else { c0++; itemsFallidosGlobal.push(nombre); }
-                labelsDetalle.push(nombre);
-                dataDetalle.push(res==1?100:0);
+                const ok = (res == 1);
+                if(ok) c1++; else { c0++; itemsFallidosGlobal.push(nombre); }
+                
+                // Añadir a tabla oculta de impresión
+                listaPrint += `<tr><td>${nombre}</td><td style="color:${ok?'green':'red'}"><b>${ok?'CUMPLE':'NO CUMPLE'}</b></td></tr>`;
              }
           }
-          conteoF1 = c1; conteoF0 = c0;
-          actualizarGraficoCriterios(labelsDetalle, dataDetalle);
+          // Actualizar Tabla Print
+          $("#tbodyPrint").innerHTML = listaPrint;
 
-          // KPIs Dummy
-          let fHit = (tipo==="EXCLUSIVO") ? 64 : 62;
+          conteoF1 = c1; conteoF0 = c0;
+          
+          // Leer KPIs unitarios (coords dummy)
+          let fHit = isExclusivo ? 64 : 62;
           let valHit = (rows[fHit]||[])[5] == 1;
           const procPct = Math.round((c1 / (c1+c0))*100) || 0;
-          const pruebaPct = 80; const ventaPct  = 75;
-
+          
           if(centroActual) centroActual.hit = valHit;
           $("#chkHit").checked = valHit;
           
-          alert(`Checklist ${tipo} procesado.\nCumple: ${c1}, No Cumple: ${c0}`);
-          actualizarVisualesCentro(valHit, $("#chkAar").checked, procPct, pruebaPct, ventaPct);
+          alert(`Checklist procesado.\nHIT: ${valHit ? "SÍ" : "NO"}`);
+          actualizarVisualesCentro(valHit, $("#chkAar").checked, procPct, 80, 75);
 
-        } catch (err) { console.error(err); alert("Error al leer el checklist."); }
+        } catch (err) { console.error(err); alert("Error al leer Excel"); }
       };
       reader.readAsArrayBuffer(file);
     }
 
-    function actualizarGraficoCriterios(labels, data) {
-      const ctx = document.getElementById("chartCriteriosDetalle").getContext("2d");
-      if(!globalCharts.criteriosDetalle) {
-        globalCharts.criteriosDetalle = new Chart(ctx, {
-          type: "bar", data: { labels, datasets: [{ label:"%", data, backgroundColor:"#38bdf8" }] },
-          options: { indexAxis:"y", maintainAspectRatio:false, plugins:{legend:{display:false}} }
-        });
-      } else {
-        globalCharts.criteriosDetalle.data.labels = labels;
-        globalCharts.criteriosDetalle.data.datasets[0].data = data;
-        globalCharts.criteriosDetalle.update();
-      }
-      $("#criteriosEmptyMsg").style.display = "none";
-    }
-
-    // --- GRÁFICOS CENTRO REDISEÑADOS ---
+    // --- GRÁFICOS CENTRO RENOVADOS ---
     function crearChartsCentro() {
       if (centroChartsCreated) return;
       centroChartsCreated = true;
+      const textColor = getComputedStyle(document.body).getPropertyValue('--text-muted');
 
       // 1. RADAR CLEAN
       centroCharts.radar = new Chart(document.getElementById("chartCentroRadar").getContext("2d"), {
         type: "radar",
         data: {
           labels: ['Procesos (%)', 'C. Prueba (%)', 'C. Venta (%)', 'Formaciones (0-10)'],
-          datasets: [{ label: 'Nivel', data: [0,0,0,0], backgroundColor: 'rgba(56, 189, 248, 0.2)', borderColor: '#38bdf8', borderWidth: 2, pointBackgroundColor: '#fff' }]
+          datasets: [{ label: 'Nivel', data: [0,0,0,0], backgroundColor: 'rgba(56, 189, 248, 0.25)', borderColor: '#38bdf8', borderWidth: 3, pointBackgroundColor: '#fff' }]
         },
-        options: { scales: { r: { angleLines: { color: 'rgba(255,255,255,0.1)' }, grid: { color: 'rgba(255,255,255,0.1)' }, pointLabels: { color: '#9ca3af' }, ticks: { display: false, min:0, max:100 } } }, plugins: { legend: { display: false } } }
+        options: { 
+           scales: { r: { angleLines: { color: 'rgba(255,255,255,0.1)' }, grid: { color: 'rgba(255,255,255,0.1)' }, pointLabels: { color: '#ffffff', font:{size:13, weight:'bold'} }, ticks: { display: false, min:0, max:100 } } }, 
+           plugins: { legend: { display: false } } 
+        }
       });
 
-      // 2. BARRAS PALANCAS (Horizontal)
+      // 2. PALANCAS (SEMÁFORO)
       centroCharts.barras = new Chart(document.getElementById("chartCentroPalancas").getContext("2d"), {
         type: 'bar',
         data: {
-           labels: ['HIT', 'AAR', '1os Aux', 'Infinity', 'Seguro', 'Stock'],
+           labels: ['HIT', 'AAR', 'Primeros Auxilios', 'Infinity', 'Seguro', 'Stock'],
            datasets: [{ data: [1,1,1,1,1,1], backgroundColor: [], borderRadius: 4, barPercentage: 0.6 }]
         },
-        options: { indexAxis: 'y', scales: { x: { display: false, max: 1 }, y: { grid: {display:false}, ticks: {color: '#9ca3af'} } }, plugins: { legend: { display: false } } }
+        options: { indexAxis: 'y', scales: { x: { display: false, max: 1 }, y: { grid: {display:false}, ticks: {color: textColor, font:{size:11}} } }, plugins: { legend: { display: false } } }
       });
 
-      // 3. AREAS MEJORA (F=0)
+      // 3. AREAS MEJORA (TOP F=0)
       centroCharts.topAreas = new Chart(document.getElementById("chartCentroAreasMejora").getContext("2d"), {
         type: 'bar',
         data: { labels: [], datasets: [{ label: 'No Cumple', data: [], backgroundColor: '#ef4444', borderRadius: 4, barPercentage: 0.6 }] },
-        options: { indexAxis: 'y', maintainAspectRatio: false, scales: { x: { display: false }, y: { grid: {display:false}, ticks: {color: '#9ca3af', font:{size:10}} } }, plugins: { legend: { display: false } } }
+        options: { 
+           indexAxis: 'y', maintainAspectRatio: false, 
+           scales: { x: { display: false }, y: { grid: {display:false}, ticks: {color: textColor, callback: function(v){ let l = this.getLabelForValue(v); return l.length>20?l.substr(0,20)+'...':l; }} } }, 
+           plugins: { legend: { display: false } } 
+        }
       });
 
-      // 4. PROCESOS COMBINADO
+      // 4. RESUMEN STACKED
       centroCharts.procesosResumen = new Chart(document.getElementById("chartCentroProcesosStack").getContext("2d"), {
         type: 'bar',
         data: {
-           labels: ['Total Items Checklist'],
+           labels: ['Global'],
            datasets: [
-              { label: 'Cumple', data: [0], backgroundColor: '#22c55e', borderRadius: 4 },
-              { label: 'No Cumple', data: [0], backgroundColor: '#ef4444', borderRadius: 4 }
+              { label: 'Cumple', data: [0], backgroundColor: '#22c55e', stack:'st1', borderRadius:{topLeft:4, bottomLeft:4} },
+              { label: 'No Cumple', data: [0], backgroundColor: '#ef4444', stack:'st1', borderRadius:{topRight:4, bottomRight:4} }
            ]
         },
-        options: { indexAxis: 'y', maintainAspectRatio: false, scales: { x: { stacked:true, display:false }, y: { stacked:true, display:false } }, plugins: { legend: { position: 'bottom', labels: {color:'#9ca3af'} } } }
+        options: { 
+           indexAxis: 'y', maintainAspectRatio: false, 
+           scales: { x: { display:false, stacked:true, max:100 }, y: { display:false, stacked:true } }, 
+           plugins: { 
+              legend: { position: 'bottom', labels: {color: textColor} },
+              datalabels: { color: 'white', font: {weight:'bold'}, formatter: (v)=> v>5 ? v+'%' : '' }
+           } 
+        }
       });
+    }
+
+    function updateChartsTheme() {
+       if(centroCharts.radar) {
+          const isLight = document.body.classList.contains('light');
+          centroCharts.radar.options.scales.r.pointLabels.color = isLight ? '#333' : '#fff';
+          centroCharts.radar.update();
+       }
     }
 
     function actualizarVisualesCentro(hitBool, aarBool, procVal=85, pruebaVal=80, ventaVal=75) {
        if(!centroChartsCreated) crearChartsCentro();
        
-       // KPIs Texto
+       // UI Textos
        const kpiHit = $("#kpiCentroHit"); kpiHit.textContent = hitBool ? "Sí" : "No"; kpiHit.style.color = hitBool ? "var(--accent-green)" : "var(--accent-red)";
-       $("#kpiCentroProcesos").textContent = procVal + "%";
-       $("#kpiCentroPrueba").textContent = pruebaVal + "%";
-       $("#kpiCentroVenta").textContent = ventaVal + "%";
+       $("#kpiCentroProcesos").textContent = procVal + "%"; $("#kpiCentroPrueba").textContent = pruebaVal + "%"; $("#kpiCentroVenta").textContent = ventaVal + "%";
 
-       // Inputs Manuales
+       // Manual Inputs
        const formVal = $("#inpFormaciones").value || 5;
        const p1 = $("#chk1os").checked; const pInf = $("#chkInfinity").checked; const pSeg = $("#chkSeguro").checked; const pStk = $("#chkStock").checked;
 
@@ -2141,7 +2193,7 @@
        centroCharts.radar.data.datasets[0].data = [procVal, pruebaVal, ventaVal, formVal * 10];
        centroCharts.radar.update();
 
-       // 2. Palancas (Verde/Rojo)
+       // 2. Palancas
        const estados = [hitBool, aarBool, p1, pInf, pSeg, pStk];
        centroCharts.barras.data.datasets[0].backgroundColor = estados.map(s => s ? '#22c55e' : '#ef4444');
        centroCharts.barras.update();
@@ -2149,77 +2201,88 @@
        // 3. Areas Mejora
        let lbls = itemsFallidosGlobal.slice(0, 10);
        let dts = itemsFallidosGlobal.map(()=>1).slice(0,10);
-       if(lbls.length===0) { lbls=["Todo Correcto"]; dts=[0]; }
+       if(lbls.length===0) { lbls=["Sin incidencias"]; dts=[0]; }
        centroCharts.topAreas.data.labels = lbls;
        centroCharts.topAreas.data.datasets[0].data = dts;
        centroCharts.topAreas.update();
 
-       // 4. Procesos Stack
-       centroCharts.procesosResumen.data.datasets[0].data = [conteoF1];
-       centroCharts.procesosResumen.data.datasets[1].data = [conteoF0];
+       // 4. Stack
+       const total = conteoF1 + conteoF0;
+       const pOk = total ? Math.round((conteoF1/total)*100) : 0;
+       centroCharts.procesosResumen.data.datasets[0].data = [pOk];
+       centroCharts.procesosResumen.data.datasets[1].data = [100 - pOk];
        centroCharts.procesosResumen.update();
     }
     
-    // Listeners Inputs
     $("#inpFormaciones").addEventListener("input", () => actualizarVisualesCentro($("#chkHit").checked, $("#chkAar").checked));
     $$(".checklist-visita input[type='checkbox']").forEach(ch => {
        ch.addEventListener("change", () => actualizarVisualesCentro($("#chkHit").checked, $("#chkAar").checked));
     });
 
-    /* NAVEGACIÓN A INFORME */
-    function irAInforme(centroNombre, fechaIso) {
-      const c = centros.find(x => x.centro === centroNombre);
-      if (!c) return;
-      centroActual = c;
-      $$(".nav-item").forEach(i => i.classList.toggle("active", i.dataset.page === "informe"));
-      pages.forEach(p => p.classList.toggle("active", p.dataset.page === "informe"));
-      
-      $("#infCentro").value = c.centro; $("#infProvincia").value = c.provincia; $("#infDelegado").value = c.delegado;
-      $("#infTipo").value = tipoCentro(c.centro); $("#infRespAudio").value = "Ariannys Rojas";
-      $("#infFecha").value = fechaIso ? formatDateHuman(fechaIso) : formatDateHuman(new Date().toISOString().slice(0,10));
-      
-      // Estado inicial informe
-      $("#chkHit").checked = c.hit; $("#chkAar").checked = c.aar;
-      itemsFallidosGlobal = []; conteoF1=0; conteoF0=0;
-      actualizarVisualesCentro(c.hit, c.aar);
+    // NAVEGACIÓN A INFORME
+    function irAInforme(centroName, isoDate) {
+       const c = centros.find(x => x.centro === centroName);
+       if (!c) return;
+       centroActual = c;
+       
+       $$(".nav-item").forEach(i => i.classList.toggle("active", i.dataset.page === "informe"));
+       pages.forEach(p => p.classList.toggle("active", p.dataset.page === "informe"));
+       
+       $("#infCentro").value = c.centro; $("#infProvincia").value = c.provincia; $("#infDelegado").value = c.delegado;
+       $("#infFecha").value = isoDate ? formatDateHuman(isoDate) : formatDateHuman(new Date().toISOString().slice(0,10));
+       
+       // Radio
+       const tipo = tipoCentro(c.centro);
+       if(tipo === "Exclusivo") $("#radExclusivo").checked = true; else $("#radCorner").checked = true;
+
+       // Estado inicial
+       $("#chkHit").checked = c.hit; $("#chkAar").checked = c.aar;
+       
+       itemsFallidosGlobal = []; conteoF1=0; conteoF0=0; $("#tbodyPrint").innerHTML = "";
+       actualizarVisualesCentro(c.hit, c.aar);
     }
 
     document.addEventListener("click", e => {
-      if (e.target.matches(".btn-ir-informe")) {
-        const idx = parseInt(e.target.dataset.idx, 10); visitaActual = visitas[idx];
-        if (visitaActual) { visitaActual.estado = "enproceso"; renderVisitas(); irAInforme(visitaActual.centro, visitaActual.fecha); }
-      }
-      if (e.target.matches(".btn-informe-centro")) { irAInforme(e.target.dataset.centro, formatDateISO(new Date())); }
+       if (e.target.matches(".btn-ir-informe")) {
+          const idx = parseInt(e.target.dataset.idx); visitaActual=visitas[idx];
+          if(visitaActual) { visitaActual.estado="enproceso"; renderVisitas(); irAInforme(visitaActual.centro, visitaActual.fecha); }
+       }
+       if (e.target.matches(".btn-informe-centro")) { irAInforme(e.target.dataset.centro, formatDateISO(new Date())); }
     });
 
     $("#btnGuardarInforme").addEventListener("click", () => {
-      if(centroActual) {
-        centroActual.hit = $("#chkHit").checked; centroActual.aar = $("#chkAar").checked;
-        recalcularKPIsGlobales(); informesPorCentro[centroActual.centro] = (informesPorCentro[centroActual.centro] || 0) + 1;
-        renderTablaCentros();
-      }
-      alert("Informe guardado.");
+       if(centroActual) {
+          centroActual.hit = $("#chkHit").checked; centroActual.aar = $("#chkAar").checked;
+          recalcularKPIsGlobales(); informesPorCentro[centroActual.centro] = (informesPorCentro[centroActual.centro]||0)+1;
+          renderTablaCentros();
+       }
+       alert("Informe guardado.");
     });
 
-    /* CHARTS DASHBOARD GLOBAL */
-    function initDashboardCharts() {
-      const radarCtx = document.getElementById("chartRadarGeneral").getContext("2d");
-      globalCharts.radarGeneral = new Chart(radarCtx, {
-        type:"radar",
-        data:{ labels:["Procesos","Prueba","Venta","HIT (%)","Form","AAR (%)"], datasets:[{ label:"Promedio %", data:[0,0,0,0,0,0], backgroundColor:"rgba(96,165,250,0.2)", borderColor:"#60a5fa" }] },
-        options:{ scales:{r:{min:0, max:100, ticks:{display:false}}}, plugins:{legend:{display:false}} }
-      });
-      const aarHitCtx = document.getElementById("chartAarHitDonut").getContext("2d");
-      globalCharts.aarHit = new Chart(aarHitCtx, {
-        type:"doughnut", data:{ labels:["Sí","No"], datasets:[{ data:[1,1], backgroundColor:["#22c55e","#ef4444"] }] }, options:{ cutout:"60%", plugins:{legend:{position:"bottom"}} }
-      });
-      new Chart(document.getElementById("chartProcesosMes"), { type:"line", data:{labels:["E","F","M"],datasets:[{data:[80,82,85],borderColor:"#3b82f6"}]}, options:{maintainAspectRatio:false} });
-      new Chart(document.getElementById("chartAreasMes"), { type:"bar", data:{labels:["E","F"],datasets:[{data:[5,3],backgroundColor:"#ef4444"}]}, options:{maintainAspectRatio:false} });
-      new Chart(document.getElementById("chartPrimerosMes"), { type:"bar", data:{labels:["E","F"],datasets:[{data:[40,60],backgroundColor:"#22c55e"}]}, options:{maintainAspectRatio:false} });
-      new Chart(document.getElementById("chartTopAreas"), { type:"bar", data:{labels:["Stock","Limpieza"],datasets:[{data:[10,5],backgroundColor:"#3b82f6"}]}, options:{indexAxis:"y",maintainAspectRatio:false} });
+    // GLOBAL CHARTS INIT
+    function initGlobalCharts() {
+       const ctxR = document.getElementById("chartRadarGeneral").getContext("2d");
+       globalCharts.radarGeneral = new Chart(ctxR, {
+          type:"radar",
+          data:{ labels:["Procesos","Prueba","Venta","HIT (%)","Form","AAR (%)"], datasets:[{ label:"Promedio %", data:[0,0,0,0,0,0], backgroundColor:"rgba(96,165,250,0.2)", borderColor:"#60a5fa" }] },
+          options:{ scales:{r:{min:0, max:100, ticks:{display:false}}}, plugins:{legend:{display:false}} }
+       });
+       const aarHitCtx = document.getElementById("chartAarHitDonut").getContext("2d");
+       globalCharts.aarHit = new Chart(aarHitCtx, {
+          type:"doughnut", data:{ labels:["Sí","No"], datasets:[{ data:[1,1], backgroundColor:["#22c55e","#ef4444"] }] }, options:{ cutout:"60%", plugins:{legend:{position:"bottom"}} }
+       });
+       // Dummys
+       new Chart(document.getElementById("chartProcesosMes"), { type:"line", data:{labels:["E","F","M"],datasets:[{data:[80,82,85],borderColor:"#3b82f6"}]}, options:{maintainAspectRatio:false} });
+       new Chart(document.getElementById("chartAreasMes"), { type:"bar", data:{labels:["E","F"],datasets:[{data:[5,3],backgroundColor:"#ef4444"}]}, options:{maintainAspectRatio:false} });
+       new Chart(document.getElementById("chartPrimerosMes"), { type:"bar", data:{labels:["E","F"],datasets:[{data:[40,60],backgroundColor:"#22c55e"}]}, options:{maintainAspectRatio:false} });
+       new Chart(document.getElementById("chartTopAreas"), { type:"bar", data:{labels:["Stock","Limpieza"],datasets:[{data:[10,5],backgroundColor:"#3b82f6"}]}, options:{indexAxis:"y",maintainAspectRatio:false} });
+       
+       // Criterios Globales (Empty)
+       const ctxC = document.getElementById("chartCriteriosDetalle").getContext("2d");
+       globalCharts.criteriosDetalle = new Chart(ctxC, { type: "bar", data: { labels: ["Sin datos"], datasets: [{ label: "%", data: [0], backgroundColor: "#38bdf8" }] }, options: { indexAxis: "y", maintainAspectRatio: false, plugins: { legend: { display:false } } } });
     }
 
-    /* CARGA INICIAL DEMO */
+    /* CARGA DEMO */
     function cargarCentrosDemo() {
       const demo = [
         { codigo:"4ABB", propietario:"MAZA Oriol", centro:"PAMPLONA C. Exclusivo", provincia:"NAVARRA", delegado:"Sonia Godino", hit:true, aar:false },
@@ -2235,13 +2298,10 @@
       ];
       demo.forEach(c => centros.push(c));
       actualizarListaCentrosDatalist(); renderTablaCentros(); renderDelegados();
-      
-      const ctx = document.getElementById("chartCriteriosDetalle").getContext("2d");
-      globalCharts.criteriosDetalle = new Chart(ctx, { type: "bar", data: { labels: ["Sin datos"], datasets: [{ label: "%", data: [0], backgroundColor: "#38bdf8" }] }, options: { indexAxis: "y", maintainAspectRatio: false, plugins: { legend: { display:false } } } });
     }
 
     window.addEventListener("load", () => {
-      cargarCentrosDemo(); initCalendar(); initDashboardCharts(); recalcularKPIsGlobales();
+      cargarCentrosDemo(); initCalendar(); initGlobalCharts(); recalcularKPIsGlobales();
     });
   </script>
 </body>
