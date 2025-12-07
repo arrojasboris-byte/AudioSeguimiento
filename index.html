@@ -35,1209 +35,212 @@
       --border-soft: #e5e7eb;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
-    }
-
-    html, body {
-      width: 100%;
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-
-    body {
-      background: var(--bg-main);
-      color: var(--text-main);
-      display: flex;
-      overflow-x: hidden;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+    html, body { width: 100%; min-height: 100vh; overflow-x: hidden; }
+    body { background: var(--bg-main); color: var(--text-main); display: flex; overflow-x: hidden; }
 
     /* SIDEBAR */
-    .sidebar {
-      width: 250px;
-      background: #020617;
-      border-right: 1px solid #020617;
-      padding: 18px 18px 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 24px;
-      color: #e5e7eb;
-      flex-shrink: 0;
-    }
-
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .logo-badge {
-      width: 34px;
-      height: 34px;
-      border-radius: 999px;
-      background: radial-gradient(circle at 30% 20%, #fee2e2, var(--accent-red));
-    }
-
-    .logo-text {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .logo-title {
-      font-weight: 700;
-      font-size: 1.05rem;
-    }
-
-    .logo-subtitle {
-      font-size: .7rem;
-      color: #9ca3af;
-    }
-
-    .section-title {
-      font-size: .75rem;
-      text-transform: uppercase;
-      color: #6b7280;
-      letter-spacing: .12em;
-      margin-bottom: 8px;
-    }
-
-    .nav-list {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .nav-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 8px 10px;
-      border-radius: 999px;
-      font-size: .88rem;
-      color: #9ca3af;
-      cursor: pointer;
-      transition: all .18s ease;
-    }
-
-    .nav-item span.icon {
-      width: 22px;
-      height: 22px;
-      border-radius: 999px;
-      background: #020617;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: .75rem;
-    }
-
-    .nav-item.active {
-      background: linear-gradient(90deg, #ff2440, #fb7185);
-      color: #111827;
-      font-weight: 600;
-    }
-
-    .nav-item.active span.icon {
-      background: rgba(15,23,42,.2);
-    }
-
-    .nav-item:hover:not(.active) {
-      background: rgba(31,41,55,0.7);
-      color: #e5e7eb;
-    }
-
-    body.light .nav-item:hover:not(.active) {
-      background: rgba(15,23,42,0.2);
-    }
-
-    .sidebar-footer {
-      margin-top: auto;
-      font-size: .78rem;
-      color: #9ca3af;
-    }
+    .sidebar { width: 250px; background: #020617; border-right: 1px solid #020617; padding: 18px 18px 24px; display: flex; flex-direction: column; gap: 24px; color: #e5e7eb; flex-shrink: 0; }
+    .logo { display: flex; align-items: center; gap: 10px; }
+    .logo-badge { width: 34px; height: 34px; border-radius: 999px; background: radial-gradient(circle at 30% 20%, #fee2e2, var(--accent-red)); }
+    .logo-text { display: flex; flex-direction: column; }
+    .logo-title { font-weight: 700; font-size: 1.05rem; }
+    .logo-subtitle { font-size: .7rem; color: #9ca3af; }
+    .section-title { font-size: .75rem; text-transform: uppercase; color: #6b7280; letter-spacing: .12em; margin-bottom: 8px; }
+    .nav-list { display: flex; flex-direction: column; gap: 4px; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 999px; font-size: .88rem; color: #9ca3af; cursor: pointer; transition: all .18s ease; }
+    .nav-item span.icon { width: 22px; height: 22px; border-radius: 999px; background: #020617; display: inline-flex; align-items: center; justify-content: center; font-size: .75rem; }
+    .nav-item.active { background: linear-gradient(90deg, #ff2440, #fb7185); color: #111827; font-weight: 600; }
+    .nav-item.active span.icon { background: rgba(15,23,42,.2); }
+    .nav-item:hover:not(.active) { background: rgba(31,41,55,0.7); color: #e5e7eb; }
+    body.light .nav-item:hover:not(.active) { background: rgba(15,23,42,0.2); }
+    .sidebar-footer { margin-top: auto; font-size: .78rem; color: #9ca3af; }
 
     /* MAIN LAYOUT */
-    .main {
-      flex: 1;
-      padding: 10px 18px 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      max-width: 1600px;
-      margin: 0 auto;
-      box-sizing: border-box;
-    }
-
-    .topbar {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 4px;
-      flex-wrap: wrap;
-    }
-
-    .topbar-search {
-      flex: 1 1 260px;
-      position: relative;
-      min-width: 220px;
-    }
-
-    .topbar-search input {
-      width: 100%;
-      border-radius: 999px;
-      padding: 8px 14px 8px 30px;
-      border: 1px solid var(--border-soft);
-      background: var(--bg-card);
-      color: var(--text-main);
-      font-size: .86rem;
-      outline: none;
-    }
-
-    .topbar-search span {
-      position: absolute;
-      left: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: .8rem;
-      color: var(--text-muted);
-    }
-
-    .topbar-buttons {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-    }
-
-    .btn {
-      border-radius: 999px;
-      padding: 6px 12px;
-      border: 1px solid var(--border-soft);
-      font-size: .8rem;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: var(--bg-card);
-      color: var(--text-main);
-      white-space: nowrap;
-      box-shadow: none;
-    }
-
-    .btn-cta {
-      background: linear-gradient(90deg, #ff2440, #fb7185);
-      color: #111827;
-      font-weight: 600;
-      border-color: transparent;
-    }
-
-    .btn span.icon {
-      font-size: .85rem;
-    }
-
-    #themeToggle {
-      min-width: 120px;
-      justify-content: center;
-    }
-
-    #btnGuardarVista {
-      background: linear-gradient(90deg, #3b82f6, #22c55e);
-      color: #0b1120;
-      border-color: transparent;
-      font-weight: 600;
-    }
-
-    #btnExportarHTML {
-      background: linear-gradient(90deg, #8b5cf6, #ec4899);
-      color: #0b1120;
-      border-color: transparent;
-      font-weight: 600;
-    }
-
-    #btnImprimir {
-      background: linear-gradient(90deg, #14b8a6, #0ea5e9);
-      color: #0b1120;
-      border-color: transparent;
-      font-weight: 600;
-    }
-
-    body.light #btnGuardarVista,
-    body.light #btnExportarHTML,
-    body.light #btnImprimir {
-      color:#111827;
-    }
+    .main { flex: 1; padding: 10px 18px 12px; display: flex; flex-direction: column; gap: 8px; max-width: 1600px; margin: 0 auto; box-sizing: border-box; }
+    .topbar { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; flex-wrap: wrap; }
+    .topbar-search { flex: 1 1 260px; position: relative; min-width: 220px; }
+    .topbar-search input { width: 100%; border-radius: 999px; padding: 8px 14px 8px 30px; border: 1px solid var(--border-soft); background: var(--bg-card); color: var(--text-main); font-size: .86rem; outline: none; }
+    .topbar-search span { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: .8rem; color: var(--text-muted); }
+    .topbar-buttons { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+    .btn { border-radius: 999px; padding: 6px 12px; border: 1px solid var(--border-soft); font-size: .8rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; background: var(--bg-card); color: var(--text-main); white-space: nowrap; box-shadow: none; }
+    .btn-cta { background: linear-gradient(90deg, #ff2440, #fb7185); color: #111827; font-weight: 600; border-color: transparent; }
+    .btn span.icon { font-size: .85rem; }
+    
+    .radio-group { display: flex; align-items: center; gap: 15px; height: 28px; }
+    .radio-group label { display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: .8rem; }
+    .radio-group input[type="radio"] { accent-color: var(--accent-blue); transform: scale(1.2); cursor: pointer; }
 
     /* PAGES */
-    .pages {
-      flex: 1;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      max-width: 100%;
-    }
-
-    .page {
-      flex: 1;
-      display: none;
-      overflow-y: auto;
-      overflow-x: hidden;
-      max-width: 100%;
-    }
-
-    .page.active {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .card {
-      background: var(--bg-card);
-      border-radius: 14px;
-      padding: 10px;
-      border: 1px solid var(--border-soft);
-      display: flex;
-      flex-direction: column;
-      min-width: 0;
-    }
-
-    .card-title {
-      font-size: .9rem;
-      font-weight: 600;
-    }
-
-    .card-sub {
-      font-size: .72rem;
-      color: var(--text-muted);
-      margin-top: 2px;
-    }
-
-    .card-header-row {
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      gap: 6px;
-      margin-bottom: 4px;
-    }
-
-    .badge-small {
-      font-size: .7rem;
-      padding: 2px 6px;
-      border-radius: 999px;
-      background: #111827;
-      color: #9ca3af;
-      border: 1px solid var(--border-soft);
-    }
-
-    body.light .badge-small {
-      background: #e5e7eb;
-    }
-
-    .chip-estado {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 2px 8px;
-      border-radius: 999px;
-      font-size: .7rem;
-      font-weight: 500;
-      color: #111827;
-      background: #9ca3af;
-    }
-
-    .chip-estado.pendiente    { background: var(--chip-pendiente); }
-    .chip-estado.enproceso    { background: var(--chip-enproceso); }
-    .chip-estado.finalizada   { background: var(--chip-finalizada); }
-
-    .btn-chip {
-      border-radius: 999px;
-      border: 1px solid var(--border-soft);
-      background: transparent;
-      font-size: .72rem;
-      padding: 2px 6px;
-      cursor: pointer;
-      color: var(--accent-blue);
-    }
-
-    /* DASHBOARD PAGE */
-    .dashboard-grid {
-      display: grid;
-      grid-template-columns: minmax(0, 1.7fr) minmax(0, 1.3fr);
-      gap: 10px;
-      min-height: 0;
-      align-items: flex-start;
-      width: 100%;
-      box-sizing: border-box;
-    }
-
-    .dashboard-right-column {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      min-height: 0;
-    }
-
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0,1fr));
-      gap: 6px;
-      margin-bottom: 6px;
-    }
-
-    .kpi-card {
-      background: var(--bg-card-soft);
-      border-radius: 10px;
-      padding: 6px 8px;
-      border: 1px solid var(--border-soft);
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    .kpi-label {
-      font-size: .72rem;
-      color: var(--text-muted);
-    }
-
-    .kpi-value {
-      font-size: .98rem;
-      font-weight: 600;
-    }
-
-    .kpi-caption {
-      font-size: .7rem;
-      color: var(--text-muted);
-    }
-
-    .dashboard-charts {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0,1fr));
-      gap: 8px;
-      min-height: 0;
-    }
-
-    .chart-container {
-      position: relative;
-      width: 100%;
-      min-height: 160px;
-      max-height: 240px;
-    }
-
-    .chart-container.centered {
-      display:flex;
-      align-items:center;
-      justify-content:center;
-    }
-
-    .chart-container canvas {
-      position: relative;
-      inset: auto !important;
-      width: 100% !important;
-      height: 100% !important;
-      display: block;
-      box-sizing: border-box;
-    }
-
-    /* contenedor específico para los 80 criterios */
-    .criterios-container {
-      min-height: 260px;
-      max-height: 320px;
-      overflow-y: auto; 
-    }
-
-    .ranking-list {
-      font-size: .78rem;
-      margin-top: 4px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .ranking-row {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      justify-content: space-between;
-      padding:3px 0;
-      border-bottom: 1px dashed rgba(148,163,184,0.3);
-    }
-
-    .ranking-main {
-      display:flex;
-      align-items:center;
-      gap:6px;
-    }
-
-    .ranking-bar {
-      height: 5px;
-      border-radius:999px;
-      background: var(--bg-card-soft);
-      flex: 1;
-      overflow:hidden;
-    }
-
-    .ranking-bar span {
-      display:block;
-      height:100%;
-      background: linear-gradient(90deg,#22c55e,#38bdf8);
-    }
-
-    .ranking-row.extra-hidden {
-      display:none;
-    }
-
-    .ranking-toggle {
-      margin-top:6px;
-      font-size:.76rem;
-      color:var(--accent-blue);
-      cursor:pointer;
-      text-align:right;
-    }
-
-    .ranking-summary {
-      margin-top: 8px;
-      padding-top: 6px;
-      border-top: 1px dashed rgba(148,163,184,0.4);
-      font-size: .76rem;
-      color: var(--text-muted);
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    .ranking-summary-item span {
-      font-weight: 600;
-      color: var(--text-main);
-    }
-
-    /* CENTROS PAGE Y DEMÁS */
-    .centros-top {
-      display: grid;
-      grid-template-columns: 1.2fr 1.2fr 1fr;
-      gap: 10px;
-      min-height: 210px;
-    }
-
-    .delegados-list {
-      margin-top: 6px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      max-height: 160px;
-      overflow: auto;
-    }
-
-    .delegado-card {
-      background: var(--bg-card-soft);
-      border-radius: 10px;
-      padding: 4px 6px;
-      border: 1px solid var(--border-soft);
-      cursor: pointer;
-    }
-
-    .delegado-header {
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:6px;
-    }
-
-    .delegado-main {
-      display:flex;
-      align-items:center;
-      gap:6px;
-      font-size:.8rem;
-    }
-
-    .delegado-color {
-      width:8px;
-      height:8px;
-      border-radius:999px;
-    }
-
-    .delegado-count {
-      font-size:.72rem;
-      color:var(--text-muted);
-    }
-
-    .delegado-bar {
-      margin-top:3px;
-      height:4px;
-      border-radius:999px;
-      background:var(--border-soft);
-      overflow:hidden;
-    }
-
-    .delegado-bar span {
-      display:block;
-      height:100%;
-      width:100%;
-      background:linear-gradient(90deg,#38bdf8,#fb7185);
-    }
-
-    .delegado-card.active {
-      outline:1px solid var(--accent-blue);
-    }
-
-    .calendar-wrapper {
-      display:flex;
-      flex-direction:column;
-      gap:4px;
-      height:100%;
-    }
-
-    .calendar-header {
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      font-size:.85rem;
-      font-weight:700;
-    }
-
-    .calendar-header button {
-      border-radius:999px;
-      width:24px;
-      height:24px;
-      border:1px solid var(--border-soft);
-      background:transparent;
-      color:var(--text-main);
-      cursor:pointer;
-      font-size:.8rem;
-    }
-
-    .calendar-weekdays {
-      display:grid;
-      grid-template-columns: repeat(7, minmax(0,1fr));
-      font-size:.7rem;
-      margin-top:4px;
-      color:var(--text-muted);
-      text-align:center;
-    }
-
-    .calendar-grid {
-      margin-top:4px;
-      display:grid;
-      grid-template-columns: repeat(7, minmax(0,1fr));
-      grid-template-rows: repeat(6, 42px);
-      gap:4px;
-      flex:1;
-    }
-
-    .cal-cell {
-      border-radius:10px;
-      border:1px solid var(--border-soft);
-      background:var(--bg-card-soft);
-      font-size:.8rem;
-      display:flex;
-      flex-direction:column;
-      align-items:flex-start;
-      justify-content:flex-start;
-      padding:3px 4px;
-      cursor:pointer;
-      position:relative;
-    }
-
-    .cal-cell.empty {
-      background:transparent;
-      border-style:dashed;
-      cursor:default;
-    }
-
-    .cal-day {
-      font-size:.78rem;
-    }
-
-    .cal-event {
-      position:absolute;
-      bottom:4px;
-      left:4px;
-      display:flex;
-      align-items:center;
-      gap:3px;
-      font-size:.7rem;
-    }
-
-    .cal-dot {
-      width:6px;
-      height:6px;
-      border-radius:999px;
-      background:#facc15;
-    }
-
-    .cal-letter {
-      font-weight:600;
-    }
-
-    .visitas-list {
-      flex:1;
-      overflow:auto;
-      font-size:.78rem;
-      display:flex;
-      flex-direction:column;
-      gap:4px;
-    }
-
-    .visita-row {
-      border-radius:10px;
-      border:1px solid var(--border-soft);
-      padding:4px 6px;
-      background:var(--bg-card-soft);
-      display:flex;
-      flex-direction:column;
-      gap:2px;
-    }
-
-    .visita-row-line {
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:4px;
-    }
-
-    .visita-row-main {
-      font-weight:500;
-    }
-
-    .visita-row-secondary {
-      color:var(--text-muted);
-      font-size:.72rem;
-    }
-
-    .visita-actions {
-      margin-top:2px;
-      display:flex;
-      justify-content:flex-end;
-      gap:4px;
-    }
-
-    .table-wrapper {
-      flex:1;
-      background: var(--bg-card);
-      border-radius: 14px;
-      border: 1px solid var(--border-soft);
-      display: flex;
-      flex-direction: column;
-      min-height: 0;
-    }
-
-    .table-header {
-      padding: 8px 10px 6px;
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-    }
-
-    .table-header h3 {
-      font-size: .9rem;
-    }
-
-    .table-header span {
-      font-size: .72rem;
-      color: var(--text-muted);
-    }
-
-    .table-scroll {
-      flex: 1;
-      overflow: auto;
-      border-top: 1px solid var(--border-soft);
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: .78rem;
-    }
-
-    thead {
-      position: sticky;
-      top: 0;
-      background: var(--bg-card);
-      z-index: 2;
-    }
-
-    th, td {
-      padding: 6px 8px;
-      border-bottom: 1px solid #0b1120;
-      text-align: left;
-      white-space: nowrap;
-    }
-
-    th {
-      font-weight: 600;
-      font-size: .75rem;
-      color: var(--text-muted);
-    }
-
-    tbody tr:nth-child(even) {
-      background: var(--bg-card-soft);
-    }
-
-    tbody tr:hover {
-      background: rgba(15,23,42,0.8);
-    }
-
-    body.light tbody tr:nth-child(even) {
-      background:#f3f4f6;
-    }
-    body.light tbody tr:hover {
-      background:#e5e7eb;
-    }
-
-    .tag {
-      border-radius: 999px;
-      padding: 2px 6px;
-      font-size: .7rem;
-      border: 1px solid var(--border-soft);
-      background: #0b1120;
-    }
-
-    .tag.exclusivo {
-      background: rgba(22,163,74,0.15);
-      color: var(--accent-green);
-      border-color: rgba(22,163,74,0.7);
-    }
-
-    .tag.corner {
-      background: rgba(37,99,235,0.15);
-      color: var(--accent-blue);
-      border-color: rgba(37,99,235,0.7);
-    }
-
-    .tag-aar {
-      background: rgba(148,163,184,0.15);
-      border-color: rgba(148,163,184,0.7);
-      color: var(--text-muted);
-    }
-
-    .tag-aar.si {
-      background: rgba(34,197,94,0.15);
-      border-color: rgba(34,197,94,0.7);
-      color: var(--accent-green);
-    }
-
-    .tag-aar.formacion {
-      background: rgba(234,179,8,0.15);
-      border-color: rgba(234,179,8,0.7);
-      color: #eab308;
-    }
-
-    .btn-link {
-      border: none;
-      background: transparent;
-      color: var(--accent-blue);
-      cursor: pointer;
-      font-size: .74rem;
-      text-decoration: underline;
-    }
-
-    .informe-layout {
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-      min-height:0;
-    }
-
-    .informe-top {
-      display:grid;
-      grid-template-columns: 1.3fr 1fr;
-      gap:10px;
-      min-height:190px;
-    }
-
-    .datos-grid {
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:6px 12px;
-      font-size:.8rem;
-      margin-top:6px;
-    }
-
-    .dato-label {
-      font-size:.72rem;
-      color:var(--text-muted);
-    }
-
-    .dato-value {
-      font-size:.82rem;
-      font-weight:500;
-    }
-
-    .dato-full {
-      grid-column:1 / -1;
-    }
-
-    .field-input {
-      width:100%;
-      padding:4px 6px;
-      border-radius:8px;
-      border:1px solid var(--border-soft);
-      background:var(--bg-card-soft);
-      color:var(--text-main);
-      font-size:.8rem;
-      outline:none;
-    }
-
-    /* NUEVOS ESTILOS PARA RADIO BUTTONS */
-    .radio-group {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      height: 28px;
-    }
-    .radio-group label {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      cursor: pointer;
-      font-size: .8rem;
-    }
-    .radio-group input[type="radio"] {
-      accent-color: var(--accent-blue);
-      transform: scale(1.2);
-      cursor: pointer;
-    }
-
-    .panel-graficos {
-      display:grid;
-      grid-template-columns: repeat(3, minmax(0,1fr));
-      gap:8px;
-      min-height:0;
-      /* Eliminamos max-height para evitar corte en impresión */
-      overflow:visible; 
-    }
-
-    .panel-inferior {
-      display: grid;
-      grid-template-columns: 1.1fr 1.9fr;
-      gap: 10px;
-    }
-
-    /* CHECKLIST CON SCROLL */
-    .checklist-visita {
-      font-size: .78rem;
-      max-height: 220px; /* Scroll vertical */
-      overflow-y: auto;
-      display:flex;
-      flex-direction:column;
-      gap:2px;
-      border: 1px solid var(--border-soft);
-      padding: 6px;
-      border-radius: 8px;
-    }
+    .pages { flex: 1; overflow: hidden; display: flex; flex-direction: column; gap: 8px; max-width: 100%; }
+    .page { flex: 1; display: none; overflow-y: auto; overflow-x: hidden; max-width: 100%; }
+    .page.active { display: flex; flex-direction: column; gap: 8px; }
+
+    .card { background: var(--bg-card); border-radius: 14px; padding: 10px; border: 1px solid var(--border-soft); display: flex; flex-direction: column; min-width: 0; }
+    .card-title { font-size: .9rem; font-weight: 600; }
+    .card-sub { font-size: .72rem; color: var(--text-muted); margin-top: 2px; }
+    .card-header-row { display: flex; align-items: baseline; justify-content: space-between; gap: 6px; margin-bottom: 4px; }
+    .badge-small { font-size: .7rem; padding: 2px 6px; border-radius: 999px; background: #111827; color: #9ca3af; border: 1px solid var(--border-soft); }
+    body.light .badge-small { background: #e5e7eb; }
+
+    .chip-estado { display: inline-flex; align-items: center; justify-content: center; padding: 2px 8px; border-radius: 999px; font-size: .7rem; font-weight: 500; color: #111827; background: #9ca3af; }
+    .chip-estado.pendiente { background: var(--chip-pendiente); }
+    .chip-estado.enproceso { background: var(--chip-enproceso); }
+    .chip-estado.finalizada { background: var(--chip-finalizada); }
+    .btn-chip { border-radius: 999px; border: 1px solid var(--border-soft); background: transparent; font-size: .72rem; padding: 2px 6px; cursor: pointer; color: var(--accent-blue); }
+
+    /* DASHBOARD */
+    .dashboard-grid { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1.3fr); gap: 10px; min-height: 0; align-items: flex-start; width: 100%; box-sizing: border-box; }
+    .dashboard-right-column { display: flex; flex-direction: column; gap: 10px; min-height: 0; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 6px; margin-bottom: 6px; }
+    .kpi-card { background: var(--bg-card-soft); border-radius: 10px; padding: 6px 8px; border: 1px solid var(--border-soft); display: flex; flex-direction: column; gap: 2px; }
+    .kpi-label { font-size: .72rem; color: var(--text-muted); }
+    .kpi-value { font-size: .98rem; font-weight: 600; }
+    .kpi-caption { font-size: .7rem; color: var(--text-muted); }
+    .dashboard-charts { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 8px; min-height: 0; }
+    .chart-container { position: relative; width: 100%; min-height: 160px; max-height: 240px; }
+    .chart-container.centered { display:flex; align-items:center; justify-content:center; }
+    .chart-container canvas { position: relative; width: 100% !important; height: 100% !important; display: block; }
+    .criterios-container { min-height: 300px; max-height: 450px; overflow-y: auto; }
+
+    /* RANKING */
+    .ranking-list { font-size: .78rem; margin-top: 4px; display: flex; flex-direction: column; gap: 4px; }
+    .ranking-row { display: flex; align-items: center; gap: 6px; justify-content: space-between; padding:3px 0; border-bottom: 1px dashed rgba(148,163,184,0.3); }
+    .ranking-main { display:flex; align-items:center; gap:6px; }
+    .ranking-bar { height: 5px; border-radius:999px; background: var(--bg-card-soft); flex: 1; overflow:hidden; }
+    .ranking-bar span { display:block; height:100%; background: linear-gradient(90deg,#22c55e,#38bdf8); }
+    .ranking-row.extra-hidden { display:none; }
+    .ranking-toggle { margin-top:6px; font-size:.76rem; color:var(--accent-blue); cursor:pointer; text-align:right; }
+    .ranking-summary { margin-top: 8px; padding-top: 6px; border-top: 1px dashed rgba(148,163,184,0.4); font-size: .76rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 2px; }
+    .ranking-summary-item span { font-weight: 600; color: var(--text-main); }
+
+    /* CENTROS */
+    .centros-top { display: grid; grid-template-columns: 1.2fr 1.2fr 1fr; gap: 10px; min-height: 210px; }
+    .delegados-list { margin-top: 6px; display: flex; flex-direction: column; gap: 4px; max-height: 160px; overflow: auto; }
+    .delegado-card { background: var(--bg-card-soft); border-radius: 10px; padding: 4px 6px; border: 1px solid var(--border-soft); cursor: pointer; }
+    .delegado-header { display:flex; align-items:center; justify-content:space-between; gap:6px; }
+    .delegado-main { display:flex; align-items:center; gap:6px; font-size:.8rem; }
+    .delegado-color { width:8px; height:8px; border-radius:999px; }
+    .delegado-count { font-size:.72rem; color:var(--text-muted); }
+    .delegado-bar { margin-top:3px; height:4px; border-radius:999px; background:var(--border-soft); overflow:hidden; }
+    .delegado-bar span { display:block; height:100%; width:100%; background:linear-gradient(90deg,#38bdf8,#fb7185); }
+    .delegado-card.active { outline:1px solid var(--accent-blue); }
+
+    /* CALENDARIO & TABLA */
+    .calendar-wrapper { display:flex; flex-direction:column; gap:4px; height:100%; }
+    .calendar-header { display:flex; align-items:center; justify-content:space-between; font-size:.85rem; font-weight:700; }
+    .calendar-header button { border-radius:999px; width:24px; height:24px; border:1px solid var(--border-soft); background:transparent; color:var(--text-main); cursor:pointer; font-size:.8rem; }
+    .calendar-weekdays { display:grid; grid-template-columns: repeat(7, minmax(0,1fr)); font-size:.7rem; margin-top:4px; color:var(--text-muted); text-align:center; }
+    .calendar-grid { margin-top:4px; display:grid; grid-template-columns: repeat(7, minmax(0,1fr)); grid-template-rows: repeat(6, 42px); gap:4px; flex:1; }
+    .cal-cell { border-radius:10px; border:1px solid var(--border-soft); background:var(--bg-card-soft); font-size:.8rem; display:flex; flex-direction:column; align-items:flex-start; justify-content:flex-start; padding:3px 4px; cursor:pointer; position:relative; }
+    .cal-cell.empty { background:transparent; border-style:dashed; cursor:default; }
+    .cal-day { font-size:.78rem; }
+    .cal-event { position:absolute; bottom:4px; left:4px; display:flex; align-items:center; gap:3px; font-size:.7rem; }
+    .cal-dot { width:6px; height:6px; border-radius:999px; background:#facc15; }
+    .cal-letter { font-weight:600; }
+
+    .visitas-list { flex:1; overflow:auto; font-size:.78rem; display:flex; flex-direction:column; gap:4px; }
+    .visita-row { border-radius:10px; border:1px solid var(--border-soft); padding:4px 6px; background:var(--bg-card-soft); display:flex; flex-direction:column; gap:2px; }
+    .visita-row-line { display:flex; align-items:center; justify-content:space-between; gap:4px; }
+    .visita-row-main { font-weight:500; }
+    .visita-row-secondary { color:var(--text-muted); font-size:.72rem; }
+    .visita-actions { margin-top:2px; display:flex; justify-content:flex-end; gap:4px; }
+
+    .table-wrapper { flex:1; background: var(--bg-card); border-radius: 14px; border: 1px solid var(--border-soft); display: flex; flex-direction: column; min-height: 0; }
+    .table-header { padding: 8px 10px 6px; display: flex; justify-content: space-between; align-items: baseline; }
+    .table-header h3 { font-size: .9rem; }
+    .table-header span { font-size: .72rem; color: var(--text-muted); }
+    .table-scroll { flex: 1; overflow: auto; border-top: 1px solid var(--border-soft); }
+    table { width: 100%; border-collapse: collapse; font-size: .78rem; }
+    thead { position: sticky; top: 0; background: var(--bg-card); z-index: 2; }
+    th, td { padding: 6px 8px; border-bottom: 1px solid #0b1120; text-align: left; white-space: nowrap; }
+    th { font-weight: 600; font-size: .75rem; color: var(--text-muted); }
+    tbody tr:nth-child(even) { background: var(--bg-card-soft); }
+    tbody tr:hover { background: rgba(15,23,42,0.8); }
+    body.light tbody tr:nth-child(even) { background:#f3f4f6; }
+    body.light tbody tr:hover { background:#e5e7eb; }
+
+    .tag { border-radius: 999px; padding: 2px 6px; font-size: .7rem; border: 1px solid var(--border-soft); background: #0b1120; }
+    .tag.exclusivo { background: rgba(22,163,74,0.15); color: var(--accent-green); border-color: rgba(22,163,74,0.7); }
+    .tag.corner { background: rgba(37,99,235,0.15); color: var(--accent-blue); border-color: rgba(37,99,235,0.7); }
+    .tag-aar { background: rgba(148,163,184,0.15); border-color: rgba(148,163,184,0.7); color: var(--text-muted); }
+    .tag-aar.si { background: rgba(34,197,94,0.15); border-color: rgba(34,197,94,0.7); color: var(--accent-green); }
+    .btn-link { border: none; background: transparent; color: var(--accent-blue); cursor: pointer; font-size: .74rem; text-decoration: underline; }
+
+    /* INFORME LAYOUT */
+    .informe-layout { display:flex; flex-direction:column; gap:8px; min-height:0; }
+    .informe-top { display:grid; grid-template-columns: 1.3fr 1fr; gap:10px; min-height:190px; }
+    .datos-grid { display:grid; grid-template-columns: 1fr 1fr; gap:6px 12px; font-size:.8rem; margin-top:6px; }
+    .dato-label { font-size:.72rem; color:var(--text-muted); }
+    .dato-value { font-size:.82rem; font-weight:500; }
+    .dato-full { grid-column:1 / -1; }
+    .field-input { width:100%; padding:4px 6px; border-radius:8px; border:1px solid var(--border-soft); background:var(--bg-card-soft); color:var(--text-main); font-size:.8rem; outline:none; }
+
+    /* PANEL COMBINADO */
+    .panel-combined { display: grid; grid-template-columns: 1fr 2fr; gap: 10px; min-height: 260px; }
+    .panel-listado { font-size: .75rem; border-right: 1px dashed var(--border-soft); padding-right: 8px; overflow-y: auto; max-height: 240px; }
+    .panel-listado ul { padding-left:15px; margin:0; }
+    .panel-listado li { margin-bottom: 4px; color: #ef4444; }
+
+    .panel-graficos { display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:8px; min-height:0; overflow:visible; }
+    .panel-inferior { display: grid; grid-template-columns: 1.1fr 1.9fr; gap: 10px; }
+
+    /* CHECKLIST COMPLETO */
+    .checklist-visita { font-size: .78rem; max-height: 260px; overflow: auto; display:flex; flex-direction:column; gap:2px; padding: 5px; border: 1px solid var(--border-soft); border-radius: 8px; }
+    .checklist-visita label { display:flex; align-items:center; gap:4px; }
     .checklist-visita::-webkit-scrollbar { width:6px; }
     .checklist-visita::-webkit-scrollbar-thumb { background:var(--border-soft); border-radius:4px; }
+    .checklist-heading { margin-top:6px; font-size:.8rem; font-weight:600; color:var(--text-main); }
 
-    .checklist-visita label {
-      display:flex;
-      align-items:center;
-      gap:4px;
-      cursor: pointer;
-    }
+    .imagenes-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 10px; font-size: .78rem; }
+    .imagen-item-title { font-size:.78rem; margin-bottom:3px; }
+    .imagen-preview { width: 100%; aspect-ratio: 16 / 9; border-radius: 10px; border: 1px dashed var(--border-soft); display: flex; align-items: center; justify-content: center; font-size: .7rem; color: var(--text-muted); overflow: hidden; background:var(--bg-card-soft); cursor:pointer; }
+    .imagen-preview img { width:100%; height:100%; object-fit:cover; }
 
-    .checklist-heading {
-      margin-top:6px;
-      font-size:.8rem;
-      font-weight:600;
-      color:var(--text-main);
-    }
+    .observaciones-grid { display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:10px; margin-top:4px; }
+    .obs-item textarea { width:100%; height:80px; resize:vertical; border-radius:10px; border:1px solid var(--border-soft); background:var(--bg-card-soft); color:var(--text-main); padding:6px; font-size:.78rem; outline:none; }
+    .obs-label { font-size:.78rem; margin-bottom:2px; }
+    .acciones-informe { margin-top:6px; display:flex; justify-content:flex-end; gap:8px; }
 
-    .imagenes-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0,1fr));
-      gap: 10px;
-      font-size: .78rem;
-    }
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(15,23,42,0.75); display: none; align-items: center; justify-content: center; z-index: 50; }
+    .modal { background: var(--bg-card); border-radius: 14px; padding: 14px; width: 420px; max-width: 95%; border: 1px solid var(--border-soft); }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .modal-close { cursor: pointer; font-size: 1rem; color: var(--text-muted); }
+    .modal-body { display: flex; flex-direction: column; gap: 8px; font-size: .78rem; }
+    .modal-field { display: flex; flex-direction: column; gap: 2px; }
+    .modal-field label { font-size: .74rem; color: var(--text-muted); }
+    .modal-field input, .modal-field select { padding: 5px 7px; border-radius: 8px; border: 1px solid var(--border-soft); background: var(--bg-card-soft); color: var(--text-main); font-size: .78rem; outline: none; }
+    .modal-footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; }
 
-    .imagen-item-title {
-      font-size:.78rem;
-      margin-bottom:3px;
-    }
+    input[type="file"] { font-size:.75rem; }
+    body.light .btn { background:#ffffff; }
+    body.light .card { background:#ffffff; }
 
-    .imagen-preview {
-      width: 100%;
-      aspect-ratio: 16 / 9;
-      border-radius: 10px;
-      border: 1px dashed var(--border-soft);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: .7rem;
-      color: var(--text-muted);
-      overflow: hidden;
-      background:var(--bg-card-soft);
-      cursor:pointer;
-    }
-
-    .imagen-preview img {
-      width:100%;
-      height:100%;
-      object-fit:cover;
-    }
-
-    .observaciones-grid {
-      display:grid;
-      grid-template-columns: repeat(3, minmax(0,1fr));
-      gap:10px;
-      margin-top:4px;
-    }
-
-    .obs-item textarea {
-      width:100%;
-      height:80px;
-      resize:vertical;
-      border-radius:10px;
-      border:1px solid var(--border-soft);
-      background:var(--bg-card-soft);
-      color:var(--text-main);
-      padding:6px;
-      font-size:.78rem;
-      outline:none;
-    }
-
-    .obs-label {
-      font-size:.78rem;
-      margin-bottom:2px;
-    }
-
-    .acciones-informe {
-      margin-top:6px;
-      display:flex;
-      justify-content:flex-end;
-      gap:8px;
-    }
-
-    .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(15,23,42,0.75);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 50;
-    }
-
-    .modal {
-      background: var(--bg-card);
-      border-radius: 14px;
-      padding: 14px;
-      width: 420px;
-      max-width: 95%;
-      border: 1px solid var(--border-soft);
-    }
-
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 8px;
-    }
-
-    .modal-header h3 {
-      font-size: .95rem;
-    }
-
-    .modal-close {
-      cursor: pointer;
-      font-size: 1rem;
-      color: var(--text-muted);
-    }
-
-    .modal-body {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      font-size: .78rem;
-    }
-
-    .modal-field {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    .modal-field label {
-      font-size: .74rem;
-      color: var(--text-muted);
-    }
-
-    .modal-field input,
-    .modal-field select {
-      padding: 5px 7px;
-      border-radius: 8px;
-      border: 1px solid var(--border-soft);
-      background: var(--bg-card-soft);
-      color: var(--text-main);
-      font-size: .78rem;
-      outline: none;
-    }
-
-    .modal-footer {
-      display: flex;
-      justify-content: flex-end;
-      gap: 8px;
-      margin-top: 10px;
-    }
-
-    input[type="file"] {
-      font-size:.75rem;
-    }
-
-    body.light .btn {
-      background:#ffffff;
-    }
-
-    body.light .card {
-      background:#ffffff;
-    }
-
-    /* RESPONSIVE */
-    @media (max-width: 1400px) {
-      .dashboard-grid {
-        grid-template-columns: 1fr;
-      }
-      .centros-top {
-        grid-template-columns: 1fr 1fr;
-      }
-    }
-
-    @media (max-width: 1100px) {
-      .topbar {
-        flex-direction: column;
-        align-items: stretch;
-      }
-      .topbar-buttons {
-        justify-content: flex-start;
-      }
-      .centros-top {
-        grid-template-columns: 1fr;
-      }
-      .informe-top {
-        grid-template-columns: 1fr;
-      }
-      .panel-graficos {
-        grid-template-columns: 1fr 1fr;
-      }
-      .panel-inferior {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    @media (max-width: 800px) {
-      .dashboard-charts {
-        grid-template-columns: 1fr;
-      }
-      .panel-graficos {
-        grid-template-columns: 1fr;
-      }
-      .observaciones-grid {
-        grid-template-columns: 1fr;
-      }
-      .imagenes-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    /* --- ESTILOS DE IMPRESIÓN --- */
-    /* OCULTO POR DEFECTO */
+    /* ESTILOS IMPRESIÓN */
     #printChecklistContainer { display: none; }
-
-    @page {
-      size: A4 portrait;
-      margin: 10mm;
-    }
-
+    @page { size: A4 portrait; margin: 10mm; }
     @media print {
-      html, body {
-        width: 100%;
-        height: auto;
-        margin: 0;
-        padding: 0;
-        background:#ffffff !important;
-        color: black !important;
-        overflow: visible !important;
-      }
-      body {
-        display:block;
-      }
-      /* Ocultar elementos de navegación e interfaz */
-      .sidebar,
-      .topbar,
-      .topbar-buttons,
-      .acciones-informe,
-      #themeToggle,
-      #btnGuardarVista,
-      #btnExportarHTML,
-      #btnImprimir,
-      #btnActualizarNube,
-      .btn, 
-      .btn-cta,
-      .modal-backdrop {
-        display:none !important;
-      }
-
-      .main {
-        padding:0 !important;
-        margin:0 !important;
-        width:100% !important;
-        max-width:none !important;
-        overflow:visible !important;
-      }
-      .pages {
-        overflow:visible !important;
-        height: auto !important;
-        display: block !important;
-      }
-      .page {
-        display: none !important;
-      }
-      /* Solo mostrar la página activa */
-      .page.active {
-        display: flex !important;
-        overflow: visible !important;
-        height: auto !important;
-      }
-
-      .card {
-        box-shadow:none !important;
-        border: 1px solid #ccc !important;
-        background: white !important;
-        color: black !important;
-        break-inside: avoid;
-        margin-bottom: 10px;
-      }
+      body { background: white !important; color: black !important; display: block; }
+      .sidebar, .topbar, .acciones-informe, #themeToggle, .btn, .btn-cta, .modal-backdrop { display: none !important; }
+      .main { padding: 0; margin: 0; max-width: none; overflow: visible; }
+      .pages { overflow: visible !important; height: auto !important; display: block !important; }
+      .page { display: none !important; }
+      .page.active { display: flex !important; overflow: visible !important; height: auto !important; }
       
-      input, textarea, select {
-        background: white !important;
-        color: black !important;
-        border: 1px solid #ccc !important;
-      }
-
-      /* Ajustes Grid Impresión */
+      .card { border: 1px solid #ccc !important; box-shadow: none !important; background: white !important; color: black !important; break-inside: avoid; margin-bottom: 10px; }
+      input, textarea, select { background: white !important; color: black !important; border: 1px solid #ccc !important; }
+      .checklist-visita { max-height: none; overflow: visible; border: 1px solid #ccc; }
       .dashboard-grid { grid-template-columns: 1fr !important; }
-      .panel-graficos { grid-template-columns: 1fr 1fr 1fr !important; height:auto; }
-      .panel-inferior { grid-template-columns: 1fr 2fr !important; height:auto; }
       .informe-top { grid-template-columns: 1.4fr 1fr !important; }
+      .panel-graficos { grid-template-columns: 1fr 1fr 1fr !important; height: auto; }
+      .panel-combined { grid-template-columns: 1fr 1fr; }
       
-      /* Checklist en página 1 (resumen) */
-      .checklist-visita { 
-        max-height: none !important; 
-        overflow: visible !important; 
-        border: 1px solid #eee;
-      }
-
-      /* PÁGINA 2: Tabla de Checklist Completo */
-      #printChecklistContainer {
-        display: block !important;
-        break-before: page;
-        margin-top: 20px;
-      }
+      /* PÁGINA 2 */
+      #printChecklistContainer { display: block !important; break-before: page; margin-top: 20px; }
       .print-header { font-size: 16px; font-weight: bold; margin-bottom: 15px; border-bottom: 2px solid black; padding-bottom: 5px; }
       .print-table { width: 100%; border-collapse: collapse; font-size: 11px; }
       .print-table th, .print-table td { border: 1px solid #ccc; padding: 5px; text-align: left; }
       .print-table th { background: #f0f0f0; font-weight: bold; }
-      .print-table tr:nth-child(even) { background: #f9f9f9; }
     }
   </style>
 </head>
@@ -1251,58 +254,29 @@
         <span class="logo-subtitle">Gestión de centros y delegados</span>
       </div>
     </div>
-
-    <div>
-      <div class="section-title">Secciones</div>
-      <nav class="nav-list">
-        <div class="nav-item active" data-page="dashboard">
-          <span class="icon">🏠</span> Dashboard
-        </div>
-        <div class="nav-item" data-page="centros">
-          <span class="icon">🏢</span> Centros
-        </div>
-        <div class="nav-item" data-page="informe">
-          <span class="icon">📋</span> Informe de la visita
-        </div>
-        <div class="nav-item" data-page="servicios">
-          <span class="icon">🛠</span> Servicios
-        </div>
-        <div class="nav-item" data-page="ventas">
-          <span class="icon">💳</span> Ventas
-        </div>
-        <div class="nav-item" data-page="proyectos">
-          <span class="icon">📊</span> Proyectos
-        </div>
-      </nav>
-    </div>
-
-    <div class="sidebar-footer">
-      Versión demo · Datos ficticios
-    </div>
+    <nav class="nav-list">
+      <div class="nav-item active" data-page="dashboard"><span class="icon">🏠</span> Dashboard</div>
+      <div class="nav-item" data-page="centros"><span class="icon">🏢</span> Centros</div>
+      <div class="nav-item" data-page="informe"><span class="icon">📋</span> Informe de la visita</div>
+      <div class="nav-item" data-page="servicios"><span class="icon">🛠</span> Servicios</div>
+      <div class="nav-item" data-page="ventas"><span class="icon">💳</span> Ventas</div>
+      <div class="nav-item" data-page="proyectos"><span class="icon">📊</span> Proyectos</div>
+    </nav>
+    <div class="sidebar-footer">Versión demo · Datos ficticios</div>
   </aside>
 
   <main class="main">
     <div class="topbar">
       <div class="topbar-search">
-        <span>🔍</span>
-        <input id="searchGlobal" placeholder="Buscar por centro, propietario o delegado...">
+        <span>🔍</span><input id="searchGlobal" placeholder="Buscar por centro, propietario o delegado...">
+      </div>
+      <div style="font-size: .8rem; color: var(--text-muted); margin-left:15px;">
+         <span id="headerVisitsCount">Visitas procesadas: 0</span>
       </div>
       <div class="topbar-buttons">
-        <button class="btn" id="themeToggle">
-          <span class="icon">🌓</span> Oscuro / Claro
-        </button>
-        <button class="btn" id="btnGuardarVista">
-          <span class="icon">💾</span> Guardar vista
-        </button>
-        <button class="btn" id="btnExportarHTML">
-          <span class="icon">⬇️</span> Exportar HTML
-        </button>
-        <button class="btn" id="btnImprimir">
-          <span class="icon">🖨</span> Imprimir
-        </button>
-        <button class="btn btn-cta" id="btnActualizarNube">
-          <span class="icon">☁️</span> Actualizar datos nube
-        </button>
+        <button class="btn" id="themeToggle"><span class="icon">🌓</span> Tema</button>
+        <button class="btn" id="btnImprimir"><span class="icon">🖨</span> Imprimir</button>
+        <button class="btn btn-cta" id="btnActualizarNube"><span class="icon">☁️</span> Nube</button>
       </div>
     </div>
 
@@ -1310,142 +284,37 @@
       <section class="page active" data-page="dashboard">
         <div class="dashboard-grid">
           <article class="card">
-            <div class="card-header-row">
-              <span class="card-title">Resumen general</span>
-              <span class="badge-small">Demo · Promedios sobre visitas guardadas</span>
-            </div>
-
+            <div class="card-header-row"><span class="card-title">Resumen general</span><span class="badge-small">Datos Globales</span></div>
             <div class="kpi-grid">
-              <div class="kpi-card">
-                <div class="kpi-label">% de aplicación de procesos</div>
-                <div class="kpi-value" id="kpiProcesos">–</div>
-                <div class="kpi-caption">Objetivo 85–100%</div>
-              </div>
-              <div class="kpi-card">
-                <div class="kpi-label">Conv. a prueba</div>
-                <div class="kpi-value" id="kpiConvPrueba">–</div>
-                <div class="kpi-caption">Objetivo 80%</div>
-              </div>
-              <div class="kpi-card">
-                <div class="kpi-label">Conv. a venta</div>
-                <div class="kpi-value" id="kpiConvVenta">–</div>
-                <div class="kpi-caption">Objetivo 80%</div>
-              </div>
-              <div class="kpi-card">
-                <div class="kpi-label">Aplicación HIT</div>
-                <div class="kpi-value" id="kpiHIT">–</div>
-                <div class="kpi-caption">% Centros (Global)</div>
-              </div>
-              <div class="kpi-card">
-                <div class="kpi-label">Formaciones %</div>
-                <div class="kpi-value" id="kpiFormaciones">–</div>
-                <div class="kpi-caption">Media de módulos formativos</div>
-              </div>
-              <div class="kpi-card">
-                <div class="kpi-label">Ayuda</div>
-                <div class="kpi-value" id="kpiAyuda">–</div>
-                <div class="kpi-caption">Telecare / PIA / Telehear</div>
-              </div>
-              <div class="kpi-card">
-                <div class="kpi-label">AAR</div>
-                <div class="kpi-value" id="kpiAar">–</div>
-                <div class="kpi-caption">% Centros (Global)</div>
-              </div>
-              <div class="kpi-card">
-                <div class="kpi-label">Primeros auxilios</div>
-                <div class="kpi-value" id="kpiPrimeros">–</div>
-                <div class="kpi-caption">Centros con formación</div>
-              </div>
+              <div class="kpi-card"><div class="kpi-label">% Procesos</div><div class="kpi-value" id="kpiProcesos">-</div></div>
+              <div class="kpi-card"><div class="kpi-label">Conv. Prueba</div><div class="kpi-value" id="kpiConvPrueba">-</div></div>
+              <div class="kpi-card"><div class="kpi-label">Conv. Venta</div><div class="kpi-value" id="kpiConvVenta">-</div></div>
+              <div class="kpi-card"><div class="kpi-label">HIT</div><div class="kpi-value" id="kpiHIT">-</div><div class="kpi-caption">% Centros</div></div>
+              <div class="kpi-card"><div class="kpi-label">Formaciones</div><div class="kpi-value" id="kpiFormaciones">-</div></div>
+              <div class="kpi-card"><div class="kpi-label">Ayuda</div><div class="kpi-value" id="kpiAyuda">-</div></div>
+              <div class="kpi-card"><div class="kpi-label">AAR</div><div class="kpi-value" id="kpiAar">-</div><div class="kpi-caption">% Centros</div></div>
+              <div class="kpi-card"><div class="kpi-label">1os Aux</div><div class="kpi-value" id="kpiPrimeros">-</div></div>
             </div>
-
             <div class="dashboard-charts">
-              <div class="card">
-                <div class="card-header-row">
-                  <span class="card-title">Radar general</span>
-                </div>
-                <div class="chart-container">
-                  <canvas id="chartRadarGeneral" width="360" height="360"></canvas>
-                </div>
-              </div>
-
-              <div class="card">
-                <div class="card-header-row">
-                  <span class="card-title">Procesos y áreas de mejora por mes</span>
-                </div>
-                <div class="chart-container">
-                  <canvas id="chartProcesosMes" width="438" height="240"></canvas>
-                </div>
-              </div>
-
-              <div class="card">
-                <div class="card-header-row">
-                  <span class="card-title">Áreas de mejora por mes</span>
-                </div>
-                <div class="chart-container">
-                  <canvas id="chartAreasMes" width="438" height="240"></canvas>
-                </div>
-              </div>
-
-              <div class="card">
-                <div class="card-header-row">
-                  <span class="card-title">Primeros auxilios por mes</span>
-                </div>
-                <div class="chart-container">
-                  <canvas id="chartPrimerosMes" width="438" height="240"></canvas>
-                </div>
-              </div>
-
-              <div class="card">
-                <div class="card-header-row">
-                  <span class="card-title">Top 10 áreas de mejora</span>
-                </div>
-                <div class="chart-container">
-                  <canvas id="chartTopAreas" width="438" height="240"></canvas>
-                </div>
-              </div>
-
-              <div class="card">
-                <div class="card-header-row">
-                  <span class="card-title">Aplicación AAR / HIT</span>
-                </div>
-                <div class="chart-container">
-                  <canvas id="chartAarHitDonut" width="438" height="360"></canvas>
-                </div>
-              </div>
+              <div class="card"><div class="card-header-row"><span class="card-title">Radar</span></div><div class="chart-container"><canvas id="chartRadarGeneral"></canvas></div></div>
+              <div class="card"><div class="card-header-row"><span class="card-title">Procesos Mes</span></div><div class="chart-container"><canvas id="chartProcesosMes"></canvas></div></div>
+              <div class="card"><div class="card-header-row"><span class="card-title">Áreas Mes</span></div><div class="chart-container"><canvas id="chartAreasMes"></canvas></div></div>
+              <div class="card"><div class="card-header-row"><span class="card-title">1os Aux Mes</span></div><div class="chart-container"><canvas id="chartPrimerosMes"></canvas></div></div>
+              <div class="card"><div class="card-header-row"><span class="card-title">Top Áreas</span></div><div class="chart-container"><canvas id="chartTopAreas"></canvas></div></div>
+              <div class="card"><div class="card-header-row"><span class="card-title">AAR / HIT</span></div><div class="chart-container"><canvas id="chartAarHitDonut"></canvas></div></div>
             </div>
           </article>
-
           <div class="dashboard-right-column">
             <article class="card">
               <div class="card-header-row">
-                <span class="card-title">Evaluación detallada de procesos (80 criterios)</span>
-                <span class="badge-small">Se actualiza con los checklists</span>
+                <span class="card-title">Evaluación 80 criterios (Promedio Global %)</span>
+                <span class="badge-small">Acumulado</span>
               </div>
-              <div class="card-sub" id="criteriosEmptyMsg" style="display: none;">
-                Adjunta un checklist en el informe de la visita para ver el detalle.
-              </div>
-              <div class="chart-container criterios-container">
-                <canvas id="chartCriteriosDetalle" width="1435"></canvas>
-              </div>
+              <div class="chart-container criterios-container"><canvas id="chartCriteriosDetalle"></canvas></div>
             </article>
-
             <article class="card">
-              <div class="card-header-row">
-                <span class="card-title">Ranking de delegados</span>
-              </div>
-              <div class="ranking-list" id="rankingDelegados">
-                </div>
-              <div class="ranking-toggle" id="rankingToggle" style="display: block;">
-                Mostrar todos
-              </div>
-              <div class="ranking-summary" id="rankingResumen">
-                <div class="ranking-summary-item">
-                  Top delegado: <span id="rankingTopDelegado">-</span>
-                </div>
-                <div class="ranking-summary-item">
-                  Media procesos delegados: <span id="rankingMediaProcesos">-</span>
-                </div>
-              </div>
+              <div class="card-header-row"><span class="card-title">Ranking</span></div>
+              <div class="ranking-list" id="rankingDelegados"></div>
             </article>
           </div>
         </div>
@@ -1454,73 +323,29 @@
       <section class="page" data-page="centros">
         <div class="centros-top">
           <article class="card">
-            <div class="card-header-row">
-              <span class="card-title">Centros y delegados</span>
-              <span class="badge-small"><span id="numDelegados">0</span> delegados</span>
-            </div>
+            <div class="card-header-row"><span class="card-title">Centros</span><span class="badge-small"><span id="numDelegados">0</span> delegados</span></div>
             <div class="delegados-list" id="delegadosList"></div>
-            <div style="display:flex; gap:8px; margin-top:6px;">
-              <button class="btn btn-cta" id="btnAddCentro">
-                <span class="icon">➕</span> Añadir centro
-              </button>
-              <button class="btn" id="btnAdjuntarExcel">
-                <span class="icon">📤</span> Adjuntar centros (Excel)
-              </button>
-              <input type="file" id="inputExcel" accept=".xlsx,.xls" style="display:none">
-            </div>
-            <div style="margin-top:4px; font-size:.74rem; color:var(--text-muted);">
-              Centros mostrados: <span id="centrosMostrados">0</span> / <span id="centrosTotal">0</span>
+            <div style="margin-top:8px; display:flex; gap:5px;">
+               <button class="btn btn-cta" id="btnAddCentro">➕ Nuevo</button>
+               <button class="btn" id="btnAdjuntarExcel">📤 Carga Masiva (Excel)</button>
+               <input type="file" id="inputExcel" hidden>
             </div>
           </article>
-
           <article class="card">
             <div class="calendar-wrapper">
-              <div class="calendar-header">
-                <button id="calPrev">&lt;</button>
-                <div class="calendar-month" id="calTitulo" style="font-weight:700;">Diciembre de 2025</div>
-                <button id="calNext">&gt;</button>
-              </div>
-              <div class="calendar-weekdays">
-                <div>L</div><div>M</div><div>X</div><div>J</div><div>V</div><div>S</div><div>D</div>
-              </div>
+              <div class="calendar-header"><button id="calPrev">&lt;</button><div id="calTitulo"></div><button id="calNext">&gt;</button></div>
               <div class="calendar-grid" id="calendarGrid"></div>
-              <div style="font-size:.72rem; color:var(--text-muted); margin-top:2px;">
-                Clic en un día para agendar visita.
-              </div>
             </div>
           </article>
-
           <article class="card">
-            <div class="card-header-row">
-              <span class="card-title">Visitas agendadas</span>
-            </div>
+            <div class="card-header-row"><span class="card-title">Visitas</span></div>
             <div class="visitas-list" id="visitasList"></div>
           </article>
         </div>
-
         <section class="table-wrapper">
-          <div class="table-header">
-            <div>
-              <h3>Listado de centros</h3>
-            </div>
-            <span class="badge-small" id="totalCentrosLabel">Centros mostrados: 0 / 0</span>
-          </div>
+          <div class="table-header"><h3>Listado</h3><span class="badge-small" id="totalCentrosLabel">0 / 0</span></div>
           <div class="table-scroll">
-            <table>
-              <thead>
-                <tr>
-                  <th>Código</th>
-                  <th>Propietario</th>
-                  <th>Centro</th>
-                  <th>Provincia</th>
-                  <th>Delegado</th>
-                  <th>Tipo</th>
-                  <th>Informes</th>
-                  <th>Centro AAR</th>
-                </tr>
-              </thead>
-              <tbody id="tablaCentrosBody"></tbody>
-            </table>
+            <table><thead><tr><th>Código</th><th>Propietario</th><th>Centro</th><th>Provincia</th><th>Delegado</th><th>Tipo</th><th>Acción</th><th>AAR</th></tr></thead><tbody id="tablaCentrosBody"></tbody></table>
           </div>
         </section>
       </section>
@@ -1529,23 +354,10 @@
         <div class="informe-layout">
           <div class="informe-top">
             <article class="card">
-              <div class="card-header-row">
-                <span class="card-title">Datos del centro</span>
-              </div>
+              <div class="card-header-row"><span class="card-title">Datos Centro</span></div>
               <div class="datos-grid">
-                <div>
-                  <div class="dato-label">Centro</div>
-                  <input id="infCentro" class="field-input" readonly="">
-                </div>
-                <div>
-                  <div class="dato-label">Provincia</div>
-                  <input id="infProvincia" class="field-input" readonly="">
-                </div>
-                <div>
-                  <div class="dato-label">Delegado</div>
-                  <input id="infDelegado" class="field-input" readonly="">
-                </div>
-                
+                <div><div class="dato-label">Centro</div><input id="infCentro" class="field-input" readonly></div>
+                <div><div class="dato-label">Delegado</div><input id="infDelegado" class="field-input" readonly></div>
                 <div class="dato-full">
                    <div class="dato-label" style="margin-bottom:2px;">Tipo de Centro</div>
                    <div class="radio-group">
@@ -1553,755 +365,463 @@
                       <label><input type="radio" name="tipoCentro" value="Corner" id="radCorner"> Corner</label>
                    </div>
                 </div>
-
-                <div>
-                  <div class="dato-label">Responsable audio</div>
-                  <input id="infRespAudio" class="field-input">
-                </div>
-                <div>
-                  <div class="dato-label">Fecha visita</div>
-                  <input id="infFecha" class="field-input">
-                </div>
+                <div><div class="dato-label">Responsable</div><input id="infRespAudio" class="field-input"></div>
+                <div><div class="dato-label">Fecha</div><input id="infFecha" class="field-input"></div>
                 <div class="dato-full" style="margin-top:4px;">
-                  <button class="btn btn-cta" id="btnAdjuntarChecklist">
-                    <span class="icon">📎</span> Adjuntar checklist (Excel)
-                  </button>
-                  <input type="file" id="inputChecklist" accept=".xlsx,.xls" style="display:none">
+                  <button class="btn btn-cta" id="btnAdjuntarChecklist">📎 Adjuntar Checklist (Excel)</button>
+                  <input type="file" id="inputChecklist" hidden>
                   <span id="nombreChecklist" style="margin-left:8px; font-size:.74rem; color:var(--text-muted);"></span>
                 </div>
               </div>
             </article>
-
+            
             <article class="card">
-              <div class="card-header-row">
-                <span class="card-title">KPIs del centro</span>
-              </div>
+              <div class="card-header-row"><span class="card-title">KPIs Calidad</span></div>
               <div style="font-size:.78rem; margin-top:4px;">
-                <div>% de aplicación de procesos: <strong id="kpiCentroProcesos">0%</strong></div>
-                <div>Conv. a prueba: <strong id="kpiCentroPrueba">0%</strong></div>
-                <div>Conv. a cierre: <strong id="kpiCentroVenta">0%</strong></div>
-                <div>Aplicación HIT: <strong id="kpiCentroHit" style="color:var(--accent-blue);">No</strong></div>
+                <div>% Procesos: <strong id="kpiCentroProcesos">0%</strong></div>
+                <div>C. Prueba: <strong id="kpiCentroPrueba">0%</strong></div>
+                <div>C. Venta: <strong id="kpiCentroVenta">0%</strong></div>
+                <div>HIT: <strong id="kpiCentroHit" style="color:var(--accent-blue);">No</strong></div>
               </div>
-              <div class="chart-container centered" style="margin-top:6px; max-height:180px;">
-                <canvas id="chartCentroRadar" width="270" height="270"></canvas>
-              </div>
+              <div class="chart-container centered" style="height:180px;"><canvas id="chartCentroKPIsBar"></canvas></div>
             </article>
           </div>
 
+          <div class="panel-combined card">
+             <div class="panel-listado">
+                <div class="card-title" style="margin-bottom:5px;">Áreas Mejora (F=0)</div>
+                <ul id="listaMejorasTexto"><li>Sin datos...</li></ul>
+             </div>
+             <div class="chart-container">
+                <canvas id="chartCentroCombo"></canvas>
+             </div>
+          </div>
+
           <div class="panel-graficos">
-            <article class="card">
-              <div class="card-header-row">
-                <span class="card-title">Palancas (Aplica/No Aplica)</span>
-              </div>
-              <div class="chart-container">
-                <canvas id="chartCentroPalancas"></canvas>
-              </div>
-            </article>
-
-            <article class="card">
-              <div class="card-header-row">
-                <span class="card-title">Áreas de Mejora (F=0)</span>
-              </div>
-              <div class="chart-container">
-                <canvas id="chartCentroAreasMejora"></canvas>
-              </div>
-            </article>
-
-            <article class="card">
-              <div class="card-header-row">
-                <span class="card-title">Resumen Procesos (Cumple vs No)</span>
-              </div>
-              <div class="chart-container">
-                <canvas id="chartCentroProcesosStack"></canvas>
-              </div>
-            </article>
+             <article class="card"><span class="card-title">Palancas</span><div class="chart-container"><canvas id="chartCentroPalancas"></canvas></div></article>
+             <article class="card"><span class="card-title">Procesos (Global)</span><div class="chart-container"><canvas id="chartCentroProcesosStack"></canvas></div></article>
           </div>
 
           <div class="panel-inferior">
             <article class="card">
-              <div class="card-header-row">
-                <span class="card-title">Checklist Rápido (Manual)</span>
-              </div>
+              <div class="card-header-row"><span class="card-title">Checklist Completo</span></div>
               <div class="checklist-visita">
-                <label><input type="checkbox" id="chkHit"> <strong>HIT</strong></label>
-                <label><input type="checkbox" id="chkAar"> <strong>AAR</strong></label>
-                <label><input type="checkbox" id="chk1os"> Primeros Auxilios</label>
-                <label><input type="checkbox" id="chkInfinity"> Infinity</label>
-                <label><input type="checkbox" id="chkSeguro"> Seguro</label>
-                <label><input type="checkbox" id="chkStock"> Stock</label>
-                <div style="margin:5px 0; border-top:1px dashed #333;"></div>
+                <div class="checklist-heading">Formaciones y Habilidades</div>
+                <label><input type="checkbox" id="chkHit"> HIT</label>
+                <label><input type="checkbox" id="chkAar"> AAR</label>
+                <label><input type="checkbox"> Financiación Infinity</label>
+                <label><input type="checkbox"> Venta Seguro</label>
+                <label><input type="checkbox"> Primeros Auxilios (Equipo)</label>
                 <label><input type="checkbox"> Formación WSA</label>
                 <label><input type="checkbox"> Formación Starkey</label>
                 <label><input type="checkbox"> Neuroventas</label>
                 <label><input type="checkbox"> Telecare</label>
                 <label><input type="checkbox"> PIA</label>
                 <label><input type="checkbox"> Telehear</label>
+                
+                <div class="checklist-heading">Producto y Comunicación</div>
                 <label><input type="checkbox"> Audiometría RT</label>
                 <label><input type="checkbox"> Test Lectura Audio</label>
-              </div>
-              <div style="margin-top:5px;">
-                 <div class="dato-label">Nota Formaciones (0-10)</div>
-                 <input type="number" id="inpFormaciones" class="field-input" value="0" min="0" max="10">
+                <label><input type="checkbox"> Screening Audio</label>
+                <label><input type="checkbox"> Manteleta Audio</label>
+                <label><input type="checkbox"> Escaparate Visible Audio</label>
+                <label><input type="checkbox"> Salud Auditiva en PDV</label>
+                <label><input type="checkbox"> Elementos Renove</label>
+                <label><input type="checkbox"> Elementos MGM</label>
+                <label><input type="checkbox"> Stock</label>
+                <label><input type="checkbox"> Tchin Tchin</label>
               </div>
             </article>
-
             <article class="card">
-              <div class="card-header-row">
-                <span class="card-title">Imágenes del centro</span>
-              </div>
-              <div class="imagenes-grid" style="margin-top:4px;">
-                <div>
-                  <div class="imagen-item-title">Centro exterior</div>
-                  <div class="imagen-preview" onclick="$('#fExt').click()">
-                    Adjuntar imagen
-                    <input type="file" id="fExt" accept="image/*" hidden onchange="preview(this)">
-                  </div>
-                </div>
-                <div>
-                  <div class="imagen-item-title">Centro interior</div>
-                  <div class="imagen-preview" onclick="$('#fInt').click()">
-                    Adjuntar imagen
-                    <input type="file" id="fInt" accept="image/*" hidden onchange="preview(this)">
-                  </div>
-                </div>
-                <div>
-                  <div class="imagen-item-title">Gabinete</div>
-                  <div class="imagen-preview" onclick="$('#fGab').click()">
-                    Adjuntar imagen
-                    <input type="file" id="fGab" accept="image/*" hidden onchange="preview(this)">
-                  </div>
-                </div>
+              <div class="card-header-row"><span class="card-title">Imágenes</span></div>
+              <div class="imagenes-grid">
+                <div class="imagen-preview" onclick="$('#f1').click()">Exterior<input id="f1" type="file" hidden onchange="prev(this)"></div>
+                <div class="imagen-preview" onclick="$('#f2').click()">Interior<input id="f2" type="file" hidden onchange="prev(this)"></div>
+                <div class="imagen-preview" onclick="$('#f3').click()">Gabinete<input id="f3" type="file" hidden onchange="prev(this)"></div>
               </div>
             </article>
           </div>
 
           <article class="card">
-            <div class="card-header-row">
-              <span class="card-title">Observaciones · Recomendaciones · Compromisos</span>
+            <span class="card-title">Conclusiones</span>
+            <div class="observaciones-grid">
+              <div class="obs-item"><div class="obs-label">Observaciones</div><textarea></textarea></div>
+              <div class="obs-item"><div class="obs-label">Recomendaciones</div><textarea></textarea></div>
+              <div class="obs-item"><div class="obs-label">Compromisos</div><textarea></textarea></div>
             </div>
-            <div class="observaciones-grid" style="margin-top:6px;">
-              <div class="obs-item">
-                <div class="obs-label">Observaciones</div>
-                <textarea id="obsObservaciones"></textarea>
-              </div>
-              <div class="obs-item">
-                <div class="obs-label">Recomendaciones</div>
-                <textarea id="obsRecomendaciones"></textarea>
-              </div>
-              <div class="obs-item">
-                <div class="obs-label">Compromisos</div>
-                <textarea id="obsCompromisos"></textarea>
-              </div>
-            </div>
-            <div class="acciones-informe">
-              <button class="btn btn-cta" id="btnGuardarInforme">
-                <span class="icon">💾</span> Guardar informe
-              </button>
-            </div>
+            <div class="acciones-informe"><button class="btn btn-cta" id="btnGuardarInforme">💾 Guardar Informe</button></div>
           </article>
         </div>
       </section>
 
-      <section class="page" data-page="servicios">
-        <article class="card"><div class="card-title">Servicios</div></article>
-      </section>
-      <section class="page" data-page="ventas">
-        <article class="card"><div class="card-title">Ventas</div></article>
-      </section>
-      <section class="page" data-page="proyectos">
-        <article class="card"><div class="card-title">Proyectos</div></article>
-      </section>
+      <section class="page" data-page="servicios"><article class="card"><div class="card-title">Servicios</div></article></section>
+      <section class="page" data-page="ventas"><article class="card"><div class="card-title">Ventas</div></article></section>
+      <section class="page" data-page="proyectos"><article class="card"><div class="card-title">Proyectos</div></article></section>
     </div>
   </main>
 
   <div id="printChecklistContainer">
-    <div class="print-header">ANEXO: DETALLE DE CHECKLIST (80 Puntos)</div>
+    <div class="print-header">ANEXO: DETALLE EVALUACIÓN (80 CRITERIOS)</div>
     <table class="print-table" id="tablaPrint">
       <thead><tr><th>Criterio</th><th>Resultado</th></tr></thead>
       <tbody id="tbodyPrint"></tbody>
     </table>
   </div>
 
-  <div class="modal-backdrop" id="modalVisita" style="display: none;">
+  <div class="modal-backdrop" id="modalVisita">
     <div class="modal">
-      <div class="modal-header">
-        <h3>Agendar visita</h3>
-        <span class="modal-close" data-close="modalVisita">✕</span>
-      </div>
+      <div class="modal-header"><h3>Agendar</h3><span class="modal-close" data-close="modalVisita">✕</span></div>
       <div class="modal-body">
-        <div class="modal-field">
-          <label>Fecha</label>
-          <input id="visitaFecha" readonly="" data-iso="2025-12-09">
-        </div>
-        <div class="modal-field">
-          <label>Responsable audio</label>
-          <select id="visitaResp">
-            <option value="Ariannys Rojas">Ariannys Rojas</option>
-            <option value="Sonia Guasque">Sonia Guasque</option>
-          </select>
-        </div>
-        <div class="modal-field">
-          <label>Centro</label>
-          <input id="visitaCentro" list="listaCentros">
-          <datalist id="listaCentros"><option value="PAMPLONA C. Exclusivo"></option><option value="PAMPLONA Calle Sancho el Mayor"></option><option value="PAMPLONA Carlos III"></option><option value="REINA DE MERCEDES"></option><option value="SANTANDER CC PEÑACASTILLO"></option><option value="SANTIAGO DE COMPOSTELA RUA DA ROSA"></option><option value="TORRELAVEGA CARREFOUR CC"></option><option value="ZARAGOZA CALLE DELICIAS"></option><option value="CC LOS VALLES"></option><option value="FUENLABRADA Calle Leganes"></option></datalist>
-        </div>
+        <div class="modal-field"><label>Fecha</label><input id="visitaFecha" readonly></div>
+        <div class="modal-field"><label>Responsable</label><select id="visitaResp"><option>Ariannys Rojas</option><option>Sonia Guasque</option></select></div>
+        <div class="modal-field"><label>Centro</label><input id="visitaCentro"></div>
       </div>
-      <div class="modal-footer">
-        <button class="btn" data-close="modalVisita">Cancelar</button>
-        <button class="btn btn-cta" id="btnGuardarVisita">Guardar visita</button>
-      </div>
+      <div class="modal-footer"><button class="btn btn-cta" id="btnGuardarVisita">Guardar</button></div>
     </div>
   </div>
 
   <div class="modal-backdrop" id="modalCentro">
     <div class="modal">
-      <div class="modal-header">
-        <h3>Nuevo centro</h3>
-        <span class="modal-close" data-close="modalCentro">✕</span>
-      </div>
+      <div class="modal-header"><h3>Nuevo Centro</h3><span class="modal-close" data-close="modalCentro">✕</span></div>
       <div class="modal-body">
-        <div class="modal-field"><label>Código</label><input id="nuevoCodigo"></div>
-        <div class="modal-field"><label>Propietario</label><input id="nuevoPropietario"></div>
-        <div class="modal-field"><label>Centro</label><input id="nuevoCentro"></div>
-        <div class="modal-field"><label>Provincia</label><input id="nuevoProvincia"></div>
-        <div class="modal-field"><label>Delegado</label><input id="nuevoDelegado"></div>
+         <div class="modal-field"><label>Centro</label><input id="nuevoCentro"></div>
+         <div class="modal-field"><label>Delegado</label><input id="nuevoDelegado"></div>
       </div>
-      <div class="modal-footer">
-        <button class="btn" data-close="modalCentro">Cancelar</button>
-        <button class="btn btn-cta" id="guardarCentro">Guardar centro</button>
-      </div>
+      <div class="modal-footer"><button class="btn btn-cta" id="guardarCentro">Guardar</button></div>
     </div>
   </div>
 
   <script>
     Chart.register(ChartDataLabels);
-    const $  = sel => document.querySelector(sel);
-    const $$ = sel => Array.from(document.querySelectorAll(sel));
+    const $ = s => document.querySelector(s);
+    const $$ = s => document.querySelectorAll(s);
+    function prev(i){if(i.files[0]){const r=new FileReader();r.onload=e=>i.parentElement.innerHTML=`<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;">`;r.readAsDataURL(i.files[0]);}}
+    function formatDateISO(d){return d.toISOString().split('T')[0];}
+    function formatDateHuman(iso){const [y,m,d]=iso.split('-');return `${d}-${m}-${y}`;}
 
-    /* UTILS */
-    function formatDateISO(d) {
-      const y = d.getFullYear();
-      const m = String(d.getMonth()+1).padStart(2,"0");
-      const day = String(d.getDate()).padStart(2,"0");
-      return `${y}-${m}-${day}`;
-    }
-    function formatDateHuman(iso) {
-      const [y,m,d] = iso.split("-");
-      return `${d}-${m}-${y}`;
-    }
-    function preview(input) {
-       if(input.files && input.files[0]) {
-          const r = new FileReader();
-          r.onload = e => input.parentElement.innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;">`;
-          r.readAsDataURL(input.files[0]);
+    // ESTADO
+    const centros = [
+       { codigo:"4ABB", centro:"PAMPLONA C. Exclusivo", provincia:"NAVARRA", delegado:"Sonia Godino", hit:true, aar:false },
+       { codigo:"4MRM", centro:"REINA DE MERCEDES", provincia:"Madrid", delegado:"Sergio Perán", hit:false, aar:true },
+       { codigo:"4AXF", centro:"SANTIAGO DE COMPOSTELA", provincia:"A Coruña", delegado:"Daniel Chazo", hit:true, aar:true },
+       { codigo:"4PEC", centro:"SANTANDER CC", provincia:"Santander", delegado:"Sergio Perán", hit:false, aar:false }
+    ];
+    // Acumulador Global de Criterios { "NombreCriterio": { total:0, ok:0 } }
+    let globalCriteriaStats = {};
+    let totalInformesCargados = 0;
+
+    let centroActual = null;
+    let visitaActual = null; const visitas = [];
+    let centroChartsCreated = false;
+    let centroCharts = {}, globalCharts = {};
+    
+    // Variables para el informe actual
+    let itemsFallidos = [];
+    let conteoOk = 0, conteoNo = 0;
+
+    // NAV
+    $$(".nav-item").forEach(i => i.addEventListener("click", () => {
+       $$(".nav-item").forEach(n=>n.classList.remove("active")); i.classList.add("active");
+       $$(".page").forEach(p=>p.classList.remove("active")); 
+       $(`.page[data-page='${i.dataset.page}']`).classList.add("active");
+    }));
+    $("#themeToggle").addEventListener("click", ()=> { document.body.classList.toggle("light"); updateChartsTheme(); });
+    $("#btnImprimir").addEventListener("click", ()=> window.print());
+
+    // CALCULO GLOBAL 80 CRITERIOS
+    function actualizarGraficoGlobalCriterios() {
+       const labels = Object.keys(globalCriteriaStats);
+       const data = labels.map(k => {
+          const s = globalCriteriaStats[k];
+          return s.total ? Math.round((s.ok / s.total) * 100) : 0;
+       });
+       
+       // Ordenar de mayor a menor cumplimiento
+       const combined = labels.map((l,i) => ({l, d: data[i]}));
+       combined.sort((a,b) => b.d - a.d);
+       
+       const sortedLabels = combined.map(c => c.l);
+       const sortedData = combined.map(c => c.d);
+       const colors = sortedData.map(v => v >= 85 ? '#22c55e' : (v >= 50 ? '#facc15' : '#ef4444'));
+
+       const ctx = document.getElementById("chartCriteriosDetalle").getContext("2d");
+       if(!globalCharts.criteriosDetalle) {
+          globalCharts.criteriosDetalle = new Chart(ctx, {
+             type: 'bar',
+             data: { labels: sortedLabels, datasets: [{ label:'% Cumplimiento Global', data: sortedData, backgroundColor: colors }] },
+             options: { indexAxis: 'y', maintainAspectRatio: false, plugins: { legend: {display:false} } }
+          });
+       } else {
+          globalCharts.criteriosDetalle.data.labels = sortedLabels;
+          globalCharts.criteriosDetalle.data.datasets[0].data = sortedData;
+          globalCharts.criteriosDetalle.data.datasets[0].backgroundColor = colors;
+          globalCharts.criteriosDetalle.update();
+       }
+       
+       // Ajustar altura canvas si hay muchos items
+       if(sortedLabels.length > 20) {
+          document.querySelector(".criterios-container canvas").style.height = (sortedLabels.length * 20) + "px";
        }
     }
 
-    /* NAV */
-    const pages = $$(".page");
-    $$(".nav-item").forEach(item => {
-      item.addEventListener("click", () => {
-        const page = item.dataset.page;
-        $$(".nav-item").forEach(i => i.classList.toggle("active", i === item));
-        pages.forEach(p => p.classList.toggle("active", p.dataset.page === page));
-      });
-    });
-
-    /* TEMA */
-    $("#themeToggle").addEventListener("click", () => {
-      document.body.classList.toggle("light");
-      Object.values(globalCharts).forEach(ch => ch && ch.resize());
-      if (centroChartsCreated) Object.values(centroCharts).forEach(ch => ch && ch.resize());
-    });
-
-    /* BOTONES */
-    $("#btnGuardarVista").addEventListener("click", () => alert("Guardar vista (demo)."));
-    $("#btnActualizarNube").addEventListener("click", () => alert("Actualización a nube (demo)."));
-    $("#btnImprimir").addEventListener("click", () => window.print());
-    $("#btnExportarHTML").addEventListener("click", () => {
-      const content = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
-      const blob = new Blob([content], {type:"text/html"});
-      const url  = URL.createObjectURL(blob);
-      const a    = document.createElement("a");
-      a.href = url; a.download = "control-center-audio.html";
-      document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
-    });
-
-    /* DATOS */
-    const exclusivosSet = new Set([
-      "CC LOS VALLES", "FUENLABRADA Calle Leganes", "PAMPLONA C. Exclusivo",
-      "PAMPLONA Calle Sancho el Mayor", "PAMPLONA Carlos III", "REINA DE MERCEDES",
-      "SANTANDER CC PEÑACASTILLO", "SANTIAGO DE COMPOSTELA RUA DA ROSA",
-      "TORRELAVEGA CARREFOUR CC", "ZARAGOZA CALLE DELICIAS"
-    ]);
-
-    const centros = [];
-    const informesPorCentro = {};
-    const delegadosColores = {};
-    const colorPalette = ["#22c55e","#2563eb","#14b8a6","#a855f7","#f97316","#0ea5e9","#ef4444","#eab308","#ec4899"];
-
-    function getColorForDelegado(nombre) {
-      if (!delegadosColores[nombre]) {
-        const idx = Object.keys(delegadosColores).length % colorPalette.length;
-        delegadosColores[nombre] = colorPalette[idx];
-      }
-      return delegadosColores[nombre];
-    }
-    function tipoCentro(nombreCentro) {
-      return nombreCentro.toUpperCase().includes("EXCLUSIVO") ? "Exclusivo" : "Corner";
-    }
-    function getInformes(nombreCentro) {
-      return informesPorCentro[nombreCentro] || 0;
-    }
-
-    /* RENDER TABLA CENTROS */
-    let filtroDelegadoActual = null;
-    let filtroTextoActual = "";
-
-    function renderTablaCentros() {
-      const tbody = $("#tablaCentrosBody");
-      tbody.innerHTML = "";
-      const filtrados = centros.filter(c => {
-        const cad = (c.centro + " " + c.propietario + " " + c.delegado).toLowerCase();
-        const pasaTexto = cad.includes(filtroTextoActual.toLowerCase());
-        const pasaDel   = !filtroDelegadoActual || c.delegado === filtroDelegadoActual;
-        return pasaTexto && pasaDel;
-      });
-
-      filtrados.forEach(c => {
-        const tr = document.createElement("tr");
-        const t  = tipoCentro(c.centro);
-        const informes = getInformes(c.centro);
-        const aarEstado = c.aar ? "Sí" : "No";
-
-        tr.innerHTML = `
-          <td>${c.codigo}</td><td>${c.propietario}</td><td>${c.centro}</td><td>${c.provincia}</td><td>${c.delegado}</td>
-          <td><span class="tag ${t === 'Exclusivo' ? 'exclusivo' : 'corner'}">${t}</span></td>
-          <td><button class="btn-link btn-informe-centro" data-centro="${c.centro}">${informes ? `Ver (${informes})` : "Añadir informe"}</button></td>
-          <td><span class="tag tag-aar ${aarEstado === 'Sí' ? 'si' : ''}">${aarEstado}</span></td>
-        `;
-        tbody.appendChild(tr);
-      });
-      $("#totalCentrosLabel").textContent = `Centros mostrados: ${filtrados.length} / ${centros.length}`;
-      $("#centrosMostrados").textContent = filtrados.length;
-      $("#centrosTotal").textContent = centros.length;
-    }
-
-    /* RENDER DELEGADOS */
-    function renderDelegados() {
-      const map = new Map();
-      centros.forEach(c => {
-        if (!map.has(c.delegado)) map.set(c.delegado, []);
-        map.get(c.delegado).push(c);
-      });
-      const list = $("#delegadosList");
-      list.innerHTML = "";
-      const arr = Array.from(map.entries()).sort((a,b)=>a[0].localeCompare(b[0]));
-
-      arr.forEach(([nombre, lista]) => {
-        const card = document.createElement("div");
-        card.className = "delegado-card";
-        const color = getColorForDelegado(nombre);
-        card.innerHTML = `<div class="delegado-header"><div class="delegado-main"><span class="delegado-color" style="background:${color}"></span><span>${nombre}</span></div><span class="delegado-count">${lista.length} centros</span></div><div class="delegado-bar"><span style="background:${color}"></span></div>`;
-        card.addEventListener("click", () => {
-          if (filtroDelegadoActual === nombre) { filtroDelegadoActual = null; card.classList.remove("active"); } 
-          else { filtroDelegadoActual = nombre; $$(".delegado-card").forEach(c=>c.classList.remove("active")); card.classList.add("active"); }
-          renderTablaCentros();
-        });
-        list.appendChild(card);
-      });
-      $("#numDelegados").textContent = arr.length;
-      renderRankingDelegados(map);
-    }
-
-    function renderRankingDelegados(map) {
-      const div = $("#rankingDelegados"); div.innerHTML = "";
-      const arr = Array.from(map.entries()).map(([nombre, lista]) => ({nombre, score: Math.floor(80+Math.random()*15)})).sort((a,b)=>b.score-a.score);
-      arr.forEach((d, idx) => {
-        const row = document.createElement("div"); row.className = "ranking-row"; if(idx>=5) row.classList.add("extra-hidden");
-        const color = getColorForDelegado(d.nombre);
-        row.innerHTML = `<div class="ranking-main"><span style="font-size:.75rem; color:var(--text-muted);">${idx+1}.</span><span class="delegado-color" style="background:${color}"></span><span>${d.nombre}</span></div><div style="flex:1; display:flex; align-items:center; gap:4px; margin-left:6px;"><div class="ranking-bar"><span style="width:${d.score}%; background:${color}"></span></div><span style="font-size:.72rem;">${d.score}</span></div>`;
-        div.appendChild(row);
-      });
-      if(arr.length) { $("#rankingTopDelegado").textContent = arr[0].nombre; $("#rankingMediaProcesos").textContent = "86%"; }
-    }
-    $("#rankingToggle").addEventListener("click", () => {
-       const exp = $("#rankingToggle").textContent === "Ocultar";
-       $$(".ranking-row.extra-hidden").forEach(r => r.style.display = exp ? "none" : "flex");
-       $("#rankingToggle").textContent = exp ? "Mostrar todos" : "Ocultar";
-    });
-
-    $("#searchGlobal").addEventListener("input", e => { filtroTextoActual = e.target.value || ""; renderTablaCentros(); });
-
-    /* EXCEL CARGA MASIVA CENTROS */
-    $("#btnAdjuntarExcel").addEventListener("click", () => $("#inputExcel").click());
-    $("#inputExcel").addEventListener("change", e => {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = evt => {
-        const wb = XLSX.read(new Uint8Array(evt.target.result), { type: 'array' });
-        const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1 });
-        rows.slice(1).forEach(row => {
-          if (!row || row.length < 5) return;
-          centros.push({
-            codigo: (row[0]||"").toString().trim(), propietario: (row[1]||"").toString().trim(),
-            centro: (row[2]||"").toString().trim(), provincia: (row[3]||"").toString().trim(),
-            delegado: (row[4]||"").toString().trim(), aar: false, hit: false
-          });
-        });
-        actualizarListaCentrosDatalist(); renderTablaCentros(); renderDelegados();
-      };
-      reader.readAsArrayBuffer(file);
-    });
-
-    /* NUEVO CENTRO */
-    $("#btnAddCentro").addEventListener("click", () => { $("#nuevoCodigo").value=""; abrirModal("modalCentro"); });
-    $("#guardarCentro").addEventListener("click", () => {
-      centros.push({
-        codigo: $("#nuevoCodigo").value||"NEW", propietario: $("#nuevoPropietario").value||"N/D",
-        centro: $("#nuevoCentro").value||"Centro", provincia: $("#nuevoProvincia").value||"N/D",
-        delegado: $("#nuevoDelegado").value||"N/D", aar: false, hit: false
-      });
-      cerrarModal("modalCentro"); renderTablaCentros(); renderDelegados(); actualizarListaCentrosDatalist();
-    });
-    function actualizarListaCentrosDatalist() {
-      const dl = $("#listaCentros"); dl.innerHTML = "";
-      centros.forEach(c => { const opt = document.createElement("option"); opt.value = c.centro; dl.appendChild(opt); });
-    }
-
-    /* CALENDARIO */
-    const calendarGrid = $("#calendarGrid");
-    let calYear, calMonth; const visitas = []; let visitaActual = null;
-    function initCalendar() { const now = new Date(); calYear = now.getFullYear(); calMonth = now.getMonth(); drawCalendar(); }
-    function drawCalendar() {
-      calendarGrid.innerHTML = "";
-      const first = new Date(calYear, calMonth, 1);
-      const dow = (first.getDay()+6)%7;
-      const last = new Date(calYear, calMonth+1, 0).getDate();
-      $("#calTitulo").textContent = new Intl.DateTimeFormat("es-ES", {month:"long", year:"numeric"}).format(first).replace(/^\w/, c=>c.toUpperCase());
-      for (let i=0;i<42;i++) {
-        const cell = document.createElement("div"); const dayNum = i - dow + 1;
-        if (dayNum < 1 || dayNum > last) { cell.className = "cal-cell empty"; } else {
-          cell.className = "cal-cell";
-          const dIso = formatDateISO(new Date(calYear, calMonth, dayNum));
-          cell.innerHTML = `<div class="cal-day">${dayNum}</div>`;
-          const v = visitas.find(x=>x.fecha===dIso);
-          if (v) cell.innerHTML += `<div class="cal-event"><span class="cal-dot"></span><span class="cal-letter">V</span></div>`;
-          cell.addEventListener("click", ()=> { $("#visitaFecha").value=formatDateHuman(dIso); $("#visitaFecha").dataset.iso=dIso; abrirModal("modalVisita"); });
-        }
-        calendarGrid.appendChild(cell);
-      }
-    }
-    $("#calPrev").addEventListener("click", ()=>{ calMonth--; if(calMonth<0){calMonth=11;calYear--;} drawCalendar(); });
-    $("#calNext").addEventListener("click", ()=>{ calMonth++; if(calMonth>11){calMonth=0;calYear++;} drawCalendar(); });
-    $("#btnGuardarVisita").addEventListener("click", ()=>{
-       const c = $("#visitaCentro").value.trim(); if(!c) return;
-       const obj = centros.find(x=>x.centro===c);
-       visitas.push({ fecha: $("#visitaFecha").dataset.iso, centro:c, delegado: obj?obj.delegado:"N/D", respAudio: $("#visitaResp").value, estado:"pendiente" });
-       cerrarModal("modalVisita"); drawCalendar(); renderVisitas();
-    });
-    function renderVisitas() {
-       const l = $("#visitasList"); l.innerHTML="";
-       visitas.sort((a,b)=>a.fecha.localeCompare(b.fecha));
-       visitas.forEach((v,i) => {
-          l.innerHTML += `<div class="visita-row"><div class="visita-row-line"><span class="visita-row-main">${formatDateHuman(v.fecha)} · ${v.centro}</span><span class="chip-estado ${v.estado}">${v.estado}</span></div><div class="visita-actions"><button class="btn-chip btn-ir-informe" data-centro="${v.centro}" data-idx="${i}">Informe</button></div></div>`;
-       });
-    }
-
-    function abrirModal(id){ document.getElementById(id).style.display = "flex"; }
-    function cerrarModal(id){ document.getElementById(id).style.display = "none"; }
-    $$(".modal-close").forEach(el=> el.addEventListener("click", ()=> cerrarModal(el.dataset.close)));
-    $$(".modal-backdrop").forEach(bg=> bg.addEventListener("click", e=>{ if(e.target===bg) bg.style.display="none"; }));
-
-    /* ========================================================================= */
-    /* LÓGICA DE INFORME Y LECTURA DE EXCEL (CORNER/EXCLUSIVO + NUEVOS CHARTS)   */
-    /* ========================================================================= */
-    
-    let centroChartsCreated = false;
-    let centroCharts = {};
-    let globalCharts = {};
-    let centroActual = null;
-    let itemsFallidosGlobal = []; 
-    let conteoF1 = 0, conteoF0 = 0;
-
-    // --- RECALCULAR DASHBOARD GLOBAL ---
+    // RECALCULO DASHBOARD
     function recalcularKPIsGlobales() {
+       $("#headerVisitsCount").textContent = `Visitas procesadas: ${totalInformesCargados}`;
+       
        const total = centros.length || 1;
        const hitCount = centros.filter(c => c.hit).length;
-       const aarCount = centros.filter(c => c.aar).length;
-       const hitPct = Math.round((hitCount / total) * 100);
-       const aarPct = Math.round((aarCount / total) * 100);
-
+       const hitPct = Math.round((hitCount/total)*100);
        $("#kpiHIT").textContent = hitPct + "%";
-       $("#kpiAar").textContent = aarPct + "%";
-       // Dummy Static
-       $("#kpiProcesos").textContent = "85%"; $("#kpiConvPrueba").textContent = "80%"; $("#kpiConvVenta").textContent = "78%";
        
-       if(globalCharts.radarGeneral) {
-         globalCharts.radarGeneral.data.datasets[0].data = [85, 80, 78, hitPct, 60, aarPct];
-         globalCharts.radarGeneral.update();
-       }
+       if(globalCharts.radarGeneral) globalCharts.radarGeneral.update();
        if(globalCharts.aarHit) {
-         globalCharts.aarHit.data.datasets[0].data = [hitCount, total - hitCount];
-         globalCharts.aarHit.update();
+          globalCharts.aarHit.data.datasets[0].data = [hitCount, total-hitCount];
+          globalCharts.aarHit.update();
        }
+       actualizarGraficoGlobalCriterios();
        renderTablaCentros();
     }
 
-    // --- LECTURA CHECKLIST EXCEL ---
+    // LECTURA EXCEL
     $("#btnAdjuntarChecklist").addEventListener("click", ()=> $("#inputChecklist").click());
     $("#inputChecklist").addEventListener("change", e => {
-      const file = e.target.files[0];
-      if (file) { $("#nombreChecklist").textContent = file.name; leerChecklist(file); }
+       const file = e.target.files[0];
+       if(file) { $("#nombreChecklist").textContent = file.name; leerChecklist(file); }
     });
 
     function leerChecklist(file) {
-      const reader = new FileReader();
-      reader.onload = evt => {
-        try {
-          const workbook = XLSX.read(new Uint8Array(evt.target.result), { type: "array" });
-          const rows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { header:1 });
+       const reader = new FileReader();
+       reader.onload = evt => {
+          const wb = XLSX.read(new Uint8Array(evt.target.result), {type:"array"});
+          const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {header:1});
           
-          // Detectar tipo y seleccionar Radio Button
-          const nameUpper = file.name.toUpperCase();
-          const isExclusivo = nameUpper.includes("EXCLUSIVO");
-          if(isExclusivo) $("#radExclusivo").checked = true; else $("#radCorner").checked = true;
+          const isExclusivo = file.name.toUpperCase().includes("EXCLUSIVO");
+          if(isExclusivo) $("#radExclusivo").checked=true; else $("#radCorner").checked=true;
 
-          // Procesar Filas
+          // Rango dummy aproximado
           let rStart = isExclusivo ? 7 : 6;
-          let rEnd   = isExclusivo ? 101 : 87;
-          
-          itemsFallidosGlobal = [];
-          let c1=0, c0=0;
-          let listaPrint = ""; // HTML para tabla pagina 2
+          let rEnd = isExclusivo ? 101 : 87;
 
+          itemsFallidos = []; conteoOk=0; conteoNo=0;
+          let listaPrint = "";
+
+          // Procesar Criterios Fila a Fila
           for(let r=rStart; r<=rEnd; r++) {
              const row = rows[r] || [];
-             const nombre = row[1]; // Col B
-             const res = row[5];    // Col F
-             if(nombre) {
-                const ok = (res == 1);
-                if(ok) c1++; else { c0++; itemsFallidosGlobal.push(nombre); }
+             const crit = row[1]; // Nombre Criterio (Col B)
+             const val = row[5];  // Valor (Col F) 1 o 0
+             
+             if(crit) {
+                // Actualizar Global Accumulator
+                if(!globalCriteriaStats[crit]) globalCriteriaStats[crit] = { total:0, ok:0 };
+                globalCriteriaStats[crit].total++;
+                if(val == 1) globalCriteriaStats[crit].ok++;
+
+                // Lógica Local (Informe actual)
+                if(val == 1) conteoOk++;
+                else { conteoNo++; itemsFallidos.push(crit); }
                 
-                // Añadir a tabla oculta de impresión
-                listaPrint += `<tr><td>${nombre}</td><td style="color:${ok?'green':'red'}"><b>${ok?'CUMPLE':'NO CUMPLE'}</b></td></tr>`;
+                listaPrint += `<tr><td>${crit}</td><td style="color:${val==1?'green':'red'}">${val==1?'CUMPLE':'NO CUMPLE'}</td></tr>`;
              }
           }
-          // Actualizar Tabla Print
           $("#tbodyPrint").innerHTML = listaPrint;
-
-          conteoF1 = c1; conteoF0 = c0;
           
           // Leer KPIs unitarios (coords dummy)
           let fHit = isExclusivo ? 64 : 62;
           let valHit = (rows[fHit]||[])[5] == 1;
-          const procPct = Math.round((c1 / (c1+c0))*100) || 0;
-          
+          const procPct = Math.round((conteoOk / (conteoOk+conteoNo))*100) || 0;
+
           if(centroActual) centroActual.hit = valHit;
           $("#chkHit").checked = valHit;
-          
-          alert(`Checklist procesado.\nHIT: ${valHit ? "SÍ" : "NO"}`);
+
+          alert(`Checklist procesado. Criterios OK: ${conteoOk}, Fallidos: ${conteoNo}`);
           actualizarVisualesCentro(valHit, $("#chkAar").checked, procPct, 80, 75);
-
-        } catch (err) { console.error(err); alert("Error al leer Excel"); }
-      };
-      reader.readAsArrayBuffer(file);
-    }
-
-    // --- GRÁFICOS CENTRO RENOVADOS ---
-    function crearChartsCentro() {
-      if (centroChartsCreated) return;
-      centroChartsCreated = true;
-      const textColor = getComputedStyle(document.body).getPropertyValue('--text-muted');
-
-      // 1. RADAR CLEAN
-      centroCharts.radar = new Chart(document.getElementById("chartCentroRadar").getContext("2d"), {
-        type: "radar",
-        data: {
-          labels: ['Procesos (%)', 'C. Prueba (%)', 'C. Venta (%)', 'Formaciones (0-10)'],
-          datasets: [{ label: 'Nivel', data: [0,0,0,0], backgroundColor: 'rgba(56, 189, 248, 0.25)', borderColor: '#38bdf8', borderWidth: 3, pointBackgroundColor: '#fff' }]
-        },
-        options: { 
-           scales: { r: { angleLines: { color: 'rgba(255,255,255,0.1)' }, grid: { color: 'rgba(255,255,255,0.1)' }, pointLabels: { color: '#ffffff', font:{size:13, weight:'bold'} }, ticks: { display: false, min:0, max:100 } } }, 
-           plugins: { legend: { display: false } } 
-        }
-      });
-
-      // 2. PALANCAS (SEMÁFORO)
-      centroCharts.barras = new Chart(document.getElementById("chartCentroPalancas").getContext("2d"), {
-        type: 'bar',
-        data: {
-           labels: ['HIT', 'AAR', 'Primeros Auxilios', 'Infinity', 'Seguro', 'Stock'],
-           datasets: [{ data: [1,1,1,1,1,1], backgroundColor: [], borderRadius: 4, barPercentage: 0.6 }]
-        },
-        options: { indexAxis: 'y', scales: { x: { display: false, max: 1 }, y: { grid: {display:false}, ticks: {color: textColor, font:{size:11}} } }, plugins: { legend: { display: false } } }
-      });
-
-      // 3. AREAS MEJORA (TOP F=0)
-      centroCharts.topAreas = new Chart(document.getElementById("chartCentroAreasMejora").getContext("2d"), {
-        type: 'bar',
-        data: { labels: [], datasets: [{ label: 'No Cumple', data: [], backgroundColor: '#ef4444', borderRadius: 4, barPercentage: 0.6 }] },
-        options: { 
-           indexAxis: 'y', maintainAspectRatio: false, 
-           scales: { x: { display: false }, y: { grid: {display:false}, ticks: {color: textColor, callback: function(v){ let l = this.getLabelForValue(v); return l.length>20?l.substr(0,20)+'...':l; }} } }, 
-           plugins: { legend: { display: false } } 
-        }
-      });
-
-      // 4. RESUMEN STACKED
-      centroCharts.procesosResumen = new Chart(document.getElementById("chartCentroProcesosStack").getContext("2d"), {
-        type: 'bar',
-        data: {
-           labels: ['Global'],
-           datasets: [
-              { label: 'Cumple', data: [0], backgroundColor: '#22c55e', stack:'st1', borderRadius:{topLeft:4, bottomLeft:4} },
-              { label: 'No Cumple', data: [0], backgroundColor: '#ef4444', stack:'st1', borderRadius:{topRight:4, bottomRight:4} }
-           ]
-        },
-        options: { 
-           indexAxis: 'y', maintainAspectRatio: false, 
-           scales: { x: { display:false, stacked:true, max:100 }, y: { display:false, stacked:true } }, 
-           plugins: { 
-              legend: { position: 'bottom', labels: {color: textColor} },
-              datalabels: { color: 'white', font: {weight:'bold'}, formatter: (v)=> v>5 ? v+'%' : '' }
-           } 
-        }
-      });
-    }
-
-    function updateChartsTheme() {
-       if(centroCharts.radar) {
-          const isLight = document.body.classList.contains('light');
-          centroCharts.radar.options.scales.r.pointLabels.color = isLight ? '#333' : '#fff';
-          centroCharts.radar.update();
        }
+       reader.readAsArrayBuffer(file);
     }
 
-    function actualizarVisualesCentro(hitBool, aarBool, procVal=85, pruebaVal=80, ventaVal=75) {
+    // CHARTS CENTRO RENOVADOS
+    function crearChartsCentro() {
+       centroChartsCreated = true;
+       const textColor = getComputedStyle(document.body).getPropertyValue('--text-muted');
+
+       // 1. HORIZONTAL BAR (Reemplaza Radar)
+       centroCharts.kpiBar = new Chart(document.getElementById("chartCentroKPIsBar").getContext("2d"), {
+          type: 'bar',
+          data: {
+             labels: ['Procesos', 'C. Prueba', 'C. Venta', 'Formación (x10)'],
+             datasets: [{ 
+                label: '%', 
+                data: [0,0,0,0], 
+                backgroundColor: ['#38bdf8', '#818cf8', '#34d399', '#fbbf24'],
+                borderRadius: 4
+             }]
+          },
+          options: {
+             indexAxis: 'y',
+             responsive: true,
+             maintainAspectRatio: false,
+             scales: { x: { max: 100, display:false }, y: { ticks: {color: textColor, font:{size:11, weight:'bold'}} } },
+             plugins: { legend: {display:false}, datalabels: { color:'#fff', anchor:'end', align:'start', formatter: Math.round } }
+          }
+       });
+
+       // 2. PALANCAS
+       centroCharts.palancas = new Chart(document.getElementById("chartCentroPalancas").getContext("2d"), {
+          type: 'bar',
+          data: { labels: ['HIT','AAR','Primeros Aux','Infinity','Seguro','Stock'], datasets: [{ data:[1,1,1,1,1,1], backgroundColor:[], borderRadius:4 }] },
+          options: { indexAxis:'y', scales:{x:{display:false}, y:{grid:{display:false}, ticks:{color:textColor}}}, plugins:{legend:{display:false}} }
+       });
+
+       // 3. COMBO CHART (Lista Mejora + Curva Procesos)
+       // NOTA: Chart.js no soporta HTML nativo dentro del canvas. Usamos el panel "panel-combined"
+       // Aquí renderizamos solo la parte gráfica (Curva + Barras de Fallo)
+       centroCharts.combo = new Chart(document.getElementById("chartCentroCombo").getContext("2d"), {
+          type: 'bar',
+          data: {
+             labels: [], // Se llenarán con los nombres de items fallidos
+             datasets: [
+                { type: 'line', label: 'Tendencia Procesos', data: [], borderColor: '#38bdf8', tension: 0.4, yAxisID: 'y1' },
+                { type: 'bar', label: 'Item Fallido (1)', data: [], backgroundColor: '#ef4444', borderRadius: 4, yAxisID: 'y' }
+             ]
+          },
+          options: {
+             maintainAspectRatio: false,
+             scales: { 
+                y: { display:false }, 
+                y1: { display:false, min:0, max:100 },
+                x: { display:false } // Ocultamos etiquetas x para limpieza, ya están en la lista izquierda
+             },
+             plugins: { legend: {display:false} }
+          }
+       });
+
+       // 4. PROCESOS STACKED
+       centroCharts.stack = new Chart(document.getElementById("chartCentroProcesosStack").getContext("2d"), {
+          type: 'bar',
+          data: { labels: ['Estado'], datasets: [
+             { label:'Cumple', data:[0], backgroundColor:'#22c55e', borderRadius:4 },
+             { label:'No Cumple', data:[0], backgroundColor:'#ef4444', borderRadius:4 }
+          ]},
+          options: { indexAxis:'y', scales:{x:{display:false, stacked:true}, y:{display:false, stacked:true}}, plugins:{legend:{position:'bottom', labels:{color:textColor}}} }
+       });
+    }
+
+    function actualizarVisualesCentro(hit, aar, proc, pru, ven) {
        if(!centroChartsCreated) crearChartsCentro();
        
-       // UI Textos
-       const kpiHit = $("#kpiCentroHit"); kpiHit.textContent = hitBool ? "Sí" : "No"; kpiHit.style.color = hitBool ? "var(--accent-green)" : "var(--accent-red)";
-       $("#kpiCentroProcesos").textContent = procVal + "%"; $("#kpiCentroPrueba").textContent = pruebaVal + "%"; $("#kpiCentroVenta").textContent = ventaVal + "%";
-
-       // Manual Inputs
+       // KPIs Texto
+       $("#kpiCentroProcesos").textContent = proc + "%"; 
+       $("#kpiCentroHit").textContent = hit?"Sí":"No"; $("#kpiCentroHit").style.color = hit?"#22c55e":"#ef4444";
+       
+       // 1. KPI Bar
        const formVal = $("#inpFormaciones").value || 5;
-       const p1 = $("#chk1os").checked; const pInf = $("#chkInfinity").checked; const pSeg = $("#chkSeguro").checked; const pStk = $("#chkStock").checked;
-
-       // 1. Radar
-       centroCharts.radar.data.datasets[0].data = [procVal, pruebaVal, ventaVal, formVal * 10];
-       centroCharts.radar.update();
+       centroCharts.kpiBar.data.datasets[0].data = [proc, pru, ven, formVal*10];
+       centroCharts.kpiBar.update();
 
        // 2. Palancas
-       const estados = [hitBool, aarBool, p1, pInf, pSeg, pStk];
-       centroCharts.barras.data.datasets[0].backgroundColor = estados.map(s => s ? '#22c55e' : '#ef4444');
-       centroCharts.barras.update();
+       const sts = [hit, aar, $("#chk1os").checked, $("#chkInfinity").checked, $("#chkSeguro").checked, $("#chkStock").checked];
+       centroCharts.palancas.data.datasets[0].backgroundColor = sts.map(s=>s?'#22c55e':'#ef4444');
+       centroCharts.palancas.update();
 
-       // 3. Areas Mejora
-       let lbls = itemsFallidosGlobal.slice(0, 10);
-       let dts = itemsFallidosGlobal.map(()=>1).slice(0,10);
-       if(lbls.length===0) { lbls=["Sin incidencias"]; dts=[0]; }
-       centroCharts.topAreas.data.labels = lbls;
-       centroCharts.topAreas.data.datasets[0].data = dts;
-       centroCharts.topAreas.update();
+       // 3. Combo (Lista + Chart)
+       // Llenar lista texto izquierda
+       const ul = document.getElementById("listaMejorasTexto");
+       ul.innerHTML = "";
+       const topFallos = itemsFallidos.slice(0, 8); // Top 8
+       if(topFallos.length === 0) ul.innerHTML = "<li style='color:#22c55e'>¡Todo Correcto!</li>";
+       else topFallos.forEach(f => ul.innerHTML += `<li>${f}</li>`);
+
+       // Llenar gráfico derecha
+       // Simulamos una curva que sube hacia el objetivo
+       const trendData = topFallos.map((_, i) => proc - (topFallos.length - i)); 
+       centroCharts.combo.data.labels = topFallos;
+       centroCharts.combo.data.datasets[0].data = trendData; // Linea
+       centroCharts.combo.data.datasets[1].data = topFallos.map(()=>1); // Barras
+       centroCharts.combo.update();
 
        // 4. Stack
-       const total = conteoF1 + conteoF0;
-       const pOk = total ? Math.round((conteoF1/total)*100) : 0;
-       centroCharts.procesosResumen.data.datasets[0].data = [pOk];
-       centroCharts.procesosResumen.data.datasets[1].data = [100 - pOk];
-       centroCharts.procesosResumen.update();
+       centroCharts.stack.data.datasets[0].data = [conteoOk];
+       centroCharts.stack.data.datasets[1].data = [conteoNo];
+       centroCharts.stack.update();
     }
+
+    // LISTENERS INPUTS
+    $("#inpFormaciones").addEventListener("input", ()=> actualizarVisualesCentro($("#chkHit").checked, $("#chkAar").checked, 85, 80, 75));
     
-    $("#inpFormaciones").addEventListener("input", () => actualizarVisualesCentro($("#chkHit").checked, $("#chkAar").checked));
-    $$(".checklist-visita input[type='checkbox']").forEach(ch => {
-       ch.addEventListener("change", () => actualizarVisualesCentro($("#chkHit").checked, $("#chkAar").checked));
-    });
+    // NAVEGACION INFORME
+    function irAInforme(nombre, iso, resp) {
+       centroActual = centros.find(c=>c.centro===nombre);
+       if(!centroActual) return;
+       
+       $$(".nav-item").forEach(n=>n.classList.remove("active")); $(`.nav-item[data-page='informe']`).classList.add("active");
+       $$(".page").forEach(p=>p.classList.remove("active")); $(`.page[data-page='informe']`).classList.add("active");
 
-    // NAVEGACIÓN A INFORME
-    function irAInforme(centroName, isoDate) {
-       const c = centros.find(x => x.centro === centroName);
-       if (!c) return;
-       centroActual = c;
+       $("#infCentro").value = centroActual.centro; $("#infProvincia").value = centroActual.provincia; $("#infDelegado").value = centroActual.delegado;
+       $("#infRespAudio").value = resp || "Ariannys Rojas";
+       $("#infFecha").value = iso;
        
-       $$(".nav-item").forEach(i => i.classList.toggle("active", i.dataset.page === "informe"));
-       pages.forEach(p => p.classList.toggle("active", p.dataset.page === "informe"));
+       if(centroActual.centro.includes("Exclusivo")) $("#radExclusivo").checked=true; else $("#radCorner").checked=true;
        
-       $("#infCentro").value = c.centro; $("#infProvincia").value = c.provincia; $("#infDelegado").value = c.delegado;
-       $("#infFecha").value = isoDate ? formatDateHuman(isoDate) : formatDateHuman(new Date().toISOString().slice(0,10));
-       
-       // Radio
-       const tipo = tipoCentro(c.centro);
-       if(tipo === "Exclusivo") $("#radExclusivo").checked = true; else $("#radCorner").checked = true;
-
-       // Estado inicial
-       $("#chkHit").checked = c.hit; $("#chkAar").checked = c.aar;
-       
-       itemsFallidosGlobal = []; conteoF1=0; conteoF0=0; $("#tbodyPrint").innerHTML = "";
-       actualizarVisualesCentro(c.hit, c.aar);
+       // Reset datos visuales
+       itemsFallidos = []; conteoOk=0; conteoNo=0;
+       actualizarVisualesCentro(centroActual.hit, centroActual.aar, 0, 0, 0);
     }
 
-    document.addEventListener("click", e => {
-       if (e.target.matches(".btn-ir-informe")) {
-          const idx = parseInt(e.target.dataset.idx); visitaActual=visitas[idx];
-          if(visitaActual) { visitaActual.estado="enproceso"; renderVisitas(); irAInforme(visitaActual.centro, visitaActual.fecha); }
-       }
-       if (e.target.matches(".btn-informe-centro")) { irAInforme(e.target.dataset.centro, formatDateISO(new Date())); }
-    });
-
-    $("#btnGuardarInforme").addEventListener("click", () => {
+    $("#btnGuardarInforme").addEventListener("click", ()=> {
        if(centroActual) {
           centroActual.hit = $("#chkHit").checked; centroActual.aar = $("#chkAar").checked;
-          recalcularKPIsGlobales(); informesPorCentro[centroActual.centro] = (informesPorCentro[centroActual.centro]||0)+1;
-          renderTablaCentros();
+          totalInformesCargados++;
+          recalcularKPIsGlobales();
        }
-       alert("Informe guardado.");
+       alert("Informe guardado. Globales actualizados.");
     });
 
-    // GLOBAL CHARTS INIT
+    // INICIALIZACION
     function initGlobalCharts() {
+       // Radar Global (Si se mantiene por petición, aunque el del centro se quitó)
        const ctxR = document.getElementById("chartRadarGeneral").getContext("2d");
        globalCharts.radarGeneral = new Chart(ctxR, {
-          type:"radar",
-          data:{ labels:["Procesos","Prueba","Venta","HIT (%)","Form","AAR (%)"], datasets:[{ label:"Promedio %", data:[0,0,0,0,0,0], backgroundColor:"rgba(96,165,250,0.2)", borderColor:"#60a5fa" }] },
-          options:{ scales:{r:{min:0, max:100, ticks:{display:false}}}, plugins:{legend:{display:false}} }
+          type: 'radar',
+          data: { labels: ['Procesos','Prueba','Venta','HIT','Form','AAR'], datasets: [{ label: 'Global %', data: [85,80,78,0,60,0], backgroundColor: 'rgba(56,189,248,0.2)', borderColor: '#38bdf8' }] },
+          options: { scales: { r: { min:0, max:100, ticks:{display:false} } }, plugins:{legend:{display:false}} }
        });
-       const aarHitCtx = document.getElementById("chartAarHitDonut").getContext("2d");
-       globalCharts.aarHit = new Chart(aarHitCtx, {
-          type:"doughnut", data:{ labels:["Sí","No"], datasets:[{ data:[1,1], backgroundColor:["#22c55e","#ef4444"] }] }, options:{ cutout:"60%", plugins:{legend:{position:"bottom"}} }
+       
+       const ctxDonut = document.getElementById("chartAarHitDonut").getContext("2d");
+       globalCharts.aarHit = new Chart(ctxDonut, {
+          type:'doughnut', data:{ labels:['Sí','No'], datasets:[{ data:[1,1], backgroundColor:['#22c55e','#ef4444'] }] }, options:{cutout:'60%', plugins:{legend:{position:'bottom'}}}
        });
-       // Dummys
+       // Dummys Mes
        new Chart(document.getElementById("chartProcesosMes"), { type:"line", data:{labels:["E","F","M"],datasets:[{data:[80,82,85],borderColor:"#3b82f6"}]}, options:{maintainAspectRatio:false} });
        new Chart(document.getElementById("chartAreasMes"), { type:"bar", data:{labels:["E","F"],datasets:[{data:[5,3],backgroundColor:"#ef4444"}]}, options:{maintainAspectRatio:false} });
        new Chart(document.getElementById("chartPrimerosMes"), { type:"bar", data:{labels:["E","F"],datasets:[{data:[40,60],backgroundColor:"#22c55e"}]}, options:{maintainAspectRatio:false} });
        new Chart(document.getElementById("chartTopAreas"), { type:"bar", data:{labels:["Stock","Limpieza"],datasets:[{data:[10,5],backgroundColor:"#3b82f6"}]}, options:{indexAxis:"y",maintainAspectRatio:false} });
-       
-       // Criterios Globales (Empty)
-       const ctxC = document.getElementById("chartCriteriosDetalle").getContext("2d");
-       globalCharts.criteriosDetalle = new Chart(ctxC, { type: "bar", data: { labels: ["Sin datos"], datasets: [{ label: "%", data: [0], backgroundColor: "#38bdf8" }] }, options: { indexAxis: "y", maintainAspectRatio: false, plugins: { legend: { display:false } } } });
     }
 
-    /* CARGA DEMO */
-    function cargarCentrosDemo() {
-      const demo = [
-        { codigo:"4ABB", propietario:"MAZA Oriol", centro:"PAMPLONA C. Exclusivo", provincia:"NAVARRA", delegado:"Sonia Godino", hit:true, aar:false },
-        { codigo:"4AFH", propietario:"MAZA Oriol", centro:"PAMPLONA Calle Sancho el Mayor", provincia:"NAVARRA", delegado:"Sonia Godino", hit:false, aar:true },
-        { codigo:"4AWQ", propietario:"MAZA Oriol", centro:"PAMPLONA Carlos III", provincia:"NAVARRA", delegado:"Sonia Godino", hit:true, aar:true },
-        { codigo:"4MRM", propietario:"AAO", centro:"REINA DE MERCEDES", provincia:"Madrid", delegado:"Sergio Perán", hit:false, aar:false },
-        { codigo:"4PEC", propietario:"AAO", centro:"SANTANDER CC PEÑACASTILLO", provincia:"Santander", delegado:"Sergio Perán", hit:true, aar:false },
-        { codigo:"4AXF", propietario:"URRUTIA Esteban", centro:"SANTIAGO DE COMPOSTELA RUA DA ROSA", provincia:"A Coruña", delegado:"Daniel Chazo", hit:true, aar:true },
-        { codigo:"4TOL", propietario:"AAO", centro:"TORRELAVEGA CARREFOUR CC", provincia:"Santander", delegado:"Sergio Perán", hit:false, aar:false },
-        { codigo:"4ZDE", propietario:"AAO", centro:"ZARAGOZA CALLE DELICIAS", provincia:"ZARAGOZA", delegado:"ENERITZ ARANGUREN", hit:true, aar:false },
-        { codigo:"4AKI", propietario:"PIEDRAFITA Rocio", centro:"CC LOS VALLES", provincia:"MADRID", delegado:"Blanca Fdez. de la Pradilla", hit:false, aar:false },
-        { codigo:"4MLG", propietario:"AAO", centro:"FUENLABRADA Calle Leganes", provincia:"MADRID", delegado:"Marisa Carmona", hit:true, aar:true }
-      ];
-      demo.forEach(c => centros.push(c));
-      actualizarListaCentrosDatalist(); renderTablaCentros(); renderDelegados();
+    function renderTablaCentros() {
+       const b = $("#tablaCentrosBody"); b.innerHTML="";
+       centros.forEach(c => {
+          b.innerHTML += `<tr><td>${c.codigo}</td><td>Owner</td><td>${c.centro}</td><td>${c.provincia}</td><td>${c.delegado}</td><td><span class="tag ${c.centro.includes('Exclusivo')?'exclusivo':'corner'}">Tipo</span></td><td><button class="btn-link" onclick="irAInforme('${c.centro}', '${new Date().toISOString().split('T')[0]}')">Informe</button></td><td>${c.aar?'Sí':'No'}</td></tr>`;
+       });
     }
+
+    function renderDelegados() {
+       $("#delegadosList").innerHTML = `<div class="delegado-card"><div class="delegado-header"><span>Delegado 1</span><span class="badge-small">2 centros</span></div></div>`;
+    }
+
+    // EVENTOS AGENDA
+    $("#btnGuardarVisita").addEventListener("click", ()=> {
+       const f = $("#visitaFecha").value; const r = $("#visitaResp").value; const c = $("#visitaCentro").value;
+       const vList = $("#visitasList");
+       vList.innerHTML += `<div class="visita-row"><div class="visita-row-line"><span>${f} · ${c}</span><span class="chip-estado pendiente">Pendiente</span></div><div class="visita-row-secondary">Resp: ${r}</div><div class="visita-actions"><button class="btn-chip" onclick="irAInforme('${c}', '${f}', '${r}')">Informe</button></div></div>`;
+       cerrarModal("modalVisita");
+    });
 
     window.addEventListener("load", () => {
-      cargarCentrosDemo(); initCalendar(); initGlobalCharts(); recalcularKPIsGlobales();
+       renderTablaCentros(); renderDelegados(); initGlobalCharts();
+       // Chart vacío criterios global
+       const ctx = document.getElementById("chartCriteriosDetalle").getContext("2d");
+       globalCharts.criteriosDetalle = new Chart(ctx, { type: "bar", data: { labels: ["Cargando data..."], datasets: [{ label: "%", data: [0] }] }, options: { indexAxis: "y", maintainAspectRatio: false } });
     });
   </script>
 </body>
