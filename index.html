@@ -1,27 +1,30 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Control Center Audio</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  <!-- XLSX para leer Excels -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
   <style>
     :root {
+      /* PALETA DE COLORES */
       --bg-main: radial-gradient(circle at top left, #111827, #020617 55%);
       --bg-card: #020617;
       --bg-card-soft: #0b1120;
       --text-main: #f9fafb;
       --text-muted: #9ca3af;
       --border-soft: #1f2937;
+      
+      /* ACENTOS */
       --accent-red: #ff2440;
       --accent-blue: #38bdf8;
       --accent-green: #22c55e;
       --accent-orange: #f97316;
+      
+      /* ESTADOS */
       --chip-pendiente: #facc15;
       --chip-enproceso: #4ade80;
       --chip-finalizada: #22c55e;
@@ -36,1134 +39,151 @@
       --border-soft: #e5e7eb;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+    html, body { width: 100%; min-height: 100vh; overflow-x: hidden; }
+    body { background: var(--bg-main); color: var(--text-main); display: flex; }
 
-    html, body {
-      width: 100%;
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-
-    body {
-      background: var(--bg-main);
-      color: var(--text-main);
-      display: flex;
-      overflow-x: hidden;
-    }
-
-    /* SIDEBAR */
+    /* --- SIDEBAR --- */
     .sidebar {
-      width: 250px;
-      background: #020617;
-      border-right: 1px solid #020617;
-      padding: 18px 18px 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 24px;
-      color: #e5e7eb;
+      width: 250px; background: #020617; border-right: 1px solid #020617;
+      padding: 18px 18px 24px; display: flex; flex-direction: column; gap: 24px; color: #e5e7eb;
     }
-
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .logo-badge {
-      width: 34px;
-      height: 34px;
-      border-radius: 999px;
-      background: radial-gradient(circle at 30% 20%, #fee2e2, var(--accent-red));
-    }
-
-    .logo-text {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .logo-title {
-      font-weight: 700;
-      font-size: 1.05rem;
-    }
-
-    .logo-subtitle {
-      font-size: .7rem;
-      color: #9ca3af;
-    }
-
-    .section-title {
-      font-size: .75rem;
-      text-transform: uppercase;
-      color: #6b7280;
-      letter-spacing: .12em;
-      margin-bottom: 8px;
-    }
-
-    .nav-list {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
+    .logo { display: flex; align-items: center; gap: 10px; }
+    .logo-badge { width: 34px; height: 34px; border-radius: 999px; background: radial-gradient(circle at 30% 20%, #fee2e2, var(--accent-red)); }
+    .logo-title { font-weight: 700; font-size: 1.05rem; }
+    .logo-subtitle { font-size: .7rem; color: #9ca3af; }
+    .section-title { font-size: .75rem; text-transform: uppercase; color: #6b7280; letter-spacing: .12em; margin-bottom: 8px; }
+    
+    .nav-list { display: flex; flex-direction: column; gap: 4px; }
     .nav-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 8px 10px;
-      border-radius: 999px;
-      font-size: .88rem;
-      color: #9ca3af;
-      cursor: pointer;
-      transition: all .18s ease;
+      display: flex; align-items: center; gap: 10px; padding: 8px 10px;
+      border-radius: 999px; font-size: .88rem; color: #9ca3af; cursor: pointer; transition: all .18s ease;
     }
-
     .nav-item span.icon {
-      width: 22px;
-      height: 22px;
-      border-radius: 999px;
-      background: #020617;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: .75rem;
+      width: 22px; height: 22px; border-radius: 999px; background: #020617;
+      display: inline-flex; align-items: center; justify-content: center; font-size: .75rem;
     }
+    .nav-item.active { background: linear-gradient(90deg, #ff2440, #fb7185); color: #111827; font-weight: 600; }
+    .nav-item:hover:not(.active) { background: rgba(31,41,55,0.7); color: #e5e7eb; }
+    body.light .nav-item:hover:not(.active) { background: rgba(15,23,42,0.2); }
+    .sidebar-footer { margin-top: auto; font-size: .78rem; color: #9ca3af; }
 
-    .nav-item.active {
-      background: linear-gradient(90deg, #ff2440, #fb7185);
-      color: #111827;
-      font-weight: 600;
-    }
-
-    .nav-item.active span.icon {
-      background: rgba(15,23,42,.2);
-    }
-
-    .nav-item:hover:not(.active) {
-      background: rgba(31,41,55,0.7);
-      color: #e5e7eb;
-    }
-
-    body.light .nav-item:hover:not(.active) {
-      background: rgba(15,23,42,0.2);
-    }
-
-    .sidebar-footer {
-      margin-top: auto;
-      font-size: .78rem;
-      color: #9ca3af;
-    }
-
-    /* MAIN LAYOUT */
-    .main {
-      flex: 1;
-      padding: 10px 18px 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      max-width: 1600px;
-      margin: 0 auto;
-      box-sizing: border-box;
-    }
-
-    .topbar {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 4px;
-      flex-wrap: wrap;
-    }
-
-    .topbar-search {
-      flex: 1 1 260px;
-      position: relative;
-      min-width: 220px;
-    }
-
+    /* --- MAIN LAYOUT --- */
+    .main { flex: 1; padding: 10px 18px 12px; display: flex; flex-direction: column; gap: 8px; max-width: 1600px; margin: 0 auto; }
+    
+    .topbar { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; flex-wrap: wrap; }
+    .topbar-search { flex: 1 1 260px; position: relative; min-width: 220px; }
     .topbar-search input {
-      width: 100%;
-      border-radius: 999px;
-      padding: 8px 14px 8px 30px;
-      border: 1px solid var(--border-soft);
-      background: var(--bg-card);
-      color: var(--text-main);
-      font-size: .86rem;
-      outline: none;
+      width: 100%; border-radius: 999px; padding: 8px 14px 8px 30px;
+      border: 1px solid var(--border-soft); background: var(--bg-card); color: var(--text-main); font-size: .86rem; outline: none;
     }
-
-    .topbar-search span {
-      position: absolute;
-      left: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: .8rem;
-      color: var(--text-muted);
-    }
-
-    .topbar-buttons {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-    }
-
+    .topbar-search span { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: .8rem; color: var(--text-muted); }
+    
+    .topbar-buttons { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
     .btn {
-      border-radius: 999px;
-      padding: 6px 12px;
-      border: 1px solid var(--border-soft);
-      font-size: .8rem;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: var(--bg-card);
-      color: var(--text-main);
-      white-space: nowrap;
-      box-shadow: none;
+      border-radius: 999px; padding: 6px 12px; border: 1px solid var(--border-soft); font-size: .8rem;
+      cursor: pointer; display: inline-flex; align-items: center; gap: 6px; background: var(--bg-card); color: var(--text-main);
     }
-
-    .btn-cta {
-      background: linear-gradient(90deg, #ff2440, #fb7185);
-      color: #111827;
-      font-weight: 600;
-      border-color: transparent;
-    }
-
-    .btn span.icon {
-      font-size: .85rem;
-    }
-
-    #themeToggle {
-      min-width: 120px;
-      justify-content: center;
-    }
-
-    #btnGuardarVista {
-      background: linear-gradient(90deg, #3b82f6, #22c55e);
-      color: #0b1120;
-      border-color: transparent;
-      font-weight: 600;
-    }
-
-    #btnExportarHTML {
-      background: linear-gradient(90deg, #8b5cf6, #ec4899);
-      color: #0b1120;
-      border-color: transparent;
-      font-weight: 600;
-    }
-
-    #btnImprimir {
-      background: linear-gradient(90deg, #14b8a6, #0ea5e9);
-      color: #0b1120;
-      border-color: transparent;
-      font-weight: 600;
-    }
-
-    body.light #btnGuardarVista,
-    body.light #btnExportarHTML,
-    body.light #btnImprimir {
-      color:#111827;
-    }
-
-    /* PAGES */
-    .pages {
-      flex: 1;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      max-width: 100%;
-    }
-
-    .page {
-      flex: 1;
-      display: none;
-      overflow-y: auto;
-      overflow-x: hidden;
-      max-width: 100%;
-    }
-
-    .page.active {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
+    .btn-cta { background: linear-gradient(90deg, #ff2440, #fb7185); color: #111827; font-weight: 600; border-color: transparent; }
+    
+    /* --- PAGES & CARDS --- */
+    .pages { flex: 1; overflow: hidden; display: flex; flex-direction: column; gap: 8px; }
+    .page { flex: 1; display: none; overflow-y: auto; overflow-x: hidden; }
+    .page.active { display: flex; flex-direction: column; gap: 8px; }
 
     .card {
-      background: var(--bg-card);
-      border-radius: 14px;
-      padding: 10px;
-      border: 1px solid var(--border-soft);
-      display: flex;
-      flex-direction: column;
-      min-width: 0;
-    }
-
-    .card-title {
-      font-size: .9rem;
-      font-weight: 600;
-    }
-
-    .card-sub {
-      font-size: .72rem;
-      color: var(--text-muted);
-      margin-top: 2px;
-    }
-
-    .card-header-row {
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      gap: 6px;
-      margin-bottom: 4px;
-    }
-
-    .badge-small {
-      font-size: .7rem;
-      padding: 2px 6px;
-      border-radius: 999px;
-      background: #111827;
-      color: #9ca3af;
-      border: 1px solid var(--border-soft);
-    }
-
-    body.light .badge-small {
-      background: #e5e7eb;
-    }
-
-    .chip-estado {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 2px 8px;
-      border-radius: 999px;
-      font-size: .7rem;
-      font-weight: 500;
-      color: #111827;
-      background: #9ca3af;
-    }
-
-    .chip-estado.pendiente    { background: var(--chip-pendiente); }
-    .chip-estado.enproceso    { background: var(--chip-enproceso); }
-    .chip-estado.finalizada   { background: var(--chip-finalizada); }
-
-    .btn-chip {
-      border-radius: 999px;
-      border: 1px solid var(--border-soft);
-      background: transparent;
-      font-size: .72rem;
-      padding: 2px 6px;
-      cursor: pointer;
-      color: var(--accent-blue);
-    }
-
-    /* DASHBOARD PAGE */
-    .dashboard-grid {
-      display: grid;
-      grid-template-columns: minmax(0, 1.7fr) minmax(0, 1.3fr);
-      gap: 10px;
-      min-height: 0;
-      align-items: flex-start;
-      width: 100%;
-      box-sizing: border-box;
-    }
-
-    .dashboard-right-column {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      min-height: 0;
-    }
-
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0,1fr));
-      gap: 6px;
-      margin-bottom: 6px;
-    }
-
-    .kpi-card {
-      background: var(--bg-card-soft);
-      border-radius: 10px;
-      padding: 6px 8px;
-      border: 1px solid var(--border-soft);
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    .kpi-label {
-      font-size: .72rem;
-      color: var(--text-muted);
-    }
-
-    .kpi-value {
-      font-size: .98rem;
-      font-weight: 600;
-    }
-
-    .kpi-caption {
-      font-size: .7rem;
-      color: var(--text-muted);
-    }
-
-    .dashboard-charts {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0,1fr));
-      gap: 8px;
-      min-height: 0;
-    }
-
-    .chart-container {
-      position: relative;
-      width: 100%;
-      min-height: 160px;
-      max-height: 240px;
-    }
-
-    .chart-container.centered {
-      display:flex;
-      align-items:center;
-      justify-content:center;
-    }
-
-    .chart-container canvas {
-      position: relative;
-      inset: auto !important;
-      width: 100% !important;
-      height: 100% !important;
-      display: block;
-      box-sizing: border-box;
-    }
-
-    /* contenedor específico para los 80 criterios */
-    .criterios-container {
-      min-height: 260px;
-      max-height: 320px;
-      overflow-y: auto; /* scroll vertical para ver todos los criterios */
-    }
-
-    .ranking-list {
-      font-size: .78rem;
-      margin-top: 4px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .ranking-row {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      justify-content: space-between;
-      padding:3px 0;
-      border-bottom: 1px dashed rgba(148,163,184,0.3);
-    }
-
-    .ranking-main {
-      display:flex;
-      align-items:center;
-      gap:6px;
-    }
-
-    .ranking-bar {
-      height: 5px;
-      border-radius:999px;
-      background: var(--bg-card-soft);
-      flex: 1;
-      overflow:hidden;
-    }
-
-    .ranking-bar span {
-      display:block;
-      height:100%;
-      background: linear-gradient(90deg,#22c55e,#38bdf8);
-    }
-
-    .ranking-row.extra-hidden {
-      display:none;
-    }
-
-    .ranking-toggle {
-      margin-top:6px;
-      font-size:.76rem;
-      color:var(--accent-blue);
-      cursor:pointer;
-      text-align:right;
-    }
-
-    .ranking-summary {
-      margin-top: 8px;
-      padding-top: 6px;
-      border-top: 1px dashed rgba(148,163,184,0.4);
-      font-size: .76rem;
-      color: var(--text-muted);
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    .ranking-summary-item span {
-      font-weight: 600;
-      color: var(--text-main);
-    }
-
-    /* CENTROS PAGE Y DEMÁS (igual que antes) */
-    .centros-top {
-      display: grid;
-      grid-template-columns: 1.2fr 1.2fr 1fr;
-      gap: 10px;
-      min-height: 210px;
-    }
-
-    .delegados-list {
-      margin-top: 6px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      max-height: 160px;
-      overflow: auto;
-    }
-
-    .delegado-card {
-      background: var(--bg-card-soft);
-      border-radius: 10px;
-      padding: 4px 6px;
-      border: 1px solid var(--border-soft);
-      cursor: pointer;
-    }
-
-    .delegado-header {
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:6px;
-    }
-
-    .delegado-main {
-      display:flex;
-      align-items:center;
-      gap:6px;
-      font-size:.8rem;
-    }
-
-    .delegado-color {
-      width:8px;
-      height:8px;
-      border-radius:999px;
-    }
-
-    .delegado-count {
-      font-size:.72rem;
-      color:var(--text-muted);
-    }
-
-    .delegado-bar {
-      margin-top:3px;
-      height:4px;
-      border-radius:999px;
-      background:var(--border-soft);
-      overflow:hidden;
-    }
-
-    .delegado-bar span {
-      display:block;
-      height:100%;
-      width:100%;
-      background:linear-gradient(90deg,#38bdf8,#fb7185);
-    }
-
-    .delegado-card.active {
-      outline:1px solid var(--accent-blue);
-    }
-
-    .calendar-wrapper {
-      display:flex;
-      flex-direction:column;
-      gap:4px;
-      height:100%;
-    }
-
-    .calendar-header {
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      font-size:.85rem;
-      font-weight:700;
-    }
-
-    .calendar-header button {
-      border-radius:999px;
-      width:24px;
-      height:24px;
-      border:1px solid var(--border-soft);
-      background:transparent;
-      color:var(--text-main);
-      cursor:pointer;
-      font-size:.8rem;
-    }
-
-    .calendar-weekdays {
-      display:grid;
-      grid-template-columns: repeat(7, minmax(0,1fr));
-      font-size:.7rem;
-      margin-top:4px;
-      color:var(--text-muted);
-      text-align:center;
-    }
-
-    .calendar-grid {
-      margin-top:4px;
-      display:grid;
-      grid-template-columns: repeat(7, minmax(0,1fr));
-      grid-template-rows: repeat(6, 42px);
-      gap:4px;
-      flex:1;
-    }
-
-    .cal-cell {
-      border-radius:10px;
-      border:1px solid var(--border-soft);
-      background:var(--bg-card-soft);
-      font-size:.8rem;
-      display:flex;
-      flex-direction:column;
-      align-items:flex-start;
-      justify-content:flex-start;
-      padding:3px 4px;
-      cursor:pointer;
-      position:relative;
-    }
-
-    .cal-cell.empty {
-      background:transparent;
-      border-style:dashed;
-      cursor:default;
-    }
-
-    .cal-day {
-      font-size:.78rem;
-    }
-
-    .cal-event {
-      position:absolute;
-      bottom:4px;
-      left:4px;
-      display:flex;
-      align-items:center;
-      gap:3px;
-      font-size:.7rem;
-    }
-
-    .cal-dot {
-      width:6px;
-      height:6px;
-      border-radius:999px;
-      background:#facc15;
-    }
-
-    .cal-letter {
-      font-weight:600;
-    }
-
-    .visitas-list {
-      flex:1;
-      overflow:auto;
-      font-size:.78rem;
-      display:flex;
-      flex-direction:column;
-      gap:4px;
-    }
-
-    .visita-row {
-      border-radius:10px;
-      border:1px solid var(--border-soft);
-      padding:4px 6px;
-      background:var(--bg-card-soft);
-      display:flex;
-      flex-direction:column;
-      gap:2px;
-    }
-
-    .visita-row-line {
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:4px;
-    }
-
-    .visita-row-main {
-      font-weight:500;
-    }
-
-    .visita-row-secondary {
-      color:var(--text-muted);
-      font-size:.72rem;
-    }
-
-    .visita-actions {
-      margin-top:2px;
-      display:flex;
-      justify-content:flex-end;
-      gap:4px;
-    }
-
-    .table-wrapper {
-      flex:1;
-      background: var(--bg-card);
-      border-radius: 14px;
-      border: 1px solid var(--border-soft);
-      display: flex;
-      flex-direction: column;
-      min-height: 0;
-    }
-
-    .table-header {
-      padding: 8px 10px 6px;
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-    }
-
-    .table-header h3 {
-      font-size: .9rem;
-    }
-
-    .table-header span {
-      font-size: .72rem;
-      color: var(--text-muted);
-    }
-
-    .table-scroll {
-      flex: 1;
-      overflow: auto;
-      border-top: 1px solid var(--border-soft);
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: .78rem;
-    }
-
-    thead {
-      position: sticky;
-      top: 0;
-      background: var(--bg-card);
-      z-index: 2;
-    }
-
-    th, td {
-      padding: 6px 8px;
-      border-bottom: 1px solid #0b1120;
-      text-align: left;
-      white-space: nowrap;
-    }
-
-    th {
-      font-weight: 600;
-      font-size: .75rem;
-      color: var(--text-muted);
-    }
-
-    tbody tr:nth-child(even) {
-      background: var(--bg-card-soft);
-    }
-
-    tbody tr:hover {
-      background: rgba(15,23,42,0.8);
-    }
-
-    body.light tbody tr:nth-child(even) {
-      background:#f3f4f6;
-    }
-    body.light tbody tr:hover {
-      background:#e5e7eb;
-    }
-
-    .tag {
-      border-radius: 999px;
-      padding: 2px 6px;
-      font-size: .7rem;
-      border: 1px solid var(--border-soft);
-      background: #0b1120;
-    }
-
-    .tag.exclusivo {
-      background: rgba(22,163,74,0.15);
-      color: var(--accent-green);
-      border-color: rgba(22,163,74,0.7);
-    }
-
-    .tag.corner {
-      background: rgba(37,99,235,0.15);
-      color: var(--accent-blue);
-      border-color: rgba(37,99,235,0.7);
-    }
-
-    .tag-aar {
-      background: rgba(148,163,184,0.15);
-      border-color: rgba(148,163,184,0.7);
-      color: var(--text-muted);
-    }
-
-    .tag-aar.si {
-      background: rgba(34,197,94,0.15);
-      border-color: rgba(34,197,94,0.7);
-      color: var(--accent-green);
-    }
-
-    .tag-aar.formacion {
-      background: rgba(234,179,8,0.15);
-      border-color: rgba(234,179,8,0.7);
-      color: #eab308;
-    }
-
-    .btn-link {
-      border: none;
-      background: transparent;
-      color: var(--accent-blue);
-      cursor: pointer;
-      font-size: .74rem;
-      text-decoration: underline;
-    }
-
-    .informe-layout {
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-      min-height:0;
-    }
-
-    .informe-top {
-      display:grid;
-      grid-template-columns: 1.3fr 1fr;
-      gap:10px;
-      min-height:190px;
-    }
-
-    .datos-grid {
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:6px 12px;
-      font-size:.8rem;
-      margin-top:6px;
-    }
-
-    .dato-label {
-      font-size:.72rem;
-      color:var(--text-muted);
-    }
-
-    .dato-value {
-      font-size:.82rem;
-      font-weight:500;
-    }
-
-    .dato-full {
-      grid-column:1 / -1;
-    }
-
-    .field-input {
-      width:100%;
-      padding:4px 6px;
-      border-radius:8px;
-      border:1px solid var(--border-soft);
-      background:var(--bg-card-soft);
-      color:var(--text-main);
-      font-size:.8rem;
-      outline:none;
-    }
-
-    .panel-graficos {
-      display:grid;
-      grid-template-columns: repeat(3, minmax(0,1fr));
-      gap:8px;
-      min-height:0;
-      max-height:340px;
-      overflow:auto;
-    }
-
-    .panel-inferior {
-      display: grid;
-      grid-template-columns: 1.1fr 1.9fr;
-      gap: 10px;
-    }
-
-    .checklist-visita {
-      font-size: .78rem;
-      max-height: 260px;
-      overflow: auto;
-      display:flex;
-      flex-direction:column;
-      gap:2px;
-    }
-
-    .checklist-visita label {
-      display:flex;
-      align-items:center;
-      gap:4px;
-    }
-
-    .checklist-heading {
-      margin-top:6px;
-      font-size:.8rem;
-      font-weight:600;
-      color:var(--text-main);
-    }
-
-    .imagenes-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0,1fr));
-      gap: 10px;
-      font-size: .78rem;
-    }
-
-    .imagen-item-title {
-      font-size:.78rem;
-      margin-bottom:3px;
-    }
-
-    .imagen-preview {
-      width: 100%;
-      aspect-ratio: 16 / 9;
-      border-radius: 10px;
-      border: 1px dashed var(--border-soft);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: .7rem;
-      color: var(--text-muted);
-      overflow: hidden;
-      background:var(--bg-card-soft);
-      cursor:pointer;
-    }
-
-    .imagen-preview img {
-      width:100%;
-      height:100%;
-      object-fit:cover;
-    }
-
-    .observaciones-grid {
-      display:grid;
-      grid-template-columns: repeat(3, minmax(0,1fr));
-      gap:10px;
-      margin-top:4px;
-    }
-
-    .obs-item textarea {
-      width:100%;
-      height:80px;
-      resize:vertical;
-      border-radius:10px;
-      border:1px solid var(--border-soft);
-      background:var(--bg-card-soft);
-      color:var(--text-main);
-      padding:6px;
-      font-size:.78rem;
-      outline:none;
-    }
-
-    .obs-label {
-      font-size:.78rem;
-      margin-bottom:2px;
-    }
-
-    .acciones-informe {
-      margin-top:6px;
-      display:flex;
-      justify-content:flex-end;
-      gap:8px;
-    }
-
-    .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(15,23,42,0.75);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 50;
-    }
-
-    .modal {
-      background: var(--bg-card);
-      border-radius: 14px;
-      padding: 14px;
-      width: 420px;
-      max-width: 95%;
-      border: 1px solid var(--border-soft);
-    }
-
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 8px;
-    }
-
-    .modal-header h3 {
-      font-size: .95rem;
-    }
-
-    .modal-close {
-      cursor: pointer;
-      font-size: 1rem;
-      color: var(--text-muted);
-    }
-
-    .modal-body {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      font-size: .78rem;
-    }
-
-    .modal-field {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    .modal-field label {
-      font-size: .74rem;
-      color: var(--text-muted);
-    }
-
-    .modal-field input,
-    .modal-field select {
-      padding: 5px 7px;
-      border-radius: 8px;
-      border: 1px solid var(--border-soft);
-      background: var(--bg-card-soft);
-      color: var(--text-main);
-      font-size: .78rem;
-      outline: none;
-    }
-
-    .modal-footer {
-      display: flex;
-      justify-content: flex-end;
-      gap: 8px;
-      margin-top: 10px;
-    }
-
-    input[type="file"] {
-      font-size:.75rem;
-    }
-
-    body.light .btn {
-      background:#ffffff;
-    }
-
-    body.light .card {
-      background:#ffffff;
-    }
-
-    /* RESPONSIVE */
-    @media (max-width: 1400px) {
-      .dashboard-grid {
-        grid-template-columns: 1fr;
-      }
-      .centros-top {
-        grid-template-columns: 1fr 1fr;
-      }
-    }
-
-    @media (max-width: 1100px) {
-      .topbar {
-        flex-direction: column;
-        align-items: stretch;
-      }
-      .topbar-buttons {
-        justify-content: flex-start;
-      }
-      .centros-top {
-        grid-template-columns: 1fr;
-      }
-      .informe-top {
-        grid-template-columns: 1fr;
-      }
-      .panel-graficos {
-        grid-template-columns: 1fr 1fr;
-      }
-      .panel-inferior {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    @media (max-width: 800px) {
-      .dashboard-charts {
-        grid-template-columns: 1fr;
-      }
-      .panel-graficos {
-        grid-template-columns: 1fr;
-      }
-      .observaciones-grid {
-        grid-template-columns: 1fr;
-      }
-      .imagenes-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    /* IMPRESIÓN A4: sin faldón izquierdo */
-    @page {
-      size: A4 portrait;
-      margin: 10mm;
-    }
-
-    @media print {
-      html, body {
-        width: 100%;
-        height: auto;
-        margin: 0;
-        padding: 0;
-        background:#ffffff !important;
-        overflow: visible !important;
-      }
-      body {
-        display:block;
-      }
-      .sidebar,
-      .topbar {
-        display:none !important;
-      }
-      .main {
-        padding:0 !important;
-        margin:0 !important;
-        width:100% !important;
-        max-width:none !important;
-        overflow:visible !important;
-      }
-      .pages,
-      .page {
-        overflow:visible !important;
-      }
-      .dashboard-grid {
-        grid-template-columns: 1fr !important;
-      }
-      .panel-graficos {
-        max-height:none !important;
-        overflow:visible !Important;
-      }
-      .card {
-        box-shadow:none !important;
-        border-color:#d1d5db !important;
-        break-inside: avoid;
-        page-break-inside: avoid;
-      }
-    }
+      background: var(--bg-card); border-radius: 14px; padding: 10px;
+      border: 1px solid var(--border-soft); display: flex; flex-direction: column; min-width: 0;
+    }
+    .card-title { font-size: .9rem; font-weight: 600; }
+    .card-sub { font-size: .72rem; color: var(--text-muted); margin-top: 2px; }
+    .card-header-row { display: flex; align-items: baseline; justify-content: space-between; gap: 6px; margin-bottom: 4px; }
+    
+    .badge-small { font-size: .7rem; padding: 2px 6px; border-radius: 999px; background: #111827; color: #9ca3af; border: 1px solid var(--border-soft); }
+    body.light .badge-small { background: #e5e7eb; }
+
+    /* --- DASHBOARD GRID --- */
+    .dashboard-grid { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1.3fr); gap: 10px; align-items: flex-start; }
+    .dashboard-right-column { display: flex; flex-direction: column; gap: 10px; }
+
+    .kpi-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 6px; margin-bottom: 6px; }
+    .kpi-card { background: var(--bg-card-soft); border-radius: 10px; padding: 6px 8px; border: 1px solid var(--border-soft); }
+    .kpi-label { font-size: .72rem; color: var(--text-muted); }
+    .kpi-value { font-size: .98rem; font-weight: 600; }
+    .kpi-caption { font-size: .7rem; color: var(--text-muted); }
+
+    .dashboard-charts { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 8px; }
+    .chart-container { position: relative; width: 100%; min-height: 160px; max-height: 240px; }
+    .chart-container.centered { display:flex; align-items:center; justify-content:center; }
+    .criterios-container { min-height: 260px; max-height: 320px; overflow-y: auto; }
+
+    /* --- RANKING DELEGADOS --- */
+    .ranking-list { font-size: .78rem; margin-top: 4px; display: flex; flex-direction: column; gap: 4px; }
+    .ranking-row { display: flex; align-items: center; gap: 6px; justify-content: space-between; padding:3px 0; border-bottom: 1px dashed rgba(148,163,184,0.3); }
+    .ranking-bar { height: 5px; border-radius:999px; background: var(--bg-card-soft); flex: 1; overflow:hidden; }
+    .ranking-bar span { display:block; height:100%; }
+    .ranking-toggle { margin-top:6px; font-size:.76rem; color:var(--accent-blue); cursor:pointer; text-align:right; }
+    .ranking-summary { margin-top: 8px; padding-top: 6px; border-top: 1px dashed rgba(148,163,184,0.4); font-size: .76rem; color: var(--text-muted); }
+
+    /* --- SECCIÓN CENTROS --- */
+    .centros-top { display: grid; grid-template-columns: 1.2fr 1.2fr 1fr; gap: 10px; min-height: 210px; }
+    .delegados-list { margin-top: 6px; display: flex; flex-direction: column; gap: 4px; max-height: 160px; overflow: auto; }
+    .delegado-card { background: var(--bg-card-soft); border-radius: 10px; padding: 4px 6px; border: 1px solid var(--border-soft); cursor: pointer; }
+    .delegado-header { display:flex; align-items:center; justify-content:space-between; gap:6px; }
+    .delegado-color { width:8px; height:8px; border-radius:999px; }
+    .delegado-card.active { outline:1px solid var(--accent-blue); }
+
+    /* Calendario simple */
+    .calendar-wrapper { display:flex; flex-direction:column; gap:4px; height:100%; }
+    .calendar-header { display:flex; align-items:center; justify-content:space-between; font-size:.85rem; font-weight:700; }
+    .calendar-grid { margin-top:4px; display:grid; grid-template-columns: repeat(7, minmax(0,1fr)); gap:4px; flex:1; }
+    .cal-cell { border-radius:10px; border:1px solid var(--border-soft); background:var(--bg-card-soft); font-size:.8rem; padding:3px 4px; cursor:pointer; position:relative; min-height: 30px;}
+    .cal-cell.empty { background:transparent; border-style:dashed; cursor:default; }
+    .cal-event { position:absolute; bottom:4px; left:4px; display:flex; align-items:center; gap:3px; }
+    .cal-dot { width:6px; height:6px; border-radius:999px; background:#facc15; }
+
+    /* Tabla */
+    .table-wrapper { flex:1; background: var(--bg-card); border-radius: 14px; border: 1px solid var(--border-soft); display: flex; flex-direction: column; }
+    .table-scroll { flex: 1; overflow: auto; border-top: 1px solid var(--border-soft); }
+    table { width: 100%; border-collapse: collapse; font-size: .78rem; }
+    thead { position: sticky; top: 0; background: var(--bg-card); z-index: 2; }
+    th, td { padding: 6px 8px; border-bottom: 1px solid #0b1120; text-align: left; white-space: nowrap; }
+    tbody tr:nth-child(even) { background: var(--bg-card-soft); }
+    
+    .tag { border-radius: 999px; padding: 2px 6px; font-size: .7rem; border: 1px solid var(--border-soft); background: #0b1120; }
+    .tag.exclusivo { background: rgba(22,163,74,0.15); color: var(--accent-green); border-color: rgba(22,163,74,0.7); }
+    .tag.corner { background: rgba(37,99,235,0.15); color: var(--accent-blue); border-color: rgba(37,99,235,0.7); }
+    .btn-link { border: none; background: transparent; color: var(--accent-blue); cursor: pointer; font-size: .74rem; text-decoration: underline; }
+
+    /* --- INFORME --- */
+    .informe-layout { display:flex; flex-direction:column; gap:8px; }
+    .informe-top { display:grid; grid-template-columns: 1.3fr 1fr; gap:10px; }
+    .datos-grid { display:grid; grid-template-columns: 1fr 1fr; gap:6px 12px; font-size:.8rem; margin-top:6px; }
+    .field-input { width:100%; padding:4px 6px; border-radius:8px; border:1px solid var(--border-soft); background:var(--bg-card-soft); color:var(--text-main); font-size:.8rem; outline:none; }
+    .panel-graficos { display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:8px; max-height:340px; overflow:auto; }
+    .panel-inferior { display: grid; grid-template-columns: 1.1fr 1.9fr; gap: 10px; }
+    
+    .checklist-visita { font-size: .78rem; max-height: 260px; overflow: auto; display:flex; flex-direction:column; gap:2px; }
+    .imagenes-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 10px; font-size: .78rem; }
+    .imagen-preview { width: 100%; aspect-ratio: 16 / 9; border-radius: 10px; border: 1px dashed var(--border-soft); display: flex; align-items: center; justify-content: center; background:var(--bg-card-soft); cursor:pointer; overflow:hidden; }
+    .imagen-preview img { width: 100%; height: 100%; object-fit: cover; }
+    .observaciones-grid { display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:10px; margin-top:4px; }
+    .obs-item textarea { width:100%; height:80px; resize:vertical; border-radius:10px; border:1px solid var(--border-soft); background:var(--bg-card-soft); color:var(--text-main); padding:6px; }
+
+    /* MODAL */
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(15,23,42,0.75); display: none; align-items: center; justify-content: center; z-index: 50; }
+    .modal { background: var(--bg-card); border-radius: 14px; padding: 14px; width: 420px; border: 1px solid var(--border-soft); }
+    .modal-header { display: flex; justify-content: space-between; margin-bottom: 8px; font-weight: bold; }
+    .modal-field { display: flex; flex-direction: column; gap: 2px; margin-bottom: 8px; }
+    .modal-field input, .modal-field select { padding: 5px 7px; border-radius: 8px; border: 1px solid var(--border-soft); background: var(--bg-card-soft); color: var(--text-main); }
+    
+    /* Responsive simple */
+    @media (max-width: 1400px) { .dashboard-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 1100px) { .centros-top, .informe-top, .panel-graficos, .panel-inferior { grid-template-columns: 1fr; } .dashboard-charts { grid-template-columns: 1fr; } }
   </style>
 </head>
 
 <body>
-  <!-- SIDEBAR -->
   <aside class="sidebar">
     <div class="logo">
       <div class="logo-badge"></div>
@@ -1172,286 +192,89 @@
         <span class="logo-subtitle">Gestión de centros y delegados</span>
       </div>
     </div>
-
-    <div>
-      <div class="section-title">Secciones</div>
-      <nav class="nav-list">
-        <div class="nav-item active" data-page="dashboard">
-          <span class="icon">🏠</span> Dashboard
-        </div>
-        <div class="nav-item" data-page="centros">
-          <span class="icon">🏢</span> Centros
-        </div>
-        <div class="nav-item" data-page="informe">
-          <span class="icon">📋</span> Informe de la visita
-        </div>
-        <div class="nav-item" data-page="servicios">
-          <span class="icon">🛠</span> Servicios
-        </div>
-        <div class="nav-item" data-page="ventas">
-          <span class="icon">💳</span> Ventas
-        </div>
-        <div class="nav-item" data-page="proyectos">
-          <span class="icon">📊</span> Proyectos
-        </div>
-      </nav>
-    </div>
-
-    <div class="sidebar-footer">
-      Versión demo · Datos ficticios
-    </div>
+    <nav class="nav-list">
+      <div class="nav-item active" data-page="dashboard"><span class="icon">🏠</span> Dashboard</div>
+      <div class="nav-item" data-page="centros"><span class="icon">🏢</span> Centros</div>
+      <div class="nav-item" data-page="informe"><span class="icon">📋</span> Informe visita</div>
+    </nav>
+    <div class="sidebar-footer">Versión demo v1.0</div>
   </aside>
 
-  <!-- MAIN -->
   <main class="main">
-    <!-- TOPBAR -->
     <div class="topbar">
       <div class="topbar-search">
         <span>🔍</span>
-        <input id="searchGlobal" placeholder="Buscar por centro, propietario o delegado..." />
+        <input id="searchGlobal" placeholder="Buscar por centro, propietario o delegado...">
       </div>
       <div class="topbar-buttons">
-        <button class="btn" id="themeToggle">
-          <span class="icon">🌓</span> Oscuro / Claro
-        </button>
-        <button class="btn" id="btnGuardarVista">
-          <span class="icon">💾</span> Guardar vista
-        </button>
-        <button class="btn" id="btnExportarHTML">
-          <span class="icon">⬇️</span> Exportar HTML
-        </button>
-        <button class="btn" id="btnImprimir">
-          <span class="icon">🖨</span> Imprimir
-        </button>
-        <button class="btn btn-cta" id="btnActualizarNube">
-          <span class="icon">☁️</span> Actualizar datos nube
-        </button>
+        <button class="btn" id="themeToggle"><span class="icon">🌓</span> Tema</button>
+        <button class="btn btn-cta" id="btnActualizarNube"><span class="icon">☁️</span> Sync Nube</button>
       </div>
     </div>
 
-    <!-- PAGES -->
     <div class="pages">
-      <!-- DASHBOARD -->
       <section class="page active" data-page="dashboard">
         <div class="dashboard-grid">
-          <!-- IZQUIERDA -->
           <article class="card">
-            <div class="card-header-row">
-              <span class="card-title">Resumen general</span>
-              <span class="badge-small">Demo · Promedios sobre visitas guardadas</span>
-            </div>
-
+            <div class="card-header-row"><span class="card-title">Resumen general (KPIs)</span></div>
             <div class="kpi-grid">
-              <div class="kpi-card">
-                <div class="kpi-label">% de aplicación de procesos</div>
-                <div class="kpi-value" id="kpiProcesos">–</div>
-                <div class="kpi-caption">Objetivo 85–100%</div>
-              </div>
-              <div class="kpi-card">
-                <div class="kpi-label">Conv. a prueba</div>
-                <div class="kpi-value" id="kpiConvPrueba">–</div>
-                <div class="kpi-caption">Objetivo 80%</div>
-              </div>
-              <div class="kpi-card">
-                <div class="kpi-label">Conv. a venta</div>
-                <div class="kpi-value" id="kpiConvVenta">–</div>
-                <div class="kpi-caption">Objetivo 80%</div>
-              </div>
-              <div class="kpi-card">
-                <div class="kpi-label">Aplicación HIT</div>
-                <div class="kpi-value" id="kpiHIT">–</div>
-                <div class="kpi-caption">Objetivo 85–100%</div>
-              </div>
-              <div class="kpi-card">
-                <div class="kpi-label">Formaciones %</div>
-                <div class="kpi-value" id="kpiFormaciones">–</div>
-                <div class="kpi-caption">Media de módulos formativos</div>
-              </div>
-              <div class="kpi-card">
-                <div class="kpi-label">Ayuda</div>
-                <div class="kpi-value" id="kpiAyuda">–</div>
-                <div class="kpi-caption">Telecare / PIA / Telehear</div>
-              </div>
-              <div class="kpi-card">
-                <div class="kpi-label">AAR</div>
-                <div class="kpi-value" id="kpiAar">–</div>
-                <div class="kpi-caption">Centros con AAR</div>
-              </div>
-              <div class="kpi-card">
-                <div class="kpi-label">Primeros auxilios</div>
-                <div class="kpi-value" id="kpiPrimeros">–</div>
-                <div class="kpi-caption">Centros con formación</div>
-              </div>
+              <div class="kpi-card"><div class="kpi-label">Procesos</div><div class="kpi-value" id="kpiProcesos">-</div></div>
+              <div class="kpi-card"><div class="kpi-label">Conv. Prueba</div><div class="kpi-value" id="kpiConvPrueba">-</div></div>
+              <div class="kpi-card"><div class="kpi-label">Conv. Venta</div><div class="kpi-value" id="kpiConvVenta">-</div></div>
+              <div class="kpi-card"><div class="kpi-label">HIT</div><div class="kpi-value" id="kpiHIT">-</div></div>
             </div>
-
             <div class="dashboard-charts">
-              <div class="card">
-                <div class="card-header-row">
-                  <span class="card-title">Radar general</span>
-                </div>
-                <div class="chart-container">
-                  <canvas id="chartRadarGeneral"></canvas>
-                </div>
-              </div>
-
-              <div class="card">
-                <div class="card-header-row">
-                  <span class="card-title">Procesos y áreas de mejora por mes</span>
-                </div>
-                <div class="chart-container">
-                  <canvas id="chartProcesosMes"></canvas>
-                </div>
-              </div>
-
-              <div class="card">
-                <div class="card-header-row">
-                  <span class="card-title">Áreas de mejora por mes</span>
-                </div>
-                <div class="chart-container">
-                  <canvas id="chartAreasMes"></canvas>
-                </div>
-              </div>
-
-              <div class="card">
-                <div class="card-header-row">
-                  <span class="card-title">Primeros auxilios por mes</span>
-                </div>
-                <div class="chart-container">
-                  <canvas id="chartPrimerosMes"></canvas>
-                </div>
-              </div>
-
-              <div class="card">
-                <div class="card-header-row">
-                  <span class="card-title">Top 10 áreas de mejora</span>
-                </div>
-                <div class="chart-container">
-                  <canvas id="chartTopAreas"></canvas>
-                </div>
-              </div>
-
-              <div class="card">
-                <div class="card-header-row">
-                  <span class="card-title">Aplicación AAR / HIT</span>
-                </div>
-                <div class="chart-container">
-                  <canvas id="chartAarHitDonut"></canvas>
-                </div>
-              </div>
+              <div class="card"><span class="card-title">Radar Global</span><div class="chart-container"><canvas id="chartRadarGeneral"></canvas></div></div>
+              <div class="card"><span class="card-title">Procesos Mes</span><div class="chart-container"><canvas id="chartProcesosMes"></canvas></div></div>
+              <div class="card"><span class="card-title">Top Áreas Mejora</span><div class="chart-container"><canvas id="chartTopAreas"></canvas></div></div>
             </div>
           </article>
 
-          <!-- DERECHA: 80 CRITERIOS + RANKING -->
           <div class="dashboard-right-column">
             <article class="card">
               <div class="card-header-row">
-                <span class="card-title">Evaluación detallada de procesos (80 criterios)</span>
-                <span class="badge-small">Se actualiza con los checklists CORNER / EXCLUSIVO</span>
+                <span class="card-title">Evaluación Detallada (80 Criterios)</span>
               </div>
-              <div class="card-sub" id="criteriosEmptyMsg">
-                Adjunta un checklist en el informe de la visita para ver el detalle por criterios.
-              </div>
+              <div class="card-sub" id="criteriosEmptyMsg">Adjunta un checklist en informe para ver detalle.</div>
               <div class="chart-container criterios-container">
                 <canvas id="chartCriteriosDetalle"></canvas>
               </div>
             </article>
-
             <article class="card">
-              <div class="card-header-row">
-                <span class="card-title">Ranking de delegados</span>
-              </div>
+              <div class="card-header-row"><span class="card-title">Ranking Delegados</span></div>
               <div class="ranking-list" id="rankingDelegados"></div>
-              <div class="ranking-toggle" id="rankingToggle" style="display:none;">
-                Mostrar todos
-              </div>
-              <div class="ranking-summary" id="rankingResumen">
-                <div class="ranking-summary-item">
-                  Top delegado: <span id="rankingTopDelegado">–</span>
-                </div>
-                <div class="ranking-summary-item">
-                  Media procesos delegados: <span id="rankingMediaProcesos">–</span>
-                </div>
-              </div>
             </article>
           </div>
         </div>
       </section>
 
-      <!-- CENTROS -->
       <section class="page" data-page="centros">
         <div class="centros-top">
-          <!-- Delegados -->
           <article class="card">
-            <div class="card-header-row">
-              <span class="card-title">Centros y delegados</span>
-              <span class="badge-small"><span id="numDelegados">0</span> delegados</span>
-            </div>
-
+            <div class="card-header-row"><span class="card-title">Delegados</span></div>
             <div class="delegados-list" id="delegadosList"></div>
-
-            <div style="display:flex; gap:8px; margin-top:6px;">
-              <button class="btn btn-cta" id="btnAddCentro">
-                <span class="icon">➕</span> Añadir centro
-              </button>
-              <button class="btn" id="btnAdjuntarExcel">
-                <span class="icon">📤</span> Adjuntar centros (Excel)
-              </button>
-              <input type="file" id="inputExcel" accept=".xlsx,.xls" style="display:none" />
-            </div>
-
-            <div style="margin-top:4px; font-size:.74rem; color:var(--text-muted);">
-              Centros mostrados: <span id="centrosMostrados">0</span> / <span id="centrosTotal">0</span>
+            <div style="margin-top:8px;">
+              <button class="btn btn-cta" id="btnAddCentro"><span class="icon">➕</span> Nuevo Centro</button>
             </div>
           </article>
-
-          <!-- Calendario -->
           <article class="card">
             <div class="calendar-wrapper">
               <div class="calendar-header">
-                <button id="calPrev">&lt;</button>
-                <div class="calendar-month" id="calTitulo" style="font-weight:700;"></div>
-                <button id="calNext">&gt;</button>
-              </div>
-              <div class="calendar-weekdays">
-                <div>L</div><div>M</div><div>X</div><div>J</div><div>V</div><div>S</div><div>D</div>
+                <button id="calPrev">&lt;</button> <span id="calTitulo">Mes</span> <button id="calNext">&gt;</button>
               </div>
               <div class="calendar-grid" id="calendarGrid"></div>
-              <div style="font-size:.72rem; color:var(--text-muted); margin-top:2px;">
-                Clic en un día para agendar visita.
-              </div>
             </div>
           </article>
-
-          <!-- Visitas agendadas -->
           <article class="card">
-            <div class="card-header-row">
-              <span class="card-title">Visitas agendadas</span>
-            </div>
-            <div class="visitas-list" id="visitasList"></div>
+            <div class="card-header-row"><span class="card-title">Próximas Visitas</span></div>
+            <div id="visitasList" style="overflow:auto; max-height:160px;"></div>
           </article>
         </div>
-
-        <!-- Tabla de centros -->
         <section class="table-wrapper">
-          <div class="table-header">
-            <div>
-              <h3>Listado de centros</h3>
-            </div>
-            <span class="badge-small" id="totalCentrosLabel">Centros mostrados: 0 / 0</span>
-          </div>
           <div class="table-scroll">
             <table>
               <thead>
-                <tr>
-                  <th>Código</th>
-                  <th>Propietario</th>
-                  <th>Centro</th>
-                  <th>Provincia</th>
-                  <th>Delegado</th>
-                  <th>Tipo</th>
-                  <th>Informes</th>
-                  <th>Centro AAR</th>
-                </tr>
+                <tr><th>Código</th><th>Propietario</th><th>Centro</th><th>Provincia</th><th>Delegado</th><th>Tipo</th><th>Acción</th></tr>
               </thead>
               <tbody id="tablaCentrosBody"></tbody>
             </table>
@@ -1459,1688 +282,382 @@
         </section>
       </section>
 
-      <!-- INFORME DE LA VISITA -->
       <section class="page" data-page="informe">
         <div class="informe-layout">
-          <!-- Panel superior -->
           <div class="informe-top">
             <article class="card">
-              <div class="card-header-row">
-                <span class="card-title">Datos del centro</span>
-              </div>
+              <div class="card-header-row"><span class="card-title">Datos Visita / Centro</span></div>
               <div class="datos-grid">
-                <div>
-                  <div class="dato-label">Centro</div>
-                  <input id="infCentro" class="field-input" readonly />
-                </div>
-                <div>
-                  <div class="dato-label">Provincia</div>
-                  <input id="infProvincia" class="field-input" readonly />
-                </div>
-                <div>
-                  <div class="dato-label">Delegado</div>
-                  <input id="infDelegado" class="field-input" readonly />
-                </div>
-                <div>
-                  <div class="dato-label">Tipo</div>
-                  <input id="infTipo" class="field-input" readonly />
-                </div>
-                <div>
-                  <div class="dato-label">Responsable audio</div>
-                  <input id="infRespAudio" class="field-input" readonly />
-                </div>
-                <div>
-                  <div class="dato-label">Fecha visita</div>
-                  <input id="infFecha" class="field-input" readonly />
-                </div>
-                <div>
-                  <div class="dato-label">Audiólogo</div>
-                  <input id="infAudiologo" class="field-input" />
-                </div>
-                <div>
-                  <div class="dato-label">Horas de servicio</div>
-                  <input id="infHoras" class="field-input" />
-                </div>
-                <div class="dato-full" style="margin-top:4px;">
-                  <button class="btn btn-cta" id="btnAdjuntarChecklist">
-                    <span class="icon">📎</span> Adjuntar checklist
-                  </button>
-                  <input type="file" id="inputChecklist" accept=".xlsx,.xls" style="display:none" />
-                  <span id="nombreChecklist" style="margin-left:8px; font-size:.74rem; color:var(--text-muted);"></span>
+                <div><div class="dato-label">Centro</div><input id="infCentro" class="field-input" readonly></div>
+                <div><div class="dato-label">Tipo</div><input id="infTipo" class="field-input" readonly></div>
+                <div><div class="dato-label">Fecha</div><input id="infFecha" class="field-input"></div>
+                <div><div class="dato-label">Delegado</div><input id="infDelegado" class="field-input" readonly></div>
+                <div class="dato-full" style="grid-column: 1 / -1; margin-top:8px;">
+                  <button class="btn btn-cta" id="btnAdjuntarChecklist">📎 Adjuntar Checklist (Excel)</button>
+                  <input type="file" id="inputChecklist" accept=".xlsx,.xls" style="display:none">
+                  <span id="nombreChecklist" style="margin-left:8px; font-size:.75rem; color:var(--text-muted);"></span>
                 </div>
               </div>
             </article>
-
-            <!-- KPIs del centro -->
             <article class="card">
-              <div class="card-header-row">
-                <span class="card-title">KPIs del centro</span>
+              <div class="card-header-row"><span class="card-title">KPIs Centro (Calculado)</span></div>
+              <div style="font-size:.85rem; margin-top:10px;">
+                <div>% Procesos: <strong id="kpiCentroProcesos">0%</strong></div>
+                <div>Conv. Prueba: <strong id="kpiCentroPrueba">0%</strong></div>
+                <div>Conv. Venta: <strong id="kpiCentroVenta">0%</strong></div>
+                <div>HIT: <strong id="kpiCentroHit">No</strong></div>
               </div>
-              <div style="font-size:.78rem; margin-top:4px;">
-                <div>% de aplicación de procesos: <strong id="kpiCentroProcesos">–</strong></div>
-                <div>Conv. a prueba: <strong id="kpiCentroPrueba">–</strong></div>
-                <div>Conv. a cierre: <strong id="kpiCentroVenta">–</strong></div>
-                <div>Aplicación HIT: <strong id="kpiCentroHit">–</strong></div>
-              </div>
-              <div class="chart-container centered" style="margin-top:6px; max-height:180px;">
-                <canvas id="chartCentroRadar"></canvas>
+              <div class="chart-container centered" style="height:140px;">
+                 <canvas id="chartCentroRadar"></canvas>
               </div>
             </article>
           </div>
 
-          <!-- Panel graficos centro -->
           <div class="panel-graficos">
-            <article class="card">
-              <div class="card-header-row">
-                <span class="card-title">Palancas SI / NO (barras)</span>
-              </div>
-              <div class="chart-container">
-                <canvas id="chartCentroSiNoBarras"></canvas>
-              </div>
-            </article>
-
-            <article class="card">
-              <div class="card-header-row">
-                <span class="card-title">Palancas SI / NO (donut)</span>
-              </div>
-              <div class="chart-container">
-                <canvas id="chartCentroSiNoDonut"></canvas>
-              </div>
-            </article>
-
-            <article class="card">
-              <div class="card-header-row">
-                <span class="card-title">Procesos y áreas de mejora (centro)</span>
-              </div>
-              <div class="chart-container">
-                <canvas id="chartCentroProcesosMes"></canvas>
-              </div>
-            </article>
-
-            <article class="card">
-              <div class="card-header-row">
-                <span class="card-title">HIT por mes (centro)</span>
-              </div>
-              <div class="chart-container">
-                <canvas id="chartCentroHitMes"></canvas>
-              </div>
-            </article>
-
-            <article class="card">
-              <div class="card-header-row">
-                <span class="card-title">Áreas de mejora por mes</span>
-              </div>
-              <div class="chart-container">
-                <canvas id="chartCentroAreasMes"></canvas>
-              </div>
-            </article>
-
-            <article class="card">
-              <div class="card-header-row">
-                <span class="card-title">Top 10 áreas de mejora</span>
-              </div>
-              <div class="chart-container">
-                <canvas id="chartCentroTopAreas"></canvas>
-              </div>
-            </article>
+            <article class="card"><span class="card-title">Palancas (Barras)</span><div class="chart-container"><canvas id="chartCentroSiNoBarras"></canvas></div></article>
+            <article class="card"><span class="card-title">Evolución Procesos</span><div class="chart-container"><canvas id="chartCentroProcesosMes"></canvas></div></article>
+            <article class="card"><span class="card-title">Resumen Conv.</span><div class="chart-container"><canvas id="chartCentroConversionResumen"></canvas></div></article>
           </div>
-
-          <!-- Panel inferior -->
+          
           <div class="panel-inferior">
-            <article class="card">
-              <div class="card-header-row">
-                <span class="card-title">Formaciones y habilidades</span>
-              </div>
-              <div class="checklist-visita" style="margin-top:6px;">
-                <label><input type="checkbox" data-kpi="wsa" /> WSA</label>
-                <label><input type="checkbox" data-kpi="starkey" /> Starkey</label>
-                <label><input type="checkbox" data-kpi="neuroventas" /> Habilidades comerciales / Neuroventas</label>
-                <label><input type="checkbox" data-kpi="hit" /> HIT</label>
-                <label><input type="checkbox" data-kpi="telecare" /> Telecare</label>
-                <label><input type="checkbox" data-kpi="pia" /> PIA</label>
-                <label><input type="checkbox" data-kpi="telehear" /> Telehear</label>
-                <label><input type="checkbox" data-kpi="infinity" /> Financiación Infinity</label>
-                <label><input type="checkbox" data-kpi="seguros" /> Venta de seguro</label>
-                <label><input type="checkbox" data-kpi="primeros" /> Primeros auxilios (equipo)</label>
-                <div class="checklist-heading">Producto y comunicación</div>
-                <label><input type="checkbox" data-kpi="rt" /> Audiometría RT</label>
-                <label><input type="checkbox" data-kpi="audio_test" /> Test de lectura audio</label>
-                <label><input type="checkbox" data-kpi="audio_screening" /> Screening audio</label>
-                <label><input type="checkbox" data-kpi="audio_manteleta" /> Manteleta audio</label>
-                <label><input type="checkbox" data-kpi="audio_escaparate" /> Escaparate visible audio</label>
-                <label><input type="checkbox" data-kpi="audio_salud" /> Salud auditiva en PDV</label>
-                <label><input type="checkbox" data-kpi="audio_renove" /> Elementos Renove</label>
-                <label><input type="checkbox" data-kpi="mgm" /> Elementos MGM</label>
-                <label><input type="checkbox" data-kpi="stock" /> Stock</label>
-                <label><input type="checkbox" data-kpi="tchin" /> Tchin Tchin</label>
-              </div>
-            </article>
-
-            <article class="card">
-              <div class="card-header-row">
-                <span class="card-title">Imágenes del centro</span>
-              </div>
-              <div class="imagenes-grid" style="margin-top:4px;">
-                <div>
-                  <div class="imagen-item-title">Centro exterior</div>
-                  <div class="imagen-preview" data-target="ext">
-                    Adjuntar imagen
-                  </div>
-                  <input type="file" accept="image/*" data-input-img="ext" style="display:none" />
+             <article class="card">
+                <span class="card-title">Formaciones y Producto</span>
+                <div class="checklist-visita">
+                   <label><input type="checkbox" data-kpi="wsa"> WSA</label>
+                   <label><input type="checkbox" data-kpi="starkey"> Starkey</label>
+                   <label><input type="checkbox" data-kpi="telecare"> Telecare / PIA</label>
+                   <label><input type="checkbox" data-kpi="rt"> Audiometría RT</label>
+                   <label><input type="checkbox" data-kpi="stock"> Stock</label>
                 </div>
-                <div>
-                  <div class="imagen-item-title">Centro interior</div>
-                  <div class="imagen-preview" data-target="int">
-                    Adjuntar imagen
-                  </div>
-                  <input type="file" accept="image/*" data-input-img="int" style="display:none" />
-                </div>
-                <div>
-                  <div class="imagen-item-title">Gabinete</div>
-                  <div class="imagen-preview" data-target="gab">
-                    Adjuntar imagen
-                  </div>
-                  <input type="file" accept="image/*" data-input-img="gab" style="display:none" />
-                </div>
-              </div>
-            </article>
+             </article>
+             <article class="card">
+               <span class="card-title">Fotos Evidencia</span>
+               <div class="imagenes-grid">
+                 <div><div class="imagen-preview" data-target="ext">Exterior</div><input type="file" data-input-img="ext" hidden></div>
+                 <div><div class="imagen-preview" data-target="int">Interior</div><input type="file" data-input-img="int" hidden></div>
+                 <div><div class="imagen-preview" data-target="gab">Gabinete</div><input type="file" data-input-img="gab" hidden></div>
+               </div>
+             </article>
           </div>
 
-          <!-- Resumen gráficos -->
           <article class="card">
-            <div class="card-header-row">
-              <span class="card-title">Resumen de la visita</span>
-            </div>
-            <div class="panel-graficos" style="max-height:none;">
-              <article class="card">
-                <div class="card-header-row">
-                  <span class="card-title">Procesos aplicados</span>
-                </div>
-                <div class="chart-container">
-                  <canvas id="chartCentroProcesosResumen"></canvas>
-                </div>
-              </article>
-              <article class="card">
-                <div class="card-header-row">
-                  <span class="card-title">Áreas de mejora</span>
-                </div>
-                <div class="chart-container">
-                  <canvas id="chartCentroAreasResumen"></canvas>
-                </div>
-              </article>
-              <article class="card">
-                <div class="card-header-row">
-                  <span class="card-title">Conv. prueba / venta</span>
-                </div>
-                <div class="chart-container">
-                  <canvas id="chartCentroConversionResumen"></canvas>
-                </div>
-              </article>
-            </div>
-          </article>
-
-          <!-- Observaciones -->
-          <article class="card">
-            <div class="card-header-row">
-              <span class="card-title">Observaciones · Recomendaciones · Compromisos</span>
-            </div>
-            <div class="observaciones-grid" style="margin-top:6px;">
-              <div class="obs-item">
-                <div class="obs-label">Observaciones</div>
-                <textarea id="obsObservaciones"></textarea>
-              </div>
-              <div class="obs-item">
-                <div class="obs-label">Recomendaciones</div>
-                <textarea id="obsRecomendaciones"></textarea>
-              </div>
-              <div class="obs-item">
-                <div class="obs-label">Compromisos</div>
-                <textarea id="obsCompromisos"></textarea>
-              </div>
-            </div>
-            <div class="acciones-informe">
-              <button class="btn btn-cta" id="btnGuardarInforme">
-                <span class="icon">💾</span> Guardar informe
-              </button>
-            </div>
+             <span class="card-title">Conclusiones</span>
+             <div class="observaciones-grid">
+               <div class="obs-item"><textarea placeholder="Observaciones..."></textarea></div>
+               <div class="obs-item"><textarea placeholder="Recomendaciones..."></textarea></div>
+               <div class="obs-item"><textarea placeholder="Compromisos..."></textarea></div>
+             </div>
+             <div style="display:flex; justify-content:flex-end; margin-top:10px;">
+               <button class="btn btn-cta" id="btnGuardarInforme">💾 Guardar Informe</button>
+             </div>
           </article>
         </div>
-      </section>
-
-      <!-- PLACEHOLDERS -->
-      <section class="page" data-page="servicios">
-        <article class="card">
-          <div class="card-title">Servicios</div>
-          <div class="card-sub">Módulo placeholder para futuras funcionalidades.</div>
-        </article>
-      </section>
-
-      <section class="page" data-page="ventas">
-        <article class="card">
-          <div class="card-title">Ventas</div>
-          <div class="card-sub">Módulo placeholder para futuras funcionalidades.</div>
-        </article>
-      </section>
-
-      <section class="page" data-page="proyectos">
-        <article class="card">
-          <div class="card-title">Proyectos</div>
-          <div class="card-sub">Módulo placeholder para futuras funcionalidades.</div>
-        </article>
       </section>
     </div>
   </main>
 
-  <!-- MODALES -->
-  <div class="modal-backdrop" id="modalVisita">
-    <div class="modal">
-      <div class="modal-header">
-        <h3>Agendar visita</h3>
-        <span class="modal-close" data-close="modalVisita">✕</span>
-      </div>
-      <div class="modal-body">
-        <div class="modal-field">
-          <label>Fecha</label>
-          <input id="visitaFecha" readonly />
-        </div>
-        <div class="modal-field">
-          <label>Responsable audio</label>
-          <select id="visitaResp">
-            <option value="Ariannys Rojas">Ariannys Rojas</option>
-            <option value="Sonia Guasque">Sonia Guasque</option>
-          </select>
-        </div>
-        <div class="modal-field">
-          <label>Centro</label>
-          <input id="visitaCentro" list="listaCentros" />
-          <datalist id="listaCentros"></datalist>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn" data-close="modalVisita">Cancelar</button>
-        <button class="btn btn-cta" id="btnGuardarVisita">Guardar visita</button>
-      </div>
-    </div>
-  </div>
-
   <div class="modal-backdrop" id="modalCentro">
     <div class="modal">
-      <div class="modal-header">
-        <h3>Nuevo centro</h3>
-        <span class="modal-close" data-close="modalCentro">✕</span>
-      </div>
+      <div class="modal-header"><h3>Nuevo Centro</h3><span class="modal-close" data-close="modalCentro">✕</span></div>
       <div class="modal-body">
-        <div class="modal-field">
-          <label>Código</label>
-          <input id="nuevoCodigo" />
-        </div>
-        <div class="modal-field">
-          <label>Propietario</label>
-          <input id="nuevoPropietario" />
-        </div>
-        <div class="modal-field">
-          <label>Centro</label>
-          <input id="nuevoCentro" />
-        </div>
-        <div class="modal-field">
-          <label>Provincia</label>
-          <input id="nuevoProvincia" />
-        </div>
-        <div class="modal-field">
-          <label>Delegado</label>
-          <input id="nuevoDelegado" />
-        </div>
+         <div class="modal-field"><label>Centro</label><input id="nuevoCentro"></div>
+         <div class="modal-field"><label>Delegado</label><input id="nuevoDelegado"></div>
+         <div class="modal-field"><label>Tipo</label><select id="nuevoTipo"><option value="Corner">Corner</option><option value="Exclusivo">Exclusivo</option></select></div>
       </div>
-      <div class="modal-footer">
-        <button class="btn" data-close="modalCentro">Cancelar</button>
-        <button class="btn btn-cta" id="guardarCentro">Guardar centro</button>
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:10px;">
+        <button class="btn btn-cta" id="guardarCentro">Guardar</button>
       </div>
     </div>
   </div>
 
   <script>
-    const $  = sel => document.querySelector(sel);
-    const $$ = sel => Array.from(document.querySelectorAll(sel));
+    const $ = sel => document.querySelector(sel);
+    const $$ = sel => document.querySelectorAll(sel);
+    
+    // ESTADO
+    const centros = [
+      { codigo:"4ABB", propietario:"MAZA Oriol", centro:"PAMPLONA C. Exclusivo", provincia:"NAVARRA", delegado:"Sonia Godino", tipo:"Exclusivo" },
+      { codigo:"4MRM", propietario:"AAO", centro:"REINA DE MERCEDES", provincia:"Madrid", delegado:"Sergio Perán", tipo:"Exclusivo" },
+      { codigo:"4COR", propietario:"TEST", centro:"CORNER DE PRUEBA", provincia:"Madrid", delegado:"Daniel Chazo", tipo:"Corner" }
+    ];
+    let centroActual = null;
+    let globalCharts = {}, centroCharts = {};
+    let criteriosGlobal = new Map();
 
-    function formatDateISO(d) {
-      const y = d.getFullYear();
-      const m = String(d.getMonth()+1).padStart(2,"0");
-      const day = String(d.getDate()).padStart(2,"0");
-      return `${y}-${m}-${day}`;
-    }
-    function formatDateHuman(iso) {
-      const [y,m,d] = iso.split("-");
-      return `${d}-${m}-${y}`;
-    }
-
-    /* NAV */
-    const pages = $$(".page");
+    /* --- NAVEGACIÓN --- */
     $$(".nav-item").forEach(item => {
       item.addEventListener("click", () => {
-        const page = item.dataset.page;
-        $$(".nav-item").forEach(i => i.classList.toggle("active", i === item));
-        pages.forEach(p => p.classList.toggle("active", p.dataset.page === page));
+        $$(".nav-item").forEach(i => i.classList.remove("active"));
+        $$(".page").forEach(p => p.classList.remove("active"));
+        item.classList.add("active");
+        $(`.page[data-page="${item.dataset.page}"]`).classList.add("active");
       });
     });
+    $("#themeToggle").addEventListener("click", ()=> document.body.classList.toggle("light"));
 
-    /* TEMA */
-    $("#themeToggle").addEventListener("click", () => {
-      document.body.classList.toggle("light");
-      Object.values(globalCharts).forEach(ch => ch && ch.resize());
-      if (centroChartsCreated) Object.values(centroCharts).forEach(ch => ch && ch.resize());
-    });
-
-    /* BOTONES TOPBAR */
-    $("#btnGuardarVista").addEventListener("click", () => alert("Guardar vista (demo)."));
-    $("#btnActualizarNube").addEventListener("click", () => alert("Actualización a nube (demo)."));
-    $("#btnImprimir").addEventListener("click", () => window.print());
-    $("#btnExportarHTML").addEventListener("click", () => {
-      const content = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
-      const blob = new Blob([content], {type:"text/html"});
-      const url  = URL.createObjectURL(blob);
-      const a    = document.createElement("a");
-      a.href = url;
-      a.download = "control-center-audio.html";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    });
-
-    /* DATOS */
-    const exclusivosSet = new Set([
-      "CC LOS VALLES",
-      "FUENLABRADA Calle Leganes",
-      "PAMPLONA C. Exclusivo",
-      "PAMPLONA Calle Sancho el Mayor",
-      "PAMPLONA Carlos III",
-      "REINA DE MERCEDES",
-      "SANTANDER CC PEÑACASTILLO",
-      "SANTIAGO DE COMPOSTELA RUA DA ROSA",
-      "TORRELAVEGA CARREFOUR CC",
-      "ZARAGOZA CALLE DELICIAS"
-    ]);
-
-    const centros = [];
-    const informesPorCentro = {};
-    const aarPorCentro = {};
-    const delegadosColores = {};
-    const colorPalette = [
-      "#22c55e","#2563eb","#14b8a6","#a855f7","#f97316","#0ea5e9","#ef4444",
-      "#eab308","#ec4899","#facc15","#22d3ee","#4ade80","#fb7185","#2dd4bf"
-    ];
-
-    function getColorForDelegado(nombre) {
-      if (!delegadosColores[nombre]) {
-        const idx = Object.keys(delegadosColores).length % colorPalette.length;
-        delegadosColores[nombre] = colorPalette[idx];
-      }
-      return delegadosColores[nombre];
-    }
-
-    /* TABLA CENTROS */
-    const tablaBody = $("#tablaCentrosBody");
-    const totalCentrosLabel = $("#totalCentrosLabel");
-    const centrosMostradosSpan = $("#centrosMostrados");
-    const centrosTotalSpan = $("#centrosTotal");
-    let filtroDelegadoActual = null;
-    let filtroTextoActual = "";
-
-    function tipoCentro(nombreCentro) {
-      return exclusivosSet.has(nombreCentro) ? "Exclusivo" : "Corner";
-    }
-
-    function getInformes(nombreCentro) {
-      return informesPorCentro[nombreCentro] || 0;
-    }
-    function getAarEstado(nombreCentro) {
-      return aarPorCentro[nombreCentro] || "No";
-    }
-
-    function renderTablaCentros() {
-      const texto = filtroTextoActual.toLowerCase();
-      tablaBody.innerHTML = "";
-      const filtrados = centros.filter(c => {
-        const cad = (c.centro + " " + c.propietario + " " + c.delegado).toLowerCase();
-        const pasaTexto = cad.includes(texto);
-        const pasaDel   = !filtroDelegadoActual || c.delegado === filtroDelegadoActual;
-        return pasaTexto && pasaDel;
-      });
-
-      filtrados.forEach(c => {
+    /* --- RENDER TABLA CENTROS --- */
+    function renderCentros() {
+      const tbody = $("#tablaCentrosBody");
+      tbody.innerHTML = "";
+      centros.forEach(c => {
         const tr = document.createElement("tr");
-        const t  = tipoCentro(c.centro);
-        const informes = getInformes(c.centro);
-        const aarEstado = getAarEstado(c.centro);
         tr.innerHTML = `
-          <td>${c.codigo}</td>
-          <td>${c.propietario}</td>
-          <td>${c.centro}</td>
-          <td>${c.provincia}</td>
+          <td>${c.codigo}</td><td>${c.propietario}</td><td>${c.centro}</td><td>${c.provincia}</td>
           <td>${c.delegado}</td>
-          <td><span class="tag ${t === 'Exclusivo' ? 'exclusivo' : 'corner'}">${t}</span></td>
-          <td>
-            <button class="btn-link btn-informe-centro" data-centro="${c.centro}">
-              ${informes ? `Ver (${informes})` : "Añadir informe"}
-            </button>
-          </td>
-          <td>
-            <span class="tag tag-aar ${
-              aarEstado === 'Sí' ? 'si' :
-              aarEstado === 'En formación' ? 'formacion' : ''
-            }">${aarEstado}</span>
-          </td>
+          <td><span class="tag ${c.tipo.toLowerCase()}">${c.tipo}</span></td>
+          <td><button class="btn-link btn-informe" data-centro="${c.centro}">Añadir informe</button></td>
         `;
-        tablaBody.appendChild(tr);
+        tbody.appendChild(tr);
       });
-
-      totalCentrosLabel.textContent = `Centros mostrados: ${filtrados.length} / ${centros.length}`;
-      centrosMostradosSpan.textContent = filtrados.length;
-      centrosTotalSpan.textContent = centros.length;
+      // Listeners dinámicos
+      $$(".btn-informe").forEach(btn => btn.addEventListener("click", e => irAInforme(e.target.dataset.centro)));
+      renderDelegados();
     }
-
-    /* DELEGADOS + RANKING */
-    const delegadosList = $("#delegadosList");
-    const numDelegadosSpan = $("#numDelegados");
-    const rankingDelegadosDiv = $("#rankingDelegados");
-    const rankingToggle = $("#rankingToggle");
-    let rankingExpandido = false;
 
     function renderDelegados() {
-      const map = new Map();
-      centros.forEach(c => {
-        if (!map.has(c.delegado)) map.set(c.delegado, []);
-        map.get(c.delegado).push(c);
-      });
-
-      delegadosList.innerHTML = "";
-      const delegados = Array.from(map.entries()).sort((a,b)=>a[0].localeCompare(b[0]));
-
-      delegados.forEach(([nombre, lista]) => {
-        const card = document.createElement("div");
-        card.className = "delegado-card";
-        card.dataset.delegado = nombre;
-        const color = getColorForDelegado(nombre);
-        card.innerHTML = `
-          <div class="delegado-header">
-            <div class="delegado-main">
-              <span class="delegado-color" style="background:${color}"></span>
-              <span>${nombre}</span>
-            </div>
-            <span class="delegado-count">${lista.length} centros</span>
-          </div>
-          <div class="delegado-bar"><span style="background:${color}"></span></div>
-        `;
-        card.addEventListener("click", () => {
-          if (filtroDelegadoActual === nombre) {
-            filtroDelegadoActual = null;
-            card.classList.remove("active");
-          } else {
-            filtroDelegadoActual = nombre;
-            $$(".delegado-card").forEach(c=>c.classList.remove("active"));
-            card.classList.add("active");
-          }
-          renderTablaCentros();
-        });
-        delegadosList.appendChild(card);
-      });
-
-      numDelegadosSpan.textContent = delegados.length;
-      renderRankingDelegados(map);
+       const list = $("#delegadosList");
+       list.innerHTML = "";
+       const counts = {};
+       centros.forEach(c => counts[c.delegado] = (counts[c.delegado]||0)+1);
+       Object.keys(counts).forEach(del => {
+         const div = document.createElement("div");
+         div.className = "delegado-card";
+         div.innerHTML = `<div class="delegado-header"><span>${del}</span> <span class="badge-small">${counts[del]} centros</span></div>`;
+         list.appendChild(div);
+       });
     }
 
-    function renderRankingDelegados(map) {
-      rankingDelegadosDiv.innerHTML = "";
-      const arr = Array.from(map.entries()).map(([nombre, lista]) => {
-        const procesos = 80 + Math.floor(Math.random()*15);
-        const hit = 75 + Math.floor(Math.random()*15);
-        const score = Math.round((procesos+hit)/2);
-        return {nombre, n:lista.length, score, procesos, hit};
-      }).sort((a,b)=>b.score-a.score);
-
-      arr.forEach((d, idx) => {
-        const row = document.createElement("div");
-        row.className = "ranking-row";
-        if (idx >= 5) row.classList.add("extra-hidden");
-        const color = getColorForDelegado(d.nombre);
-        row.innerHTML = `
-          <div class="ranking-main">
-            <span style="font-size:.75rem; color:var(--text-muted);">${idx+1}.</span>
-            <span class="delegado-color" style="background:${color}"></span>
-            <span>${d.nombre}</span>
-          </div>
-          <div style="flex:1; display:flex; align-items:center; gap:4px; margin-left:6px;">
-            <div class="ranking-bar"><span style="width:${d.score}%; background:${color}"></span></div>
-            <span style="font-size:.72rem;">${d.score}</span>
-          </div>
-        `;
-        rankingDelegadosDiv.appendChild(row);
-      });
-
-      if (arr.length > 5) rankingToggle.style.display = "block";
-      else rankingToggle.style.display = "none";
-
-      const topSpan   = $("#rankingTopDelegado");
-      const mediaSpan = $("#rankingMediaProcesos");
-      if (arr.length) {
-        topSpan.textContent = arr[0].nombre;
-        const mediaProc = Math.round(arr.reduce((s,d)=> s + d.procesos, 0) / arr.length);
-        mediaSpan.textContent = mediaProc + "%";
-      } else {
-        topSpan.textContent = "–";
-        mediaSpan.textContent = "–";
-      }
+    /* --- IR A INFORME --- */
+    function irAInforme(nombre) {
+      centroActual = centros.find(c => c.centro === nombre);
+      if(!centroActual) return;
+      
+      // Rellenar datos
+      $("#infCentro").value = centroActual.centro;
+      $("#infTipo").value = centroActual.tipo;
+      $("#infDelegado").value = centroActual.delegado;
+      $("#infFecha").value = new Date().toISOString().slice(0,10);
+      
+      // Cambiar página
+      $$(".nav-item").forEach(i => i.classList.remove("active"));
+      $$(".page").forEach(p => p.classList.remove("active"));
+      $('[data-page="informe"]').classList.add("active");
+      $('.nav-item[data-page="informe"]').classList.add("active");
+      
+      initCentroCharts(); 
     }
 
-    rankingToggle.addEventListener("click", () => {
-      rankingExpandido = !rankingExpandido;
-      $$(".ranking-row.extra-hidden").forEach(r => {
-        r.style.display = rankingExpandido ? "flex" : "none";
-      });
-      rankingToggle.textContent = rankingExpandido ? "Ocultar" : "Mostrar todos";
-    });
-
-    /* BUSCADOR */
-    $("#searchGlobal").addEventListener("input", e => {
-      filtroTextoActual = e.target.value || "";
-      renderTablaCentros();
-    });
-
-    /* EXCEL CENTROS */
-    const inputExcel = $("#inputExcel");
-    $("#btnAdjuntarExcel").addEventListener("click", () => inputExcel.click());
-
-    inputExcel.addEventListener("change", e => {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = evt => {
-        const data = new Uint8Array(evt.target.result);
-        const workbook = XLSX.read(data, { type: 'array' });
-        const sheetName = workbook.SheetNames[0];
-        const sheet = workbook.Sheets[sheetName];
-        const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-
-        rows.slice(1).forEach(row => {
-          if (!row || row.length < 5) return;
-          const [codigo, propietario, centro, provincia, delegado] = row;
-          if (!centro) return;
-          centros.push({
-            codigo: (codigo || "").toString().trim(),
-            propietario: (propietario || "").toString().trim(),
-            centro: (centro || "").toString().trim(),
-            provincia: (provincia || "").toString().trim(),
-            delegado: (delegado || "").toString().trim(),
-            aar: "No"
-          });
-        });
-
-        actualizarListaCentrosDatalist();
-        renderTablaCentros();
-        renderDelegados();
-      };
-      reader.readAsArrayBuffer(file);
-    });
-
-    /* NUEVO CENTRO */
-    $("#btnAddCentro").addEventListener("click", () => {
-      $("#nuevoCodigo").value = "";
-      $("#nuevoPropietario").value = "";
-      $("#nuevoCentro").value = "";
-      $("#nuevoProvincia").value = "";
-      $("#nuevoDelegado").value = "";
-      abrirModal("modalCentro");
-    });
-
-    $("#guardarCentro").addEventListener("click", () => {
-      const nuevo = {
-        codigo: $("#nuevoCodigo").value || "NEW",
-        propietario: $("#nuevoPropietario").value || "N/D",
-        centro: $("#nuevoCentro").value || "Centro sin nombre",
-        provincia: $("#nuevoProvincia").value || "N/D",
-        delegado: $("#nuevoDelegado").value || "N/D",
-        aar: "No"
-      };
-      centros.push(nuevo);
-      cerrarModal("modalCentro");
-      renderTablaCentros();
-      renderDelegados();
-      actualizarListaCentrosDatalist();
-    });
-
-    function actualizarListaCentrosDatalist() {
-      const dl = $("#listaCentros");
-      dl.innerHTML = "";
-      centros.forEach(c => {
-        const opt = document.createElement("option");
-        opt.value = c.centro;
-        dl.appendChild(opt);
-      });
-    }
-
-    /* CALENDARIO + VISITAS */
-    const calendarGrid = $("#calendarGrid");
-    const calTitulo    = $("#calTitulo");
-    let calYear, calMonth;
-    const visitas = [];
-    let visitaActual = null;
-
-    function initCalendar() {
-      const now = new Date();
-      calYear  = now.getFullYear();
-      calMonth = now.getMonth();
-      drawCalendar();
-    }
-
-    function drawCalendar() {
-      calendarGrid.innerHTML = "";
-      const first = new Date(calYear, calMonth, 1);
-      const dow   = (first.getDay()+6)%7;
-      const last  = new Date(calYear, calMonth+1, 0).getDate();
-
-      const formatter = new Intl.DateTimeFormat("es-ES", {month:"long", year:"numeric"});
-      calTitulo.textContent = formatter
-        .format(new Date(calYear, calMonth, 1))
-        .replace(/^\w/, c=>c.toUpperCase());
-
-      const totalCells = 42;
-      for (let i=0;i<totalCells;i++) {
-        const cell = document.createElement("div");
-        const dayNum = i - dow + 1;
-        if (dayNum < 1 || dayNum > last) {
-          cell.className = "cal-cell empty";
-        } else {
-          cell.className = "cal-cell";
-          const dateIso = formatDateISO(new Date(calYear, calMonth, dayNum));
-          cell.dataset.date = dateIso;
-          cell.innerHTML = `<div class="cal-day">${dayNum}</div>`;
-          const v = visitas.find(v=>v.fecha===dateIso);
-          if (v) {
-            const letter = v.respAudio.startsWith("A") ? "A" : "S";
-            const ev = document.createElement("div");
-            ev.className = "cal-event";
-            ev.innerHTML = `<span class="cal-dot"></span><span class="cal-letter">${letter}</span>`;
-            cell.appendChild(ev);
-          }
-          cell.addEventListener("click", ()=> abrirModalVisita(dateIso));
-        }
-        calendarGrid.appendChild(cell);
-      }
-    }
-
-    $("#calPrev").addEventListener("click", () => {
-      calMonth--;
-      if (calMonth<0){calMonth=11;calYear--;}
-      drawCalendar();
-    });
-    $("#calNext").addEventListener("click", () => {
-      calMonth++;
-      if (calMonth>11){calMonth=0;calYear++;}
-      drawCalendar();
-    });
-
-    function abrirModalVisita(fechaIso) {
-      $("#visitaFecha").value = formatDateHuman(fechaIso);
-      $("#visitaFecha").dataset.iso = fechaIso;
-      $("#visitaCentro").value = "";
-      $("#visitaResp").value = "Ariannys Rojas";
-      abrirModal("modalVisita");
-    }
-
-    $("#btnGuardarVisita").addEventListener("click", () => {
-      const iso   = $("#visitaFecha").dataset.iso;
-      const resp  = $("#visitaResp").value;
-      const centroNombre = $("#visitaCentro").value.trim();
-      if (!centroNombre) { alert("Indica el centro."); return; }
-      const centroObj = centros.find(c=>c.centro===centroNombre);
-      const delegado  = centroObj ? centroObj.delegado : "N/D";
-      visitas.push({
-        fecha: iso,
-        centro: centroNombre,
-        delegado,
-        respAudio: resp,
-        estado: "pendiente"
-      });
-      cerrarModal("modalVisita");
-      drawCalendar();
-      renderVisitas();
-    });
-
-    const visitasList = $("#visitasList");
-    function renderVisitas() {
-      visitasList.innerHTML = "";
-      visitas.sort((a,b)=>a.fecha.localeCompare(b.fecha));
-      visitas.forEach((v, idx) => {
-        const row = document.createElement("div");
-        row.className = "visita-row";
-        row.innerHTML = `
-          <div class="visita-row-line">
-            <span class="visita-row-main">${formatDateHuman(v.fecha)} · ${v.centro}</span>
-            <span class="chip-estado ${v.estado}">
-              ${v.estado === "pendiente" ? "Pendiente" :
-                 v.estado === "enproceso" ? "En proceso" : "Finalizada"}
-            </span>
-          </div>
-          <div class="visita-row-secondary">
-            Del. ${v.delegado} · Resp. Audio ${v.respAudio}
-          </div>
-          <div class="visita-actions">
-            <button class="btn-chip btn-ir-informe" data-centro="${v.centro}" data-fecha="${v.fecha}" data-idx="${idx}">Informe</button>
-          </div>
-        `;
-        visitasList.appendChild(row);
-      });
-    }
-
-    /* MODALES GENÉRICOS */
-    function abrirModal(id){ document.getElementById(id).style.display = "flex"; }
-    function cerrarModal(id){ document.getElementById(id).style.display = "none"; }
-    $$(".modal-close").forEach(el=>{
-      el.addEventListener("click", ()=> cerrarModal(el.dataset.close));
-    });
-    $$(".modal-backdrop").forEach(bg=>{
-      bg.addEventListener("click", e=>{
-        if (e.target===bg) bg.style.display="none";
-      });
-    });
-
-    /* INFORME / KPIs CENTRO */
-    let centroChartsCreated = false;
-    const centroCharts = {};
-    let centroMetricsActual = null;
-    let centroActual = null;
-
-    const dashboardAcum = {
-      procesos: 0,
-      convPrueba: 0,
-      convVenta: 0,
-      hit: 0,
-      formaciones: 0,
-      ayuda: 0,
-      aar: 0,
-      primeros: 0,
-      areas: 0,
-      n: 0
-    };
-
-    function actualizarDashboardDesdeAcum() {
-      if (!dashboardAcum.n) return;
-      if (!globalCharts.radarGeneral) return;
-      const n = dashboardAcum.n;
-      const avgProc = Math.round(dashboardAcum.procesos / n);
-      const avgPrue = Math.round(dashboardAcum.convPrueba / n);
-      const avgVent = Math.round(dashboardAcum.convVenta / n);
-      const avgHit  = Math.round(dashboardAcum.hit / n);
-      const avgForm = Math.round(dashboardAcum.formaciones / n);
-      const ayudaPct = Math.round(100 * dashboardAcum.ayuda / n);
-      const aarPct   = Math.round(100 * dashboardAcum.aar / n);
-      const primerosPct = Math.round(100 * dashboardAcum.primeros / n);
-
-      $("#kpiProcesos").textContent   = avgProc + "%";
-      $("#kpiConvPrueba").textContent = avgPrue + "%";
-      $("#kpiConvVenta").textContent  = avgVent + "%";
-      $("#kpiHIT").textContent        = avgHit + "%";
-      $("#kpiFormaciones").textContent = avgForm + "%";
-      $("#kpiAyuda").textContent      = ayudaPct === 0 ? "No" : `Sí ${ayudaPct}%`;
-      $("#kpiAar").textContent        = aarPct === 0 ? "No" : `Sí ${aarPct}%`;
-      $("#kpiPrimeros").textContent   = primerosPct === 0 ? "No" : `Sí ${primerosPct}%`;
-
-      globalCharts.radarGeneral.data.datasets[0].data = [
-        avgProc, avgPrue, avgVent, avgHit, avgForm, primerosPct
-      ];
-      globalCharts.radarGeneral.update();
-    }
-
-    function getChecklistFlags() {
-      const q = sel => document.querySelector(`input[data-kpi="${sel}"]`);
-      const isChecked = sel => !!(q(sel) && q(sel).checked);
-      const audioKeys = [
-        "audio_test","audio_screening","audio_manteleta",
-        "audio_escaparate","audio_salud","audio_renove"
-      ];
-      const audioCount = audioKeys.reduce((acc,k)=> acc + (isChecked(k)?1:0), 0);
-      const elemAudio = audioCount >= 3;
-      const aar   = centroActual ? (centroActual.aar === "Sí") : false;
-      const ayuda = isChecked("telecare") || isChecked("pia") || isChecked("telehear");
-      return {
-        aar,
-        hit: isChecked("hit"),
-        primeros: isChecked("primeros"),
-        infinity: isChecked("infinity"),
-        seguros: isChecked("seguros"),
-        tchin: isChecked("tchin"),
-        rt: isChecked("rt"),
-        elemAudio,
-        mgm: isChecked("mgm"),
-        ayuda
-      };
-    }
-
-    function calcularFormacionesYScreening() {
-      const formKeys = ["wsa","starkey","neuroventas","telecare","pia","telehear","rt"];
-      const totalForm = formKeys.length;
-      const checkedForm = formKeys.reduce((acc,k)=>{
-        const el = document.querySelector(`input[data-kpi="${k}"]`);
-        return acc + (el && el.checked ? 1 : 0);
-      },0);
-      const formaciones = totalForm ? Math.round(100 * checkedForm / totalForm) : 0;
-      const screening = document.querySelector('input[data-kpi="audio_screening"]')?.checked ? 100 : 0;
-      return { formaciones, screening };
-    }
-
-    /* 80 CRITERIOS: estructura global */
-    const criteriosGlobal = new Map(); // nombre -> {nombre, suma, total}
-    let criteriosDemoActivo = false;
-    let ultimoChecklistCentro = null;  // {centro, data}
-    const globalCharts = {};
-
-    function normalizarPorcentaje(v) {
-      if (v == null || v === "") return 0;
-      let num = v;
-      if (typeof num !== "number") {
-        num = parseFloat(String(num).replace(",", "."));
-        if (isNaN(num)) return 0;
-      }
-      if (num <= 1) return Math.round(num * 100);
-      return Math.round(num);
-    }
-
-    const clampPct = v => Math.max(0, Math.min(100, v));
-
-    function seedCriteriosDemo() {
-      criteriosDemoActivo = true;
-      criteriosGlobal.clear();
-      const total = 80;
-      for (let i = 1; i <= total; i++) {
-        const nombre = `Criterio ${i}`;
-        const pct = 60 + Math.round(Math.random()*40); // 60–100 %
-        criteriosGlobal.set(nombre, { nombre, suma: pct, total: 100 });
-      }
-      actualizarGraficoCriterios();
-    }
-
-    function parseChecklistRows(rows, tipo) {
-      const criterios = [];
-      let rStart, rEnd, colCrit, colRes, filaProc, colProc, filaHit, colHit, filaPrueba, colPrueba, filaVenta, colVenta;
-
-      if (tipo === "EXCLUSIVO") {
-        // B8–B102 / F8–F102, %proc F104, HIT F65, prueba I126, venta I127
-        rStart = 7;  rEnd = 101; colCrit = 1; colRes = 5;
-        filaProc = 103; colProc = 5;
-        filaHit  = 64;  colHit  = 5;
-        filaPrueba = 125; colPrueba = 8; // I
-        filaVenta  = 126; colVenta  = 8;
-      } else { // CORNER
-        // B7–B88 / F7–F88, %proc F90, HIT F63, prueba B92, venta B93
-        rStart = 6;  rEnd = 87; colCrit = 1; colRes = 5;
-        filaProc = 89; colProc = 5;
-        filaHit  = 62; colHit  = 5;
-        filaPrueba = 91; colPrueba = 1; // B
-        filaVenta  = 92; colVenta  = 1;
-      }
-
-      for (let r=rStart; r<=rEnd && r<rows.length; r++) {
-        const row = rows[r] || [];
-        const nombre = row[colCrit];
-        if (!nombre) continue;
-        const val = row[colRes];
-        const aplica = Number(val) === 1 ? 1 : 0;
-        criterios.push({ nombre: String(nombre).trim(), aplica });
-      }
-
-      const procesosRaw = (rows[filaProc] || [])[colProc];
-      const hitRaw      = (rows[filaHit]  || [])[colHit];
-      const pruebaRaw   = (rows[filaPrueba] || [])[colPrueba];
-      const ventaRaw    = (rows[filaVenta]  || [])[colVenta];
-
-      const procesosPct   = clampPct(normalizarPorcentaje(procesosRaw));
-      const convPruebaPct = clampPct(normalizarPorcentaje(pruebaRaw));
-      const convVentaPct  = clampPct(normalizarPorcentaje(ventaRaw));
-      const hit           = Number(hitRaw) === 1;
-
-      const areasMejora = criterios.filter(c => !c.aplica).length;
-
-      return { tipo, procesosPct, convPruebaPct, convVentaPct, hit, criterios, areasMejora };
-    }
-
-    function integrarChecklistEnMetricas(centroNombre, parsed) {
-      // si había datos demo, los limpiamos al primer checklist real
-      if (criteriosDemoActivo) {
-        criteriosGlobal.clear();
-        criteriosDemoActivo = false;
-      }
-
-      parsed.criterios.forEach(c => {
-        const key = c.nombre || "Criterio";
-        let obj = criteriosGlobal.get(key);
-        if (!obj) {
-          obj = { nombre:key, suma:0, total:0 };
-          criteriosGlobal.set(key, obj);
-        }
-        obj.suma  += c.aplica ? 1 : 0;
-        obj.total += 1;
-      });
-      actualizarGraficoCriterios();
-    }
-
-    function actualizarGraficoCriterios() {
-      const lista = Array.from(criteriosGlobal.values()).map(o => ({
-        nombre: o.nombre,
-        pct: o.total ? Math.round(100 * o.suma / o.total) : 0
-      }));
-      if (!lista.length) return;
-
-      lista.sort((a,b)=>b.pct - a.pct);
-      const maxCriterios = 82;
-      const top = lista.slice(0, maxCriterios);
-      const labels = top.map(i => i.nombre);
-      const data   = top.map(i => i.pct);
-      const colors = top.map(i =>
-        i.pct >= 100 ? "#16a34a" :     // 100% Óptimo
-        i.pct >= 85  ? "#22c55e" :     // 85–99% Muy bien
-                       "#ef4444"       // <85% Mejorable
-      );
-
-      const msg = $("#criteriosEmptyMsg");
-      if (msg) msg.style.display = "none";
-
-      // altura del canvas según nº de criterios -> scroll en el contenedor
-      const canvas = document.getElementById("chartCriteriosDetalle");
-      if (canvas) {
-        const pxPerRow = 18;
-        canvas.style.height = (top.length * pxPerRow) + "px";
-      }
-
-      if (!globalCharts.criteriosDetalle) {
-        const ctx = document.getElementById("chartCriteriosDetalle").getContext("2d");
-        globalCharts.criteriosDetalle = new Chart(ctx, {
-          type: "bar",
-          data: {
-            labels,
-            datasets: [{
-              label: "% aplicación criterio",
-              data,
-              backgroundColor: colors,
-              borderWidth: 1
-            }]
-          },
-          options: {
-            indexAxis: "y",
-            animation: false,
-            plugins: {
-              legend: { display:false },
-              tooltip: {
-                callbacks: {
-                  label: ctx => `${ctx.parsed.x}%`
-                }
-              }
-            },
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-              x: {
-                min: 0,
-                max: 110,
-                ticks: {
-                  color: getComputedStyle(document.body).getPropertyValue("--text-muted"),
-                  callback: v => v + "%"
-                },
-                grid: { color: "rgba(31,41,55,0.3)" }
-              },
-              y: {
-                ticks: {
-                  color: getComputedStyle(document.body).getPropertyValue("--text-muted"),
-                  font: { size: 9 }
-                },
-                grid: { display:false }
-              }
-            }
-          }
-        });
-      } else {
-        const ch = globalCharts.criteriosDetalle;
-        ch.data.labels = labels;
-        ch.data.datasets[0].data = data;
-        ch.data.datasets[0].backgroundColor = colors;
-        ch.update();
-      }
-    }
-
-    function procesarChecklist(file, centroNombre) {
-      const reader = new FileReader();
-      reader.onload = evt => {
-        try {
-          const data = new Uint8Array(evt.target.result);
-          const workbook = XLSX.read(data, { type: "array" });
-          const sheetName = workbook.SheetNames[0];
-          const sheet = workbook.Sheets[sheetName];
-          const rows = XLSX.utils.sheet_to_json(sheet, { header:1 });
-          const nameUpper = file.name.toUpperCase();
-          let tipo = "CORNER";
-          if (nameUpper.includes("EXCLUSIVO")) tipo = "EXCLUSIVO";
-          else if (nameUpper.includes("CORNER")) tipo = "CORNER";
-          const parsed = parseChecklistRows(rows, tipo);
-          ultimoChecklistCentro = { centro: centroNombre, data: parsed };
-          integrarChecklistEnMetricas(centroNombre, parsed);
-          // KPIs de centro desde checklist
-          $("#kpiCentroProcesos").textContent = parsed.procesosPct + "%";
-          $("#kpiCentroPrueba").textContent   = parsed.convPruebaPct + "%";
-          $("#kpiCentroVenta").textContent    = parsed.convVentaPct + "%";
-          $("#kpiCentroHit").textContent      = parsed.hit ? "Sí" : "No";
-          actualizarChartsCentro();
-        } catch (err) {
-          console.error(err);
-          alert("No se ha podido leer el checklist. Revisa el formato (CORNER / EXCLUSIVO).");
-        }
-      };
-      reader.readAsArrayBuffer(file);
-    }
-
-    /* CHARTS CENTRO */
-    function crearChartsCentro() {
-      if (centroChartsCreated) return;
-      centroChartsCreated = true;
-      const radarCtx = document.getElementById("chartCentroRadar").getContext("2d");
-      centroCharts.radar = new Chart(radarCtx, {
-        type: "radar",
-        data: {
-          labels: ["Formaciones","1os auxilios","Procesos","Conv. prueba","Conv. cierre"],
-          datasets: [{
-            label: "Nivel (%)",
-            data: [80,40,90,82,78],
-            backgroundColor: "rgba(56,189,248,0.2)",
-            borderColor: "#38bdf8",
-            borderWidth: 2,
-            pointBackgroundColor: "#38bdf8"
-          }]
-        },
-        options: {
-          plugins: { legend: { display: false } },
-          scales: {
-            r: {
-              angleLines: { color: "rgba(148,163,184,0.3)" },
-              grid: { color: "rgba(148,163,184,0.3)" },
-              pointLabels: { color: getComputedStyle(document.body).getPropertyValue("--text-main"), font:{size:10} },
-              ticks: { display:false, max:100, min:0 }
-            }
-          }
-        }
-      });
-
-      const barrasCtx = document.getElementById("chartCentroSiNoBarras").getContext("2d");
-      centroCharts.barras = new Chart(barrasCtx, {
-        type: "bar",
-        data: {
-          labels: ["AAR","HIT","1os aux.","Infinity","Seguros","Tchin","RT","Elem. audio","MGM"],
-          datasets: [{
-            label: "1 = Sí, 0 = No",
-            data: [1,1,0,1,0,0,1,1,0],
-            backgroundColor: [
-              "#22c55e","#3b82f6","#f97316","#ef4444",
-              "#22c55e","#3b82f6","#f97316","#ef4444","#22c55e"
-            ],
-            borderWidth: 1
-          }]
-        },
-        options: {
-          plugins: { legend: { display:false } },
-          responsive:true,
-          maintainAspectRatio:false,
-          scales:{
-            x:{ ticks:{ color:getComputedStyle(document.body).getPropertyValue("--text-muted"), font:{size:10} },
-                grid:{ display:false } },
-            y:{ ticks:{ color:getComputedStyle(document.body).getPropertyValue("--text-muted"), stepSize:1, max:1, min:0 },
-                grid:{ color:"rgba(30,64,175,0.3)" } }
-          }
-        }
-      });
-
-      const donutCtx = document.getElementById("chartCentroSiNoDonut").getContext("2d");
-      centroCharts.donut = new Chart(donutCtx, {
-        type: "doughnut",
-        data: {
-          labels: ["Sí","No"],
-          datasets: [{
-            data: [6,3],
-            backgroundColor: ["#22c55e","#ef4444"],
-            borderWidth: 1
-          }]
-        },
-        options: {
-          plugins:{ legend:{ position:"bottom", labels:{ color: getComputedStyle(document.body).getPropertyValue("--text-main"), font:{size:10} } } },
-          responsive:true,
-          maintainAspectRatio:false,
-          cutout:"55%"
-        }
-      });
-
-      const procMCtx = document.getElementById("chartCentroProcesosMes").getContext("2d");
-      centroCharts.procMes = new Chart(procMCtx, {
-        type:"bar",
-        data:{
-          labels:["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"],
-          datasets:[
-            {
-              type:"line",
-              label:"Procesos %",
-              data:[78,80,82,85,87,88,89,90,91,92,92,93],
-              borderWidth:2,
-              tension:.35,
-              borderColor:"#3b82f6",
-              pointRadius:2,
-              yAxisID:"y"
-            },
-            {
-              type:"bar",
-              label:"Áreas de mejora",
-              data:[6,6,5,5,4,4,3,3,3,2,2,2],
-              backgroundColor:"rgba(239,68,68,0.5)",
-              yAxisID:"y"
-            }
-          ]
-        },
-        options:{
-          responsive:true,
-          maintainAspectRatio:false,
-          plugins:{ legend:{ labels:{ color:getComputedStyle(document.body).getPropertyValue("--text-main"), font:{size:10} } } },
-          scales:{
-            x:{ ticks:{ color:getComputedStyle(document.body).getPropertyValue("--text-muted"), font:{size:10} },
-                grid:{ color:"rgba(31,41,55,0.3)" } },
-            y:{ ticks:{ color:getComputedStyle(document.body).getPropertyValue("--text-muted"), font:{size:10} },
-                grid:{ color:"rgba(31,41,55,0.3)" } }
-          }
-        }
-      });
-
-      const hitMCtx = document.getElementById("chartCentroHitMes").getContext("2d");
-      centroCharts.hitMes = new Chart(hitMCtx, {
-        type:"bar",
-        data:{
-          labels:["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"],
-          datasets:[{
-            label:"HIT",
-            data:[70,72,74,76,78,80,82,84,85,86,86,87],
-            backgroundColor:"#f97316"
-          }]
-        },
-        options:{
-          responsive:true,
-          maintainAspectRatio:false,
-          plugins:{ legend:{ display:false } },
-          scales:{
-            x:{ ticks:{ color:getComputedStyle(document.body).getPropertyValue("--text-muted"), font:{size:10} },
-                grid:{ display:false } },
-            y:{ ticks:{ color:getComputedStyle(document.body).getPropertyValue("--text-muted"), font:{size:10} },
-                grid:{ color:"rgba(31,41,55,0.3)" } }
-          }
-        }
-      });
-
-      const areasMCtx = document.getElementById("chartCentroAreasMes").getContext("2d");
-      centroCharts.areasMes = new Chart(areasMCtx, {
-        type:"bar",
-        data:{
-          labels:["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"],
-          datasets:[{
-            label:"Áreas de mejora",
-            data:[6,6,5,5,4,4,3,3,3,2,2,2],
-            backgroundColor:"#ef4444"
-          }]
-        },
-        options:{
-          responsive:true,
-          maintainAspectRatio:false,
-          plugins:{ legend:{ display:false } },
-          scales:{
-            x:{ ticks:{ color:getComputedStyle(document.body).getPropertyValue("--text-muted"), font:{size:10} },
-                grid:{ display:false } },
-            y:{ ticks:{ color:getComputedStyle(document.body).getPropertyValue("--text-muted"), font:{size:10} },
-                grid:{ color:"rgba(31,41,55,0.3)" } }
-          }
-        }
-      });
-
-      const topAreasCtx = document.getElementById("chartCentroTopAreas").getContext("2d");
-      centroCharts.topAreas = new Chart(topAreasCtx, {
-        type:"bar",
-        data:{
-          labels:["Seguimiento","Telecare","Escaparate","Stock","Formación","AAR","Postventa","Documentación","Citas","Otros"],
-          datasets:[{
-            label:"Nº incidencias",
-            data:[5,4,4,3,3,3,2,2,2,1],
-            backgroundColor:"#3b82f6"
-          }]
-        },
-        options:{
-          indexAxis:"y",
-          responsive:true,
-          maintainAspectRatio:false,
-          plugins:{ legend:{ display:false } },
-          scales:{
-            x:{ ticks:{ color:getComputedStyle(document.body).getPropertyValue("--text-muted"), font:{size:10} },
-                grid:{ color:"rgba(31,41,55,0.3)" } },
-            y:{ ticks:{ color:getComputedStyle(document.body).getPropertyValue("--text-muted"), font:{size:10} },
-                grid:{ display:false } }
-          }
-        }
-      });
-
-      const procResCtx = document.getElementById("chartCentroProcesosResumen").getContext("2d");
-      centroCharts.procResumen = new Chart(procResCtx, {
-        type:"doughnut",
-        data:{
-          labels:["Aplicados","Pendiente"],
-          datasets:[{
-            data:[90,10],
-            backgroundColor:["#22c55e","#6b7280"],
-            borderWidth:1
-          }]
-        },
-        options:{
-          plugins:{ legend:{ position:"bottom", labels:{ color:getComputedStyle(document.body).getPropertyValue("--text-main"), font:{size:10} } } },
-          responsive:true,
-          maintainAspectRatio:false,
-          cutout:"55%"
-        }
-      });
-
-      const areasResCtx = document.getElementById("chartCentroAreasResumen").getContext("2d");
-      centroCharts.areasResumen = new Chart(areasResCtx, {
-        type:"bar",
-        data:{
-          labels:["Áreas mejora","Correcto"],
-          datasets:[{
-            data:[4,10],
-            backgroundColor:["#ef4444","#22c55e"]
-          }]
-        },
-        options:{
-          plugins:{ legend:{ display:false } },
-          responsive:true,
-          maintainAspectRatio:false,
-          scales:{
-            x:{ ticks:{ color:getComputedStyle(document.body).getPropertyValue("--text-muted"), font:{size:10} },
-                grid:{ display:false } },
-            y:{ ticks:{ color:getComputedStyle(document.body).getPropertyValue("--text-muted"), font:{size:10} },
-                grid:{ color:"rgba(31,41,55,0.3)" } }
-          }
-        }
-      });
-
-      const convResCtx = document.getElementById("chartCentroConversionResumen").getContext("2d");
-      centroCharts.convResumen = new Chart(convResCtx, {
-        type:"bar",
-        data:{
-          labels:["Prueba","Venta"],
-          datasets:[{
-            data:[82,78],
-            backgroundColor:["#38bdf8","#22c55e"]
-          }]
-        },
-        options:{
-          plugins:{ legend:{ display:false } },
-          responsive:true,
-          maintainAspectRatio:false,
-          scales:{
-            x:{ ticks:{ color:getComputedStyle(document.body).getPropertyValue("--text-muted"), font:{size:10} },
-                grid:{ display:false } },
-            y:{ ticks:{ color:getComputedStyle(document.body).getPropertyValue("--text-muted"), font:{size:10} },
-                grid:{ color:"rgba(31,41,55,0.3)" }, max:100, min:0 }
-          }
-        }
-      });
-    }
-
-    function actualizarChartsCentro() {
-      if (!centroChartsCreated) return;
-      const { formaciones, screening } = calcularFormacionesYScreening();
-      let procesos   = 90;
-      let convPrueba = 82;
-      let convVenta  = 78;
-      let hitVal     = 80;
-      let areasMejora = 4;
-
-      const parsed = (ultimoChecklistCentro && centroActual && ultimoChecklistCentro.centro === centroActual.centro)
-        ? ultimoChecklistCentro.data
-        : null;
-
-      if (parsed) {
-        procesos    = parsed.procesosPct;
-        convPrueba  = parsed.convPruebaPct;
-        convVenta   = parsed.convVentaPct;
-        areasMejora = parsed.areasMejora;
-        hitVal      = parsed.hit ? 90 : 60;
-      }
-
-      const flags = getChecklistFlags();
-      const primerosPct = flags.primeros ? 100 : 0;
-
-      $("#kpiCentroProcesos").textContent = procesos + "%";
-      $("#kpiCentroPrueba").textContent   = convPrueba + "%";
-      $("#kpiCentroVenta").textContent    = convVenta + "%";
-      $("#kpiCentroHit").textContent      = hitVal + "%";
-
-      centroCharts.radar.data.datasets[0].data = [
-        formaciones,
-        primerosPct,
-        procesos,
-        convPrueba,
-        convVenta
-      ];
-      centroCharts.radar.update();
-
-      const valores = [
-        flags.aar, flags.hit, flags.primeros, flags.infinity, flags.seguros,
-        flags.tchin, flags.rt, flags.elemAudio, flags.mgm
-      ].map(b => b ? 1 : 0);
-      centroCharts.barras.data.datasets[0].data = valores;
-      centroCharts.barras.update();
-
-      const siCount = valores.filter(v => v === 1).length;
-      const noCount = valores.length - siCount;
-      centroCharts.donut.data.datasets[0].data = [siCount, noCount];
-      centroCharts.donut.update();
-
-      centroCharts.procResumen.data.datasets[0].data = [procesos, 100-procesos];
-      centroCharts.procResumen.update();
-
-      centroCharts.areasResumen.data.datasets[0].data = [areasMejora, Math.max(0, 10-areasMejora)];
-      centroCharts.areasResumen.update();
-
-      centroCharts.convResumen.data.datasets[0].data = [convPrueba, convVenta];
-      centroCharts.convResumen.update();
-
-      centroMetricsActual = { procesos, convPrueba, convVenta, hit: hitVal, formaciones, screening, primeros: primerosPct, areasMejora };
-    }
-
-    document.addEventListener("change", e => {
-      if (e.target.matches("input[data-kpi]")) {
-        crearChartsCentro();
-        actualizarChartsCentro();
-      }
-    });
-
-    function irAInforme(centroNombre, fechaIso) {
-      const c = centros.find(x => x.centro === centroNombre) || centros[0];
-      if (!c) { alert("No hay centros cargados todavía."); return; }
-      centroActual = c;
-      $$(".nav-item").forEach(i => i.classList.toggle("active", i.dataset.page === "informe"));
-      pages.forEach(p => p.classList.toggle("active", p.dataset.page === "informe"));
-      $("#infCentro").value    = c.centro;
-      $("#infProvincia").value = c.provincia;
-      $("#infDelegado").value  = c.delegado;
-      $("#infTipo").value      = tipoCentro(c.centro);
-      $("#infRespAudio").value = "Ariannys Rojas / Sonia Guasque";
-      $("#infFecha").value     = fechaIso ? formatDateHuman(fechaIso) : formatDateHuman(new Date().toISOString().slice(0,10));
-      crearChartsCentro();
-      actualizarChartsCentro();
-    }
-
-    document.addEventListener("click", e => {
-      if (e.target.matches(".btn-ir-informe")) {
-        const idx = parseInt(e.target.dataset.idx, 10);
-        visitaActual = visitas[idx];
-        if (visitaActual) {
-          visitaActual.estado = "enproceso";
-          renderVisitas();
-          irAInforme(visitaActual.centro, visitaActual.fecha);
-        }
-      }
-      if (e.target.matches(".btn-informe-centro")) {
-        const centroNombre = e.target.dataset.centro;
-        visitaActual = null;
-        irAInforme(centroNombre, formatDateISO(new Date()));
-      }
-    });
-
-    $("#btnAdjuntarChecklist").addEventListener("click", ()=> $("#inputChecklist").click());
+    /* -------------------------------------------------------------------------- */
+    /* LÓGICA DE LECTURA DE CHECKLISTS (CORNER VS EXCLUSIVO)            */
+    /* -------------------------------------------------------------------------- */
+    
+    // Adjuntar archivo
+    $("#btnAdjuntarChecklist").addEventListener("click", () => $("#inputChecklist").click());
+    
     $("#inputChecklist").addEventListener("change", e => {
       const file = e.target.files[0];
-      if (file) {
-        $("#nombreChecklist").textContent = file.name;
-        const centroNombre = centroActual ? centroActual.centro : "Centro sin asignar";
-        procesarChecklist(file, centroNombre);
+      if(!file) return;
+      $("#nombreChecklist").textContent = file.name;
+      leerChecklist(file);
+    });
+
+    function leerChecklist(file) {
+      const reader = new FileReader();
+      reader.onload = evt => {
+         try {
+           const data = new Uint8Array(evt.target.result);
+           const workbook = XLSX.read(data, { type: "array" });
+           const sheetName = workbook.SheetNames[0];
+           const sheet = workbook.Sheets[sheetName];
+           const rows = XLSX.utils.sheet_to_json(sheet, { header:1 }); // Leer como array de arrays
+           
+           // DETECTAR TIPO POR NOMBRE DE ARCHIVO
+           const nameUpper = file.name.toUpperCase();
+           let tipo = "CORNER"; // Default
+           if (nameUpper.includes("EXCLUSIVO")) tipo = "EXCLUSIVO";
+           else if (nameUpper.includes("CORNER")) tipo = "CORNER";
+
+           console.log("Procesando Checklist tipo:", tipo);
+           procesarFilas(rows, tipo);
+
+         } catch (err) {
+           console.error(err);
+           alert("Error al leer el Excel. Asegúrate de que es un archivo válido.");
+         }
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    function procesarFilas(rows, tipo) {
+      // DEFINICIÓN DE COORDENADAS SEGÚN TIPO
+      // Nota: Los índices de array empiezan en 0. (Fila Excel 8 = índice 7)
+      
+      let rStart, rEnd, colCrit, colRes;     // Para leer los 80 criterios
+      let filaProc, colProc;                 // % Procesos
+      let filaHit, colHit;                   // HIT
+      let filaPrueba, colPrueba;             // % Conv Prueba
+      let filaVenta, colVenta;               // % Conv Venta
+
+      if (tipo === "EXCLUSIVO") {
+        // --- CONFIGURACIÓN EXCLUSIVO ---
+        rStart = 7;  rEnd = 101;  // Filas donde están los criterios (aprox)
+        colCrit = 1; colRes = 5;  // Columna B (índice 1) Nombre, F (índice 5) Resultado (1/0)
+        
+        filaProc = 103; colProc = 5; // F104
+        filaHit  = 64;  colHit  = 5; // F65
+        filaPrueba = 125; colPrueba = 8; // I126
+        filaVenta  = 126; colVenta  = 8; // I127
+        
       } else {
-        $("#nombreChecklist").textContent = "";
+        // --- CONFIGURACIÓN CORNER ---
+        rStart = 6;  rEnd = 87;
+        colCrit = 1; colRes = 5; 
+        
+        filaProc = 89; colProc = 5; // F90
+        filaHit  = 62; colHit  = 5; // F63
+        filaPrueba = 91; colPrueba = 1; // B92
+        filaVenta  = 92; colVenta  = 1; // B93
       }
-    });
 
-    $$(".imagen-preview").forEach(div => {
-      div.addEventListener("click", () => {
-        const target = div.dataset.target;
-        const input = document.querySelector(`input[data-input-img="${target}"]`);
-        if (input) input.click();
-      });
-    });
-    $$('input[data-input-img]').forEach(input => {
-      input.addEventListener("change", e => {
-        const file = e.target.files[0];
-        const target = e.target.dataset.inputImg;
-        const cont = document.querySelector(`.imagen-preview[data-target="${target}"]`);
-        if (file && cont) {
-          const reader = new FileReader();
-          reader.onload = evt => {
-            cont.innerHTML = `<img src="${evt.target.result}" alt="Imagen ${target}">`;
-          };
-          reader.readAsDataURL(file);
-        }
-      });
-    });
-
-    $("#btnGuardarInforme").addEventListener("click", () => {
-      actualizarChartsCentro();
-      if (centroMetricsActual && centroActual) {
-        const flags = getChecklistFlags();
-        dashboardAcum.procesos   += centroMetricsActual.procesos;
-        dashboardAcum.convPrueba += centroMetricsActual.convPrueba;
-        dashboardAcum.convVenta  += centroMetricsActual.convVenta;
-        dashboardAcum.hit        += centroMetricsActual.hit;
-        dashboardAcum.formaciones+= centroMetricsActual.formaciones;
-        dashboardAcum.ayuda      += flags.ayuda ? 1 : 0;
-        dashboardAcum.aar        += flags.aar ? 1 : 0;
-        dashboardAcum.primeros   += flags.primeros ? 1 : 0;
-        dashboardAcum.areas      += centroMetricsActual.areasMejora || 0;
-        dashboardAcum.n += 1;
-        actualizarDashboardDesdeAcum();
-        informesPorCentro[centroActual.centro] = (informesPorCentro[centroActual.centro] || 0) + 1;
-        renderTablaCentros();
+      // 1. LEER CRITERIOS
+      criteriosGlobal.clear();
+      const labels = [];
+      const dataVals = [];
+      
+      for(let r = rStart; r <= rEnd && r < rows.length; r++) {
+         const row = rows[r] || [];
+         const nombre = row[colCrit];
+         const val = row[colRes];
+         if(nombre) {
+            labels.push(nombre);
+            // Si es 1 es "Sí", si es 0 es "No". Convertimos a % para el gráfico
+            dataVals.push(val == 1 ? 100 : 0); 
+         }
       }
-      if (visitaActual) {
-        visitaActual.estado = "finalizada";
-        renderVisitas();
-        visitaActual = null;
-      }
-      alert("Informe guardado (demo). Se han actualizado los KPIs del dashboard.");
-    });
 
-    /* CHARTS DASHBOARD GLOBAL */
-    function initDashboardCharts() {
-      const radarCtx = document.getElementById("chartRadarGeneral").getContext("2d");
-      globalCharts.radarGeneral = new Chart(radarCtx, {
-        type:"radar",
-        data:{
-          labels:["% procesos","Conv. prueba","Conv. venta","HIT","Formaciones","1os auxilios"],
-          datasets:[{
-            label:"Promedio %",
-            data:[85,80,78,82,60,40],
-            backgroundColor:"rgba(96,165,250,0.2)",
-            borderColor:"#60a5fa",
-            borderWidth:2,
-            pointBackgroundColor:"#60a5fa"
-          }]
-        },
-        options:{
-          plugins:{ legend:{ display:false } },
-          scales:{
-            r:{
-              angleLines:{ color:"rgba(148,163,184,0.3)" },
-              grid:{ color:"rgba(148,163,184,0.3)" },
-              pointLabels:{ color:getComputedStyle(document.body).getPropertyValue("--text-main"), font:{size:10} },
-              ticks:{ display:false, min:0, max:100 }
-            }
-          }
-        }
-      });
+      // 2. LEER KPIS PRINCIPALES
+      // Función auxiliar para limpiar %
+      const cleanPct = (v) => {
+         if(!v) return 0;
+         if(typeof v === 'number') return v <= 1 ? Math.round(v*100) : v;
+         // Si viene como string "85%"
+         let s = String(v).replace('%','').replace(',','.');
+         return parseFloat(s) || 0;
+      };
 
-      const procCtx = document.getElementById("chartProcesosMes").getContext("2d");
-      globalCharts.procMes = new Chart(procCtx, {
-        type:"bar",
-        data:{
-          labels:["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"],
-          datasets:[
-            {
-              type:"line",
-              label:"Procesos %",
-              data:[80,82,83,84,85,86,87,88,88,89,89,90],
-              borderColor:"#38bdf8",
-              backgroundColor:"rgba(56,189,248,0.2)",
-              tension:.35,
-              borderWidth:2,
-              pointRadius:2,
-              yAxisID:"y"
-            },
-            {
-              type:"bar",
-              label:"Áreas de mejora",
-              data:[7,7,6,6,5,5,4,4,3,3,3,2],
-              backgroundColor:"rgba(239,68,68,0.5)",
-              yAxisID:"y"
-            }
-          ]
-        },
-        options:{
-          plugins:{ legend:{ labels:{ color:getComputedStyle(document.body).getPropertyValue("--text-main"), font:{size:10} } } },
-          responsive:true,
-          maintainAspectRatio:false,
-          scales:{
-            x:{ ticks:{ color:getComputedStyle(document.body).getPropertyValue("--text-muted"), font:{size:10} },
-                grid:{ color:"rgba(31,41,55,0.3)" } },
-            y:{ ticks:{ color:getComputedStyle(document.body).getPropertyValue("--text-muted"), font:{size:10} },
-                grid:{ color:"rgba(31,41,55,0.3)" } }
-          }
-        }
-      });
+      const valProc = cleanPct((rows[filaProc]||[])[colProc]);
+      const valHit  = (rows[filaHit]||[])[colHit] == 1 ? "Sí" : "No";
+      const valPrueba = cleanPct((rows[filaPrueba]||[])[colPrueba]);
+      const valVenta  = cleanPct((rows[filaVenta]||[])[colVenta]);
 
-      const areasCtx = document.getElementById("chartAreasMes").getContext("2d");
-      globalCharts.areasMes = new Chart(areasCtx, {
-        type:"bar",
-        data:{
-          labels:["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"],
-          datasets:[{
-            label:"Áreas de mejora",
-            data:[7,7,6,6,5,5,4,4,3,3,3,2],
-            backgroundColor:"#ef4444"
-          }]
-        },
-        options:{
-          plugins:{ legend:{ display:false } },
-          responsive:true,
-          maintainAspectRatio:false,
-          scales:{
-            x:{ ticks:{ color:getComputedStyle(document.body).getPropertyValue("--text-muted"), font:{size:10} },
-                grid:{ display:false } },
-            y:{ ticks:{ color:getComputedStyle(document.body).getPropertyValue("--text-muted"), font:{size:10} },
-                grid:{ color:"rgba(31,41,55,0.3)" } }
-          }
-        }
-      });
+      // 3. ACTUALIZAR INTERFAZ
+      $("#kpiCentroProcesos").textContent = valProc + "%";
+      $("#kpiCentroHit").textContent = valHit;
+      $("#kpiCentroPrueba").textContent = valPrueba + "%";
+      $("#kpiCentroVenta").textContent = valVenta + "%";
 
-      const primerosCtx = document.getElementById("chartPrimerosMes").getContext("2d");
-      globalCharts.primerosMes = new Chart(primerosCtx, {
-        type:"bar",
-        data:{
-          labels:["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"],
-          datasets:[{
-            label:"1os auxilios %",
-            data:[40,45,50,55,60,65,70,72,74,76,78,80],
-            backgroundColor:"#22c55e"
-          }]
-        },
-        options:{
-          plugins:{ legend:{ display:false } },
-          responsive:true,
-          maintainAspectRatio:false,
-          scales:{
-            x:{ ticks:{ color:getComputedStyle(document.body).getPropertyValue("--text-muted"), font:{size:10} },
-                grid:{ display:false } },
-            y:{ ticks:{ color:getComputedStyle(document.body).getPropertyValue("--text-muted"), font:{size:10} },
-                grid:{ color:"rgba(31,41,55,0.3)" }, max:100, min:0 }
-          }
-        }
-      });
-
-      const topCtx = document.getElementById("chartTopAreas").getContext("2d");
-      globalCharts.topAreas = new Chart(topCtx, {
-        type:"bar",
-        data:{
-          labels:["Seguimiento","Telecare","Escaparate","Stock","Formación","AAR","Postventa","Documentación","Citas","Otros"],
-          datasets:[{
-            label:"Nº incidencias",
-            data:[12,10,9,8,7,6,5,4,4,3],
-            backgroundColor:"#3b82f6"
-          }]
-        },
-        options:{
-          indexAxis:"y",
-          plugins:{ legend:{ display:false } },
-          responsive:true,
-          maintainAspectRatio:false,
-          scales:{
-            x:{ ticks:{ color:getComputedStyle(document.body).getPropertyValue("--text-muted"), font:{size:10} },
-                grid:{ color:"rgba(31,41,55,0.3)" } },
-            y:{ ticks:{ color:getComputedStyle(document.body).getPropertyValue("--text-muted"), font:{size:10} },
-                grid:{ display:false } }
-          }
-        }
-      });
-
-      const aarHitCtx = document.getElementById("chartAarHitDonut").getContext("2d");
-      globalCharts.aarHit = new Chart(aarHitCtx, {
-        type:"doughnut",
-        data:{
-          labels:["Centros con AAR","Centros sin AAR"],
-          datasets:[{
-            data:[30,20],
-            backgroundColor:["#22c55e","#ef4444"],
-            borderWidth:1
-          }]
-        },
-        options:{
-          plugins:{ legend:{ position:"bottom", labels:{ color:getComputedStyle(document.body).getPropertyValue("--text-main"), font:{size:10} } } },
-          responsive:true,
-          maintainAspectRatio:false,
-          cutout:"55%"
-        }
-      });
+      // 4. ACTUALIZAR GRÁFICOS DEL INFORME
+      updateCentroCharts(valProc, valPrueba, valVenta);
+      updateCriteriosChart(labels, dataVals); // Gráfico detalle 80 criterios
+      
+      alert(`Checklist ${tipo} cargado correctamente.\nProcesos: ${valProc}% | HIT: ${valHit}`);
     }
 
-    /* DEMO CENTROS */
-    function cargarCentrosDemo() {
-      const demo = [
-        { codigo:"4ABB", propietario:"MAZA Oriol", centro:"PAMPLONA C. Exclusivo", provincia:"NAVARRA", delegado:"Sonia Godino" },
-        { codigo:"4AFH", propietario:"MAZA Oriol", centro:"PAMPLONA Calle Sancho el Mayor", provincia:"NAVARRA", delegado:"Sonia Godino" },
-        { codigo:"4AWQ", propietario:"MAZA Oriol", centro:"PAMPLONA Carlos III", provincia:"NAVARRA", delegado:"Sonia Godino" },
-        { codigo:"4MRM", propietario:"AAO", centro:"REINA DE MERCEDES", provincia:"Madrid", delegado:"Sergio Perán" },
-        { codigo:"4PEC", propietario:"AAO", centro:"SANTANDER CC PEÑACASTILLO", provincia:"Santander", delegado:"Sergio Perán" },
-        { codigo:"4AXF", propietario:"URRUTIA Esteban", centro:"SANTIAGO DE COMPOSTELA RUA DA ROSA", provincia:"A Coruña", delegado:"Daniel Chazo" },
-        { codigo:"4TOL", propietario:"AAO", centro:"TORRELAVEGA CARREFOUR CC", provincia:"Santander", delegado:"Sergio Perán" },
-        { codigo:"4ZDE", propietario:"AAO", centro:"ZARAGOZA CALLE DELICIAS", provincia:"ZARAGOZA", delegado:"ENERITZ ARANGUREN" },
-        { codigo:"4AKI", propietario:"PIEDRAFITA Rocio", centro:"CC LOS VALLES", provincia:"MADRID", delegado:"Blanca Fdez. de la Pradilla" },
-        { codigo:"4MLG", propietario:"AAO", centro:"FUENLABRADA Calle Leganes", provincia:"MADRID", delegado:"Marisa Carmona" }
-      ];
-      demo.forEach(c => centros.push(c));
-      actualizarListaCentrosDatalist();
-      renderTablaCentros();
-      renderDelegados();
+    /* -------------------------------------------------------------------------- */
+    /* CHARTS HELPERS                                */
+    /* -------------------------------------------------------------------------- */
+
+    function initCentroCharts() {
+       if(centroCharts.radar) return; // Ya creados
+       
+       // Radar Centro
+       const ctxR = document.getElementById("chartCentroRadar");
+       centroCharts.radar = new Chart(ctxR, {
+         type: 'radar',
+         data: {
+           labels: ['Procesos', 'Prueba', 'Venta', 'Formación', 'Auditoría'],
+           datasets: [{ label: 'Centro Actual', data: [0,0,0,0,0], borderColor: '#38bdf8', backgroundColor: 'rgba(56,189,248,0.2)' }]
+         },
+         options: { scales: { r: { min: 0, max: 100, ticks: { display: false } } }, plugins: { legend: { display: false } } }
+       });
+       
+       // Barras Centro
+       const ctxB = document.getElementById("chartCentroSiNoBarras");
+       centroCharts.barras = new Chart(ctxB, {
+         type: 'bar',
+         data: { labels: ['AAR','HIT','Infinity'], datasets: [{ label: '1=Sí', data:[1,0,1], backgroundColor: ['#22c55e','#ef4444','#22c55e'] }] },
+         options: { plugins: { legend: { display: false } }, scales: { y: { display:false } } }
+       });
+
+       // Criterios Detalle (El grande del dashboard)
+       const ctxDet = document.getElementById("chartCriteriosDetalle");
+       globalCharts.criterios = new Chart(ctxDet, {
+         type: 'bar',
+         data: { labels: [], datasets: [{ label: '% Cumplimiento', data: [], backgroundColor: '#38bdf8' }] },
+         options: { indexAxis: 'y', maintainAspectRatio: false, plugins: { legend: { display:false } } }
+       });
     }
 
+    function updateCentroCharts(proc, prueba, venta) {
+       // Actualizamos el radar con los datos leídos
+       if(centroCharts.radar) {
+         centroCharts.radar.data.datasets[0].data = [proc, prueba, venta, 80, 90]; // 80 y 90 son placeholders
+         centroCharts.radar.update();
+       }
+    }
+
+    function updateCriteriosChart(labels, data) {
+       // Actualizamos el gráfico de barras grande
+       if(globalCharts.criterios) {
+         globalCharts.criterios.data.labels = labels;
+         globalCharts.criterios.data.datasets[0].data = data;
+         // Ajustar altura canvas según cantidad de datos
+         document.getElementById("chartCriteriosDetalle").parentNode.style.height = (labels.length * 20 + 50) + "px";
+         globalCharts.criterios.resize();
+         globalCharts.criterios.update();
+         
+         // Ocultar mensaje vacío
+         $("#criteriosEmptyMsg").style.display = "none";
+       }
+    }
+
+    /* --- INICIALIZACIÓN --- */
     window.addEventListener("load", () => {
-      cargarCentrosDemo();
-      initCalendar();
-      seedCriteriosDemo();          // datos demo para los 80 criterios
-      initDashboardCharts();
-      actualizarDashboardDesdeAcum();
+       renderCentros();
+       // Inicializar gráficos dummy del dashboard home
+       new Chart(document.getElementById("chartRadarGeneral"), {
+         type:'radar', data: { labels:['Procesos','Ventas','HIT'], datasets:[{data:[80,75,90], label:'Global'}] }
+       });
     });
+    
+    // Listeners Modal Nuevo Centro
+    $("#btnAddCentro").addEventListener("click", ()=> $("#modalCentro").style.display="flex");
+    $$(".modal-close").forEach(el => el.addEventListener("click", ()=> $(".modal-backdrop").style.display="none"));
+    
+    $("#guardarCentro").addEventListener("click", ()=> {
+       centros.push({
+         codigo: "NEW", propietario: "Nuevo",
+         centro: $("#nuevoCentro").value,
+         provincia: "N/D", delegado: $("#nuevoDelegado").value,
+         tipo: $("#nuevoTipo").value
+       });
+       $("#modalCentro").style.display="none";
+       renderCentros();
+    });
+
+    // Imágenes preview
+    $$(".imagen-preview").forEach(div => div.addEventListener("click", e => {
+       const t = e.target.dataset.target;
+       $(`input[data-input-img="${t}"]`).click();
+    }));
+    $$('input[data-input-img]').forEach(inp => inp.addEventListener("change", e => {
+       if(e.target.files[0]) {
+          const url = URL.createObjectURL(e.target.files[0]);
+          const div = $(`.imagen-preview[data-target="${e.target.dataset.inputImg}"]`);
+          div.innerHTML = `<img src="${url}">`;
+       }
+    }));
+
   </script>
 </body>
 </html>
