@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Control Center Audio - Plataforma Integral</title>
+  <title>Control Center Audio - Plataforma Integral v5.0</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -19,12 +19,12 @@
       --bg-card: #020617;
       --bg-card-soft: #0b1120;
       
-      /* Tipografía */
+      /* Tipografía y Bordes */
       --text-main: #f9fafb;
       --text-muted: #9ca3af;
       --border-soft: #1f2937;
       
-      /* Colores de Acento */
+      /* Colores Corporativos / Semáforo */
       --accent-red: #ff2440;
       --accent-blue: #38bdf8;
       --accent-green: #22c55e;
@@ -243,7 +243,7 @@
       color: var(--text-muted);
     }
 
-    /* CONTADOR VISITAS */
+    /* CONTADOR VISITAS EN CABECERA */
     .topbar-info {
         font-size: .9rem;
         font-weight: 500;
@@ -297,7 +297,7 @@
         box-shadow: 0 6px 15px rgba(34, 197, 94, 0.4);
     }
 
-    /* PÁGINAS Y TRANSICIONES */
+    /* PÁGINAS */
     .pages {
       flex: 1;
       display: flex;
@@ -347,8 +347,6 @@
       color: var(--text-main);
     }
 
-    .card-sub { font-size: .75rem; color: var(--text-muted); }
-
     .badge-small {
       font-size: .75rem;
       padding: 4px 10px;
@@ -360,7 +358,7 @@
     }
 
     /* =========================================
-       4. DASHBOARD GLOBAL (ESTRUCTURA ORIGINAL)
+       4. DASHBOARD GLOBAL
        ========================================= */
     .dashboard-grid {
       display: grid;
@@ -410,7 +408,6 @@
       min-height: 200px;
       max-height: 260px;
     }
-    .chart-container.centered { display: flex; align-items: center; justify-content: center; }
     
     .criterios-container {
       min-height: 350px;
@@ -418,7 +415,7 @@
       overflow-y: auto;
     }
 
-    /* RANKING DELEGADOS */
+    /* Ranking Delegados */
     .ranking-list { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
     .ranking-row { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed var(--border-soft); font-size: .85rem; }
     .ranking-main { display: flex; align-items: center; gap: 8px; }
@@ -448,7 +445,7 @@
     .visita-row-line { display: flex; justify-content: space-between; margin-bottom: 4px; font-weight: 500; }
     .visita-actions { margin-top: 4px; display: flex; justify-content: flex-end; }
 
-    /* TABLAS */
+    /* TABLAS GENERALES */
     .table-wrapper { background: var(--bg-card); border-radius: 12px; border: 1px solid var(--border-soft); overflow: hidden; display: flex; flex-direction: column; min-height: 250px; }
     .table-header { padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); }
     .table-scroll { overflow: auto; flex: 1; max-height: 500px; }
@@ -557,7 +554,7 @@
         border: 2px dashed var(--border-soft); 
         border-radius: 10px; 
         display: flex; align-items: center; justify-content: center; 
-        font-size: .8rem; cursor: pointer; color: var(--text-muted); 
+        font-size: .75rem; cursor: pointer; color: var(--text-muted); 
         overflow: hidden; flex-direction: column; gap: 5px;
         transition: all 0.2s;
     }
@@ -632,7 +629,7 @@
       <div class="nav-item" data-page="ventas"><span class="icon">💳</span> Ventas</div>
       <div class="nav-item" data-page="proyectos"><span class="icon">📊</span> Proyectos</div>
     </nav>
-    <div class="sidebar-footer">Versión 4.0 Final</div>
+    <div class="sidebar-footer">Versión 5.0 · Demo Final</div>
   </aside>
 
   <main class="main">
@@ -758,7 +755,7 @@
                 <div class="dato-full" style="margin-top:5px;">
                   <button class="btn btn-cta" id="btnAdjuntarChecklist" style="width:100%; justify-content:center;">📎 Adjuntar Checklist (Excel)</button>
                   <input type="file" id="inputChecklist" hidden>
-                  <span id="nombreChecklist" style="display:block; margin-top:4px; font-size:.7rem; color:var(--text-muted); text-align:center;"></span>
+                  <span id="nombreChecklist" style="display:block; margin-top:4px; font-size:.75rem; color:var(--text-muted); text-align:center;"></span>
                 </div>
               </div>
             </article>
@@ -1075,7 +1072,7 @@
        // 4. STACKED PROCESOS
        centroCharts.stack = new Chart(document.getElementById("chartCentroProcesosStack").getContext("2d"), {
           type: 'bar',
-          data: { labels: ['Global'], datasets: [{ label:'Cumple', data:[0], backgroundColor:'#22c55e' }, { label:'No Cumple', data:[0], backgroundColor:'#ef4444' }] },
+          data: { labels: ['Estado'], datasets: [{ label:'Cumple', data:[0], backgroundColor:'#22c55e' }, { label:'No Cumple', data:[0], backgroundColor:'#ef4444' }] },
           options: { indexAxis:'y', scales:{x:{stacked:true, display:false}, y:{stacked:true, display:false}}, plugins:{legend:{position:'bottom', labels:{color:textColor}}, datalabels:{color:'white', font:{weight:'bold'}, formatter:(v)=>v>0?v:''}} }
        });
     }
@@ -1100,7 +1097,6 @@
        else topF.forEach(f=> ul.innerHTML += `<li>${f}</li>`);
        
        centroCharts.combo.data.labels = topF.length?topF:[''];
-       // Curva simulada descendente
        centroCharts.combo.data.datasets[0].data = topF.map((_,i)=> proc - (topF.length-i));
        centroCharts.combo.data.datasets[1].data = topF.map(()=>1);
        centroCharts.combo.update();
@@ -1193,6 +1189,12 @@
       ];
       demo.forEach(c => centros.push(c));
       renderTablaCentros(); renderDelegados();
+      
+      // Añadir visitas demo para que el calendario se vea lleno
+      visitas.push({ fecha: "2025-12-05", centro: "PAMPLONA C. Exclusivo", respAudio: "Sonia Guasque", estado: "finalizada" });
+      visitas.push({ fecha: "2025-12-10", centro: "REINA DE MERCEDES", respAudio: "Ariannys Rojas", estado: "enproceso" });
+      visitas.push({ fecha: "2025-12-15", centro: "CC LOS VALLES", respAudio: "Sonia Guasque", estado: "pendiente" });
+      renderVisitas();
     }
     
     function renderDelegados() {
