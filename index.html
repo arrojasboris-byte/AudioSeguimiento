@@ -5,7 +5,7 @@
   <title>Gestión Audio - Dashboard General</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 
   <style>
     :root {
@@ -14,7 +14,6 @@
       --bg-card: #0f172a;
       --bg-card-soft: #111827;
       --accent: #ef4444;
-      --accent-soft: #fecaca;
       --text-main: #f9fafb;
       --text-muted: #9ca3af;
       --border-soft: #1f2937;
@@ -22,8 +21,8 @@
       --shadow-soft: 0 14px 30px rgba(0,0,0,.45);
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
-
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, sans-serif; }
+    
     body {
       background: radial-gradient(circle at top left, #1f2937, #020617 45%);
       color: var(--text-main);
@@ -31,11 +30,9 @@
       display: flex;
     }
 
-    body.light-theme {
-      --bg: #f3f4f6; --bg-sidebar: #000000; --bg-card: #ffffff; --bg-card-soft: #e5e7eb;
-      --text-main: #111827; --text-muted: #6b7280; --border-soft: #d1d5db;
-      background: #f3f4f6; color: var(--text-main);
-    }
+    /* Scrollbars */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-thumb { background: rgba(148,163,184,0.4); border-radius: 99px; }
 
     /* Sidebar */
     .sidebar {
@@ -46,433 +43,374 @@
       display: flex; flex-direction: column; gap: 18px;
       flex-shrink: 0;
     }
-    .logo { display: flex; align-items: center; gap: 12px; }
-    .logo-icon {
-      width: 40px; height: 40px; border-radius: 999px;
-      background: radial-gradient(circle at 30% 20%, #fecaca, #b91c1c);
-      display: flex; align-items: center; justify-content: center; font-size: 1.4rem; color: #fef2f2;
-    }
-    .logo-title { font-weight: 800; font-size: 1.05rem; }
-    .logo-title-gestion { color: #f97316; }
-    .logo-title-audio { color: #38bdf8; }
-    .logo-subtitle { font-size: .7rem; color: var(--text-muted); }
+    .logo { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+    .logo-icon { width: 40px; height: 40px; border-radius: 50%; background: #ef4444; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; }
+    .logo-title { font-weight: 800; font-size: 1.1rem; }
+    .logo-title-gestion { color: #f97316; } .logo-title-audio { color: #38bdf8; }
     
-    .side-nav { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
     .side-nav-item {
-      width: 100%; text-align: left; background: transparent;
-      border-radius: 999px; border: 1px solid rgba(148,163,184,0.6);
-      padding: 7px 10px; font-size: .8rem; color: var(--text-muted);
-      cursor: pointer; display: flex; align-items: center; gap: 8px;
-      transition: all .15s ease;
+      width: 100%; text-align: left; background: transparent; border: 1px solid #334155;
+      padding: 10px; border-radius: 99px; color: var(--text-muted); cursor: pointer;
+      display: flex; gap: 10px; align-items: center; margin-bottom: 6px;
+      transition: all 0.2s;
     }
-    .side-nav-item:hover { background: rgba(15,23,42,0.75); color: #e5e7eb; }
-    .side-nav-item.active { background: rgba(239,68,68,0.1); border-color: #ef4444; color: #fef2f2; }
-    .sidebar-footer { margin-top: auto; font-size: .7rem; color: var(--text-muted); }
+    .side-nav-item:hover { background: rgba(255,255,255,0.05); color: #fff; }
+    .side-nav-item.active { background: rgba(239,68,68,0.15); border-color: #ef4444; color: #fff; }
 
     /* Main */
-    .main { flex: 1; padding: 18px 22px; display: flex; flex-direction: column; gap: 18px; overflow-x: hidden; }
-
-    .topbar { display: flex; align-items: center; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+    .main { flex: 1; padding: 20px; display: flex; flex-direction: column; gap: 20px; overflow-x: hidden; }
+    
+    .topbar { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
     .btn {
-      border-radius: 999px; padding: 6px 12px; border: 1px solid #ef4444;
-      font-size: .78rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
-      background: #ef4444; color: #fef2f2; transition: transform .08s ease;
+      background: #ef4444; color: white; border: none; padding: 6px 14px; border-radius: 99px;
+      cursor: pointer; font-size: 0.8rem; display: flex; align-items: center; gap: 6px;
+      transition: transform 0.1s;
     }
     .btn:hover { transform: translateY(-1px); background: #dc2626; }
 
-    /* Cards & Layout */
-    .card {
-      background: var(--bg-card-soft);
-      border-radius: var(--radius-xl); padding: 14px;
-      border: 1px solid var(--border-soft);
-      box-shadow: var(--shadow-soft); position: relative;
-    }
-    .card h3 { font-size: .9rem; margin-bottom: 4px; }
-    .card-sub { font-size: .76rem; color: var(--text-muted); margin-bottom: 10px; }
-    
-    .grid-main { display: grid; grid-template-columns: 2fr 1.4fr; gap: 16px; margin-top: 8px; }
-    .grid-bottom { margin-top: 16px; display: grid; grid-template-columns: 1.4fr 1.6fr; gap: 16px; }
-    
-    .chart-container { position: relative; height: 230px; width: 100%; }
-    .chart-container.tall { height: 260px; }
-
-    /* KPI Pills */
-    .kpi-row { display: flex; gap: 8px; margin-top: 10px; overflow-x: auto; padding-bottom: 4px; }
-    .kpi-pill {
-      display: flex; align-items: center; justify-content: space-between; gap: 6px;
-      padding: 5px 10px; border-radius: 999px; font-size: .76rem;
-      border: 1px solid #b91c1c; background: #ef4444; color: #fef2f2;
-      min-width: 140px; flex-shrink: 0;
-    }
-    .kpi-status {
-      width: 18px; height: 18px; border-radius: 999px; display: flex;
-      align-items: center; justify-content: center; background: rgba(0,0,0,0.2);
-    }
-
-    /* Vistas */
-    .view { display: none; }
+    .view { display: none; animation: fadeIn 0.3s ease; }
     .view.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-    /* Inputs y Formularios */
-    .visit-layout { display: grid; grid-template-columns: 1.2fr 1.6fr; gap: 12px; margin-top: 10px; }
-    .visit-meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    /* Cards & Grids */
+    .card {
+      background: var(--bg-card); border: 1px solid var(--border-soft);
+      border-radius: var(--radius-xl); padding: 16px; position: relative;
+      box-shadow: var(--shadow-soft);
+    }
+    .grid-main { display: grid; grid-template-columns: 2fr 1.4fr; gap: 16px; margin-top: 10px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 10px; }
     
-    .visit-field { display: flex; flex-direction: column; gap: 3px; margin-bottom: 6px; }
-    .visit-label { font-size: .72rem; color: var(--text-muted); }
-    .visit-input, .visit-select, .visit-textarea {
-      background: var(--bg-sidebar); border-radius: 10px; border: 1px solid var(--border-soft);
-      padding: 5px 8px; font-size: .78rem; color: var(--text-main); outline: none; width: 100%;
+    /* Inputs genéricos */
+    .input-dark {
+      background: #020617; border: 1px solid var(--border-soft); color: white;
+      padding: 6px 10px; border-radius: 8px; width: 100%; font-size: 0.8rem; outline: none;
     }
-    body.light-theme .visit-input { background: #fff; }
+    .input-dark:focus { border-color: #ef4444; }
 
-    /* Scrollable Tables (Centros) */
-    .table-scroll-container {
-      width: 100%; overflow-x: auto; border-radius: 8px;
-      border: 1px solid var(--border-soft); background: rgba(0,0,0,0.2);
-      max-height: 200px;
+    /* KPI Pills (Dashboard) */
+    .kpi-row { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; }
+    .kpi-pill {
+      background: #ef4444; color: white; padding: 8px 14px; border-radius: 99px;
+      min-width: 140px; display: flex; justify-content: space-between; align-items: center;
+      box-shadow: 0 4px 10px rgba(239,68,68,0.3); font-size: 0.8rem; flex-shrink: 0;
     }
-    .data-table { width: 100%; border-collapse: collapse; font-size: .75rem; white-space: nowrap; }
-    .data-table th, .data-table td { padding: 6px 10px; border-bottom: 1px solid var(--border-soft); text-align: left; }
-    .data-table th { background: rgba(255,255,255,0.05); font-weight: 600; position: sticky; top: 0; }
+    .kpi-val { font-weight: bold; font-size: 0.95rem; }
 
-    /* Images Grid */
-    .images-grid { margin-top: 12px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    /* ---- GESTOR VISITAS / INFORME ESTILOS ESPECÍFICOS ---- */
+    
+    /* Layout Informe */
+    .visit-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; font-size: 0.8rem; }
+    .visit-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+    .visit-label { color: var(--text-muted); font-size: 0.7rem; margin-bottom: 2px; display: block; }
+    
+    /* Sección Imágenes */
+    .images-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
     .image-slot {
-      border-radius: 14px; border: 1px dashed rgba(148,163,184,0.8);
-      padding: 10px; font-size: .74rem; text-align: center;
-      display: flex; flex-direction: column; align-items: center;
+      border: 1px dashed #475569; border-radius: 12px; height: 120px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; overflow: hidden; position: relative; background: #0f172a;
     }
-    .image-preview {
-      width: 100%; height: 100px; object-fit: cover; margin-top: 5px;
-      border-radius: 6px; display: none; border: 1px solid var(--border-soft);
+    .image-slot img { width: 100%; height: 100%; object-fit: cover; position: absolute; top:0; left:0; z-index: 1; }
+    .image-slot input { position: absolute; width: 100%; height: 100%; opacity: 0; z-index: 2; cursor: pointer; }
+    .image-placeholder { z-index: 0; padding: 10px; pointer-events: none; }
+
+    /* Centros List con Scroll */
+    .centros-container { margin-top: 10px; }
+    .centros-list {
+      list-style: none; max-height: 150px; overflow-y: auto; overflow-x: auto;
+      white-space: nowrap; border: 1px solid var(--border-soft); border-radius: 8px;
     }
-    .image-preview.visible { display: block; }
-
-    /* Check Interno & Observaciones */
-    .visit-bottom-grid { margin-top: 12px; display: grid; grid-template-columns: 1.4fr 1.6fr; gap: 12px; }
-    .check-groups { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: .76rem; max-height: 260px; overflow-y: auto; }
-    .check-list { list-style: none; display: flex; flex-direction: column; gap: 2px; }
-    .check-list li { display: flex; align-items: center; gap: 4px; }
-    .observaciones-area { height: 100%; min-height: 150px; resize: none; }
-
-    /* Chart Boxes Informe */
-    .visit-charts-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px; }
-    .chart-box { background: rgba(0,0,0,0.2); border-radius: 10px; padding: 8px; border: 1px solid var(--border-soft); }
-
-    /* Modal */
-    .modal-overlay {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none;
-      align-items: center; justify-content: center; z-index: 9999;
+    .centros-item {
+      padding: 6px 10px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.75rem;
+      display: flex; gap: 15px;
     }
-    .modal-overlay.active { display: flex; }
-    .modal-content {
-      background: var(--bg-sidebar); padding: 20px; border-radius: 16px; width: 320px;
-      border: 1px solid var(--border-soft);
-    }
+    .centros-item span { display: inline-block; min-width: 100px; }
 
-    /* --- ESTILOS DE IMPRESIÓN (A4) --- */
+    /* Check Interno */
+    .check-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-height: 250px; overflow-y: auto; font-size: 0.75rem; }
+    .check-item { display: flex; gap: 6px; align-items: center; margin-bottom: 4px; }
+    
+    /* Calendario simple */
+    .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; font-size: 0.7rem; margin-top: 10px; }
+    .cal-cell { padding: 6px; text-align: center; border-radius: 4px; cursor: pointer; }
+    .cal-cell:hover { background: rgba(255,255,255,0.1); }
+    .cal-today { border: 1px solid #ef4444; color: #ef4444; font-weight: bold; }
+
+    /* PRINT STYLES - A4 Ajuste */
     @media print {
       @page { size: A4; margin: 5mm; }
-      body {
-        background: white !important; color: black !important;
-        display: block !important; height: auto !important;
-      }
-      .sidebar, .topbar, .no-print, .btn, .kpi-row::-webkit-scrollbar { display: none !important; }
-      .main { padding: 0 !important; overflow: visible !important; }
+      body { background: white; color: black; display: block; }
+      .sidebar, .topbar, .no-print, .btn { display: none !important; }
+      .main { padding: 0 !important; overflow: visible; }
+      .card { border: 1px solid #ccc; box-shadow: none; break-inside: avoid; page-break-inside: avoid; margin-bottom: 10px; background: white; color: black; }
+      .input-dark, select, textarea { border: 1px solid #ccc; background: white; color: black; }
+      .kpi-pill { border: 1px solid #000; color: black; background: #eee; box-shadow: none; }
       
-      /* Ajustes generales de impresión */
-      .card {
-        border: 1px solid #ccc !important; box-shadow: none !important;
-        background: white !important; color: black !important;
-        break-inside: avoid; margin-bottom: 10px;
-        padding: 8px !important;
-      }
-      h2, h3, h4, span, div, p { color: black !important; }
+      /* Forzar ajuste a una página por módulo */
+      .view { display: block !important; }
+      /* Si solo queremos imprimir la vista activa, usamos JS para ocultar las otras, 
+         pero aquí asumiremos que el usuario imprime lo que ve */
       
-      /* Forzar una sola página por vista si es posible */
-      .view { display: none !important; }
-      .view.active { display: block !important; }
+      /* Reducir escala para que quepa todo */
+      body { zoom: 0.65; } 
       
-      /* Ajuste Dashboard */
-      #view-dashboard .grid-main { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-      #view-dashboard .chart-container { height: 180px !important; }
-      
-      /* Ajuste Informe (Gestor de Visitas) */
-      #view-informes .visit-planning-grid { display: none; } /* Ocultar calendario al imprimir informe */
-      #informeVisitasSection { display: block !important; border: none !important; }
-      .visit-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-      .visit-charts-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; }
-      .chart-box { border: 1px solid #ddd; }
-      .images-grid { grid-template-columns: 1fr 1fr 1fr; }
-      .image-preview { height: 80px; border: 1px solid #ccc; }
-      .visit-bottom-grid { display: grid; grid-template-columns: 1fr 1fr; page-break-inside: avoid; }
-      .check-groups { max-height: none; overflow: visible; }
-      
-      /* Texto inputs al imprimir */
-      input, select, textarea {
-        border: none !important; background: transparent !important;
-        font-weight: bold; padding: 0 !important; color: black !important;
-        resize: none;
-      }
+      .image-slot { border: 1px solid #000; }
+      .visit-layout, .grid-main, .grid-3 { display: grid; } /* Mantener grid */
     }
+
+    /* Helper ocultar */
+    .hidden { display: none; }
   </style>
 </head>
 <body>
 
-  <aside class="sidebar no-print">
+  <aside class="sidebar">
     <div class="logo">
       <div class="logo-icon">🎧</div>
-      <div class="logo-text">
+      <div>
         <div class="logo-title"><span class="logo-title-gestion">Gestión</span><span class="logo-title-audio"> Audio</span></div>
-        <span class="logo-subtitle">Plataforma de seguimiento</span>
+        <div style="font-size: 0.7rem; color: #94a3b8;">Plataforma de Seguimiento</div>
       </div>
     </div>
-    <nav class="side-nav">
-      <button class="side-nav-item active" onclick="cambiarVista('dashboard')">📊 Dashboard General</button>
-      <button class="side-nav-item" onclick="cambiarVista('informes')">🗂️ Gestor de Visitas</button>
+
+    <nav>
+      <button class="side-nav-item" onclick="switchView('dashboard')">
+        <span>📈</span> Dashboard General
+      </button>
+      <button class="side-nav-item active" onclick="switchView('informes')">
+        <span>🗂️</span> Gestor & Informes
+      </button>
     </nav>
-    <div class="sidebar-footer">
-      <p>Versión editada · Persistencia activada</p>
-    </div>
   </aside>
 
   <main class="main">
-    <div class="topbar no-print">
-      <button class="btn" onclick="toggleTheme()">☀️ Tema</button>
-      <button class="btn" onclick="window.print()">🖨️ Imprimir</button>
-      <button class="btn" onclick="exportarHTML()">⬇️ Guardar Todo (HTML)</button>
+    
+    <div class="topbar">
+      <button class="btn" onclick="saveAndExportHTML()"><span>💾</span> Guardar y Exportar HTML (Portable)</button>
+      <button class="btn" onclick="window.print()"><span>🖨️</span> Imprimir</button>
     </div>
 
-    <section id="view-dashboard" class="view active">
-      <div class="section-header">
-        <h2>Dashboard General</h2>
-        <span class="sub" style="font-size:0.8rem; color:var(--text-muted)">Resumen de KPIs y procesos globales.</span>
+    <section id="view-dashboard" class="view">
+      <div class="card" style="margin-bottom: 10px;">
+        <h2 style="font-size: 1.1rem; margin-bottom: 5px;">Resumen General KPIs</h2>
+        <div class="kpi-row">
+          <div class="kpi-pill"><div>% Procesos</div><div class="kpi-val" id="dashProcesos">--%</div></div>
+          <div class="kpi-pill"><div>HIT Global</div><div class="kpi-val" id="dashHit">--%</div></div>
+          <div class="kpi-pill"><div>Conv. Prueba</div><div class="kpi-val" id="dashPrueba">--%</div></div>
+          <div class="kpi-pill"><div>Conv. Venta</div><div class="kpi-val" id="dashVenta">--%</div></div>
+        </div>
       </div>
 
-      <div class="kpi-row">
-        <div class="kpi-pill"><span>% Procesos</span><strong>92%</strong><div class="kpi-status">🟢</div></div>
-        <div class="kpi-pill"><span>HIT Global</span><strong>100%</strong><div class="kpi-status">🟢</div></div>
-        <div class="kpi-pill"><span>1º Auxilios</span><strong>63%</strong><div class="kpi-status">🔴</div></div>
-        <div class="kpi-pill"><span>Conv. Prueba</span><strong>72%</strong><div class="kpi-status">🟡</div></div>
-        <div class="kpi-pill"><span>Conv. Venta</span><strong>81%</strong><div class="kpi-status">🟢</div></div>
+      <div class="grid-main">
+        <div class="card">
+          <h3>Evolución Mensual</h3>
+          <div style="height: 200px;"><canvas id="chartEvolucion"></canvas></div>
+        </div>
+        <div class="card">
+          <h3>Estado Visitas</h3>
+          <div style="height: 200px;"><canvas id="chartVisitas"></canvas></div>
+        </div>
       </div>
-
-      <section class="grid-main">
-        <article class="card">
-          <h3>Evolución mensual</h3>
-          <div class="chart-container"><canvas id="chartEvolucion"></canvas></div>
-        </article>
-        <article class="card">
-          <h3>Estado de visitas</h3>
-          <div class="chart-container"><canvas id="chartVisitas"></canvas></div>
-        </article>
-      </section>
-
-      <section class="grid-main" style="grid-template-columns:1fr 1fr;">
-        <article class="card">
-          <h3>Área de mejora</h3>
-          <div class="chart-container"><canvas id="chartAreaMejora"></canvas></div>
-        </article>
-        <article class="card">
-          <h3>Ranking Delegados</h3>
-          <div class="chart-container"><canvas id="chartDelegados"></canvas></div>
-        </article>
-      </section>
     </section>
 
-    <section id="view-informes" class="view">
-      <h2>Gestor de Visitas e Informes</h2>
-
-      <section class="visit-planning-grid no-print" style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px;">
-        <article class="card">
-          <h3>Visitas Pendientes</h3>
-          <div id="listaVisitasPendientes" style="margin-top:10px; font-size:.8rem;">
-            <div style="padding:6px; background:rgba(255,255,255,0.05); border-radius:6px; margin-bottom:4px;">
-              07/12/2025 - Madrid Tetuán <button class="btn" style="float:right; transform:scale(0.8);" onclick="cargarInformeDemo()">Crear</button>
+    <section id="view-informes" class="view active">
+      
+      <div class="grid-main" style="margin-bottom: 20px;">
+        <div class="card">
+          <h3>Planificación de Visitas</h3>
+          <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin: 10px 0;">
+            <button class="btn" style="padding: 2px 8px;" onclick="prevMonth()">&lt;</button>
+            <span id="calLabel">Diciembre 2025</span>
+            <button class="btn" style="padding: 2px 8px;" onclick="nextMonth()">&gt;</button>
+          </div>
+          <div class="calendar-grid" id="calendarGrid">
             </div>
+          <div style="margin-top: 15px; border-top: 1px solid #334155; padding-top: 10px;">
+            <h4 style="font-size: 0.8rem; margin-bottom: 5px;">Visitas Pendientes</h4>
+            <div id="pendingVisitsList" style="font-size: 0.75rem; color: #cbd5e1; max-height: 80px; overflow-y: auto;">
+              </div>
           </div>
-          <button class="btn" style="margin-top:10px;" onclick="abrirModalVisita()">+ Agendar Visita</button>
-        </article>
+        </div>
 
-        <article class="card">
-          <h3>Carga de Centros (Excel)</h3>
-          <p class="card-sub">Adjunta el Excel para ver todos los datos con scroll horizontal.</p>
-          <input type="file" id="inputExcelCentros" class="visit-input" style="margin-bottom:8px;">
-          
-          <div class="table-scroll-container">
-            <table class="data-table" id="tablaCentros">
-              <thead><tr><th>Nombre Centro</th><th>Ciudad</th><th>Tipo</th><th>Delegado</th></tr></thead>
-              <tbody>
-                <tr><td>Madrid · Reina Mercedes</td><td>Madrid</td><td>Corner</td><td>Blanca</td></tr>
-                <tr><td>Sevilla · Nervión</td><td>Sevilla</td><td>Exclusivo</td><td>Luis</td></tr>
-              </tbody>
-            </table>
+        <div class="card">
+          <h3>Base de Datos Centros</h3>
+          <div style="margin-bottom: 10px;">
+            <label class="visit-label">Adjuntar Excel Centros (para listado)</label>
+            <input type="file" id="inputExcelCentros" class="input-dark" accept=".xlsx, .xls">
           </div>
-        </article>
-      </section>
+          <div class="centros-list" id="listaCentros">
+            <div style="padding:10px; color:#64748b; text-align:center;">Carga un Excel para ver datos (con scroll horizontal)</div>
+          </div>
+        </div>
+      </div>
 
-      <article class="card" id="informeVisitasSection">
-        <h3 style="border-bottom:1px solid var(--border-soft); padding-bottom:8px; margin-bottom:10px;">Informe de Visita</h3>
+      <div class="card" id="informeSection">
+        <h2 style="font-size: 1.1rem; border-bottom: 1px solid #334155; padding-bottom: 8px; margin-bottom: 15px;">Informe de Visita</h2>
 
         <div class="visit-layout">
           <div>
-            <div class="visit-meta-grid">
-              <div class="visit-field">
+            <div class="visit-row">
+              <div>
                 <span class="visit-label">Centro</span>
-                <input id="infCentro" class="visit-input" placeholder="Ej: Madrid Tetuán">
+                <input id="infCentro" class="input-dark" placeholder="Nombre Centro">
               </div>
-              <div class="visit-field">
+              <div>
                 <span class="visit-label">Delegado</span>
-                <input id="infDelegado" class="visit-input" placeholder="Nombre">
+                <input id="infDelegado" class="input-dark" placeholder="Delegado">
               </div>
             </div>
-            <div class="visit-meta-grid" style="margin-top:6px;">
-              <div class="visit-field">
+            <div class="visit-row">
+              <div>
                 <span class="visit-label">Responsable Audio</span>
-                <input id="infResp" class="visit-input">
-              </div>
-              <div class="visit-field">
-                <span class="visit-label">Fecha Visita</span>
-                <input type="date" id="infFecha" class="visit-input">
-              </div>
-            </div>
-            <div class="visit-meta-grid" style="margin-top:6px;">
-              <div class="visit-field">
-                <span class="visit-label">Audiólogo</span>
-                <input id="infAudiologo" class="visit-input" placeholder="Nombre Audiólogo">
-              </div>
-              <div class="visit-field">
-                <span class="visit-label">Horas de servicio</span>
-                <input id="infHoras" class="visit-input" placeholder="Ej: 40h">
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <div class="visit-meta-grid">
-              <div class="visit-field">
-                <span class="visit-label">Tipo de Centro (Afecta lógica)</span>
-                <select id="infTipoCentro" class="visit-select">
-                  <option value="CORNER">CORNER</option>
-                  <option value="EXCLUSIVO">EXCLUSIVO</option>
-                </select>
-              </div>
-              <div class="visit-field">
-                <span class="visit-label">Centro AAR</span>
-                <select id="infAAR" class="visit-select">
-                  <option value="No">No</option>
-                  <option value="Si">Sí</option>
-                </select>
-              </div>
-            </div>
-            <div class="visit-field" style="margin-top:12px; background: rgba(239,68,68,0.1); padding:10px; border-radius:10px; border:1px solid var(--accent);">
-              <span class="visit-label" style="color:#ef4444; font-weight:bold;">Adjuntar Checklist (Excel) para cálculo automático</span>
-              <input type="file" id="inputChecklistExcel" class="visit-input" accept=".xlsx, .xls">
-              <small style="font-size:0.65rem; display:block; margin-top:4px;">
-                * Corner: Lee B7-B88. * Exclusivo: Lee B8-B102.
-              </small>
-            </div>
-          </div>
-        </div>
-
-        <div class="visit-charts-grid">
-          <div class="chart-box">
-            <h4>Resultados (Radar)</h4>
-            <div class="chart-container" style="height:150px;"><canvas id="chartRadarInforme"></canvas></div>
-          </div>
-          <div class="chart-box">
-            <h4>Áreas Mejora</h4>
-            <div class="chart-container" style="height:150px;"><canvas id="chartAreaInforme"></canvas></div>
-          </div>
-          <div class="chart-box">
-            <h4>KPIs Calculados</h4>
-            <div class="chart-container" style="height:150px;"><canvas id="chartKpiInforme"></canvas></div>
-          </div>
-        </div>
-
-        <div class="images-grid">
-          <div class="image-slot">
-            <strong>Imagen 1</strong>
-            <input type="file" onchange="previewImage(this, 'img1')">
-            <img id="img1" class="image-preview" alt="Vista previa 1">
-          </div>
-          <div class="image-slot">
-            <strong>Imagen 2</strong>
-            <input type="file" onchange="previewImage(this, 'img2')">
-            <img id="img2" class="image-preview" alt="Vista previa 2">
-          </div>
-          <div class="image-slot">
-            <strong>Imagen 3</strong>
-            <input type="file" onchange="previewImage(this, 'img3')">
-            <img id="img3" class="image-preview" alt="Vista previa 3">
-          </div>
-        </div>
-
-        <div class="visit-bottom-grid">
-          <article class="card" style="border:none; box-shadow:none; padding:0; background:transparent;">
-            <h3>Check Interno</h3>
-            <p class="card-sub">Validación manual de elementos visuales y formación.</p>
-            <div class="check-groups" style="background:var(--bg-card); padding:10px; border-radius:10px; border:1px solid var(--border-soft);">
-              <div>
-                <strong>Formación</strong>
-                <ul class="check-list">
-                  <li><input type="checkbox"> WSA</li>
-                  <li><input type="checkbox"> Starkey</li>
-                  <li><input type="checkbox"> HIT</li>
-                  <li><input type="checkbox"> Telecare</li>
-                  <li><input type="checkbox"> Financiación</li>
-                </ul>
+                <input id="infResp" class="input-dark">
               </div>
               <div>
-                <strong>Marketing/Visual</strong>
-                <ul class="check-list">
-                  <li><input type="checkbox"> Audiometría RT</li>
-                  <li><input type="checkbox"> Escaparate</li>
-                  <li><input type="checkbox"> Manteleta</li>
-                  <li><input type="checkbox"> Stock</li>
-                </ul>
+                <span class="visit-label">Fecha</span>
+                <input type="date" id="infFecha" class="input-dark">
               </div>
             </div>
-          </article>
+            <div class="visit-row">
+              <div>
+                <span class="visit-label" style="color:#38bdf8; font-weight:bold;">Audiólogo</span>
+                <input id="infAudiologo" class="input-dark" placeholder="Nombre audiólogo">
+              </div>
+              <div>
+                <span class="visit-label" style="color:#38bdf8; font-weight:bold;">Horas de servicio</span>
+                <input id="infHoras" type="number" class="input-dark" placeholder="Ej: 8">
+              </div>
+            </div>
+          </div>
 
-          <article class="card" style="border:none; box-shadow:none; padding:0; background:transparent;">
+          <div style="background: rgba(15,23,42,0.5); padding: 10px; border-radius: 12px; border: 1px dashed #334155;">
+            <h4 style="font-size: 0.9rem; margin-bottom: 10px; color: #f97316;">Evaluación y KPIs (Excel)</h4>
+            
+            <div class="visit-row">
+              <div>
+                <span class="visit-label">Tipo Centro (Activa Lógica)</span>
+                <select id="infTipo" class="input-dark">
+                  <option value="">Seleccionar...</option>
+                  <option value="Corner">CORNER</option>
+                  <option value="Exclusivo">EXCLUSIVO</option>
+                </select>
+              </div>
+              <div>
+                <span class="visit-label">Adjuntar Checklist Excel</span>
+                <input type="file" id="infChecklistFile" class="input-dark" accept=".xlsx, .xls">
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px;">
+              <div class="kpi-pill" style="min-width: auto; padding: 4px 8px; background: #1e293b; border: 1px solid #334155;">
+                <span style="font-size:0.7rem;">% Procesos</span>
+                <strong id="resProcesos" style="color:#ef4444;">-</strong>
+              </div>
+              <div class="kpi-pill" style="min-width: auto; padding: 4px 8px; background: #1e293b; border: 1px solid #334155;">
+                <span style="font-size:0.7rem;">HIT</span>
+                <strong id="resHit" style="color:#ef4444;">-</strong>
+              </div>
+              <div class="kpi-pill" style="min-width: auto; padding: 4px 8px; background: #1e293b; border: 1px solid #334155;">
+                <span style="font-size:0.7rem;">Conv. Prueba</span>
+                <strong id="resPrueba" style="color:#38bdf8;">-</strong>
+              </div>
+              <div class="kpi-pill" style="min-width: auto; padding: 4px 8px; background: #1e293b; border: 1px solid #334155;">
+                <span style="font-size:0.7rem;">Conv. Venta</span>
+                <strong id="resVenta" style="color:#22c55e;">-</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-3">
+          <div class="card" style="padding: 10px;">
+            <h4 style="font-size: 0.8rem; text-align: center;">Radar Resultados</h4>
+            <div style="height: 150px;"><canvas id="chartRadar"></canvas></div>
+          </div>
+          <div class="card" style="padding: 10px;">
+            <h4 style="font-size: 0.8rem; text-align: center;">KPIs Negocio</h4>
+            <div style="height: 150px;"><canvas id="chartKpiNegocio"></canvas></div>
+          </div>
+          <div class="images-grid" style="margin-top:0; grid-column: span 1;">
+            <div class="image-slot">
+              <div class="image-placeholder">IMG 1</div>
+              <img id="preview1">
+              <input type="file" accept="image/*" onchange="previewImage(this, 'preview1')">
+            </div>
+            <div class="image-slot">
+              <div class="image-placeholder">IMG 2</div>
+              <img id="preview2">
+              <input type="file" accept="image/*" onchange="previewImage(this, 'preview2')">
+            </div>
+            <div class="image-slot">
+              <div class="image-placeholder">IMG 3</div>
+              <img id="preview3">
+              <input type="file" accept="image/*" onchange="previewImage(this, 'preview3')">
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-main" style="margin-top: 15px;">
+          <div class="card">
+            <h3>Check Interno (Manual)</h3>
+            <div class="check-grid">
+              <label class="check-item"><input type="checkbox"> WSA</label>
+              <label class="check-item"><input type="checkbox"> Starkey</label>
+              <label class="check-item"><input type="checkbox"> Habilidades Comerciales</label>
+              <label class="check-item"><input type="checkbox"> HIT</label>
+              <label class="check-item"><input type="checkbox"> Telecare / Telehear</label>
+              <label class="check-item"><input type="checkbox"> Financiación Infinity</label>
+              <label class="check-item"><input type="checkbox"> Venta Seguro</label>
+              <label class="check-item"><input type="checkbox"> Primeros Auxilios</label>
+              <label class="check-item"><input type="checkbox"> Audiometría RT</label>
+              <label class="check-item"><input type="checkbox"> Stock</label>
+              <label class="check-item"><input type="checkbox"> Tchin Tchin</label>
+              <label class="check-item"><input type="checkbox"> Escaparate / PDV</label>
+            </div>
+            </div>
+
+          <div class="card">
             <h3>Observaciones y Compromisos</h3>
-            <textarea id="infObs" class="visit-textarea observaciones-area" placeholder="Escribir conclusiones..."></textarea>
-          </article>
+            <textarea id="infObs" class="input-dark" style="height: 200px; resize: none;" placeholder="Escribe aquí las observaciones, acuerdos y próximos pasos..."></textarea>
+          </div>
         </div>
-      </article>
+
+      </div>
+
+      <div class="card no-print" style="margin-top: 20px;">
+        <h3>Historial de Informes Generados (Sesión actual)</h3>
+        <ul id="historialList" style="list-style: none; font-size: 0.8rem; margin-top: 10px; color: var(--text-muted);">
+          </ul>
+      </div>
+
     </section>
+
   </main>
 
-  <div id="modalVisita" class="modal-overlay">
-    <div class="modal-content">
-      <h3>Nueva Visita</h3>
-      <input class="visit-input" style="margin-bottom:8px;" placeholder="Centro">
-      <input type="date" class="visit-input" style="margin-bottom:8px;">
-      <div style="display:flex; justify-content:flex-end; gap:8px;">
-        <button class="btn" style="background:transparent; border-color:#888;" onclick="document.getElementById('modalVisita').classList.remove('active')">Cancelar</button>
-        <button class="btn" onclick="document.getElementById('modalVisita').classList.remove('active')">Guardar</button>
-      </div>
-    </div>
-  </div>
-
   <script>
-    // --- ESTADO INICIAL (Para persistencia) ---
-    // Variables globales que guardaremos al exportar
-    let savedState = {
-      visitasPendientes: [],
-      historialInformes: [],
-      config: { theme: 'dark' }
+    // ==========================================
+    // 1. ESTADO GLOBAL (Datos que se guardarán)
+    // ==========================================
+    // Si venimos de un archivo exportado, usamos window.exportedData, si no, inicializamos
+    const loadedData = window.exportedData || {};
+
+    let appState = {
+      visitasPendientes: loadedData.visitasPendientes || [],
+      historialInformes: loadedData.historialInformes || [],
+      centrosData: loadedData.centrosData || [], // Datos crudos del Excel de centros
+      kpiData: loadedData.kpiData || { procesos: 0, hit: 0, prueba: 0, venta: 0 }
     };
 
-    // --- 1. LÓGICA DE EXCEL (CHECKLIST) ---
-    document.getElementById('inputChecklistExcel').addEventListener('change', handleChecklistFile);
+    // ==========================================
+    // 2. LÓGICA EXCEL (CHECKLIST)
+    // ==========================================
+    const inputFile = document.getElementById('infChecklistFile');
+    const selectTipo = document.getElementById('infTipo');
 
-    function handleChecklistFile(e) {
-      const file = e.target.files[0];
-      const tipoCentro = document.getElementById('infTipoCentro').value; // CORNER o EXCLUSIVO
+    function readChecklistExcel() {
+      const file = inputFile.files[0];
+      const tipo = selectTipo.value;
 
-      if (!file) return;
+      if (!file || !tipo) return;
 
       const reader = new FileReader();
       reader.onload = function(e) {
@@ -480,208 +418,299 @@
         const workbook = XLSX.read(data, {type: 'array'});
         const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
 
-        // Helper para leer celda con seguridad
-        const getVal = (cell) => {
-            const v = firstSheet[cell];
-            return v ? (v.v === undefined ? 0 : v.v) : 0;
+        // Helper para leer celda segura
+        const getVal = (addr) => {
+          const cell = firstSheet[addr];
+          return cell ? cell.v : 0;
         };
 
-        // VARIABLES DE RESULTADO
-        let percentProcesos = 0;
-        let percentHIT = 0; // Si aplica o %
-        let convPrueba = 0;
-        let convVenta = 0;
-        let aplicaHIT_Text = "No"; 
+        let proc=0, hit=0, prueba=0, venta=0;
 
-        if (tipoCentro === "CORNER") {
-            // Lógica CORNER
-            // Rango B7-B88 (Criterios) y F7-F88 (Resultados 0/1) - Solo leemos resultados clave
-            percentProcesos = getVal('F90') * 100; // Asumiendo que el excel trae 0.9 para 90%
-            // HIT F63 (Aplica HIT? 0/1 o dato)
-            let valHit = getVal('F63');
-            aplicaHIT_Text = valHit == 1 ? "Sí" : "No";
-            
-            convPrueba = getVal('B92') * 100;
-            convVenta = getVal('B93') * 100;
+        // --- LÓGICA SOLICITADA ---
+        if (tipo === 'Corner') {
+          // Corner Logic: Criterios B7-B88, Resultados F7-F88
+          // KPIs:
+          proc = getVal('F90');    // % Procesos
+          hit = getVal('F63');     // Aplica HIT
+          prueba = getVal('B92');  // Conv Prueba
+          venta = getVal('B93');   // Conv Venta
 
-        } else {
-            // Lógica EXCLUSIVO
-            // Rango B8-B102 y F8-F102
-            percentProcesos = getVal('F104') * 100;
-            
-            // HIT F65
-            let valHit = getVal('F65');
-            aplicaHIT_Text = valHit == 1 ? "Sí" : "No";
-
-            convPrueba = getVal('I126') * 100;
-            convVenta = getVal('I127') * 100;
+        } else if (tipo === 'Exclusivo') {
+          // Exclusivo Logic: Criterios B8-B102, Resultados F8-F102
+          // KPIs:
+          proc = getVal('F104');   // % Procesos
+          prueba = getVal('I126'); // Conv Prueba
+          venta = getVal('I127');  // Conv Venta
+          hit = getVal('F65');     // Aplica HIT
         }
 
-        // Formatear valores
-        percentProcesos = parseFloat(percentProcesos).toFixed(1);
-        convPrueba = parseFloat(convPrueba).toFixed(1);
-        convVenta = parseFloat(convVenta).toFixed(1);
+        // Normalizar a porcentaje (si viene 0.8 -> 80, si viene 80 -> 80)
+        // Asumimos que Excel trae decimales (0.5) para porcentajes o enteros.
+        const fmt = (v) => v <= 1 ? (v*100).toFixed(0) : v;
+        
+        appState.kpiData = { 
+          procesos: fmt(proc), 
+          hit: fmt(hit), 
+          prueba: fmt(prueba), 
+          venta: fmt(venta) 
+        };
 
-        alert(`Datos Extraídos (${tipoCentro}):\n% Procesos: ${percentProcesos}%\nConv. Prueba: ${convPrueba}%\nConv. Venta: ${convVenta}%\nAplica HIT: ${aplicaHIT_Text}`);
-
-        // ACTUALIZAR GRÁFICOS DEL INFORME
-        updateReportCharts(percentProcesos, convPrueba, convVenta);
+        updateReportUI();
       };
       reader.readAsArrayBuffer(file);
     }
 
-    function updateReportCharts(procesos, prueba, venta) {
-        // Actualizar Radar
-        chartRadar.data.datasets[0].data = [procesos, venta, prueba, 85];
-        chartRadar.update();
-        
-        // Actualizar KPI Barras
-        chartKpis.data.datasets[0].data = [procesos, venta, prueba, 60, 70, 80];
-        chartKpis.update();
+    inputFile.addEventListener('change', readChecklistExcel);
+    selectTipo.addEventListener('change', readChecklistExcel);
+
+    function updateReportUI() {
+      // Actualizar textos
+      document.getElementById('resProcesos').textContent = appState.kpiData.procesos + '%';
+      document.getElementById('resHit').textContent = appState.kpiData.hit + '%';
+      document.getElementById('resPrueba').textContent = appState.kpiData.prueba + '%';
+      document.getElementById('resVenta').textContent = appState.kpiData.venta + '%';
+
+      // Actualizar gráficas del informe
+      updateCharts(appState.kpiData);
     }
 
-    // --- 2. LÓGICA DE CENTROS (TABLA SCROLL) ---
-    document.getElementById('inputExcelCentros').addEventListener('change', function(e) {
+    // ==========================================
+    // 3. PREVISUALIZACIÓN DE IMÁGENES
+    // ==========================================
+    window.previewImage = function(input, imgId) {
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          document.getElementById(imgId).src = e.target.result;
+        }
+        reader.readAsDataURL(input.files[0]);
+      }
+    }
+
+    // ==========================================
+    // 4. LECTURA EXCEL CENTROS (Scroll horizontal)
+    // ==========================================
+    document.getElementById('inputExcelCentros').addEventListener('change', function(e){
       const file = e.target.files[0];
       if(!file) return;
+      
       const reader = new FileReader();
-      reader.onload = function(e) {
-        const data = new Uint8Array(e.target.result);
-        const wb = XLSX.read(data, {type:'array'});
+      reader.onload = function(evt) {
+        const data = new Uint8Array(evt.target.result);
+        const wb = XLSX.read(data, {type: 'array'});
         const ws = wb.Sheets[wb.SheetNames[0]];
-        const json = XLSX.utils.sheet_to_json(ws, {header:1}); // Array de arrays
-
-        // Generar tabla HTML
-        let html = '<thead><tr>';
-        // Cabeceras (Fila 0)
-        if(json.length > 0) {
-            json[0].forEach(head => html += `<th>${head}</th>`);
-            html += '</tr></thead><tbody>';
-            // Datos
-            for(let i=1; i<json.length; i++) {
-                html += '<tr>';
-                json[i].forEach(cell => html += `<td>${cell || ''}</td>`);
-                html += '</tr>';
-            }
-            html += '</tbody>';
-            document.getElementById('tablaCentros').innerHTML = html;
-        }
+        // Convertir a JSON array de arrays
+        const json = XLSX.utils.sheet_to_json(ws, {header: 1});
+        
+        appState.centrosData = json; // Guardar estado
+        renderCentrosList();
       };
       reader.readAsArrayBuffer(file);
     });
 
-    // --- 3. PREVISUALIZACIÓN DE IMÁGENES ---
-    function previewImage(input, imgId) {
-        const file = input.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const img = document.getElementById(imgId);
-                img.src = e.target.result;
-                img.classList.add('visible');
-            }
-            reader.readAsDataURL(file);
-        }
+    function renderCentrosList() {
+      const container = document.getElementById('listaCentros');
+      container.innerHTML = '';
+      
+      if (!appState.centrosData || appState.centrosData.length === 0) {
+        container.innerHTML = '<div style="padding:10px;">Sin datos</div>';
+        return;
+      }
+
+      appState.centrosData.forEach((row, idx) => {
+        // Omitir cabecera opcionalmente o renderizar todo
+        if (row.length === 0) return;
+        
+        const div = document.createElement('div');
+        div.className = 'centros-item';
+        // Crear spans para cada celda
+        row.forEach(cell => {
+          const span = document.createElement('span');
+          span.textContent = cell;
+          div.appendChild(span);
+        });
+        container.appendChild(div);
+      });
     }
 
-    // --- 4. PERSISTENCIA (GUARDAR HTML CON DATOS) ---
-    function exportarHTML() {
-      // 1. Capturar el estado actual de los inputs del informe por si acaso
-      const inputs = document.querySelectorAll('input, select, textarea');
-      inputs.forEach(el => el.setAttribute('value', el.value)); // Para que se quede en el HTML
+    // ==========================================
+    // 5. GRÁFICOS (Chart.js)
+    // ==========================================
+    let radarChart, kpiChart, evoChart, visChart;
 
-      // 2. Serializar el contenido
-      const htmlContent = document.documentElement.outerHTML;
+    function initCharts() {
+      // 1. Radar Informe
+      const ctxRadar = document.getElementById('chartRadar').getContext('2d');
+      radarChart = new Chart(ctxRadar, {
+        type: 'radar',
+        data: {
+          labels: ['Procesos', 'HIT', 'Prueba', 'Venta'],
+          datasets: [{
+            label: 'Resultados Visita',
+            data: [0,0,0,0],
+            backgroundColor: 'rgba(239, 68, 68, 0.2)',
+            borderColor: '#ef4444',
+            pointBackgroundColor: '#fff'
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          scales: { r: { suggestedMin: 0, suggestedMax: 100, grid: { color: '#334155' }, angleLines: { color: '#334155' }, pointLabels: { color: '#cbd5e1', font: {size: 10} }, ticks: { display: false } } },
+          plugins: { legend: { display: false } }
+        }
+      });
+
+      // 2. Barras KPI Negocio
+      const ctxKpi = document.getElementById('chartKpiNegocio').getContext('2d');
+      kpiChart = new Chart(ctxKpi, {
+        type: 'bar',
+        data: {
+          labels: ['Conv. Prueba', 'Conv. Venta'],
+          datasets: [{
+            label: '%',
+            data: [0, 0],
+            backgroundColor: ['#38bdf8', '#22c55e']
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          scales: { y: { beginAtZero: true, max: 100, grid: { color: '#334155' } }, x: { grid: { display: false } } },
+          plugins: { legend: { display: false } }
+        }
+      });
+
+      // 3. Dashboard Evolución (Demo data static)
+      const ctxEvo = document.getElementById('chartEvolucion').getContext('2d');
+      evoChart = new Chart(ctxEvo, {
+        type: 'line',
+        data: {
+          labels: ['Ene','Feb','Mar','Abr','May','Jun'],
+          datasets: [{ label: 'HIT', data: [65, 70, 80, 81, 85, 90], borderColor: '#ef4444', tension: 0.3 }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: 'white' } } }, scales: { y: { grid: { color: '#334155' } }, x: { grid: { color: '#334155' } } } }
+      });
+
+      // 4. Dashboard Visitas
+      const ctxVis = document.getElementById('chartVisitas').getContext('2d');
+      visChart = new Chart(ctxVis, {
+        type: 'doughnut',
+        data: {
+          labels: ['Realizadas', 'Pendientes'],
+          datasets: [{ data: [80, 20], backgroundColor: ['#22c55e', '#f97316'], borderWidth: 0 }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: 'white' } } } }
+      });
+    }
+
+    function updateCharts(data) {
+      // Radar
+      radarChart.data.datasets[0].data = [data.procesos, data.hit, data.prueba, data.venta];
+      radarChart.update();
+      // KPI Barras
+      kpiChart.data.datasets[0].data = [data.prueba, data.venta];
+      kpiChart.update();
+    }
+
+    // ==========================================
+    // 6. UTILIDADES & EXPORTACIÓN PORTABLE
+    // ==========================================
+    
+    function switchView(viewName) {
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      document.querySelectorAll('.side-nav-item').forEach(b => b.classList.remove('active'));
       
-      // 3. Crear descarga
-      const blob = new Blob([htmlContent], { type: 'text/html' });
+      document.getElementById('view-' + viewName).classList.add('active');
+      // Update button active state manually or via event delegation
+      event.currentTarget.classList.add('active');
+    }
+
+    // CALENDARIO SIMPLE
+    const months = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+    let currDate = new Date();
+    
+    function renderCalendar() {
+      const y = currDate.getFullYear();
+      const m = currDate.getMonth();
+      document.getElementById('calLabel').textContent = `${months[m]} ${y}`;
+      
+      const firstDay = new Date(y, m, 1).getDay(); // 0 Dom
+      const daysInMonth = new Date(y, m+1, 0).getDate();
+      const grid = document.getElementById('calendarGrid');
+      grid.innerHTML = '';
+      
+      // Headers
+      ['D','L','M','X','J','V','S'].forEach(d => grid.innerHTML += `<div style="color:#94a3b8">${d}</div>`);
+      
+      // Empty slots
+      for(let i=0; i<firstDay; i++) { grid.innerHTML += `<div></div>`; }
+      
+      // Days
+      for(let i=1; i<=daysInMonth; i++) {
+        const dDiv = document.createElement('div');
+        dDiv.className = 'cal-cell';
+        dDiv.textContent = i;
+        if(i === new Date().getDate() && m === new Date().getMonth()) dDiv.classList.add('cal-today');
+        
+        dDiv.onclick = () => {
+          const dateStr = `${y}-${String(m+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
+          const centro = prompt("Centro para la visita:");
+          if(centro) {
+            appState.visitasPendientes.push({date: dateStr, centro: centro});
+            renderPendingVisits();
+          }
+        };
+        grid.appendChild(dDiv);
+      }
+    }
+    
+    function prevMonth() { currDate.setMonth(currDate.getMonth()-1); renderCalendar(); }
+    function nextMonth() { currDate.setMonth(currDate.getMonth()+1); renderCalendar(); }
+
+    function renderPendingVisits() {
+      const list = document.getElementById('pendingVisitsList');
+      list.innerHTML = '';
+      appState.visitasPendientes.forEach(v => {
+        const div = document.createElement('div');
+        div.style.padding = "4px 0"; borderBottom = "1px solid #333";
+        div.textContent = `📅 ${v.date} - ${v.centro}`;
+        list.appendChild(div);
+      });
+    }
+
+    // --- FUNCIÓN CLAVE: GUARDAR Y EXPORTAR (PORTABILIDAD) ---
+    function saveAndExportHTML() {
+      // 1. Serializar el estado actual a JSON
+      const jsonState = JSON.stringify(appState);
+
+      // 2. Obtener todo el HTML actual
+      let htmlContent = document.documentElement.outerHTML;
+
+      // 3. Inyectar el estado en el script de inicio
+      // Buscamos donde definimos 'window.exportedData' o lo creamos
+      const scriptInjection = `<script>window.exportedData = ${jsonState};<\/script>`;
+      
+      // Insertar justo antes del cierre del body
+      const newHtml = htmlContent.replace('</body>', `${scriptInjection}</body>`);
+
+      // 4. Descargar
+      const blob = new Blob([newHtml], {type: 'text/html'});
+      const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'gestion-audio-dashboard-GUARDADO.html';
+      a.href = url;
+      a.download = `Gestion_Audio_Backup_${new Date().toISOString().slice(0,10)}.html`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-      alert("Archivo guardado. Ábrelo en cualquier PC y mantendrá este contenido.");
     }
 
-    // --- UTILIDADES UI ---
-    function cambiarVista(id) {
-        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-        document.getElementById('view-' + id).classList.add('active');
-        document.querySelectorAll('.side-nav-item').forEach(b => b.classList.remove('active'));
-        event.target.classList.add('active');
-    }
-
-    function toggleTheme() {
-        document.body.classList.toggle('light-theme');
-    }
-    
-    function abrirModalVisita() {
-        document.getElementById('modalVisita').classList.add('active');
-    }
-    
-    function cargarInformeDemo() {
-        document.getElementById('infCentro').value = "Madrid · Tetuán";
-        document.getElementById('infDelegado').value = "Blanca";
-        document.getElementById('infTipoCentro').value = "CORNER";
-        cambiarVista('informes');
-        // Scroll hacia abajo
-        document.getElementById('informeVisitasSection').scrollIntoView({behavior:'smooth'});
-    }
-
-    // --- INICIALIZACIÓN DE GRÁFICOS (Chart.js) ---
-    // Dashboard Main Charts (Demo data)
-    new Chart(document.getElementById('chartEvolucion'), {
-        type: 'line',
-        data: {
-            labels: ['Ene','Feb','Mar','Abr','May','Jun'],
-            datasets: [{label: 'Procesos', data: [80,82,81,85,88,92], borderColor: '#ef4444', tension:0.3}]
-        },
-        options: { responsive: true, maintainAspectRatio: false }
-    });
-    
-    new Chart(document.getElementById('chartVisitas'), {
-        type: 'doughnut',
-        data: { labels: ['Realizadas','Pendientes'], datasets: [{ data: [80, 20], backgroundColor: ['#3b82f6','#fbbf24'] }] },
-        options: { responsive: true, maintainAspectRatio: false }
-    });
-
-    new Chart(document.getElementById('chartAreaMejora'), {
-        type: 'bar',
-        data: { labels: ['Financiación','Seguimiento','MGM'], datasets: [{ label:'% Fallo', data: [30, 25, 20], backgroundColor: '#ef4444' }] },
-        options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false }
-    });
-
-    new Chart(document.getElementById('chartDelegados'), {
-        type: 'bar',
-        data: { labels: ['Blanca','Luis','Ana'], datasets: [{ label:'Score', data: [95, 88, 92], backgroundColor: '#3b82f6' }] },
-        options: { responsive: true, maintainAspectRatio: false }
-    });
-
-    // Informe Charts (Variables)
-    const chartRadar = new Chart(document.getElementById('chartRadarInforme'), {
-        type: 'radar',
-        data: {
-            labels: ['Procesos', 'Venta', 'Prueba', 'Formación'],
-            datasets: [{ label: 'Visita Actual', data: [0,0,0,0], borderColor: '#ef4444', backgroundColor: 'rgba(239,68,68,0.2)' }]
-        },
-        options: { responsive: true, maintainAspectRatio: false, scales: { r: { suggestedMax: 100 } } }
-    });
-
-    const chartKpis = new Chart(document.getElementById('chartKpiInforme'), {
-        type: 'bar',
-        data: {
-            labels: ['Procesos', 'Venta', 'Prueba', 'HIT', 'Infinity', 'Stock'],
-            datasets: [{ label: 'Valores %', data: [0,0,0,0,0,0], backgroundColor: ['#ef4444','#3b82f6','#fbbf24','#10b981','#8b5cf6','#6b7280'] }]
-        },
-        options: { responsive: true, maintainAspectRatio: false, scales: { y: { suggestedMax: 100 } } }
-    });
-    
-    new Chart(document.getElementById('chartAreaInforme'), {
-        type: 'bar',
-        data: { labels: ['Seguimiento', 'Folleto'], datasets: [{ label:'% No Aplica', data: [40, 30], backgroundColor: '#ef4444' }] },
-        options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false }
-    });
+    // INICIALIZACIÓN
+    window.onload = function() {
+      initCharts();
+      renderCalendar();
+      renderPendingVisits();
+      renderCentrosList(); // Si hay datos cargados previamente
+      if(appState.kpiData.procesos !== 0) updateReportUI(); // Restaurar KPIs si existen
+    };
 
   </script>
 </body>
